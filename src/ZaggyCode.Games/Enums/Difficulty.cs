@@ -4,9 +4,9 @@ namespace ZaggyCode.Games.Enums;
 
 public enum Difficulty
 {
-    [XmlEnum] VeryEasy,
-    [XmlEnum] Easy,
-    [XmlEnum] Normal,
-    [XmlEnum] Hard,
-    [XmlEnum] Insane
+    [XmlEnum("very-easy")] VeryEasy,
+    [XmlEnum("easy")] Easy,
+    [XmlEnum("normal")] Normal,
+    [XmlEnum("hard")] Hard,
+    [XmlEnum("insane")] Insane
 }
