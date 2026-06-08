@@ -1,0 +1,125 @@
+<Window
+    Icon="/Assets/avalonia-logo.ico"
+    Title="Программирование с Загги"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d"
+    x:Class="ZaggyCode.Avalonia.Views.MainWindow"
+    x:DataType="vm:MainWindowViewModel"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="using:ZaggyCode.Avalonia.ViewModels"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Design.DataContext>
+        <vm:MainWindowViewModel />
+    </Design.DataContext>
+
+    <Grid RowDefinitions="Auto,*,Auto">
+        <Menu Grid.Row="0">
+
+            <Menu.Styles>
+                <Style Selector="Menu">
+                    <Setter Property="Background" Value="{DynamicResource ButtonBackground}" />
+                </Style>
+                <Style Selector="MenuItem">
+                    <Setter Property="Background" Value="{DynamicResource ButtonBackground}" />
+                </Style>
+            </Menu.Styles>
+
+            <MenuItem Background="Transparent" Header="Уровни">
+                <MenuItem Header="Открыть уровень из файловой системы" Icon="{materialIcons:MaterialIconExt Kind=Games}" />
+                <MenuItem Header="Создать уровень" Icon="{materialIcons:MaterialIconExt Kind=Create}" />
+                <MenuItem Header="Загрузить уровень из репозитория" Icon="{materialIcons:MaterialIconExt Kind=Download}" />
+            </MenuItem>
+            <MenuItem Background="Transparent" Header="Вид">
+                <MenuItem Header="Тема" Icon="{materialIcons:MaterialIconExt Kind=ThemeLightDark}">
+                    <MenuItem Header="Светлая" Icon="{materialIcons:MaterialIconExt Kind=CheckboxBlank}" />
+                    <MenuItem Header="Темная" Icon="{materialIcons:MaterialIconExt Kind=CheckboxBlank}" />
+                    <MenuItem Header="Определять автоматически" Icon="{materialIcons:MaterialIconExt Kind=CheckboxMarked}" />
+                </MenuItem>
+                <MenuItem Header="Настройки" Icon="{materialIcons:MaterialIconExt Kind=Settings}" />
+                <MenuItem Header="Управления горячими клавишами" Icon="{materialIcons:MaterialIconExt Kind=KeyboardSettings}" />
+            </MenuItem>
+            <MenuItem Background="Transparent" Header="Сервис" />
+            <MenuItem Background="Transparent" Header="Справка">
+                <MenuItem Header="О приложении" Icon="{materialIcons:MaterialIconExt Kind=About}" />
+                <MenuItem Header="Руководство по програмированию на языке..." Icon="{materialIcons:MaterialIconExt Kind=Code}">
+                    <MenuItem Header="Python (Пайтон)" Icon="{materialIcons:MaterialIconExt Kind=LanguagePython}" />
+                    <MenuItem Header="C# (Си Шарп)" Icon="{materialIcons:MaterialIconExt Kind=LanguageCsharp}" />
+                    <MenuItem Header="Lua (Луа)" Icon="{materialIcons:MaterialIconExt Kind=LanguageLua}" />
+                </MenuItem>
+                <MenuItem Header="Руководство по програмированию Загги на языке..." Icon="{materialIcons:MaterialIconExt Kind=Code}">
+                    <MenuItem Header="Python (Пайтон)" Icon="{materialIcons:MaterialIconExt Kind=LanguagePython}" />
+                    <MenuItem Header="C# (Си Шарп)" Icon="{materialIcons:MaterialIconExt Kind=LanguageCsharp}" />
+                    <MenuItem Header="Lua (Луа)" Icon="{materialIcons:MaterialIconExt Kind=LanguageLua}" />
+                </MenuItem>
+            </MenuItem>
+        </Menu>
+
+        <Grid ColumnDefinitions="Auto, *" Grid.Row="1">
+            <Grid Background="{DynamicResource ButtonBackground}" RowDefinitions="Auto, *">
+                <Grid.Styles>
+                    <Style Selector="Button">
+                        <Setter Property="Background" Value="Transparent" />
+                        <Setter Property="Padding" Value="2" />
+                    </Style>
+                    <Style Selector="Button materialIcons|MaterialIcon">
+                        <Setter Property="Width" Value="25" />
+                        <Setter Property="Height" Value="25" />
+                    </Style>
+                </Grid.Styles>
+
+                <Grid Grid.Row="0" RowDefinitions="Auto,Auto,Auto,Auto, Auto, Auto">
+                    <Button
+                        Content="{materialIcons:MaterialIconExt Kind=Play}"
+                        Grid.Row="0"
+                        ToolTip.Tip="Запустить Зигги" />
+                    <Button
+                        Content="{materialIcons:MaterialIconExt Kind=BugCheck}"
+                        Grid.Row="1"
+                        ToolTip.Tip="Откладка Зигги" />
+                    <Button
+                        Content="{materialIcons:MaterialIconExt Kind=ViewListOutline}"
+                        Grid.Row="2"
+                        ToolTip.Tip="Открыть загруженные уровени" />
+                    <Button
+                        Content="{materialIcons:MaterialIconExt Kind=Download}"
+                        Grid.Row="3"
+                        ToolTip.Tip="Установить уровень из интернета" />
+                    <Button
+                        Content="{materialIcons:MaterialIconExt Kind=FileDownload}"
+                        Grid.Row="4"
+                        ToolTip.Tip="Установить уровень из файла" />
+                    <Button
+                        Content="{materialIcons:MaterialIconExt Kind=ContentSave}"
+                        Grid.Row="5"
+                        ToolTip.Tip="Сохранить" />
+                </Grid>
+
+                <Grid
+                    Grid.Row="1"
+                    RowDefinitions="Auto,Auto,Auto"
+                    VerticalAlignment="Bottom">
+                    <Button
+                        Content="{materialIcons:MaterialIconExt Kind=HelpBox}"
+                        Grid.Row="0"
+                        ToolTip.Tip="Справка по приложению" />
+                    <Button
+                        Content="{materialIcons:MaterialIconExt Kind=Settings}"
+                        Grid.Row="1"
+                        ToolTip.Tip="Настройки" />
+                    <Button
+                        Content="{materialIcons:MaterialIconExt Kind=Terminal}"
+                        Grid.Row="2"
+                        ToolTip.Tip="Вывод" />
+                </Grid>
+            </Grid>
+            <Grid Grid.Column="1" Grid.RowDefinitions="Auto, *, *" />
+        </Grid>
+
+        <Border Grid.Row="2" />
+    </Grid>
+</Window>
