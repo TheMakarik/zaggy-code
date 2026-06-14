@@ -10,4 +10,8 @@
       <ProjectReference Include="..\ZaggyCode.Languages\ZaggyCode.Languages.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="AvaloniaEdit.TextMate" Version="12.0.0" />
+    </ItemGroup>
+
 </Project>

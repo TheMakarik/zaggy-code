@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <Folder Include="Lua\" />
+      <Folder Include="Options\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="AvaloniaUI.DiagnosticsSupport" Version="2.2.2" />
+      <PackageReference Include="Microsoft.CodeAnalysis.Scripting" Version="5.3.0" />
+      <PackageReference Include="NLua" Version="1.7.9" />
+      <PackageReference Include="Python.Runtime.NETStandard" Version="3.7.1" />
+    </ItemGroup>
+
+</Project>

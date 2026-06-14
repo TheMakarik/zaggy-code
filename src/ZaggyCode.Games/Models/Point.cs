@@ -4,7 +4,7 @@ using System.Xml.Serialization;
 
 namespace ZaggyCode.Games.Models;
 
-public sealed class Point : INotifyPropertyChanged
+public class Point : INotifyPropertyChanged
 {
     [XmlAttribute("x")]
     public int X { get; set => SetField(ref field, value); }

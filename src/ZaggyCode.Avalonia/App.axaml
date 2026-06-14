@@ -1,12 +1,18 @@
-<Application xmlns="https://github.com/avaloniaui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             x:Class="ZaggyCode.Avalonia.App"
-             xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
-             RequestedThemeVariant="Light">
-             <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
-  
+<Application
+    RequestedThemeVariant="Light"
+    x:Class="ZaggyCode.Avalonia.App"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!--  "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options.  -->
+
     <Application.Styles>
         <FluentTheme />
-        <materialIcons:MaterialIconStyles/>
+        <materialIcons:MaterialIconStyles />
+        <StyleInclude Source="avares://AvaloniaEdit/Themes/Fluent/AvaloniaEdit.xaml" />
     </Application.Styles>
+
+    <Application.Resources>
+        <SolidColorBrush x:Key="DarkBackground">#303030</SolidColorBrush>
+    </Application.Resources>
 </Application>

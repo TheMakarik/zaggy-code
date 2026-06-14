@@ -1,8 +1,12 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/ZaggyCode.Avalonia/ZaggyCode.Avalonia.csproj" />
+    <Project Path="src/ZaggyCode.Data/ZaggyCode.Data.csproj" />
     <Project Path="src/ZaggyCode.Games/ZaggyCode.Games.csproj" />
+    <Project Path="src/ZaggyCode.Languages/ZaggyCode.Languages.csproj" />
     <Project Path="src/ZaggyCode.Shared/ZaggyCode.Shared.csproj" />
   </Folder>
-  <Folder Name="/tests/" />
+  <Folder Name="/tests/">
+    <Project Path="tests/ZaggyCode.Data.Tests/ZaggyCode.Data.Tests.csproj" />
+  </Folder>
 </Solution>
