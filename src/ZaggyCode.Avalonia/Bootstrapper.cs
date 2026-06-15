@@ -5,8 +5,8 @@ namespace ZaggyCode.Avalonia;
 
 public sealed class Bootstrapper
 {
-    public async Task LoadApplicationAsync(IProgress<int> progress)
+    public async Task LoadApplicationAsync(IProgress<int> progress, int maxValue = 100)
     {
-        
+     
     }
 }
