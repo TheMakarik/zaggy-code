@@ -22,5 +22,5 @@ sealed class Program
 #endif
             .WithInterFont()
             .LogToTrace()
-            .UseReactiveUI();
+            .UseReactiveUI((_) => { });
 }

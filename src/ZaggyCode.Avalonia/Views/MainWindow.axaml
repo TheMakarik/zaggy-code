@@ -1,6 +1,6 @@
 <Window
     Icon="/Assets/avalonia-logo.ico"
-    Title="Программирование с Загги"
+    Title="Программирование с Зигой"
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d"
@@ -11,7 +11,8 @@
     xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="using:ZaggyCode.Avalonia.ViewModels"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:controls="using:ZaggyCode.Avalonia.Controls">
 
     <Design.DataContext>
         <vm:MainWindowViewModel />
@@ -117,7 +118,18 @@
                         ToolTip.Tip="Вывод" />
                 </Grid>
             </Grid>
-            <Grid Grid.Column="1" Grid.RowDefinitions="Auto, *, *" />
+			<!--Grid Grid.Column="1" Grid.RowDefinitions="Auto, *, *" /-->
+			<Grid Grid.Column="1" Grid.RowDefinitions="Auto, *, *">
+				<controls:TerminalControl
+                    Background="#1e1e1e"
+                    Focusable="True"
+                    Foreground="#cccccc"
+                    Grid.Row="1"
+                    Grid.RowSpan="2"
+                    TerminalFontFamily="Consolas"
+                    TerminalFontSize="14"
+                    x:Name="Terminal" />
+			</Grid>
         </Grid>
 
         <Border Grid.Row="2" />
