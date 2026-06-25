@@ -1,4 +1,4 @@
-<Window
+<rxui:ReactiveWindow
     Icon="/Assets/avalonia-logo.ico"
     Name="ThisWindow"
     Title="Программирование с Загги"
@@ -7,12 +7,14 @@
     mc:Ignorable="d"
     x:Class="ZaggyCode.Avalonia.Views.MainWindow"
     x:DataType="vm:MainWindowViewModel"
+    x:TypeArguments="vm:MainWindowViewModel"
     xmlns="https://github.com/avaloniaui"
     xmlns:avaloniaEdit="https://github.com/avaloniaui/avaloniaedit"
     xmlns:controls="clr-namespace:ZaggyCode.Avalonia.Views.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:rxui="http://reactiveui.net"
     xmlns:vm="using:ZaggyCode.Avalonia.ViewModels"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
@@ -235,4 +237,4 @@
 
         <Border Grid.Row="2" />
     </Grid>
-</Window>
+</rxui:ReactiveWindow>

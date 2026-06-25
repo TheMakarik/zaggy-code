@@ -2,12 +2,14 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using AvaloniaEdit;
 using AvaloniaEdit.TextMate;
+using ReactiveUI.Avalonia;
 using TextMateSharp.Grammars;
+using ZaggyCode.Avalonia.ViewModels;
 using ZaggyCode.Avalonia.Views.Controls;
 
 namespace ZaggyCode.Avalonia.Views;
 
-public partial class MainWindow : Window
+public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
 {
     public MainWindow()
     {
