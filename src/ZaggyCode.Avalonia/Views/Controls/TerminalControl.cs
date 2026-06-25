@@ -128,9 +128,8 @@ public class TerminalControl : TemplatedControl, IDisposable
     {
         base.OnAttachedToVisualTree(e);
         if (_xTermDotNetTerminal.Options.CursorBlink)
-        {
             _blinkTimer.Start();
-        }
+        
     }
 
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
