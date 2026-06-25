@@ -38,4 +38,9 @@ public class Point : INotifyPropertyChanged
         OnPropertyChanged(propertyName);
         return true;
     }
+    
+    public static explicit operator System.Drawing.Point(Point point)
+    {
+        return new System.Drawing.Point(point.X, point.Y);
+    }
 }

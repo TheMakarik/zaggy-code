@@ -1,18 +1,20 @@
 <Window
     Icon="/Assets/avalonia-logo.ico"
-    Title="Программирование с Зигой"
+    Name="ThisWindow"
+    Title="Программирование с Загги"
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d"
     x:Class="ZaggyCode.Avalonia.Views.MainWindow"
     x:DataType="vm:MainWindowViewModel"
     xmlns="https://github.com/avaloniaui"
+    xmlns:avaloniaEdit="https://github.com/avaloniaui/avaloniaedit"
+    xmlns:controls="clr-namespace:ZaggyCode.Avalonia.Views.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="using:ZaggyCode.Avalonia.ViewModels"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-	xmlns:controls="using:ZaggyCode.Avalonia.Controls">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <Design.DataContext>
         <vm:MainWindowViewModel />
@@ -34,26 +36,35 @@
                 <MenuItem Header="Открыть уровень из файловой системы" Icon="{materialIcons:MaterialIconExt Kind=Games}" />
                 <MenuItem Header="Создать уровень" Icon="{materialIcons:MaterialIconExt Kind=Create}" />
                 <MenuItem Header="Загрузить уровень из репозитория" Icon="{materialIcons:MaterialIconExt Kind=Download}" />
+                <MenuItem Header="Скорость" Icon="{materialIcons:MaterialIconExt Kind=Speedometer}">
+                    <MenuItem Header="X1" />
+                    <MenuItem Header="X2" />
+                    <MenuItem Header="X5" />
+                    <MenuItem Header="X10" />
+                </MenuItem>
+            </MenuItem>
+            <MenuItem Background="Transparent" Header="Файл">
+                <MenuItem Header="Сохранить" Icon="{materialIcons:MaterialIconExt Kind=ContentSave}" />
+                <MenuItem Header="Копировать выделенное" Icon="{materialIcons:MaterialIconExt Kind=ContentCopy}" />
+                <MenuItem Header="Вставить" Icon="{materialIcons:MaterialIconExt Kind=ContentPaste}" />
+                <MenuItem Header="Удалить выделенное" Icon="{materialIcons:MaterialIconExt Kind=TrashCan}" />
+                <MenuItem Header="Вырезать выделенное" Icon="{materialIcons:MaterialIconExt Kind=ContentCut}" />
             </MenuItem>
             <MenuItem Background="Transparent" Header="Вид">
-                <MenuItem Header="Тема" Icon="{materialIcons:MaterialIconExt Kind=ThemeLightDark}">
-                    <MenuItem Header="Светлая" Icon="{materialIcons:MaterialIconExt Kind=CheckboxBlank}" />
-                    <MenuItem Header="Темная" Icon="{materialIcons:MaterialIconExt Kind=CheckboxBlank}" />
-                    <MenuItem Header="Определять автоматически" Icon="{materialIcons:MaterialIconExt Kind=CheckboxMarked}" />
-                </MenuItem>
+                <MenuItem Header="Тема подцветски синтаксиса" Icon="{materialIcons:MaterialIconExt Kind=CodeBlockBraces}" />
+                <MenuItem Header="Показывать боковое меню" Icon="{materialIcons:MaterialIconExt Kind=PageLayoutSidebarLeft}" />
+            </MenuItem>
+            <MenuItem Background="Transparent" Header="Сервис">
                 <MenuItem Header="Настройки" Icon="{materialIcons:MaterialIconExt Kind=Settings}" />
                 <MenuItem Header="Управления горячими клавишами" Icon="{materialIcons:MaterialIconExt Kind=KeyboardSettings}" />
             </MenuItem>
-            <MenuItem Background="Transparent" Header="Сервис" />
             <MenuItem Background="Transparent" Header="Справка">
                 <MenuItem Header="О приложении" Icon="{materialIcons:MaterialIconExt Kind=About}" />
                 <MenuItem Header="Руководство по програмированию на языке..." Icon="{materialIcons:MaterialIconExt Kind=Code}">
-                    <MenuItem Header="Python (Пайтон)" Icon="{materialIcons:MaterialIconExt Kind=LanguagePython}" />
                     <MenuItem Header="C# (Си Шарп)" Icon="{materialIcons:MaterialIconExt Kind=LanguageCsharp}" />
                     <MenuItem Header="Lua (Луа)" Icon="{materialIcons:MaterialIconExt Kind=LanguageLua}" />
                 </MenuItem>
                 <MenuItem Header="Руководство по програмированию Загги на языке..." Icon="{materialIcons:MaterialIconExt Kind=Code}">
-                    <MenuItem Header="Python (Пайтон)" Icon="{materialIcons:MaterialIconExt Kind=LanguagePython}" />
                     <MenuItem Header="C# (Си Шарп)" Icon="{materialIcons:MaterialIconExt Kind=LanguageCsharp}" />
                     <MenuItem Header="Lua (Луа)" Icon="{materialIcons:MaterialIconExt Kind=LanguageLua}" />
                 </MenuItem>
@@ -73,15 +84,11 @@
                     </Style>
                 </Grid.Styles>
 
-                <Grid Grid.Row="0" RowDefinitions="Auto,Auto,Auto,Auto, Auto, Auto">
+                <Grid Grid.Row="0" RowDefinitions="Auto,Auto,Auto,Auto, Auto, Auto, Auto">
                     <Button
                         Content="{materialIcons:MaterialIconExt Kind=Play}"
                         Grid.Row="0"
                         ToolTip.Tip="Запустить Зигги" />
-                    <Button
-                        Content="{materialIcons:MaterialIconExt Kind=BugCheck}"
-                        Grid.Row="1"
-                        ToolTip.Tip="Откладка Зигги" />
                     <Button
                         Content="{materialIcons:MaterialIconExt Kind=ViewListOutline}"
                         Grid.Row="2"
@@ -98,6 +105,12 @@
                         Content="{materialIcons:MaterialIconExt Kind=ContentSave}"
                         Grid.Row="5"
                         ToolTip.Tip="Сохранить" />
+                    <Label
+                        Grid.Row="6"
+                        Height="25"
+                        Width="25">
+                        X2
+                    </Label>
                 </Grid>
 
                 <Grid
@@ -118,18 +131,106 @@
                         ToolTip.Tip="Вывод" />
                 </Grid>
             </Grid>
-			<!--Grid Grid.Column="1" Grid.RowDefinitions="Auto, *, *" /-->
-			<Grid Grid.Column="1" Grid.RowDefinitions="Auto, *, *">
-				<controls:TerminalControl
-                    Background="#1e1e1e"
-                    Focusable="True"
-                    Foreground="#cccccc"
-                    Grid.Row="1"
-                    Grid.RowSpan="2"
-                    TerminalFontFamily="Consolas"
-                    TerminalFontSize="14"
-                    x:Name="Terminal" />
-			</Grid>
+
+            <Grid Grid.Column="1" Grid.RowDefinitions="Auto, 1.3*, Auto, 0.7*">
+                <Grid Grid.Row="1">
+                    <Grid ColumnDefinitions="1.15*, Auto, 0.85*">
+                        <Border
+                            BorderBrush="{DynamicResource ButtonBackground}"
+                            BorderThickness="1"
+                            CornerRadius="20"
+                            Grid.Column="0"
+                            Margin="5">
+                            <avaloniaEdit:TextEditor
+                                FontFamily="Cascadia Code,Consolas,Menlo,Monospace"
+                                Grid.Column="0"
+                                Name="Editor"
+                                ShowLineNumbers="True" />
+                        </Border>
+                        <GridSplitter Grid.Column="1" />
+                        <Border
+                            BorderBrush="{DynamicResource ButtonBackground}"
+                            BorderThickness="1"
+                            CornerRadius="20"
+                            Grid.Column="2"
+                            Margin="0,5,5,5" />
+                    </Grid>
+                </Grid>
+                <GridSplitter Grid.Row="2" />
+                <Border
+                    BorderBrush="{DynamicResource ButtonBackground}"
+                    BorderThickness="1"
+                    Grid.Row="3">
+                    <Grid RowDefinitions="Auto, *">
+                        <Border
+                            BorderBrush="{DynamicResource ButtonBackground}"
+                            BorderThickness="0,0,0,1"
+                            CornerRadius="20 20 0 0"
+                            Grid.Row="0"
+                            Padding="10,5">
+                            <Grid ColumnDefinitions="Auto, *, Auto">
+                                <StackPanel
+                                    Grid.Column="0"
+                                    Orientation="Horizontal"
+                                    Spacing="8">
+                                    <materialIcons:MaterialIcon
+                                        Height="18"
+                                        Kind="Terminal"
+                                        Width="18" />
+                                    <TextBlock
+                                        FontWeight="SemiBold"
+                                        Text="Терминал"
+                                        VerticalAlignment="Center" />
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="2" Orientation="Horizontal">
+                                    <Button
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        Classes="window-control"
+                                        Cursor="Hand"
+                                        Padding="8,4">
+                                        <materialIcons:MaterialIcon
+                                            Height="16"
+                                            Kind="Minus"
+                                            Width="16" />
+                                    </Button>
+                                    <Button
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        Classes="window-control"
+                                        Cursor="Hand"
+                                        Padding="8,4">
+                                        <materialIcons:MaterialIcon
+                                            Height="16"
+                                            Kind="CropSquare"
+                                            Width="16" />
+                                    </Button>
+                                    <Button
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        Classes="window-control close"
+                                        Cursor="Hand"
+                                        Padding="8,4">
+                                        <materialIcons:MaterialIcon
+                                            Height="16"
+                                            Kind="Close"
+                                            Width="16" />
+                                    </Button>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                        <controls:TerminalControl
+                            Background="{Binding #ThisWindow.Background}"
+                            Focusable="True"
+                            Foreground="{Binding #ThisWindow.Foreground}"
+                            Grid.Row="1"
+                            TerminalFontFamily="Cascadia Code"
+                            TerminalFontSize="14"
+                            x:Name="Terminal" />
+                    </Grid>
+                </Border>
+            </Grid>
         </Grid>
 
         <Border Grid.Row="2" />

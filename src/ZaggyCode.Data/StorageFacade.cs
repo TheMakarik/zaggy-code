@@ -1,15 +1,15 @@
 using ZaggyCode.Data.Interfaces;
+using ZaggyCode.Shared.Attributes;
 
 namespace ZaggyCode.Data;
 
+[TransientService]
 public sealed class StorageFacade(IUserStorage userStorage, IGameCodeStorage gameCodeStorage) : IStorageFacade
 {
-    public async Task LoadAllAsync(IProgress<int> progress)
+    public Task LoadAllAsync()
     {
-        await userStorage.LoadAsync();
-        progress.Report(50);
-        await gameCodeStorage.LoadAsync();
-        progress.Report(100);
+        return userStorage.LoadAsync()
+            .ContinueWith((_) => gameCodeStorage.LoadAsync());
     }
 
     public async ValueTask FlushAllAsync()

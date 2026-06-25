@@ -1,8 +1,14 @@
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media;
 using Avalonia.Styling;
+using Avalonia.Threading;
+using Microsoft.Extensions.DependencyInjection;
 using ZaggyCode.Avalonia.ViewModels;
 using ZaggyCode.Avalonia.Views;
 
@@ -17,21 +23,29 @@ public partial class App : Application
 
     public override void OnFrameworkInitializationCompleted()
     {
-        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-        {
-            desktop.MainWindow = new MainWindow
-            {
-                DataContext = new MainWindowViewModel(),
-            };
+        if (ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop)
+            return;
 
-            if (this.ActualThemeVariant == ThemeVariant.Dark)
-            {
-                desktop.MainWindow.Background = this.Resources["DarkBackground"] as SolidColorBrush;
-                desktop.MainWindow.ApplyTemplate();
-                desktop.MainWindow.UpdateLayout();
-            }
-        }
+      
+        desktop.MainWindow = new MainWindow();
+        var loading = new Window();
+        loading.Show();
+        new Bootstrapper()
+            .LoadApplicationAsync()
+            .ContinueWith(async task =>
+                await this.Dispatcher
+                    .InvokeAsync(() =>
+                    {
+                        if (task.Exception is not null)
+                            Console.WriteLine(
+                                $"Error was happen while loading: {string.Join(", ", task.Exception.InnerExceptions)}");
+                        loading.Close();
 
-        base.OnFrameworkInitializationCompleted();
+                        desktop.MainWindow.DataContext = task.Result
+                            .Services
+                            .GetRequiredService<MainWindowViewModel>();
+
+                        base.OnFrameworkInitializationCompleted();
+                    }));
     }
 }

@@ -7,6 +7,8 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="Avalonia.AvaloniaEdit" Version="12.0.0" />
+      <PackageReference Include="AvaloniaEdit.TextMate" Version="12.0.0" />
       <PackageReference Include="AvaloniaUI.DiagnosticsSupport" Version="2.2.2" />
       <PackageReference Include="Microsoft.CodeAnalysis.Scripting" Version="5.3.0" />
       <PackageReference Include="NLua" Version="1.7.9" />
@@ -15,6 +17,13 @@
 
     <ItemGroup>
       <ProjectReference Include="..\ZaggyCode.Games\ZaggyCode.Games.csproj" />
+      <ProjectReference Include="..\ZaggyCode.Shared\ZaggyCode.Shared.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="Microsoft.Extensions.Options">
+        <HintPath>..\..\..\..\.nuget\packages\microsoft.extensions.options\10.0.9\lib\net10.0\Microsoft.Extensions.Options.dll</HintPath>
+      </Reference>
     </ItemGroup>
 
 </Project>

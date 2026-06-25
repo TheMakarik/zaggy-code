@@ -1,11 +1,11 @@
+using System;
+using System.Collections.Generic;
+using System.Globalization;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Media;
 using Avalonia.Threading;
-using System;
-using System.Collections.Generic;
-using System.Globalization;
 using XTerm;
 using XTerm.Buffer;
 using XTerm.Common;
@@ -21,11 +21,10 @@ using AvaloniaPointerUpdateKind = Avalonia.Input.PointerUpdateKind;
 using AvaloniaPointerWheelEventArgs = Avalonia.Input.PointerWheelEventArgs;
 using AvaloniaTextInputEventArgs = Avalonia.Input.TextInputEventArgs;
 using FocusChangedEventArgs = Avalonia.Input.FocusChangedEventArgs;
-
 using XKey = XTerm.Input.Key;
 using XKeyModifiers = XTerm.Input.KeyModifiers;
 
-namespace ZaggyCode.Avalonia.Controls;
+namespace ZaggyCode.Avalonia.Views.Controls;
 
 public class TerminalControl : TemplatedControl, IDisposable
 {

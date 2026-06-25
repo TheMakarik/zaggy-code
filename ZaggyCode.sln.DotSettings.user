@@ -15,16 +15,14 @@
     &lt;TestId&gt;xUnit::29C02A1A-AB76-C54A-EBDB-E4EA980B74C6::net10.0::ZaggyCode.Data.Tests.UserStorageTests&lt;/TestId&gt;
   &lt;/TestAncestor&gt;
 &lt;/SessionState&gt;</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=857fe769_002Db1b8_002D46a3_002D9f4b_002Da1598d621a7c/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="UserProperty_AfterFlush_UpdateUserDataForce #2" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
-  &lt;TestAncestor&gt;
-    &lt;TestId&gt;xUnit::29C02A1A-AB76-C54A-EBDB-E4EA980B74C6::net10.0::ZaggyCode.Data.Tests.UserStorageTests.UserProperty_AfterFlush_UpdateUserDataForce&lt;/TestId&gt;
-    &lt;TestId&gt;xUnit::29C02A1A-AB76-C54A-EBDB-E4EA980B74C6::net10.0::ZaggyCode.Data.Tests.SealedClassesTests&lt;/TestId&gt;
-  &lt;/TestAncestor&gt;
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=857fe769_002Db1b8_002D46a3_002D9f4b_002Da1598d621a7c/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="UserProperty_AfterFlush_UpdateUserDataForce #2" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
+  &lt;Project Location="/home/themakarik/Проекты(Программирование)/ZaggyCode/tests/ZaggyCode.Data.Tests" Presentation="&amp;lt;tests&amp;gt;\&amp;lt;ZaggyCode.Data.Tests&amp;gt;" /&gt;
 &lt;/SessionState&gt;</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=9e3c5150_002D4975_002D4195_002D983c_002D9f7fb7bba67d/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="UserProperty_UpdatesAfterSpecifiedTime #2" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=9e3c5150_002D4975_002D4195_002D983c_002D9f7fb7bba67d/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="UserProperty_UpdatesAfterSpecifiedTime #2" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
   &lt;TestAncestor&gt;
     &lt;TestId&gt;xUnit::29C02A1A-AB76-C54A-EBDB-E4EA980B74C6::net10.0::ZaggyCode.Data.Tests.UserStorageTests&lt;/TestId&gt;
     &lt;TestId&gt;xUnit::29C02A1A-AB76-C54A-EBDB-E4EA980B74C6::net10.0::ZaggyCode.Data.Tests.SealedClassesTests&lt;/TestId&gt;
+    &lt;TestId&gt;xUnit::29C02A1A-AB76-C54A-EBDB-E4EA980B74C6::net10.0::ZaggyCode.Data.Tests.GameCodeStorageTests&lt;/TestId&gt;
   &lt;/TestAncestor&gt;
 &lt;/SessionState&gt;</s:String>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=Zaggy/@EntryIndexedValue">True</s:Boolean></wpf:ResourceDictionary>

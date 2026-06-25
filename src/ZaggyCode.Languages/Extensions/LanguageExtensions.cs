@@ -2,7 +2,7 @@ using System.Reflection;
 using ZaggyCode.Languages.Attributes;
 using ZaggyCode.Languages.Enums;
 
-namespace ZaggyCode.Shared.Extensions;
+namespace ZaggyCode.Languages.Extensions;
 
 public static class LanguageExtensions
 {

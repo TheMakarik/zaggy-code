@@ -13,6 +13,8 @@
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="Avalonia.AvaloniaEdit" Version="12.0.0" />
+      <PackageReference Include="AvaloniaEdit.TextMate" Version="12.0.0" />
       <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.9" />
     </ItemGroup>
 

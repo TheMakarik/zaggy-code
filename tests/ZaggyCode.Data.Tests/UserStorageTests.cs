@@ -18,6 +18,7 @@ public class UserStorageTests : IDisposable
     private readonly IFileSystem _fileSystem;
     private string _jsonPath;
     private string _stubDirectoryPath;
+    private ISpecialFolderProvider _stubProvider = A.Fake<ISpecialFolderProvider>();
     private readonly IOptions<DefaultUser> _userDefaultMock;
 
     public UserStorageTests()
@@ -39,9 +40,11 @@ public class UserStorageTests : IDisposable
                 CodeFontSize = 14,
                 CodeTheme = "Light",
                 LastLanguage = Language.Lua,
-                LastGamePath = null
+                LastGamePath = null,
+                LastSpeed = ExecutionSpeed.X2
             }
         });
+        A.CallTo(() => _stubProvider.GetFolder(An<Environment.SpecialFolder>.Ignored, _jsonPath)).Returns(_jsonPath);
     }
 
     [Fact]
@@ -56,7 +59,7 @@ public class UserStorageTests : IDisposable
             WaitUserDataUpdateSeconds = 3,
             GameCodeDataPath = _stubDirectoryPath
         });
-        var systemUnderTests = new UserStorage(logger, options, _userDefaultMock);
+        var systemUnderTests = new UserStorage(logger, options, _userDefaultMock, _stubProvider);
         await systemUnderTests.LoadAsync();
         var firstContent = await File.ReadAllTextAsync(_jsonPath);
 
@@ -88,7 +91,7 @@ public class UserStorageTests : IDisposable
         var corruptedContent = await File.ReadAllTextAsync(_jsonPath);
         var expectedUser = _userDefaultMock.Value.User;
 
-        var systemUnderTests = new UserStorage(logger, options, _userDefaultMock);
+        var systemUnderTests = new UserStorage(logger, options, _userDefaultMock, _stubProvider);
 
         // Act
         await systemUnderTests.LoadAsync();
@@ -113,7 +116,7 @@ public class UserStorageTests : IDisposable
             GameCodeDataPath = _stubDirectoryPath
         });
 
-        var systemUnderTests = new UserStorage(logger, options, _userDefaultMock);
+        var systemUnderTests = new UserStorage(logger, options, _userDefaultMock, _stubProvider);
         await systemUnderTests.LoadAsync();
 
         var firstContent = await File.ReadAllTextAsync(_jsonPath);
@@ -147,7 +150,7 @@ public class UserStorageTests : IDisposable
             GameCodeDataPath = _stubDirectoryPath
         });
 
-        var systemUnderTests = new UserStorage(logger, options, _userDefaultMock);
+        var systemUnderTests = new UserStorage(logger, options, _userDefaultMock, _stubProvider);
         await systemUnderTests.LoadAsync();
 
         var firstContent = await File.ReadAllTextAsync(_jsonPath);
@@ -177,7 +180,7 @@ public class UserStorageTests : IDisposable
             GameCodeDataPath = _stubDirectoryPath
         });
 
-        var systemUnderTests = new UserStorage(logger, options, _userDefaultMock);
+        var systemUnderTests = new UserStorage(logger, options, _userDefaultMock, _stubProvider);
         await systemUnderTests.LoadAsync();
 
         var originalContent = await File.ReadAllTextAsync(_jsonPath);

@@ -1,9 +1,11 @@
 using System.Xml.Serialization;
 using ZaggyCode.Games.Interfaces;
 using ZaggyCode.Games.Models;
+using ZaggyCode.Shared.Attributes;
 
 namespace ZaggyCode.Games;
 
+[ScopedService]
 public sealed class GameEditor : IGameEditor
 {
     private FileStream _stream;

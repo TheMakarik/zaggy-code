@@ -6,10 +6,12 @@ using ZaggyCode.Data.Interfaces;
 using ZaggyCode.Data.Json;
 using ZaggyCode.Data.Model;
 using ZaggyCode.Data.Options;
+using ZaggyCode.Shared.Attributes;
 
 namespace ZaggyCode.Data;
 
-public sealed class UserStorage(ILogger<UserStorage> logger, IOptions<StorageOptions> storageOptions, IOptions<DefaultUser> defaultUser) : IUserStorage
+[SingletonService]
+public sealed class UserStorage(ILogger<UserStorage> logger, IOptions<StorageOptions> storageOptions, IOptions<DefaultUser> defaultUser, ISpecialFolderProvider folderProvider) : IUserStorage
 {
     private readonly Lock _locker = new Lock();
     private  volatile bool _requireUpdate = false;
@@ -40,6 +42,7 @@ public sealed class UserStorage(ILogger<UserStorage> logger, IOptions<StorageOpt
 
     public async Task LoadAsync()
     {
+        storageOptions.Value.DataFilePath = folderProvider.GetFolder(Environment.SpecialFolder.LocalApplicationData, storageOptions.Value.DataFilePath);
         logger.LogInformation("Begin loading user data from path {path}", storageOptions.Value.DataFilePath);
         if (!File.Exists(storageOptions.Value.DataFilePath))
         {
@@ -64,8 +67,14 @@ public sealed class UserStorage(ILogger<UserStorage> logger, IOptions<StorageOpt
 
     private async Task CreateUserConfigFileAsync(string valueDataFilePath)
     {
+        var directory = Path.GetDirectoryName(valueDataFilePath);
+        if (!Directory.Exists(directory))
+        {
+            Directory.CreateDirectory(directory!);
+        }
+        
         logger.LogInformation("User data was not found. Creating user config file {path}", valueDataFilePath);
-        await using var file = File.Open(valueDataFilePath, FileMode.Create);
+        await using var file = File.Create(valueDataFilePath);
         Current = defaultUser.Value.User;
         await JsonSerializer.SerializeAsync(file, defaultUser.Value.User, UserDataSerializerContext.Default.Options);
         using var streamReader = new StreamReader(file);    

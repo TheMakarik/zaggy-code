@@ -4,10 +4,13 @@ using Microsoft.Extensions.Options;
 using ZaggyCode.Data.Interfaces;
 using ZaggyCode.Data.Options;
 using ZaggyCode.Languages.Enums;
+using ZaggyCode.Languages.Extensions;
+using ZaggyCode.Shared.Attributes;
 using ZaggyCode.Shared.Extensions;
 
 namespace ZaggyCode.Data;
 
+[SingletonService]
 public sealed class GameCodeStorage(
     IUserStorage userStorage,
     ILogger<GameCodeStorage> logger, 
@@ -93,6 +96,4 @@ public sealed class GameCodeStorage(
     {
        await GetGameCodeAsync(lastGamePath, language);
     }
-
-
 }

@@ -1,6 +1,9 @@
+using ZaggyCode.Games.EventArgs;
+
 namespace ZaggyCode.Games.Events;
 
-public class RobotEvents
+public sealed class RobotEvents
 {
-    
+   public EventHandler<RobotMovedEventArgs> RobotMoved;
+   public EventHandler RobotDead;
 }

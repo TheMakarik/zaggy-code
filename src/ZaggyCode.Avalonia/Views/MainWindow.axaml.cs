@@ -1,6 +1,9 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-using ZaggyCode.Avalonia.Controls;
+using AvaloniaEdit;
+using AvaloniaEdit.TextMate;
+using TextMateSharp.Grammars;
+using ZaggyCode.Avalonia.Views.Controls;
 
 namespace ZaggyCode.Avalonia.Views;
 
@@ -16,21 +19,19 @@ public partial class MainWindow : Window
         base.OnLoaded(e);
 
         if (this.FindControl<TerminalControl>("Terminal") is not { } terminal)
-        {
             return;
-        }
 
-        /*
-        terminal.TerminalInput += (_, input) =>
+        terminal.TerminalInput += (_, args) =>
         {
-            terminal.Write(input);
+            terminal.WriteLine("Terminal: " + args);
         };
-        */
-
-        terminal.WriteLine("\x1b[1;32mДобро пожаловать в виртуальный терминал ZaggyCode!\x1b[0m");
-        terminal.WriteLine("");
-        terminal.WriteLine("\x1b[31mКрасный\x1b[0m \x1b[33mжелтый\x1b[0m \x1b[34mсиний\x1b[0m \x1b[38;2;255;100;200mRGB розовый\x1b[0m");
-        terminal.WriteLine("");
-        terminal.Write("\x1b[1m>\x1b[0m ");
+        
+        terminal.WriteLine("\x1b[38;2;75;0;130mДобро пожаловать в Zaggy's Code!\x1b[0m");
+        
+        var textEditor = this.FindControl<TextEditor>("Editor");
+        var  registryOptions = new RegistryOptions(ThemeName.VisualStudioLight);
+        var textMateInstallation = textEditor.InstallTextMate(registryOptions);
+        textMateInstallation.SetGrammar(registryOptions.GetScopeByLanguageId(registryOptions.GetLanguageByExtension(".lua").Id));
+        
     }
 }
