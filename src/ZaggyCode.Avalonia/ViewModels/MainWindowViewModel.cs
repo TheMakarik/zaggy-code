@@ -1,4 +1,8 @@
-﻿using System.Reactive;
+﻿using System;
+using System.Reactive;
+using System.Reactive.Linq;
+using System.Threading.Tasks;
+using DynamicData.Binding;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualBasic;
 using ReactiveUI;
@@ -17,14 +21,18 @@ public partial class MainWindowViewModel : ViewModelBase
 
     [Reactive] private bool _isTerminalVisible = true;
     [Reactive] private bool _isTerminalExists = true;
+    [Reactive] private bool _isTerminalMaximized = true;
     [Reactive] private bool _isRunning = false;
     [Reactive] private ExecutionSpeed _executionSpeed;
 
     #endregion    
     
     #region Interaction
-    
-    public Interaction<Unit, Unit> ClearTerminalContent = new();
+
+    public readonly Interaction<Unit, Unit> ResizeGridToMax = new();
+    public readonly Interaction<Unit, Unit> ClearTerminalContent = new();
+    public readonly Interaction<Unit, Unit> BackGridToNormal = new();
+    public readonly Interaction<Unit, Unit> MaximizeTerminal = new();
     
     #endregion
 
@@ -43,7 +51,24 @@ public partial class MainWindowViewModel : ViewModelBase
         _userStorage = userStorage;
 
         _executionSpeed = userStorage.Current.LastSpeed;
-        
+
+
+        this.WhenAnyPropertyChanged().Subscribe(context =>
+        {
+            this.WhenAnyValue(vm => vm.IsTerminalVisible)
+                .Where(isVisible => !isVisible)
+                .Subscribe(async void (onNext) => await ResizeGridToMax.Handle(Unit.Default));
+
+            this.WhenAnyValue(vm => vm.IsTerminalVisible)
+                .Where(isVisible => isVisible)
+                .Subscribe(async void (onNext) => await BackGridToNormal.Handle(Unit.Default));
+            
+            this.WhenAnyValue(vm => vm.IsTerminalExists)
+                .Where(isVisible => !isVisible)
+                .Subscribe(async void (onNext) => await ClearTerminalContent.Handle(Unit.Default));
+            
+        });
+
     }
 
     #endregion
@@ -53,14 +78,34 @@ public partial class MainWindowViewModel : ViewModelBase
     [ReactiveCommand]
     private void CloseTheTerminal()
     {
-        HideTheTerminal();
-        _isTerminalExists = false;
+        IsTerminalVisible = false;
+        IsTerminalExists = false;
     }
     
     [ReactiveCommand]
-    private void HideTheTerminal()
+    private async Task MaximizeOrNormalizeTerminal()
     {
-        _isTerminalVisible = false;
+        if(IsTerminalMaximized)
+            await BackGridToNormal.Handle(Unit.Default);
+        else
+        
+            await MaximizeTerminal.Handle(Unit.Default);
+
+        IsTerminalMaximized = !IsTerminalMaximized;
+
+    }
+    
+    [ReactiveCommand]
+    private void ChangeTerminalVisibility()
+    {
+        IsTerminalExists = true;
+        IsTerminalVisible = !IsTerminalVisible;
+    }
+
+    [ReactiveCommand]
+    private void UpdateFontSize(int fontSize)
+    {
+        _userStorage.Current.CodeFontSize = fontSize;
     }
 
     #endregion

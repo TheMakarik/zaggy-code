@@ -1,4 +1,5 @@
 using System;
+using System.Windows.Input;
 using Avalonia;
 using Avalonia.Input;
 using Avalonia.Interactivity;
@@ -20,6 +21,17 @@ public class TextEditorZoomBehavior : Behavior<TextEditor>
 
     public static readonly StyledProperty<double> ZoomStepProperty =
         AvaloniaProperty.Register<TextEditorZoomBehavior, double>(nameof(ZoomStep), 1);
+
+    private ICommand _updateFontSizeCommand;
+
+    public static readonly DirectProperty<TextEditorZoomBehavior, ICommand> UpdateFontSizeCommandProperty = AvaloniaProperty.RegisterDirect<TextEditorZoomBehavior, ICommand>(
+        nameof(UpdateFontSizeCommand), o => o.UpdateFontSizeCommand, (o, v) => o.UpdateFontSizeCommand = v);
+
+    public ICommand UpdateFontSizeCommand
+    {
+        get => _updateFontSizeCommand;
+        set => SetAndRaise(UpdateFontSizeCommandProperty, ref _updateFontSizeCommand, value);
+    }
 
     public double DefaultFontSize
     {
@@ -105,6 +117,7 @@ public class TextEditorZoomBehavior : Behavior<TextEditor>
         var newSize = Math.Clamp(AssociatedObject.FontSize + delta, MinFontSize, MaxFontSize);
         AssociatedObject.FontSize = newSize;
         AssociatedObject.TextArea.FontSize = newSize;
+        UpdateFontSizeCommand?.Execute(newSize);
     }
 
     private void ResetFontSize()
@@ -113,5 +126,6 @@ public class TextEditorZoomBehavior : Behavior<TextEditor>
             
         AssociatedObject.FontSize = DefaultFontSize;
         AssociatedObject.TextArea.FontSize = DefaultFontSize;
+        UpdateFontSizeCommand?.Execute(DefaultFontSize);
     }
 }
