@@ -117,7 +117,7 @@ public class TextEditorZoomBehavior : Behavior<TextEditor>
         var newSize = Math.Clamp(AssociatedObject.FontSize + delta, MinFontSize, MaxFontSize);
         AssociatedObject.FontSize = newSize;
         AssociatedObject.TextArea.FontSize = newSize;
-        UpdateFontSizeCommand?.Execute(newSize);
+        UpdateFontSizeCommand?.Execute(Convert.ToInt32(newSize));
     }
 
     private void ResetFontSize()
@@ -126,6 +126,6 @@ public class TextEditorZoomBehavior : Behavior<TextEditor>
             
         AssociatedObject.FontSize = DefaultFontSize;
         AssociatedObject.TextArea.FontSize = DefaultFontSize;
-        UpdateFontSizeCommand?.Execute(DefaultFontSize);
+        UpdateFontSizeCommand?.Execute(Convert.ToInt32(DefaultFontSize));
     }
 }

@@ -24,6 +24,7 @@ public partial class MainWindowViewModel : ViewModelBase
     [Reactive] private bool _isTerminalMaximized = true;
     [Reactive] private bool _isRunning = false;
     [Reactive] private ExecutionSpeed _executionSpeed;
+    [Reactive] private int _textEditorFontSize;
 
     #endregion    
     
@@ -49,9 +50,9 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         _factory = factory;
         _userStorage = userStorage;
-
         _executionSpeed = userStorage.Current.LastSpeed;
-
+        _textEditorFontSize = userStorage.Current.CodeFontSize;
+        
 
         this.WhenAnyPropertyChanged().Subscribe(context =>
         {
@@ -82,18 +83,6 @@ public partial class MainWindowViewModel : ViewModelBase
         IsTerminalExists = false;
     }
     
-    [ReactiveCommand]
-    private async Task MaximizeOrNormalizeTerminal()
-    {
-        if(IsTerminalMaximized)
-            await BackGridToNormal.Handle(Unit.Default);
-        else
-        
-            await MaximizeTerminal.Handle(Unit.Default);
-
-        IsTerminalMaximized = !IsTerminalMaximized;
-
-    }
     
     [ReactiveCommand]
     private void ChangeTerminalVisibility()

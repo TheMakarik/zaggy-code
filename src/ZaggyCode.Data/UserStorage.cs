@@ -22,7 +22,7 @@ public sealed class UserStorage(ILogger<UserStorage> logger, IOptions<StorageOpt
         logger.LogInformation("Observe user data {path}", storageOptions.Value.DataFilePath);
         Current.PropertyChanged += (_, args) =>
         {
-            logger.LogInformation("User property changed: {path}", storageOptions.Value.DataFilePath);
+            logger.LogInformation("User property changed: {path}", args.PropertyName);
             using var scope = _locker.EnterScope();
             _requireUpdate = true;
         };
@@ -87,8 +87,9 @@ public sealed class UserStorage(ILogger<UserStorage> logger, IOptions<StorageOpt
         if (!_requireUpdate)
             return;
         
-        await using  var file = File.Open(storageOptions.Value.DataFilePath, FileMode.Truncate);
-        await JsonSerializer.SerializeAsync(file, Current, UserDataSerializerContext.Default.Options);
+        await using(var file = File.Open(storageOptions.Value.DataFilePath, FileMode.Truncate))
+            await JsonSerializer.SerializeAsync(file, Current, UserDataSerializerContext.Default.Options);
         _requireUpdate = false;
+        logger.LogInformation("User config file expanded successfully. Content: {content}", await File.ReadAllTextAsync(storageOptions.Value.DataFilePath));
     }
 }

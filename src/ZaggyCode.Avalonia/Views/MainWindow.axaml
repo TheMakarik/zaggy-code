@@ -10,6 +10,7 @@
     x:TypeArguments="vm:MainWindowViewModel"
     xmlns="https://github.com/avaloniaui"
     xmlns:avaloniaEdit="https://github.com/avaloniaui/avaloniaedit"
+    xmlns:behaviors="clr-namespace:ZaggyCode.Avalonia.Views.Behaviors"
     xmlns:controls="clr-namespace:ZaggyCode.Avalonia.Views.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
@@ -23,7 +24,7 @@
     </Design.DataContext>
 
     <Grid RowDefinitions="Auto,*,Auto">
-        <Menu Grid.Row="0">
+        <Menu Background="{DynamicResource SystemColorWindowColor}" Grid.Row="0">
 
             <Menu.Styles>
                 <Style Selector="Menu">
@@ -153,9 +154,20 @@
                             Margin="5">
                             <avaloniaEdit:TextEditor
                                 FontFamily="Cascadia Code,Consolas,Menlo,Monospace"
+                                FontSize="{Binding TextEditorFontSize, Mode=OneTime}"
                                 Grid.Column="0"
                                 Name="Editor"
-                                ShowLineNumbers="True" />
+                                ShowLineNumbers="True">
+
+                                <Interaction.Behaviors>
+                                    <behaviors:TextEditorZoomBehavior
+                                        MaxFontSize="30"
+                                        MinFontSize="10"
+                                        UpdateFontSizeCommand="{Binding UpdateFontSizeCommand}"
+                                        ZoomStep="1" />
+                                </Interaction.Behaviors>
+
+                            </avaloniaEdit:TextEditor>
                         </Border>
                         <GridSplitter Grid.Column="1" />
                         <Border
