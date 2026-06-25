@@ -28,7 +28,7 @@ namespace ZaggyCode.Avalonia.Views.Controls;
 
 public class TerminalControl : TemplatedControl, IDisposable
 {
-    private readonly Terminal _terminal;
+    private readonly Terminal _xTermDotNetTerminal;
     private readonly DispatcherTimer _blinkTimer;
     private readonly List<Color> _palette = new(256);
 
@@ -46,7 +46,7 @@ public class TerminalControl : TemplatedControl, IDisposable
 
     public TerminalControl()
     {
-        _terminal = new Terminal(new XTerm.Options.TerminalOptions
+        _xTermDotNetTerminal = new Terminal(new XTerm.Options.TerminalOptions
         {
             Cols = 80,
             Rows = 24,
@@ -55,10 +55,10 @@ public class TerminalControl : TemplatedControl, IDisposable
             CursorBlink = true
         });
 
-        _terminal.LineFed += (_, _) => InvalidateVisual();
-        _terminal.BufferChanged += (_, _) => InvalidateVisual();
-        _terminal.Scrolled += (_, _) => InvalidateVisual();
-        _terminal.CursorStyleChanged += (_, _) => InvalidateVisual();
+        _xTermDotNetTerminal.LineFed += (_, _) => InvalidateVisual();
+        _xTermDotNetTerminal.BufferChanged += (_, _) => InvalidateVisual();
+        _xTermDotNetTerminal.Scrolled += (_, _) => InvalidateVisual();
+        _xTermDotNetTerminal.CursorStyleChanged += (_, _) => InvalidateVisual();
 
         Focusable = true;
         Background = new SolidColorBrush(Color.FromRgb(30, 30, 30));
@@ -79,7 +79,7 @@ public class TerminalControl : TemplatedControl, IDisposable
         UpdateTypeface();
     }
 
-    public Terminal Terminal => _terminal;
+    public Terminal XTermDotNetTerminal => _xTermDotNetTerminal;
 
     public double TerminalFontSize
     {
@@ -97,13 +97,13 @@ public class TerminalControl : TemplatedControl, IDisposable
 
     public void Write(string text)
     {
-        _terminal.Write(text);
+        _xTermDotNetTerminal.Write(text);
         InvalidateVisual();
     }
 
     public void WriteLine(string text)
     {
-        _terminal.WriteLine(text);
+        _xTermDotNetTerminal.WriteLine(text);
         InvalidateVisual();
     }
 
@@ -116,18 +116,18 @@ public class TerminalControl : TemplatedControl, IDisposable
     {
         base.OnPropertyChanged(change);
 
-        if (change.Property == TerminalFontSizeProperty || change.Property == TerminalFontFamilyProperty)
-        {
-            UpdateTypeface();
-            ResizeTerminal(Bounds.Size);
-            InvalidateVisual();
-        }
+        if (change.Property != TerminalFontSizeProperty && change.Property != TerminalFontFamilyProperty) 
+            return;
+        
+        UpdateTypeface();
+        ResizeTerminal(Bounds.Size);
+        InvalidateVisual();
     }
 
     protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
     {
         base.OnAttachedToVisualTree(e);
-        if (_terminal.Options.CursorBlink)
+        if (_xTermDotNetTerminal.Options.CursorBlink)
         {
             _blinkTimer.Start();
         }
@@ -171,39 +171,39 @@ public class TerminalControl : TemplatedControl, IDisposable
         if (e.Key is >= AvaloniaKey.A and <= AvaloniaKey.Z && modifiers.HasFlag(XKeyModifiers.Control))
         {
             char c = (char)('a' + (e.Key - AvaloniaKey.A));
-            input = _terminal.GenerateCharInput(c, modifiers);
+            input = _xTermDotNetTerminal.GenerateCharInput(c, modifiers);
         }
         else
         {
             input = e.Key switch
             {
-                AvaloniaKey.Enter or AvaloniaKey.Return => _terminal.GenerateKeyInput(XKey.Enter, modifiers),
-                AvaloniaKey.Tab => _terminal.GenerateKeyInput(XKey.Tab, modifiers),
-                AvaloniaKey.Back => _terminal.GenerateKeyInput(XKey.Backspace, modifiers),
-                AvaloniaKey.Delete => _terminal.GenerateKeyInput(XKey.Delete, modifiers),
-                AvaloniaKey.Escape => _terminal.GenerateKeyInput(XKey.Escape, modifiers),
-                AvaloniaKey.Up => _terminal.GenerateKeyInput(XKey.UpArrow, modifiers),
-                AvaloniaKey.Down => _terminal.GenerateKeyInput(XKey.DownArrow, modifiers),
-                AvaloniaKey.Left => _terminal.GenerateKeyInput(XKey.LeftArrow, modifiers),
-                AvaloniaKey.Right => _terminal.GenerateKeyInput(XKey.RightArrow, modifiers),
-                AvaloniaKey.Home => _terminal.GenerateKeyInput(XKey.Home, modifiers),
-                AvaloniaKey.End => _terminal.GenerateKeyInput(XKey.End, modifiers),
-                AvaloniaKey.PageUp => _terminal.GenerateKeyInput(XKey.PageUp, modifiers),
-                AvaloniaKey.PageDown => _terminal.GenerateKeyInput(XKey.PageDown, modifiers),
-                AvaloniaKey.Insert => _terminal.GenerateKeyInput(XKey.Insert, modifiers),
-                AvaloniaKey.F1 => _terminal.GenerateKeyInput(XKey.F1, modifiers),
-                AvaloniaKey.F2 => _terminal.GenerateKeyInput(XKey.F2, modifiers),
-                AvaloniaKey.F3 => _terminal.GenerateKeyInput(XKey.F3, modifiers),
-                AvaloniaKey.F4 => _terminal.GenerateKeyInput(XKey.F4, modifiers),
-                AvaloniaKey.F5 => _terminal.GenerateKeyInput(XKey.F5, modifiers),
-                AvaloniaKey.F6 => _terminal.GenerateKeyInput(XKey.F6, modifiers),
-                AvaloniaKey.F7 => _terminal.GenerateKeyInput(XKey.F7, modifiers),
-                AvaloniaKey.F8 => _terminal.GenerateKeyInput(XKey.F8, modifiers),
-                AvaloniaKey.F9 => _terminal.GenerateKeyInput(XKey.F9, modifiers),
-                AvaloniaKey.F10 => _terminal.GenerateKeyInput(XKey.F10, modifiers),
-                AvaloniaKey.F11 => _terminal.GenerateKeyInput(XKey.F11, modifiers),
-                AvaloniaKey.F12 => _terminal.GenerateKeyInput(XKey.F12, modifiers),
-                AvaloniaKey.Space => _terminal.GenerateCharInput(' ', modifiers),
+                AvaloniaKey.Enter or AvaloniaKey.Return => _xTermDotNetTerminal.GenerateKeyInput(XKey.Enter, modifiers),
+                AvaloniaKey.Tab => _xTermDotNetTerminal.GenerateKeyInput(XKey.Tab, modifiers),
+                AvaloniaKey.Back => _xTermDotNetTerminal.GenerateKeyInput(XKey.Backspace, modifiers),
+                AvaloniaKey.Delete => _xTermDotNetTerminal.GenerateKeyInput(XKey.Delete, modifiers),
+                AvaloniaKey.Escape => _xTermDotNetTerminal.GenerateKeyInput(XKey.Escape, modifiers),
+                AvaloniaKey.Up => _xTermDotNetTerminal.GenerateKeyInput(XKey.UpArrow, modifiers),
+                AvaloniaKey.Down => _xTermDotNetTerminal.GenerateKeyInput(XKey.DownArrow, modifiers),
+                AvaloniaKey.Left => _xTermDotNetTerminal.GenerateKeyInput(XKey.LeftArrow, modifiers),
+                AvaloniaKey.Right => _xTermDotNetTerminal.GenerateKeyInput(XKey.RightArrow, modifiers),
+                AvaloniaKey.Home => _xTermDotNetTerminal.GenerateKeyInput(XKey.Home, modifiers),
+                AvaloniaKey.End => _xTermDotNetTerminal.GenerateKeyInput(XKey.End, modifiers),
+                AvaloniaKey.PageUp => _xTermDotNetTerminal.GenerateKeyInput(XKey.PageUp, modifiers),
+                AvaloniaKey.PageDown => _xTermDotNetTerminal.GenerateKeyInput(XKey.PageDown, modifiers),
+                AvaloniaKey.Insert => _xTermDotNetTerminal.GenerateKeyInput(XKey.Insert, modifiers),
+                AvaloniaKey.F1 => _xTermDotNetTerminal.GenerateKeyInput(XKey.F1, modifiers),
+                AvaloniaKey.F2 => _xTermDotNetTerminal.GenerateKeyInput(XKey.F2, modifiers),
+                AvaloniaKey.F3 => _xTermDotNetTerminal.GenerateKeyInput(XKey.F3, modifiers),
+                AvaloniaKey.F4 => _xTermDotNetTerminal.GenerateKeyInput(XKey.F4, modifiers),
+                AvaloniaKey.F5 => _xTermDotNetTerminal.GenerateKeyInput(XKey.F5, modifiers),
+                AvaloniaKey.F6 => _xTermDotNetTerminal.GenerateKeyInput(XKey.F6, modifiers),
+                AvaloniaKey.F7 => _xTermDotNetTerminal.GenerateKeyInput(XKey.F7, modifiers),
+                AvaloniaKey.F8 => _xTermDotNetTerminal.GenerateKeyInput(XKey.F8, modifiers),
+                AvaloniaKey.F9 => _xTermDotNetTerminal.GenerateKeyInput(XKey.F9, modifiers),
+                AvaloniaKey.F10 => _xTermDotNetTerminal.GenerateKeyInput(XKey.F10, modifiers),
+                AvaloniaKey.F11 => _xTermDotNetTerminal.GenerateKeyInput(XKey.F11, modifiers),
+                AvaloniaKey.F12 => _xTermDotNetTerminal.GenerateKeyInput(XKey.F12, modifiers),
+                AvaloniaKey.Space => _xTermDotNetTerminal.GenerateCharInput(' ', modifiers),
                 _ => null
             };
         }
@@ -221,7 +221,7 @@ public class TerminalControl : TemplatedControl, IDisposable
 
         foreach (char c in e.Text ?? string.Empty)
         {
-            string input = _terminal.GenerateCharInput(c, XKeyModifiers.None);
+            string input = _xTermDotNetTerminal.GenerateCharInput(c, XKeyModifiers.None);
             if (!string.IsNullOrEmpty(input))
             {
                 OnTerminalInput(input);
@@ -239,7 +239,7 @@ public class TerminalControl : TemplatedControl, IDisposable
         var point = e.GetPosition(this);
         var (col, row) = HitTest(point);
         var button = GetXTermMouseButton(e.GetCurrentPoint(this).Properties.PointerUpdateKind);
-        string input = _terminal.GenerateMouseEvent(button, col + 1, row + 1, MouseEventType.Down, GetKeyModifiers(e.KeyModifiers));
+        string input = _xTermDotNetTerminal.GenerateMouseEvent(button, col + 1, row + 1, MouseEventType.Down, GetKeyModifiers(e.KeyModifiers));
 
         if (!string.IsNullOrEmpty(input))
         {
@@ -254,7 +254,7 @@ public class TerminalControl : TemplatedControl, IDisposable
         var point = e.GetPosition(this);
         var (col, row) = HitTest(point);
         var button = GetXTermMouseButtonFromAvalonia(e.InitialPressMouseButton);
-        string input = _terminal.GenerateMouseEvent(button, col + 1, row + 1, MouseEventType.Up, GetKeyModifiers(e.KeyModifiers));
+        string input = _xTermDotNetTerminal.GenerateMouseEvent(button, col + 1, row + 1, MouseEventType.Up, GetKeyModifiers(e.KeyModifiers));
 
         if (!string.IsNullOrEmpty(input))
         {
@@ -274,7 +274,7 @@ public class TerminalControl : TemplatedControl, IDisposable
         }
 
         var (col, row) = HitTest(point);
-        string input = _terminal.GenerateMouseEvent(MouseButton.Left, col + 1, row + 1, MouseEventType.Drag, GetKeyModifiers(e.KeyModifiers));
+        string input = _xTermDotNetTerminal.GenerateMouseEvent(MouseButton.Left, col + 1, row + 1, MouseEventType.Drag, GetKeyModifiers(e.KeyModifiers));
 
         if (!string.IsNullOrEmpty(input))
         {
@@ -290,15 +290,15 @@ public class TerminalControl : TemplatedControl, IDisposable
         var (col, row) = HitTest(point);
         var button = e.Delta.Y > 0 ? MouseButton.WheelUp : MouseButton.WheelDown;
         var modifiers = GetKeyModifiers(e.KeyModifiers);
-        string input = _terminal.GenerateMouseEvent(button, col + 1, row + 1, MouseEventType.Down, modifiers);
+        string input = _xTermDotNetTerminal.GenerateMouseEvent(button, col + 1, row + 1, MouseEventType.Down, modifiers);
 
         if (!string.IsNullOrEmpty(input))
         {
             OnTerminalInput(input);
         }
-        else if (!_terminal.IsAlternateBufferActive)
+        else if (!_xTermDotNetTerminal.IsAlternateBufferActive)
         {
-            _terminal.ScrollLines(e.Delta.Y > 0 ? -3 : 3);
+            _xTermDotNetTerminal.ScrollLines(e.Delta.Y > 0 ? -3 : 3);
         }
     }
 
@@ -307,11 +307,11 @@ public class TerminalControl : TemplatedControl, IDisposable
         base.Render(context);
 
         var bounds = Bounds;
-        var buffer = _terminal.Buffer;
+        var buffer = _xTermDotNetTerminal.Buffer;
 
         context.FillRectangle(Background ?? Brushes.Transparent, bounds);
 
-        for (int row = 0; row < _terminal.Rows; row++)
+        for (int row = 0; row < _xTermDotNetTerminal.Rows; row++)
         {
             int lineIndex = buffer.YDisp + row;
             if (lineIndex < 0 || lineIndex >= buffer.Lines.Length)
@@ -325,7 +325,7 @@ public class TerminalControl : TemplatedControl, IDisposable
                 continue;
             }
 
-            for (int col = 0; col < _terminal.Cols; col++)
+            for (int col = 0; col < _xTermDotNetTerminal.Cols; col++)
             {
                 var cell = line[col];
                 if (cell.Width == 0)
@@ -359,7 +359,7 @@ public class TerminalControl : TemplatedControl, IDisposable
     public void Dispose()
     {
         _blinkTimer.Stop();
-        _terminal.Dispose();
+        _xTermDotNetTerminal.Dispose();
     }
 
     private void InitializePalette()
@@ -430,9 +430,9 @@ public class TerminalControl : TemplatedControl, IDisposable
         int cols = (int)(size.Width / _cellSize.Width);
         int rows = (int)(size.Height / _cellSize.Height);
 
-        if (cols > 0 && rows > 0 && (cols != _terminal.Cols || rows != _terminal.Rows))
+        if (cols > 0 && rows > 0 && (cols != _xTermDotNetTerminal.Cols || rows != _xTermDotNetTerminal.Rows))
         {
-            _terminal.Resize(cols, rows);
+            _xTermDotNetTerminal.Resize(cols, rows);
             InvalidateVisual();
         }
     }
@@ -539,12 +539,12 @@ public class TerminalControl : TemplatedControl, IDisposable
 
     private void RenderCursor(DrawingContext context, TerminalBuffer buffer)
     {
-        if (!_terminal.CursorVisible || !_isFocused)
+        if (!_xTermDotNetTerminal.CursorVisible || !_isFocused)
         {
             return;
         }
 
-        if (_terminal.Options.CursorBlink && !_cursorVisible)
+        if (_xTermDotNetTerminal.Options.CursorBlink && !_cursorVisible)
         {
             return;
         }
@@ -553,7 +553,7 @@ public class TerminalControl : TemplatedControl, IDisposable
         double y = buffer.Y * _cellSize.Height;
         var cursorBrush = new SolidColorBrush(Color.FromRgb(200, 200, 200));
 
-        switch (_terminal.Options.CursorStyle)
+        switch (_xTermDotNetTerminal.Options.CursorStyle)
         {
             case CursorStyle.Block:
                 context.FillRectangle(cursorBrush, new Rect(x, y, _cellSize.Width, _cellSize.Height));

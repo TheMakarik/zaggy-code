@@ -36,6 +36,10 @@ public sealed class Bootstrapper
             .AddClasses(c => c.WithAttribute<SingletonServiceAttribute>())
             .AsImplementedInterfaces()
             .WithSingletonLifetime()
+            
+            .AddClasses(c => c.WithAttribute<SingletonServiceAttribute>())
+            .AsSelf()
+            .WithSingletonLifetime()
     
             .AddClasses(c => c.WithAttribute<ScopedServiceAttribute>()
                 .WithoutAttribute<LanguageExtensionAttribute>())
