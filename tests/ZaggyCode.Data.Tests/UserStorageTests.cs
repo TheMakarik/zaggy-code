@@ -41,7 +41,8 @@ public class UserStorageTests : IDisposable
                 CodeTheme = "Light",
                 LastLanguage = Language.Lua,
                 LastGamePath = null,
-                LastSpeed = ExecutionSpeed.X2
+                LastSpeed = ExecutionSpeed.X2,
+                TerminalFontSize = 17
             }
         });
         A.CallTo(() => _stubProvider.GetFolder(An<Environment.SpecialFolder>.Ignored, _jsonPath)).Returns(_jsonPath);
