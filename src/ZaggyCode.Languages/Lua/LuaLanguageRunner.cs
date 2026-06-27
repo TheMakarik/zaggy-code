@@ -1,6 +1,6 @@
+using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System.Diagnostics;
 using ZaggyCode.Games.Events;
 using ZaggyCode.Games.Interfaces;
 using ZaggyCode.Languages.Attributes;
@@ -18,22 +18,26 @@ public sealed class LuaLanguageRunner(ILogger logger, IOptions<SpeedMilliseconds
 {
     private NLua.Lua _lua = new NLua.Lua();
     private volatile bool _isLoadedRobot = false;
-
+    
     public EventHandler<DebugLineUpdatedEventArgs> DebugLineUpdated { get; set; }
-
     public void Execute(string code, ExecutionSpeed speed, IRobotMover mover)
     {
-        Debug.Assert(Thread.CurrentThread.ManagedThreadId != 1, "This function must be called from another thread");
+        throw new NotImplementedException();
+    }
 
+    public void RedirectIoStreams(Stream input, Stream output)
+    {
+        throw new NotImplementedException();
+    }
+
+    public RobotEvents Execute(string code, ExecutionSpeed speed)
+    {
+        Debug.Assert(Thread.CurrentThread.ManagedThreadId != 1, "This function must be called from another thread");
+        
         var events = new RobotEvents();
         LoadLineUpdating(speed);
         LoadRobot(events);
         _lua.DoString(code);
-        throw new NotImplementedException();
-    }
-
-    public void RedirectIoStreams(TextReader input, TextWriter output)
-    {
         throw new NotImplementedException();
     }
 
@@ -42,7 +46,7 @@ public sealed class LuaLanguageRunner(ILogger logger, IOptions<SpeedMilliseconds
         var waitMilliseconds = speedOptions.GetType().GetProperty(speed.ToString())?.GetValue(speedOptions) as int? ?? 0;
         _lua["__raise_DebugLineUpdated_ClrEvent"] = (int line) =>
         {
-            DebugLineUpdated.Invoke(this, new DebugLineUpdatedEventArgs() { LineNumber = line });
+            DebugLineUpdated.Invoke(this, new  DebugLineUpdatedEventArgs(){LineNumber = line});
             Thread.Sleep(waitMilliseconds);
         };
         _lua.DoString(@"
@@ -124,9 +128,15 @@ end
 ");
     }
 
+    public void RedirectErrorStreamToOutputStream()
+    {
+        //Lua has no stderr to redirect.
+    }
+
+
     public void Dispose()
     {
-        _lua?.Dispose();
-        logger.LogDebug("Disposed lua script");
+         _lua?.Dispose();
+         logger.LogDebug("Disposed lua script");
     }
 }
