@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Serilog;
 using ZaggyCode.Avalonia.Options;
 using ZaggyCode.Data.Interfaces;
@@ -77,8 +79,25 @@ public sealed class Bootstrapper
         
         await using var scope = app.Services.CreateAsyncScope();
 
-        var storageFacade = scope.ServiceProvider.GetRequiredService<IStorageFacade>();
-        await storageFacade.LoadAllAsync();
+#if DEBUG
+        try
+        {
+#endif
+            var storageFacade = scope.ServiceProvider.GetRequiredService<IStorageFacade>();
+            await storageFacade.LoadAllAsync();
+#if DEBUG
+        }
+        catch(Exception e)
+        {
+            Log.Error(@$"
+Произошла ошибка при загрузке пользовательских данных. Возможно это произошло из за требования к миграциям, которые пока что не реализованы
+Самый простой способ удалить файл, который использовал сервис, и он будет создан по новой.
+Например {Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), app.Services.GetRequiredService<IOptions<StorageOptions>>().Value.DataFilePath)} для {nameof(IUserStorage)}
+");
+        }
+#endif
+          
+     
 
         return app;
     }
