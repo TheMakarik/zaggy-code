@@ -1,85 +1,36 @@
-using System;
-using System.Collections.Generic;
-using System.Globalization;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
+using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Threading;
-using XTerm;
-using XTerm.Buffer;
-using XTerm.Common;
-using XTerm.Input;
-using AvaloniaKey = Avalonia.Input.Key;
-using AvaloniaKeyEventArgs = Avalonia.Input.KeyEventArgs;
-using AvaloniaKeyModifiers = Avalonia.Input.KeyModifiers;
-using AvaloniaMouseButton = Avalonia.Input.MouseButton;
-using AvaloniaPointerEventArgs = Avalonia.Input.PointerEventArgs;
-using AvaloniaPointerPressedEventArgs = Avalonia.Input.PointerPressedEventArgs;
-using AvaloniaPointerReleasedEventArgs = Avalonia.Input.PointerReleasedEventArgs;
-using AvaloniaPointerUpdateKind = Avalonia.Input.PointerUpdateKind;
-using AvaloniaPointerWheelEventArgs = Avalonia.Input.PointerWheelEventArgs;
-using AvaloniaTextInputEventArgs = Avalonia.Input.TextInputEventArgs;
-using FocusChangedEventArgs = Avalonia.Input.FocusChangedEventArgs;
-using XKey = XTerm.Input.Key;
-using XKeyModifiers = XTerm.Input.KeyModifiers;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
+using System.Threading;
+using ZaggyCode.Avalonia.Views.TerminalEngine;
+using ZaggyCode.Avalonia.Views.TerminalEngine.Session;
 
 namespace ZaggyCode.Avalonia.Views.Controls;
 
 public class TerminalControl : TemplatedControl, IDisposable
 {
-    private readonly Terminal _xTermDotNetTerminal;
+    private static readonly Color defaultForeground = Colors.White;
+    private static readonly Color defaultBackground = Colors.Black;
+
+    private readonly DrawingGroup _rootDrawingGroup = new DrawingGroup();
+    private readonly DrawingGroup _cursorVisual = new DrawingGroup();
+    private readonly List<DrawingGroup> _lineDrawings = [];
+
+    private readonly Lock _renderLock;
+    private readonly DispatcherTimer _renderTimer;
     private readonly DispatcherTimer _blinkTimer;
-    private readonly List<Color> _palette = new(256);
+    private readonly ITerminalSession _session;
 
+    private bool cursorState = true;
     private bool _cursorVisible = true;
-    private bool _isFocused;
-    private Typeface _typeface;
-    private double _fontSize = 14;
-    private Size _cellSize;
-
-    public static readonly StyledProperty<double> TerminalFontSizeProperty =
-        AvaloniaProperty.Register<TerminalControl, double>(nameof(TerminalFontSize), 14);
-
-    public static readonly StyledProperty<string> TerminalFontFamilyProperty =
-        AvaloniaProperty.Register<TerminalControl, string>(nameof(TerminalFontFamily), "Consolas");
-
-    public TerminalControl()
-    {
-        _xTermDotNetTerminal = new Terminal(new XTerm.Options.TerminalOptions
-        {
-            Cols = 80,
-            Rows = 24,
-            Scrollback = 1000,
-            CursorStyle = CursorStyle.Block,
-            CursorBlink = true
-        });
-
-        _xTermDotNetTerminal.LineFed += (_, _) => InvalidateVisual();
-        _xTermDotNetTerminal.BufferChanged += (_, _) => InvalidateVisual();
-        _xTermDotNetTerminal.Scrolled += (_, _) => InvalidateVisual();
-        _xTermDotNetTerminal.CursorStyleChanged += (_, _) => InvalidateVisual();
-
-        Focusable = true;
-        Background = new SolidColorBrush(Color.FromRgb(30, 30, 30));
-        Foreground = new SolidColorBrush(Color.FromRgb(204, 204, 204));
-
-        _blinkTimer = new DispatcherTimer
-        {
-            Interval = TimeSpan.FromMilliseconds(500)
-        };
-
-        _blinkTimer.Tick += (_, _) =>
-        {
-            _cursorVisible = !_cursorVisible;
-            InvalidateVisual();
-        };
-
-        InitializePalette();
-        UpdateTypeface();
-    }
-
-    public Terminal XTermDotNetTerminal => _xTermDotNetTerminal;
+    private bool needsFullInvalidation = true;
 
     public double TerminalFontSize
     {
@@ -93,43 +44,71 @@ public class TerminalControl : TemplatedControl, IDisposable
         set => SetValue(TerminalFontFamilyProperty, value);
     }
 
-    public event EventHandler<string>? TerminalInput;
-
-    public void Write(string text)
+    public TerminalScreenBuffer? CurrentBuffer
     {
-        _xTermDotNetTerminal.Write(text);
-        InvalidateVisual();
+        get => GetValue(CurrentBufferProperty);
+        set => SetValue(CurrentBufferProperty, value);
     }
 
-    public void WriteLine(string text)
+    public bool CursorVisible
     {
-        _xTermDotNetTerminal.WriteLine(text);
-        InvalidateVisual();
+        get => GetValue(CursorVisibleProperty);
+        set => SetValue(CursorVisibleProperty, value);
     }
 
-    protected virtual void OnTerminalInput(string input)
+    public ITerminalSession Session
     {
-        TerminalInput?.Invoke(this, input);
+        get => _session;
+    }
+
+    public Point CursorPosition
+    {
+        get;
+        private set;
+    }
+
+    public TerminalControl()
+    {
+        ITerminalSession session = new DummyTerminalSession();
+        session.Resize(512, 10240);
+
+        _session = session;
+        _renderLock = new Lock();
+        _renderTimer = new DispatcherTimer(TimeSpan.FromMilliseconds(16), DispatcherPriority.Background, Dispatcher.CurrentDispatcher, DispatcherRenderHandler);
+        _blinkTimer = new DispatcherTimer(TimeSpan.FromMilliseconds(530), DispatcherPriority.Background, Dispatcher.CurrentDispatcher, DispatcherBlinkHandler);
+
+        CurrentBuffer = _session.Buffer;
+        _rootDrawingGroup.Children.Add(_cursorVisual);
+        _session.BufferUpdated += OnSessionBufferUpdated;
+        _renderTimer.Start();
+    }
+
+    private void OnSessionBufferUpdated(object? sender, EventArgs e)
+    {
+        Dispatcher.UIThread.Post(() =>
+        {
+            needsFullInvalidation = true;
+            InvalidateVisual();
+        });
     }
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {
         base.OnPropertyChanged(change);
 
-        if (change.Property != TerminalFontSizeProperty && change.Property != TerminalFontFamilyProperty) 
-            return;
-        
-        UpdateTypeface();
-        ResizeTerminal(Bounds.Size);
-        InvalidateVisual();
+        if (change.Property == CurrentBufferProperty ||
+            change.Property == TerminalFontSizeProperty ||
+            change.Property == TerminalFontFamilyProperty)
+        {
+            needsFullInvalidation = true;
+            InvalidateVisual();
+        }
     }
 
     protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
     {
         base.OnAttachedToVisualTree(e);
-        if (_xTermDotNetTerminal.Options.CursorBlink)
-            _blinkTimer.Start();
-        
+        _blinkTimer.Start();
     }
 
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
@@ -141,7 +120,6 @@ public class TerminalControl : TemplatedControl, IDisposable
     protected override void OnGotFocus(FocusChangedEventArgs e)
     {
         base.OnGotFocus(e);
-        _isFocused = true;
         _cursorVisible = true;
         InvalidateVisual();
     }
@@ -149,7 +127,6 @@ public class TerminalControl : TemplatedControl, IDisposable
     protected override void OnLostFocus(FocusChangedEventArgs e)
     {
         base.OnLostFocus(e);
-        _isFocused = false;
         _cursorVisible = true;
         InvalidateVisual();
     }
@@ -157,412 +134,313 @@ public class TerminalControl : TemplatedControl, IDisposable
     protected override void OnSizeChanged(SizeChangedEventArgs e)
     {
         base.OnSizeChanged(e);
-        ResizeTerminal(e.NewSize);
     }
 
-    protected override void OnKeyDown(AvaloniaKeyEventArgs e)
+    protected override void OnKeyDown(KeyEventArgs e)
     {
         base.OnKeyDown(e);
-
-        var modifiers = GetKeyModifiers(e.KeyModifiers);
-        string? input = null;
-
-        if (e.Key is >= AvaloniaKey.A and <= AvaloniaKey.Z && modifiers.HasFlag(XKeyModifiers.Control))
-        {
-            char c = (char)('a' + (e.Key - AvaloniaKey.A));
-            input = _xTermDotNetTerminal.GenerateCharInput(c, modifiers);
-        }
-        else
-        {
-            input = e.Key switch
-            {
-                AvaloniaKey.Enter or AvaloniaKey.Return => _xTermDotNetTerminal.GenerateKeyInput(XKey.Enter, modifiers),
-                AvaloniaKey.Tab => _xTermDotNetTerminal.GenerateKeyInput(XKey.Tab, modifiers),
-                AvaloniaKey.Back => _xTermDotNetTerminal.GenerateKeyInput(XKey.Backspace, modifiers),
-                AvaloniaKey.Delete => _xTermDotNetTerminal.GenerateKeyInput(XKey.Delete, modifiers),
-                AvaloniaKey.Escape => _xTermDotNetTerminal.GenerateKeyInput(XKey.Escape, modifiers),
-                AvaloniaKey.Up => _xTermDotNetTerminal.GenerateKeyInput(XKey.UpArrow, modifiers),
-                AvaloniaKey.Down => _xTermDotNetTerminal.GenerateKeyInput(XKey.DownArrow, modifiers),
-                AvaloniaKey.Left => _xTermDotNetTerminal.GenerateKeyInput(XKey.LeftArrow, modifiers),
-                AvaloniaKey.Right => _xTermDotNetTerminal.GenerateKeyInput(XKey.RightArrow, modifiers),
-                AvaloniaKey.Home => _xTermDotNetTerminal.GenerateKeyInput(XKey.Home, modifiers),
-                AvaloniaKey.End => _xTermDotNetTerminal.GenerateKeyInput(XKey.End, modifiers),
-                AvaloniaKey.PageUp => _xTermDotNetTerminal.GenerateKeyInput(XKey.PageUp, modifiers),
-                AvaloniaKey.PageDown => _xTermDotNetTerminal.GenerateKeyInput(XKey.PageDown, modifiers),
-                AvaloniaKey.Insert => _xTermDotNetTerminal.GenerateKeyInput(XKey.Insert, modifiers),
-                AvaloniaKey.F1 => _xTermDotNetTerminal.GenerateKeyInput(XKey.F1, modifiers),
-                AvaloniaKey.F2 => _xTermDotNetTerminal.GenerateKeyInput(XKey.F2, modifiers),
-                AvaloniaKey.F3 => _xTermDotNetTerminal.GenerateKeyInput(XKey.F3, modifiers),
-                AvaloniaKey.F4 => _xTermDotNetTerminal.GenerateKeyInput(XKey.F4, modifiers),
-                AvaloniaKey.F5 => _xTermDotNetTerminal.GenerateKeyInput(XKey.F5, modifiers),
-                AvaloniaKey.F6 => _xTermDotNetTerminal.GenerateKeyInput(XKey.F6, modifiers),
-                AvaloniaKey.F7 => _xTermDotNetTerminal.GenerateKeyInput(XKey.F7, modifiers),
-                AvaloniaKey.F8 => _xTermDotNetTerminal.GenerateKeyInput(XKey.F8, modifiers),
-                AvaloniaKey.F9 => _xTermDotNetTerminal.GenerateKeyInput(XKey.F9, modifiers),
-                AvaloniaKey.F10 => _xTermDotNetTerminal.GenerateKeyInput(XKey.F10, modifiers),
-                AvaloniaKey.F11 => _xTermDotNetTerminal.GenerateKeyInput(XKey.F11, modifiers),
-                AvaloniaKey.F12 => _xTermDotNetTerminal.GenerateKeyInput(XKey.F12, modifiers),
-                AvaloniaKey.Space => _xTermDotNetTerminal.GenerateCharInput(' ', modifiers),
-                _ => null
-            };
-        }
-
-        if (!string.IsNullOrEmpty(input))
-        {
-            OnTerminalInput(input);
-            e.Handled = true;
-        }
     }
 
-    protected override void OnTextInput(AvaloniaTextInputEventArgs e)
+    protected override void OnTextInput(TextInputEventArgs e)
     {
         base.OnTextInput(e);
-
-        foreach (char c in e.Text ?? string.Empty)
-        {
-            string input = _xTermDotNetTerminal.GenerateCharInput(c, XKeyModifiers.None);
-            if (!string.IsNullOrEmpty(input))
-            {
-                OnTerminalInput(input);
-            }
-        }
-
-        e.Handled = true;
     }
 
-    protected override void OnPointerPressed(AvaloniaPointerPressedEventArgs e)
+    protected override void OnPointerPressed(PointerPressedEventArgs e)
     {
         base.OnPointerPressed(e);
         Focus();
-
-        var point = e.GetPosition(this);
-        var (col, row) = HitTest(point);
-        var button = GetXTermMouseButton(e.GetCurrentPoint(this).Properties.PointerUpdateKind);
-        string input = _xTermDotNetTerminal.GenerateMouseEvent(button, col + 1, row + 1, MouseEventType.Down, GetKeyModifiers(e.KeyModifiers));
-
-        if (!string.IsNullOrEmpty(input))
-        {
-            OnTerminalInput(input);
-        }
     }
 
-    protected override void OnPointerReleased(AvaloniaPointerReleasedEventArgs e)
+    protected override void OnPointerReleased(PointerReleasedEventArgs e)
     {
         base.OnPointerReleased(e);
-
-        var point = e.GetPosition(this);
-        var (col, row) = HitTest(point);
-        var button = GetXTermMouseButtonFromAvalonia(e.InitialPressMouseButton);
-        string input = _xTermDotNetTerminal.GenerateMouseEvent(button, col + 1, row + 1, MouseEventType.Up, GetKeyModifiers(e.KeyModifiers));
-
-        if (!string.IsNullOrEmpty(input))
-        {
-            OnTerminalInput(input);
-        }
     }
 
-    protected override void OnPointerMoved(AvaloniaPointerEventArgs e)
+    protected override void OnPointerMoved(PointerEventArgs e)
     {
         base.OnPointerMoved(e);
-
-        var point = e.GetPosition(this);
-        var properties = e.GetCurrentPoint(this).Properties;
-        if (!properties.IsLeftButtonPressed && !properties.IsRightButtonPressed)
-        {
-            return;
-        }
-
-        var (col, row) = HitTest(point);
-        string input = _xTermDotNetTerminal.GenerateMouseEvent(MouseButton.Left, col + 1, row + 1, MouseEventType.Drag, GetKeyModifiers(e.KeyModifiers));
-
-        if (!string.IsNullOrEmpty(input))
-        {
-            OnTerminalInput(input);
-        }
     }
 
-    protected override void OnPointerWheelChanged(AvaloniaPointerWheelEventArgs e)
+    protected override void OnPointerWheelChanged(PointerWheelEventArgs e)
     {
         base.OnPointerWheelChanged(e);
-
-        var point = e.GetPosition(this);
-        var (col, row) = HitTest(point);
-        var button = e.Delta.Y > 0 ? MouseButton.WheelUp : MouseButton.WheelDown;
-        var modifiers = GetKeyModifiers(e.KeyModifiers);
-        string input = _xTermDotNetTerminal.GenerateMouseEvent(button, col + 1, row + 1, MouseEventType.Down, modifiers);
-
-        if (!string.IsNullOrEmpty(input))
-        {
-            OnTerminalInput(input);
-        }
-        else if (!_xTermDotNetTerminal.IsAlternateBufferActive)
-        {
-            _xTermDotNetTerminal.ScrollLines(e.Delta.Y > 0 ? -3 : 3);
-        }
     }
 
     public override void Render(DrawingContext context)
     {
         base.Render(context);
 
-        var bounds = Bounds;
-        var buffer = _xTermDotNetTerminal.Buffer;
-
-        context.FillRectangle(Background ?? Brushes.Transparent, bounds);
-
-        for (int row = 0; row < _xTermDotNetTerminal.Rows; row++)
+        if (needsFullInvalidation)
         {
-            int lineIndex = buffer.YDisp + row;
-            if (lineIndex < 0 || lineIndex >= buffer.Lines.Length)
+            RenderFullBuffer();
+            needsFullInvalidation = false;
+        }
+
+        lock (_renderLock)
+        {
+            if (Background is not null)
+                context.DrawRectangle(Background, null, new Rect(Bounds.Size));
+
+            _rootDrawingGroup.Draw(context);
+        }
+    }
+
+    private void DispatcherRenderHandler(object? sender, EventArgs e)
+    {
+        if (CurrentBuffer == null)
+            return;
+
+        if (CurrentBuffer.HasDirtyLines())
+        {
+            for (int i = 0; i < CurrentBuffer.RowsCount; i++)
             {
-                continue;
-            }
-
-            var line = buffer.Lines[lineIndex];
-            if (line == null)
-            {
-                continue;
-            }
-
-            for (int col = 0; col < _xTermDotNetTerminal.Cols; col++)
-            {
-                var cell = line[col];
-                if (cell.Width == 0)
+                if (CurrentBuffer.IsLineDirty(i))
                 {
-                    continue;
-                }
-
-                double x = col * _cellSize.Width;
-                double y = row * _cellSize.Height;
-                double cellWidth = cell.Width * _cellSize.Width;
-
-                var bg = GetBackgroundBrush(cell.Attributes);
-                if (bg != null)
-                {
-                    context.FillRectangle(bg, new Rect(x, y, cellWidth, _cellSize.Height));
-                }
-
-                if (!string.IsNullOrEmpty(cell.Content) && cell.Content != " ")
-                {
-                    var fg = GetForegroundBrush(cell.Attributes);
-                    var weight = cell.Attributes.IsBold() ? FontWeight.Bold : FontWeight.Normal;
-                    var text = CreateFormattedText(cell.Content, fg, weight);
-                    context.DrawText(text, new Point(x, y));
+                    InvalidateRow(i);
+                    CurrentBuffer.MarkLineClean(i);
                 }
             }
         }
+    }
 
-        RenderCursor(context, buffer);
+    private void DispatcherBlinkHandler(object? sender, EventArgs e)
+    {
+        if (!CursorVisible)
+        {
+            cursorState = false;
+            RenderCursorFromBuffer();
+            return;
+        }
+
+        cursorState = !cursorState;
+        RenderCursorFromBuffer();
+    }
+
+    void RenderFullBuffer()
+    {
+        if (CurrentBuffer == null)
+            return;
+
+        lock (_renderLock)
+        {
+            CorrectVisualsCountForBuffer();
+            for (int y = 0; y < CurrentBuffer.GridSize.Height && y < _lineDrawings.Count; y++)
+                RenderRowFromBuffer(y);
+
+            UpdateCursorPositionFromBuffer();
+        }
+    }
+
+    private void CorrectVisualsCountForBuffer()
+    {
+        if (CurrentBuffer == null)
+            return;
+
+        int targetRows = Math.Min(CurrentBuffer.RowsCount, (int)CurrentBuffer.GridSize.Height);
+        int currentRows = _lineDrawings.Count;
+        int difference = targetRows - currentRows;
+
+        if (difference == 0)
+            return;
+
+        if (difference > 0)
+        {
+            for (int i = 0; i < difference; i++)
+            {
+                DrawingGroup newVisual = new DrawingGroup();
+                _lineDrawings.Add(newVisual);
+                _rootDrawingGroup.Children.Insert(_rootDrawingGroup.Children.Count - 1, newVisual);
+            }
+        }
+        else if (difference < 0)
+        {
+            for (int i = 0; i < -difference; i++)
+            {
+                _lineDrawings.RemoveAt(_lineDrawings.Count - 1);
+                _rootDrawingGroup.Children.RemoveAt(_rootDrawingGroup.Children.Count - 2);
+            }
+        }
+    }
+
+    private void InvalidateRow(int row)
+    {
+        if (!Dispatcher.CheckAccess())
+        {
+            Dispatcher.Invoke(() => InvalidateRow(row));
+            return;
+        }
+
+        if (CurrentBuffer == null || row < 0 || row >= CurrentBuffer.RowsCount)
+            return;
+
+        lock (_renderLock)
+        {
+            CorrectVisualsCountForBuffer();
+            if (row < _lineDrawings.Count)
+            {
+                RenderRowFromBuffer(row);
+            }
+        }
+    }
+
+    private void RenderRowFromBuffer(int row)
+    {
+        if (CurrentBuffer == null || row < 0 || row >= CurrentBuffer.RowsCount || row >= _lineDrawings.Count)
+            return;
+
+        try
+        {
+            Size cellSize = GetCellSize();
+            double verticalOffset = row * cellSize.Height;
+
+            DrawingGroup visual = _lineDrawings[row];
+            visual.Transform = new TranslateTransform(0, verticalOffset);
+
+            Span<TerminalCellInfo> rowSpan = CurrentBuffer.GetRow(row);
+            RenderRowFromTerminalBuffer(visual, rowSpan, cellSize);
+        }
+        catch
+        {
+            // fucked up somewhere
+            _ = 0xBAD + 0xC0DE;
+        }
+    }
+
+    private void RenderRowFromTerminalBuffer(DrawingGroup visual, Span<TerminalCellInfo> rowSpan, Size cellSize)
+    {
+        using DrawingContext dc = visual.Open();
+        double horizontalOffset = 0;
+
+        Span<char> textSpan = rowSpan.Length > 1024
+            ? new char[rowSpan.Length]
+            : stackalloc char[rowSpan.Length];
+
+        for (int x = 0; x < rowSpan.Length;)
+        {
+            try
+            {
+                Span<TerminalCellInfo> remainingSlice = rowSpan.Slice(x);
+                int runLength = TakeWhileSameAttributes(remainingSlice);
+                x += runLength;
+
+                Span<TerminalCellInfo> runSpan = remainingSlice.Slice(0, runLength);
+
+                for (int i = 0; i < runLength; i++)
+                    textSpan[i] = runSpan[i].Character;
+
+                TerminalCellInfo firstCell = runSpan[0];
+
+                // Apply bold if needed
+                FontWeight weight = firstCell.Bold ? FontWeight.Bold : FontWeight.Normal;
+                Typeface runTypeface = new Typeface(new FontFamily(TerminalFontFamily), FontStyle.Normal, weight, FontStretch.Normal);
+
+                FormattedText formatted = new FormattedText(
+                    new string(textSpan.Slice(0, runLength)),
+                    CultureInfo.CurrentCulture,
+                    FlowDirection.LeftToRight,
+                    runTypeface,
+                    TerminalFontSize,
+                    firstCell.Foreground == defaultForeground ? Foreground : new SolidColorBrush(firstCell.Foreground));
+
+                if (firstCell.Background != defaultBackground)
+                {
+                    dc.DrawRectangle(
+                        new SolidColorBrush(firstCell.Background), null,
+                        new Rect(horizontalOffset, 0, formatted.WidthIncludingTrailingWhitespace, formatted.Height));
+                }
+
+                dc.DrawText(formatted, new Point(horizontalOffset, 0));
+                horizontalOffset += formatted.WidthIncludingTrailingWhitespace;
+            }
+            catch
+            {
+                // fucked up somewhere
+                _ = 0xBAD + 0xC0DE;
+            }
+        }
+    }
+
+    private static int TakeWhileSameAttributes(ReadOnlySpan<TerminalCellInfo> span)
+    {
+        if (span.IsEmpty)
+            return 0;
+
+        TerminalCellInfo first = span[0];
+        int length = span.Length;
+
+        for (int i = 1; i < length; i++)
+        {
+            TerminalCellInfo current = span[i];
+            if (first != current)
+                return i;
+        }
+
+        return span.Length;
+    }
+
+    private void UpdateCursorPositionFromBuffer()
+    {
+        if (CurrentBuffer == null)
+            return;
+
+        if (_session.Decoder is TerminalDecoder decoder)
+            CursorPosition = decoder.CursorPosition;
+
+        Size cellSize = GetCellSize();
+        _cursorVisual.Transform = new TranslateTransform(CursorPosition.X * cellSize.Width, CursorPosition.Y * cellSize.Height);
+    }
+
+    private void RenderCursorFromBuffer()
+    {
+        if (CurrentBuffer == null)
+            return;
+
+        try
+        {
+            UpdateCursorPositionFromBuffer();
+
+            using DrawingContext dc = _cursorVisual.Open();
+            IBrush? background = cursorState ? Foreground : Brushes.Transparent;
+            dc.DrawRectangle(background, new Pen(), new Rect(0, 0, 1, GetCellSize().Height));
+        }
+        catch (Exception exc)
+        {
+            Debug.WriteLine(exc);
+        }
+    }
+
+    public Size GetCellSize()
+    {
+        FormattedText formattedText = Format("M", Brushes.Black);
+        return new Size(formattedText.WidthIncludingTrailingWhitespace, formattedText.Height);
+    }
+
+    private FormattedText Format(string text, IBrush foreground)
+    {
+        Typeface typeface = new Typeface(new FontFamily(TerminalFontFamily), FontStyle.Normal, FontWeight.Normal, FontStretch.Normal);
+        return new FormattedText(
+            text, CultureInfo.CurrentCulture, FlowDirection.LeftToRight,
+            typeface, TerminalFontSize, foreground);
     }
 
     public void Dispose()
     {
+        _renderTimer.Stop();
         _blinkTimer.Stop();
-        _xTermDotNetTerminal.Dispose();
+        _session.BufferUpdated -= OnSessionBufferUpdated;
+        _session.Dispose();
     }
 
-    private void InitializePalette()
-    {
-        var standardColors = new[]
-        {
-            Color.FromRgb(0, 0, 0),
-            Color.FromRgb(205, 0, 0),
-            Color.FromRgb(0, 205, 0),
-            Color.FromRgb(205, 205, 0),
-            Color.FromRgb(0, 0, 238),
-            Color.FromRgb(205, 0, 205),
-            Color.FromRgb(0, 205, 205),
-            Color.FromRgb(229, 229, 229),
-            Color.FromRgb(127, 127, 127),
-            Color.FromRgb(255, 0, 0),
-            Color.FromRgb(0, 255, 0),
-            Color.FromRgb(255, 255, 0),
-            Color.FromRgb(92, 92, 255),
-            Color.FromRgb(255, 0, 255),
-            Color.FromRgb(0, 255, 255),
-            Color.FromRgb(255, 255, 255)
-        };
+    public static readonly StyledProperty<TerminalScreenBuffer?> CurrentBufferProperty =
+        AvaloniaProperty.Register<TerminalControl, TerminalScreenBuffer?>(nameof(CurrentBuffer), null);
 
-        _palette.AddRange(standardColors);
+    public static readonly StyledProperty<bool> CursorVisibleProperty =
+        AvaloniaProperty.Register<TerminalControl, bool>(nameof(CursorVisible), true);
 
-        for (int r = 0; r < 6; r++)
-        {
-            for (int g = 0; g < 6; g++)
-            {
-                for (int b = 0; b < 6; b++)
-                {
-                    byte rr = r == 0 ? (byte)0 : (byte)(95 + (r - 1) * 40);
-                    byte gg = g == 0 ? (byte)0 : (byte)(95 + (g - 1) * 40);
-                    byte bb = b == 0 ? (byte)0 : (byte)(95 + (b - 1) * 40);
-                    _palette.Add(Color.FromRgb(rr, gg, bb));
-                }
-            }
-        }
+    public static readonly StyledProperty<double> TerminalFontSizeProperty =
+        AvaloniaProperty.Register<TerminalControl, double>(nameof(TerminalFontSize), 14);
 
-        for (int i = 0; i < 24; i++)
-        {
-            byte c = (byte)(8 + i * 10);
-            _palette.Add(Color.FromRgb(c, c, c));
-        }
-    }
-
-    private void UpdateTypeface()
-    {
-        _fontSize = TerminalFontSize;
-        _typeface = new Typeface(new FontFamily(TerminalFontFamily), FontStyle.Normal, FontWeight.Normal, FontStretch.Normal);
-        MeasureCellSize();
-    }
-
-    private void MeasureCellSize()
-    {
-        var text = CreateFormattedText("W", Brushes.Black, FontWeight.Normal);
-        _cellSize = new Size(text.Width, text.Height);
-    }
-
-    private void ResizeTerminal(Size size)
-    {
-        if (_cellSize.Width <= 0 || _cellSize.Height <= 0)
-        {
-            return;
-        }
-
-        int cols = (int)(size.Width / _cellSize.Width);
-        int rows = (int)(size.Height / _cellSize.Height);
-
-        if (cols > 0 && rows > 0 && (cols != _xTermDotNetTerminal.Cols || rows != _xTermDotNetTerminal.Rows))
-        {
-            _xTermDotNetTerminal.Resize(cols, rows);
-            InvalidateVisual();
-        }
-    }
-
-    private (int col, int row) HitTest(Point point)
-    {
-        int col = Math.Max(0, (int)(point.X / _cellSize.Width));
-        int row = Math.Max(0, (int)(point.Y / _cellSize.Height));
-        return (col, row);
-    }
-
-    private static XKeyModifiers GetKeyModifiers(AvaloniaKeyModifiers modifiers)
-    {
-        XKeyModifiers result = XKeyModifiers.None;
-        if (modifiers.HasFlag(AvaloniaKeyModifiers.Control))
-        {
-            result |= XKeyModifiers.Control;
-        }
-
-        if (modifiers.HasFlag(AvaloniaKeyModifiers.Shift))
-        {
-            result |= XKeyModifiers.Shift;
-        }
-
-        if (modifiers.HasFlag(AvaloniaKeyModifiers.Alt))
-        {
-            result |= XKeyModifiers.Alt;
-        }
-
-        return result;
-    }
-
-    private static XTerm.Input.MouseButton GetXTermMouseButton(AvaloniaPointerUpdateKind kind)
-    {
-        return kind switch
-        {
-            AvaloniaPointerUpdateKind.LeftButtonPressed or AvaloniaPointerUpdateKind.LeftButtonReleased => MouseButton.Left,
-            AvaloniaPointerUpdateKind.RightButtonPressed or AvaloniaPointerUpdateKind.RightButtonReleased => MouseButton.Right,
-            AvaloniaPointerUpdateKind.MiddleButtonPressed or AvaloniaPointerUpdateKind.MiddleButtonReleased => MouseButton.Middle,
-            _ => MouseButton.None
-        };
-    }
-
-    private static XTerm.Input.MouseButton GetXTermMouseButtonFromAvalonia(AvaloniaMouseButton button)
-    {
-        return button switch
-        {
-            AvaloniaMouseButton.Left => MouseButton.Left,
-            AvaloniaMouseButton.Right => MouseButton.Right,
-            AvaloniaMouseButton.Middle => MouseButton.Middle,
-            _ => MouseButton.None
-        };
-    }
-
-    private FormattedText CreateFormattedText(string text, IBrush brush, FontWeight weight)
-    {
-        var typeface = new Typeface(_typeface.FontFamily, _typeface.Style, weight, _typeface.Stretch);
-        return new FormattedText(text, CultureInfo.InvariantCulture, FlowDirection.LeftToRight, typeface, _fontSize, brush);
-    }
-
-    private IBrush GetForegroundBrush(AttributeData attributes)
-    {
-        int mode = attributes.GetFgColorMode();
-        int value = attributes.GetFgColor();
-
-        if (mode == 0 && value == 256)
-        {
-            return Foreground ?? Brushes.White;
-        }
-
-        return new SolidColorBrush(GetColor(mode, value));
-    }
-
-    private IBrush? GetBackgroundBrush(AttributeData attributes)
-    {
-        int mode = attributes.GetBgColorMode();
-        int value = attributes.GetBgColor();
-
-        if (mode == 0 && value == 257)
-        {
-            return null;
-        }
-
-        return new SolidColorBrush(GetColor(mode, value));
-    }
-
-    private Color GetColor(int mode, int value)
-    {
-        if (mode == 0 && value >= 0 && value < _palette.Count)
-        {
-            return _palette[value];
-        }
-
-        if (mode == 1)
-        {
-            byte r = (byte)((value >> 16) & 0xFF);
-            byte g = (byte)((value >> 8) & 0xFF);
-            byte b = (byte)(value & 0xFF);
-            return Color.FromRgb(r, g, b);
-        }
-
-        return Colors.Black;
-    }
-
-    private void RenderCursor(DrawingContext context, TerminalBuffer buffer)
-    {
-        if (!_xTermDotNetTerminal.CursorVisible || !_isFocused)
-        {
-            return;
-        }
-
-        if (_xTermDotNetTerminal.Options.CursorBlink && !_cursorVisible)
-        {
-            return;
-        }
-
-        double x = buffer.X * _cellSize.Width;
-        double y = buffer.Y * _cellSize.Height;
-        var cursorBrush = new SolidColorBrush(Color.FromRgb(200, 200, 200));
-
-        switch (_xTermDotNetTerminal.Options.CursorStyle)
-        {
-            case CursorStyle.Block:
-                context.FillRectangle(cursorBrush, new Rect(x, y, _cellSize.Width, _cellSize.Height));
-                break;
-            case CursorStyle.Underline:
-                context.FillRectangle(cursorBrush, new Rect(x, y + _cellSize.Height - 2, _cellSize.Width, 2));
-                break;
-            case CursorStyle.Bar:
-                context.FillRectangle(cursorBrush, new Rect(x, y, 2, _cellSize.Height));
-                break;
-        }
-    }
+    public static readonly StyledProperty<string> TerminalFontFamilyProperty =
+        AvaloniaProperty.Register<TerminalControl, string>(nameof(TerminalFontFamily), "Consolas");
 }

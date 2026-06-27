@@ -6,10 +6,13 @@ public enum Language
 {
     [LanguageExtension(".cs")]
     CSharp,
-    
+
     [LanguageExtension(".lua")]
     Lua,
-    
+
     [LanguageExtension(".py")]
-    Python
+    Python,
+
+    [LanguageExtension(".ss")]
+    ShardScript
 }
