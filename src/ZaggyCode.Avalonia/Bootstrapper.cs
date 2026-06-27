@@ -67,7 +67,7 @@ public sealed class Bootstrapper
             .AddSerilog(Log.Logger, dispose: true);
 
         builder
-            .AddOptions<TextEditorFontSizeOptions>()
+            .AddOptions<FontSizeOptions>()
             .AddOptions<DefaultUser>()
             .AddOptions<StorageOptions>()
             .AddOptions<SpeedMillisecondsOptions>();

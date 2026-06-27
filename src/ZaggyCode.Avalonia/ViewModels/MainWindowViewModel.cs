@@ -4,9 +4,11 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using DynamicData.Binding;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Microsoft.VisualBasic;
 using ReactiveUI;
 using ReactiveUI.SourceGenerators;
+using ZaggyCode.Avalonia.Options;
 using ZaggyCode.Data.Interfaces;
 using ZaggyCode.Languages.Enums;
 using ZaggyCode.Shared.Attributes;
@@ -28,6 +30,13 @@ public partial class MainWindowViewModel : ViewModelBase
 
     #endregion    
     
+    #region Properties
+    
+    public int MaxFontSize { get; init; }
+    public int MinFontSize { get; init; }
+    
+    #endregion
+    
     #region Interaction
 
     public readonly Interaction<Unit, Unit> ResizeGridToMax = new();
@@ -40,17 +49,22 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private readonly IServiceScopeFactory _factory;
     private readonly IUserStorage _userStorage;
+    private readonly FontSizeOptions _fontSizeOptions;
 
     #endregion
 
     #region Constructors
 
-    public MainWindowViewModel(IServiceScopeFactory factory, IUserStorage userStorage)
+    public MainWindowViewModel(IServiceScopeFactory factory, IUserStorage userStorage, IOptions<FontSizeOptions> textFontSize)
     {
         _factory = factory;
         _userStorage = userStorage;
         _executionSpeed = userStorage.Current.LastSpeed;
         _textEditorFontSize = userStorage.Current.CodeFontSize;
+        _fontSizeOptions = textFontSize.Value;
+        MaxFontSize = _fontSizeOptions.MaxFontSize;
+        MinFontSize = _fontSizeOptions.MinFontSize;
+        
         
 
         this.WhenAnyPropertyChanged().Subscribe(context =>
@@ -84,7 +98,22 @@ public partial class MainWindowViewModel : ViewModelBase
         IsTerminalVisible = false;
         IsTerminalExists = false;
     }
+
+    [ReactiveCommand]
+    private void IncrementEditorFontSize()
+    {
+        if(TextEditorFontSize < MaxFontSize)
+          TextEditorFontSize += 1;
+    }
     
+    
+    [ReactiveCommand]
+    private void DecrementEditorFontSize()
+    {
+        if(TextEditorFontSize  > MinFontSize)
+             TextEditorFontSize -= 1;
+    }
+
     
     [ReactiveCommand]
     private void ChangeTerminalVisibility()

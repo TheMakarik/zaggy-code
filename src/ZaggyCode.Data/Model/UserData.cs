@@ -13,6 +13,7 @@ public sealed class UserData : INotifyPropertyChanged
     public required Language LastLanguage { get; set => SetField(ref field, value); }
     public required string? LastGamePath { get; set => SetField(ref field, value); }
     public required ExecutionSpeed LastSpeed { get; set => SetField(ref field, value); }
+    public required int TerminalFontSize { get; set => SetField(ref field, value); }
 
     public event PropertyChangedEventHandler? PropertyChanged;
 

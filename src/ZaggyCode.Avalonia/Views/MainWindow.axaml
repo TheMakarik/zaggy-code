@@ -56,8 +56,21 @@
             <MenuItem Background="Transparent" Header="Вид">
                 <MenuItem Header="Тема подцветски синтаксиса" Icon="{materialIcons:MaterialIconExt Kind=CodeBlockBraces}" />
                 <MenuItem Header="Показывать боковое меню" Icon="{materialIcons:MaterialIconExt Kind=PageLayoutSidebarLeft}" />
-                <MenuItem Header="Увевличить размер текста" Icon="{materialIcons:MaterialIconExt Kind=FormatFontSizeIncrease}" />
-                <MenuItem Header="Уменьшить размер текста" Icon="{materialIcons:MaterialIconExt Kind=FormatFontSizeDecrease}" />
+                <MenuItem Header="Текст" Icon="{materialIcons:MaterialIconExt Kind=FontSize}">
+                    <MenuItem
+                        Command="{Binding IncrementEditorFontSizeCommand}"
+                        Header="Увевличить размер текста редактора"
+                        Icon="{materialIcons:MaterialIconExt Kind=FormatFontSizeIncrease}"
+                        InputGesture="Ctrl++" />
+                    <MenuItem
+                        Command="{Binding DecrementEditorFontSizeCommand}"
+                        Header="Уменьшить размер текста редактора"
+                        Icon="{materialIcons:MaterialIconExt Kind=FormatFontSizeDecrease}"
+                        InputGesture="Ctrl+-" />
+                    <MenuItem Header="Увевличить размер текста терминала" Icon="{materialIcons:MaterialIconExt Kind=FormatFontSizeIncrease}" />
+                    <MenuItem Header="Уменьшить размер текста терминала" Icon="{materialIcons:MaterialIconExt Kind=FormatFontSizeDecrease}" />
+
+                </MenuItem>
             </MenuItem>
             <MenuItem Background="Transparent" Header="Сервис">
                 <MenuItem Header="Настройки" Icon="{materialIcons:MaterialIconExt Kind=Settings}" />
@@ -156,15 +169,15 @@
                             Margin="5">
                             <avaloniaEdit:TextEditor
                                 FontFamily="Cascadia Code,Consolas,Menlo,Monospace"
-                                FontSize="{Binding TextEditorFontSize, Mode=OneTime}"
+                                FontSize="{Binding TextEditorFontSize}"
                                 Grid.Column="0"
                                 Name="Editor"
                                 ShowLineNumbers="True">
 
                                 <Interaction.Behaviors>
                                     <behaviors:TextEditorZoomBehavior
-                                        MaxFontSize="30"
-                                        MinFontSize="10"
+                                        MaxFontSize="{Binding MaxFontSize, Mode=OneTime}"
+                                        MinFontSize="{Binding MinFontSize, Mode=OneTime}"
                                         UpdateFontSizeCommand="{Binding UpdateFontSizeCommand}"
                                         ZoomStep="1" />
                                 </Interaction.Behaviors>
