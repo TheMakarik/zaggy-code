@@ -33,7 +33,6 @@ public partial class MainWindowViewModel : ViewModelBase
     public readonly Interaction<Unit, Unit> ResizeGridToMax = new();
     public readonly Interaction<Unit, Unit> ClearTerminalContent = new();
     public readonly Interaction<Unit, Unit> BackGridToNormal = new();
-    public readonly Interaction<Unit, Unit> MaximizeTerminal = new();
     
     #endregion
 
@@ -68,6 +67,9 @@ public partial class MainWindowViewModel : ViewModelBase
                 .Where(isVisible => !isVisible)
                 .Subscribe(async void (onNext) => await ClearTerminalContent.Handle(Unit.Default));
             
+            this.WhenAnyValue(vm => vm.TextEditorFontSize)
+                .Where(size => size != _userStorage.Current.CodeFontSize)
+                .Subscribe(onNext =>  userStorage.Current.CodeFontSize = _textEditorFontSize);
         });
 
     }
@@ -94,7 +96,7 @@ public partial class MainWindowViewModel : ViewModelBase
     [ReactiveCommand]
     private void UpdateFontSize(int fontSize)
     {
-        _userStorage.Current.CodeFontSize = fontSize;
+        TextEditorFontSize = fontSize;
     }
 
     #endregion

@@ -7,12 +7,15 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Serilog;
+using ZaggyCode.Avalonia.Options;
 using ZaggyCode.Data.Interfaces;
 using ZaggyCode.Data.Options;
 using ZaggyCode.Games.Interfaces;
 using ZaggyCode.Languages.Attributes;
 using ZaggyCode.Languages.Enums;
+using ZaggyCode.Languages.Options;
 using ZaggyCode.Shared.Attributes;
+using ZaggyCode.Shared.Extensions;
 
 namespace ZaggyCode.Avalonia;
 
@@ -61,9 +64,12 @@ public sealed class Bootstrapper
             .ClearProviders()
             .AddSerilog(Log.Logger, dispose: true);
 
-        builder.Services
-            .Configure<DefaultUser>(builder.Configuration.GetSection(nameof(DefaultUser)))
-            .Configure<StorageOptions>(builder.Configuration.GetSection(nameof(StorageOptions)));
+        builder
+            .AddOptions<TextEditorFontSizeOptions>()
+            .AddOptions<DefaultUser>()
+            .AddOptions<StorageOptions>()
+            .AddOptions<SpeedMillisecondsOptions>();
+        
         
         var app = builder.Build();
 

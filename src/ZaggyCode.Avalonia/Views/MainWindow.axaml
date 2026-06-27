@@ -56,6 +56,8 @@
             <MenuItem Background="Transparent" Header="Вид">
                 <MenuItem Header="Тема подцветски синтаксиса" Icon="{materialIcons:MaterialIconExt Kind=CodeBlockBraces}" />
                 <MenuItem Header="Показывать боковое меню" Icon="{materialIcons:MaterialIconExt Kind=PageLayoutSidebarLeft}" />
+                <MenuItem Header="Увевличить размер текста" Icon="{materialIcons:MaterialIconExt Kind=FormatFontSizeIncrease}" />
+                <MenuItem Header="Уменьшить размер текста" Icon="{materialIcons:MaterialIconExt Kind=FormatFontSizeDecrease}" />
             </MenuItem>
             <MenuItem Background="Transparent" Header="Сервис">
                 <MenuItem Header="Настройки" Icon="{materialIcons:MaterialIconExt Kind=Settings}" />

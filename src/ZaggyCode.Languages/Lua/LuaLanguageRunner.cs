@@ -2,6 +2,7 @@ using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using ZaggyCode.Games.Events;
+using ZaggyCode.Games.Interfaces;
 using ZaggyCode.Languages.Attributes;
 using ZaggyCode.Languages.Enums;
 using ZaggyCode.Languages.EventArgs;
@@ -19,6 +20,16 @@ public sealed class LuaLanguageRunner(ILogger logger, IOptions<SpeedMilliseconds
     private volatile bool _isLoadedRobot = false;
     
     public EventHandler<DebugLineUpdatedEventArgs> DebugLineUpdated { get; set; }
+    public void Execute(string code, ExecutionSpeed speed, IRobotMover mover)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void RedirectIoStreams(Stream input, Stream output)
+    {
+        throw new NotImplementedException();
+    }
+
     public RobotEvents Execute(string code, ExecutionSpeed speed)
     {
         Debug.Assert(Thread.CurrentThread.ManagedThreadId != 1, "This function must be called from another thread");
