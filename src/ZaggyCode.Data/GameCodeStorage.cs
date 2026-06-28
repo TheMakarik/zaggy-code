@@ -10,7 +10,7 @@ using ZaggyCode.Shared.Extensions;
 
 namespace ZaggyCode.Data;
 
-[SingletonService]
+
 public sealed class GameCodeStorage(
     IUserStorage userStorage,
     ILogger<GameCodeStorage> logger, 

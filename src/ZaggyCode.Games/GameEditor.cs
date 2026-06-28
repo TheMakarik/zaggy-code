@@ -5,7 +5,6 @@ using ZaggyCode.Shared.Attributes;
 
 namespace ZaggyCode.Games;
 
-[ScopedService]
 public sealed class GameEditor : IGameEditor
 {
     private FileStream _stream;

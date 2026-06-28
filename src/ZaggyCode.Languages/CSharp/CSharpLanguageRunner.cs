@@ -17,7 +17,6 @@ public record class CSharpLanguageRunnerScriptGlobals(
     TextReader Input
 );
 
-[ScopedService]
 [LanguageExtension(".cs")]
 public sealed partial class CSharpLanguageRunner(ILogger<CSharpLanguageRunner> logger) : ILanguageRunner
 {

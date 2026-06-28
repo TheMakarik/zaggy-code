@@ -15,7 +15,6 @@ using ZaggyCode.Shared.Attributes;
 
 namespace ZaggyCode.Avalonia.ViewModels;
 
-[SingletonService]
 public partial class MainWindowViewModel : ViewModelBase
 {
     

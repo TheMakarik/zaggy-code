@@ -18,6 +18,7 @@ using ZaggyCode.Languages.Enums;
 using ZaggyCode.Languages.Options;
 using ZaggyCode.Shared.Attributes;
 using ZaggyCode.Shared.Extensions;
+using Scrutor;
 
 namespace ZaggyCode.Avalonia;
 
@@ -35,6 +36,16 @@ public sealed class Bootstrapper
         builder.Configuration.AddJsonFile("appsettings.json");
         
         Log.Logger = new LoggerConfiguration().ReadFrom.Configuration(builder.Configuration).CreateLogger();
+         
+        /*
+         * Мигрированме с ZaggyCode.Shared.Attributes требует удаление аттрибутов. Теперь сервисы сканируются
+         * "по конвенция".
+         * Ниже представлены эти конценции:
+              * Классы заканчивающиеся на ViewMode добавлены как Singleton без интерфейса (обычная  вьбмодель)
+              * IDisposable/IAsyncDisposable классы будут зарегестрированы как Scoped
+              * Классы с аттрибутом LanguageExtension - Keyed Singleton со значением LanguageExtension.Extension в качестве ключа
+              * В остальных слуаях - Singleton
+         */
         
         builder.Services.Scan(selector => selector
             .FromAssemblies(assemblies)
@@ -47,15 +58,16 @@ public sealed class Bootstrapper
             .AsSelf()
             .WithSingletonLifetime()
             
-            .AddClasses(c => c.WithAttribute<ScopedServiceAttribute>()
-                .WithAttribute<LanguageExtensionAttribute>())
+            .AddClasses(c => c.WithAttribute<LanguageExtensionAttribute>())
             .AsImplementedInterfaces()
-            .WithServiceKey(t => t.GetCustomAttribute<LanguageExtensionAttribute>()!.Extension)
-            .WithScopedLifetime()
-    
-            .AddClasses(c => c.WithAttribute<TransientServiceAttribute>())
+            .WithServiceKey(type => type.GetCustomAttribute<LanguageExtensionAttribute>()!.Extension)
+            .WithSingletonLifetime()
+            
+            .AddClasses(c => c.Where(t => 
+                !t.IsAssignableTo(typeof(IDisposable)) && 
+                    !t.IsAssignableTo(typeof(IAsyncDisposable))).WithoutAttribute<LanguageExtensionAttribute>())
             .AsImplementedInterfaces()
-            .WithTransientLifetime()
+            .WithSingletonLifetime()
         );
         
         builder.Logging
@@ -90,6 +102,7 @@ public sealed class Bootstrapper
 Самый простой способ удалить файл, который использовал сервис, и он будет создан по новой.
 Например {Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), app.Services.GetRequiredService<IOptions<StorageOptions>>().Value.DataFilePath)} для {nameof(IUserStorage)}
 ");
+            Console.WriteLine(e);
         }
 #endif
           

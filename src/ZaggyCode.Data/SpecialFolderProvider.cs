@@ -3,7 +3,6 @@ using ZaggyCode.Shared.Attributes;
 
 namespace ZaggyCode.Data;
 
-[SingletonService]
 //Нужно чтоб мокнуть получения папки в тестах чтоб не переписывать их и не ломать свою либу
 public class SpecialFolderProvider : ISpecialFolderProvider
 {

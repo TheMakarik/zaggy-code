@@ -5,7 +5,6 @@ using ZaggyCode.Shared.Attributes;
 
 namespace ZaggyCode.Games.Factories;
 
-[SingletonService]
 public sealed class RobotMoverFactory(ILogger<RobotMover> logger) : IRobotMoverFactory
 {
     public RobotMover GetFactory(RobotEvents events, Game game)
