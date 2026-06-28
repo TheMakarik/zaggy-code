@@ -3,7 +3,6 @@ using ZaggyCode.Shared.Attributes;
 
 namespace ZaggyCode.Data;
 
-[TransientService]
 public sealed class StorageFacade(IUserStorage userStorage, IGameCodeStorage gameCodeStorage) : IStorageFacade
 {
     public Task LoadAllAsync()

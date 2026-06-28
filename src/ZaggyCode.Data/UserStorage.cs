@@ -10,7 +10,6 @@ using ZaggyCode.Shared.Attributes;
 
 namespace ZaggyCode.Data;
 
-[SingletonService]
 public sealed class UserStorage(ILogger<UserStorage> logger, IOptions<StorageOptions> storageOptions, IOptions<DefaultUser> defaultUser, ISpecialFolderProvider folderProvider) : IUserStorage
 {
     private readonly Lock _locker = new Lock();
