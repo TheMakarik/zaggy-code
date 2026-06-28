@@ -1,6 +1,7 @@
 ﻿using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.Extensions.Logging;
+using System.Text.RegularExpressions;
 using ZaggyCode.Games.Interfaces;
 using ZaggyCode.Languages.Attributes;
 using ZaggyCode.Languages.Enums;
@@ -18,7 +19,7 @@ public record class CSharpLanguageRunnerScriptGlobals(
 
 [ScopedService]
 [LanguageExtension(".cs")]
-public sealed class CSharpLanguageRunner(ILogger<CSharpLanguageRunner> logger) : ILanguageRunner
+public sealed partial class CSharpLanguageRunner(ILogger<CSharpLanguageRunner> logger) : ILanguageRunner
 {
     private static readonly ScriptOptions scriptOptions = ScriptOptions.Default
         .WithImports("ZaggyCode.Languages.CSharp")
@@ -54,6 +55,8 @@ public sealed class CSharpLanguageRunner(ILogger<CSharpLanguageRunner> logger) :
 
             using CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromMinutes(2));
             CSharpLanguageRunnerScriptGlobals globals = new CSharpLanguageRunnerScriptGlobals(mover, Output, Input);
+
+            code = ThreadSleepKostylAwesomeGeneratedRegex().Replace(code, "; Thread.Sleep(" + SpeedToMilliseconds(speed) + ")");
             object result = CSharpScript.EvaluateAsync(code, scriptOptions, globals, typeof(CSharpLanguageRunnerScriptGlobals), cancellationToken: cts.Token).Result;
         }
         catch (CompilationErrorException compEx)
@@ -77,8 +80,19 @@ public sealed class CSharpLanguageRunner(ILogger<CSharpLanguageRunner> logger) :
         }
     }
 
+    private static int SpeedToMilliseconds(ExecutionSpeed speed) => speed switch
+    {
+        ExecutionSpeed.X10 => 10,
+        ExecutionSpeed.X5 => 200,
+        ExecutionSpeed.X2 => 500,
+        ExecutionSpeed.X1 or _ => 1000,
+    };
+
     public void Dispose()
     {
 
     }
+
+    [GeneratedRegex(";")]
+    private static partial Regex ThreadSleepKostylAwesomeGeneratedRegex();
 }
