@@ -1,19 +1,4 @@
-﻿namespace ZaggyCode.Avalonia.Views.TerminalEngine;
-
-public enum Direction
-{
-    Up,
-    Down,
-    Forward,
-    Backward
-}
-
-public enum ClearDirection
-{
-    Forward = 0,
-    Backward = 1,
-    Both = 2
-}
+namespace ZaggyCode.Avalonia.Views.TerminalEngine.Enums;
 
 public enum GraphicRendition
 {
@@ -81,32 +66,4 @@ public enum GraphicRendition
     BackgroundBrightCyan = 106,
     BackgroundBrightWhite = 107,
     BackgroundBrightReset = 109,
-}
-
-public enum AnsiMode
-{
-    ShowCursor,
-    HideCursor,
-    LineFeed,
-    NewLine,
-    CursorKeyToCursor,
-    CursorKeyToApplication,
-    ANSI,
-    VT52,
-    Columns80,
-    Columns132,
-    JumpScrolling,
-    SmoothScrolling,
-    NormalVideo,
-    ReverseVideo,
-    OriginIsAbsolute,
-    OriginIsRelative,
-    LineWrap,
-    DisableLineWrap,
-    AutoRepeat,
-    DisableAutoRepeat,
-    Interlacing,
-    DisableInterlacing,
-    NumericKeypad,
-    AlternateKeypad,
 }

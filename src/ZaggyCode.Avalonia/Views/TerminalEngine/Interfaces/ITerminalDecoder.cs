@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text;
 
-namespace ZaggyCode.Avalonia.Views.TerminalEngine;
+namespace ZaggyCode.Avalonia.Views.TerminalEngine.Interfaces;
 
 public interface ITerminalDecoder : IDisposable
 {

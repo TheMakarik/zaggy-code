@@ -3,10 +3,13 @@ using Avalonia.Media;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using ZaggyCode.Avalonia.Views.TerminalEngine.Enums;
+using ZaggyCode.Avalonia.Views.TerminalEngine.Exceptions;
+using ZaggyCode.Avalonia.Views.TerminalEngine.Interfaces;
 
 namespace ZaggyCode.Avalonia.Views.TerminalEngine;
 
-public class TerminalDecoder : EscapeSequenceDecoder
+public sealed class TerminalDecoder : EscapeSequenceDecoder
 {
     private const int defaultCols = 512;
     private const int defaultRows = 1024;
@@ -193,7 +196,7 @@ public class TerminalDecoder : EscapeSequenceDecoder
         }
     }
 
-    protected virtual void ProcessLCommand(byte command, ReadOnlySpan<int> parameters, bool privateMode)
+    protected void ProcessLCommand(byte command, ReadOnlySpan<int> parameters, bool privateMode)
     {
         int param = parameters.At(0, 0);
         switch (param)
@@ -320,7 +323,7 @@ public class TerminalDecoder : EscapeSequenceDecoder
         }
     }
 
-    protected virtual void ProcessHCommand(byte command, ReadOnlySpan<int> parameters, bool privateMode)
+    protected void ProcessHCommand(byte command, ReadOnlySpan<int> parameters, bool privateMode)
     {
         if (parameters.Length == 0)
         {

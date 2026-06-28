@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Drawing;
+using ZaggyCode.Avalonia.Views.TerminalEngine.Enums;
 
-namespace ZaggyCode.Avalonia.Views.TerminalEngine;
+namespace ZaggyCode.Avalonia.Views.TerminalEngine.Interfaces;
 
 public interface ITerminalScreenView
 {

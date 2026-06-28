@@ -3,6 +3,7 @@ using Avalonia.Interactivity;
 using AvaloniaEdit.TextMate;
 using ReactiveUI.Avalonia;
 using System.Collections.Generic;
+using System.Reactive;
 using TextMateSharp.Grammars;
 using ZaggyCode.Avalonia.ViewModels;
 using ZaggyCode.Avalonia.Views.TerminalEngine.Session;
@@ -22,10 +23,15 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
 
         this.DataContextChanged += (_, __) =>
         {
-            /*
+            
             ViewModel!.ClearTerminalContent.RegisterHandler(context =>
             {
-                Terminal.XTermDotNetTerminal.Clear();
+                
+                /*
+                 Кое кто забыл добавить поддержку очистки терминала 
+                 Terminal.Clear();
+                          
+                 */
                 context.SetOutput(Unit.Default);
             });
 
@@ -86,15 +92,13 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
                 
                 context.SetOutput(Unit.Default);
             });
-            */
         };
     }
 
     private void SaveGridState()
     {
         _originalRows.Clear();
-
-        /*
+        
         _savedRowDefinitions = new RowDefinition[MainContentGrid.RowDefinitions.Count];
         for (int i = 0; i < MainContentGrid.RowDefinitions.Count; i++)
         {
@@ -112,7 +116,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
             var currentRow = Grid.GetRow(child);
             _originalRows[child] = currentRow;
         }
-        */
+        
     }
 
     protected override void OnLoaded(RoutedEventArgs e)

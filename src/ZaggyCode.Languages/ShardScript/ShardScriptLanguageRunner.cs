@@ -6,12 +6,14 @@ using ShardScript.Syntax;
 using ShardScript.Syntax.Builders;
 using ShardScript.Syntax.Symbols;
 using ZaggyCode.Games.Interfaces;
+using ZaggyCode.Languages.Attributes;
 using ZaggyCode.Languages.Enums;
 using ZaggyCode.Languages.EventArgs;
 using ZaggyCode.Languages.Interfaces;
 
 namespace ZaggyCode.Languages.ShardScript;
 
+[LanguageExtension(".ss")]
 public class ShardScriptLanguageRunner(ILogger<ShardScriptLanguageRunner> logger) : ILanguageRunner
 {
     private static readonly ShardScriptOptions _options = ShardScriptOptions.Default;

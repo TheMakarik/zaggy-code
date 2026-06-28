@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text;
 using ZaggyCode.Avalonia.Views.TerminalEngine;
+using ZaggyCode.Avalonia.Views.TerminalEngine.Interfaces;
 
 namespace ZaggyCode.Avalonia.Views.TerminalEngine.Session;
 

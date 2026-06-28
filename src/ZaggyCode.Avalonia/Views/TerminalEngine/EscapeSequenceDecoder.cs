@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
+using ZaggyCode.Avalonia.Views.TerminalEngine.Exceptions;
+using ZaggyCode.Avalonia.Views.TerminalEngine.Interfaces;
 
 namespace ZaggyCode.Avalonia.Views.TerminalEngine;
 

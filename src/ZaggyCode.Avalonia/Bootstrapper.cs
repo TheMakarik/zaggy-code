@@ -38,19 +38,15 @@ public sealed class Bootstrapper
         
         builder.Services.Scan(selector => selector
             .FromAssemblies(assemblies)
-            .AddClasses(c => c.WithAttribute<SingletonServiceAttribute>())
-            .AsImplementedInterfaces()
-            .WithSingletonLifetime()
-            
-            .AddClasses(c => c.WithAttribute<SingletonServiceAttribute>())
-            .AsSelf()
-            .WithSingletonLifetime()
-    
-            .AddClasses(c => c.WithAttribute<ScopedServiceAttribute>()
-                .WithoutAttribute<LanguageExtensionAttribute>())
+            .AddClasses(c => c.AssignableTo<IDisposable>())
+            .AddClasses(c => c.AssignableTo<IAsyncDisposable>())
             .AsImplementedInterfaces()
             .WithScopedLifetime()
-    
+            
+            .AddClasses(c => c.Where(t => t.Name.EndsWith("ViewModel")))
+            .AsSelf()
+            .WithSingletonLifetime()
+            
             .AddClasses(c => c.WithAttribute<ScopedServiceAttribute>()
                 .WithAttribute<LanguageExtensionAttribute>())
             .AsImplementedInterfaces()
