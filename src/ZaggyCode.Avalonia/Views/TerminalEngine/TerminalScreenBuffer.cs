@@ -1,11 +1,8 @@
 ﻿using Avalonia;
-using Avalonia.Media;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Text;
-using ZaggyCode.Avalonia.Views.TerminalEngine.Enums;
 
 namespace ZaggyCode.Avalonia.Views.TerminalEngine;
 

@@ -10,6 +10,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Threading;
 using ZaggyCode.Avalonia.Views.TerminalEngine;
+using ZaggyCode.Avalonia.Views.TerminalEngine.Extensions;
 using ZaggyCode.Avalonia.Views.TerminalEngine.Session;
 
 namespace ZaggyCode.Avalonia.Views.Controls;
@@ -81,6 +82,11 @@ public class TerminalControl : TemplatedControl, IDisposable
         _rootDrawingGroup.Children.Add(_cursorVisual);
         _session.BufferUpdated += OnSessionBufferUpdated;
         _renderTimer.Start();
+    }
+
+    public void Clear()
+    {
+        _session.Decoder.Write("\033[3J\033[H\033[2J");
     }
 
     private void OnSessionBufferUpdated(object? sender, EventArgs e)
