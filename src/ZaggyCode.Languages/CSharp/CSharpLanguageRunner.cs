@@ -18,7 +18,7 @@ public record class CSharpLanguageRunnerScriptGlobals(
 
 [ScopedService]
 [LanguageExtension(".cs")]
-public sealed class CSharpLanguageRunner(ILogger logger) : ILanguageRunner
+public sealed class CSharpLanguageRunner(ILogger<CSharpLanguageRunner> logger) : ILanguageRunner
 {
     private static readonly ScriptOptions scriptOptions = ScriptOptions.Default
         .WithImports("ZaggyCode.Languages.CSharp")
