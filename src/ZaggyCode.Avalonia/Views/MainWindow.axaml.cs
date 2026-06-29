@@ -3,11 +3,15 @@ using Avalonia.Interactivity;
 using AvaloniaEdit.TextMate;
 using ReactiveUI.Avalonia;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Reactive;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
+using AvaloniaEdit;
 using TextMateSharp.Grammars;
 using ZaggyCode.Avalonia.ViewModels;
+using ZaggyCode.Avalonia.Views.Controls;
 using ZaggyCode.Avalonia.Views.TerminalEngine.Session;
 
 namespace ZaggyCode.Avalonia.Views;
@@ -19,38 +23,34 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
     private bool _isMaximized = false;
     private bool _isTerminalMaximized = false;
     private ScriptCommandLineSession _terminalSession = new ScriptCommandLineSession();
-
-    private void OnButtonClick(object? sender, RoutedEventArgs e)
-    {
-        _ = Task.Run(async () =>
-        {
-            _terminalSession.Writer.Write("Твоё имя : ");
-            string? line = _terminalSession.Reader.ReadLine();
-            _terminalSession.Writer.WriteLine(line);
-        });
-    }
+    
 
     public MainWindow()
     {
         InitializeComponent();
         Terminal.CurrentSession = _terminalSession;
-
-        // на.
+        
         TextReader reader = _terminalSession.Reader;
         TextWriter writer = _terminalSession.Writer;
 
+        Terminal.PropertyChanged += async void (_, args) =>
+        {
+            if (args.Property.Name == nameof(Height) && Terminal.Height <= Terminal.MinHeight)
+                await ViewModel?.ResizeGridToMax.Handle(Unit.Default)!;
+        };
+        
+
         this.DataContextChanged += (_, __) =>
         {
-            ViewModel!.ClearTerminalContent.RegisterHandler(context =>
+            Debug.Assert(ViewModel is not null);
+           
+            ViewModel.GetCodeToExecute.RegisterHandler(context =>
+                Dispatcher.Invoke(() => context.SetOutput(Editor.Text)));
+            
+            ViewModel.TerminalReader = reader;
+            ViewModel.TerminalWriter = writer;
+            ViewModel.ClearTerminalContent.RegisterHandler(context =>
             {
-
-                /*
-                 Кое кто забыл добавить поддержку очистки терминала 
-
-                RikitavTimur:
-                Нахуй иди
-                 */
-
                 Terminal.Clear();
                 context.SetOutput(Unit.Default);
             });
@@ -142,8 +142,10 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
     {
         base.OnLoaded(e);
 
+
         var registryOptions = new RegistryOptions(ThemeName.VisualStudioLight);
         var textMateInstallation = Editor.InstallTextMate(registryOptions);
         textMateInstallation.SetGrammar(registryOptions.GetScopeByLanguageId(registryOptions.GetLanguageByExtension(".lua").Id));
+    
     }
 }

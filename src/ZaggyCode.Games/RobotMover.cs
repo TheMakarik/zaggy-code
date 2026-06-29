@@ -13,12 +13,12 @@ public sealed class RobotMover : IRobotMover
 
     public RobotMover(ILogger<RobotMover> logger, Game game, RobotEvents events)
     {
-        _zaggyCurrent = game.Map.Points.First(p => p.IsSpawn);
-        logger.LogDebug("Caching points for game: {gamePath}", game.Path);
-        var points = new Dictionary<System.Drawing.Point, Point>(capacity: game.Map.Points.Count);
-        foreach (var mapPoint in game.Map.Points)
-            points.Add((System.Drawing.Point)mapPoint, mapPoint);
-        _pointsCache = points.ToFrozenDictionary();
+        // _zaggyCurrent = game.Map.Points.First(p => p.IsSpawn);
+        // logger.LogDebug("Caching points for game: {gamePath}", game.Path);
+        // var points = new Dictionary<System.Drawing.Point, Point>(capacity: game.Map.Points.Count);
+        // foreach (var mapPoint in game.Map.Points)
+        //     points.Add((System.Drawing.Point)mapPoint, mapPoint);
+        // _pointsCache = points.ToFrozenDictionary();
 
     }
 

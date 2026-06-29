@@ -107,8 +107,8 @@
                 </Grid.Styles>
 
                 <Grid Grid.Row="0" RowDefinitions="Auto,Auto,Auto,Auto, Auto, Auto, Auto">
-					<Button
-						Click="OnButtonClick"
+                    <Button
+                        Command="{Binding ExecuteCodeCommand}"
                         Content="{materialIcons:MaterialIconExt Kind=Play}"
                         Grid.Row="0"
                         ToolTip.Tip="Запустить Зигги" />
@@ -267,6 +267,7 @@
                             Grid.Row="1"
                             IsVisible="{Binding IsTerminalVisible}"
                             Margin="7,0"
+                            MinHeight="100"
                             TerminalFontFamily="Cascadia Code"
                             TerminalFontSize="14"
                             x:Name="Terminal" />

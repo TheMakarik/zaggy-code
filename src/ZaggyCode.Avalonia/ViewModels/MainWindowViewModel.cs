@@ -1,16 +1,21 @@
 ﻿using System;
+using System.Diagnostics;
+using System.IO;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using DynamicData.Binding;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualBasic;
 using ReactiveUI;
 using ReactiveUI.SourceGenerators;
 using ZaggyCode.Avalonia.Options;
 using ZaggyCode.Data.Interfaces;
+using ZaggyCode.Games;
 using ZaggyCode.Languages.Enums;
+using ZaggyCode.Languages.Interfaces;
 using ZaggyCode.Shared.Attributes;
 
 namespace ZaggyCode.Avalonia.ViewModels;
@@ -33,7 +38,10 @@ public partial class MainWindowViewModel : ViewModelBase
     
     public int MaxFontSize { get; init; }
     public int MinFontSize { get; init; }
-    
+
+    public TextReader? TerminalReader { get; set; }
+    public TextWriter? TerminalWriter { get; set; }
+
     #endregion
     
     #region Interaction
@@ -41,6 +49,7 @@ public partial class MainWindowViewModel : ViewModelBase
     public readonly Interaction<Unit, Unit> ResizeGridToMax = new();
     public readonly Interaction<Unit, Unit> ClearTerminalContent = new();
     public readonly Interaction<Unit, Unit> BackGridToNormal = new();
+    public readonly Interaction<Unit, string> GetCodeToExecute = new();
     
     #endregion
 
@@ -49,12 +58,17 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly IServiceScopeFactory _factory;
     private readonly IUserStorage _userStorage;
     private readonly FontSizeOptions _fontSizeOptions;
+    private readonly ILogger<MainWindowViewModel> _logger;
 
     #endregion
 
     #region Constructors
 
-    public MainWindowViewModel(IServiceScopeFactory factory, IUserStorage userStorage, IOptions<FontSizeOptions> textFontSize)
+    public MainWindowViewModel(
+        ILogger<MainWindowViewModel> logger,
+        IServiceScopeFactory factory,
+        IUserStorage userStorage,
+        IOptions<FontSizeOptions> textFontSize)
     {
         _factory = factory;
         _userStorage = userStorage;
@@ -63,11 +77,13 @@ public partial class MainWindowViewModel : ViewModelBase
         _fontSizeOptions = textFontSize.Value;
         MaxFontSize = _fontSizeOptions.MaxFontSize;
         MinFontSize = _fontSizeOptions.MinFontSize;
+        _logger = logger;
         
         
 
         this.WhenAnyPropertyChanged().Subscribe(context =>
         {
+            
             this.WhenAnyValue(vm => vm.IsTerminalVisible)
                 .Where(isVisible => !isVisible)
                 .Subscribe(async void (onNext) => await ResizeGridToMax.Handle(Unit.Default));
@@ -96,6 +112,32 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         IsTerminalVisible = false;
         IsTerminalExists = false;
+    }
+
+    [ReactiveCommand]
+    private void ExecuteCode()
+    {
+        _ = Task.Factory.StartNew(async () =>
+        {
+            try
+            {
+                var codeObservable = GetCodeToExecute.Handle(Unit.Default);
+                await using var scope = _factory.CreateAsyncScope();
+                var runner = scope.ServiceProvider.GetRequiredKeyedService<ILanguageRunner>(".lua");
+                var code = await codeObservable;
+                
+                Debug.Assert(TerminalReader is not null);
+                Debug.Assert(TerminalWriter is not null);
+                
+                runner.RedirectIoStreams(TerminalReader, TerminalWriter);
+                runner.Execute(code, ExecutionSpeed.X2, new RobotMover(null!, null!, null!));
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Error while running code");
+            }
+            
+        }, TaskCreationOptions.LongRunning);
     }
 
     [ReactiveCommand]

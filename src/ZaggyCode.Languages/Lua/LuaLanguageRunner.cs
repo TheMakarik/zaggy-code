@@ -13,21 +13,41 @@ using ZaggyCode.Shared.Attributes;
 namespace ZaggyCode.Languages.Lua;
 
 [LanguageExtension(".lua")]
-public sealed class LuaLanguageRunner : ILanguageRunner
+public sealed class LuaLanguageRunner(ILogger<LuaLanguageRunner> logger, IOptions<SpeedMillisecondsOptions> options) : ILanguageRunner
 {
-    public void Dispose()
-    {
-        // TODO release managed resources here
-    }
-
+    private readonly NLua.Lua _lua = new();
+    
     public EventHandler<DebugLineUpdatedEventArgs>? DebugLineUpdated { get; set; }
+    
     public void RedirectIoStreams(TextReader input, TextWriter output)
     {
-        throw new NotImplementedException();
+        _lua["__clr_input"] = input;
+        _lua["__clr_output"] = output;
+        _lua.DoString(@"
+
+io.read = function()
+    return __clr_input:ReadLine()
+end
+
+io.write = function(text)
+    __clr_output:Write(tostring(text))
+end
+
+print = function(text)
+     __clr_output:WriteLine(tostring(text))
+end
+
+");
     }
 
     public void Execute(string code, ExecutionSpeed speed, IRobotMover mover)
     {
-        throw new NotImplementedException();
+        //var speedMilliseconds = (int)options.GetType().GetProperty(speed.ToString()!)!.GetValue(speed)!;
+        _lua.DoString(code);
+    }
+    
+    public void Dispose()
+    {
+        _lua.Dispose();
     }
 }
