@@ -1,11 +1,13 @@
 ﻿using System;
 using System.IO;
+using System.Text;
 
 namespace ZaggyCode.Avalonia.Views.TerminalEngine.Session;
 
 /// <summary>
 /// Convenience extension methods for working with <see cref="ITerminalSession"/>:
-/// sending text, clearing the screen, and redirecting <see cref="Console.Out"/> into the terminal buffer.
+/// sending text, clearing the screen, redirecting <see cref="Console.Out"/> into the terminal buffer,
+/// and creating readers to read from the terminal buffer.
 /// </summary>
 public static class TerminalSessionExtensions
 {
@@ -22,6 +24,24 @@ public static class TerminalSessionExtensions
         {
             session.RedirectConsole();
         }
+
+        /// <summary>
+        /// Redirects <see cref="Console.In"/> to read from the session buffer.
+        /// </summary>
+        /// <param name="session"></param>
+        public static void RedirectInputToSession(ITerminalSession session)
+        {
+            session.RedirectConsoleInput();
+        }
+
+        /// <summary>
+        /// Redirects both <see cref="Console.In"/> and <see cref="Console.Out"/> to the session.
+        /// </summary>
+        /// <param name="session"></param>
+        public static void RedirectConsoleToSession(ITerminalSession session)
+        {
+            session.RedirectFullConsole();
+        }
     }
 
     /// <summary>
@@ -32,7 +52,7 @@ public static class TerminalSessionExtensions
     public static void Append(this ITerminalSession session, string text)
     {
         byte[] data = session.InputEncoding.GetBytes(text);
-        session.WriteInput(data);
+        session.Write(data);
     }
 
     /// <summary>
@@ -74,6 +94,16 @@ public static class TerminalSessionExtensions
     }
 
     /// <summary>
+    /// Creates a <see cref="TextReader"/> that reads directly from <see cref="ITerminalSession.Buffer"/>.
+    /// </summary>
+    /// <param name="session">Target session.</param>
+    /// <returns>A reader that reads from the terminal buffer.</returns>
+    public static TextReader CreateBufferReader(this ITerminalSession session)
+    {
+        return new BufferStreamReader(session);
+    }
+
+    /// <summary>
     /// Redirects <see cref="Console.Out"/> to the session buffer, so <see cref="Console.WriteLine(string?)"/>
     /// output becomes visible in the terminal UI.
     /// </summary>
@@ -82,5 +112,75 @@ public static class TerminalSessionExtensions
     {
         TextWriter writer = session.CreateBufferWriter();
         Console.SetOut(writer);
+    }
+
+    /// <summary>
+    /// Redirects <see cref="Console.In"/> to read from the session buffer.
+    /// </summary>
+    /// <param name="session">Target session.</param>
+    public static void RedirectConsoleInput(this ITerminalSession session)
+    {
+        TextReader reader = session.CreateBufferReader();
+        Console.SetIn(reader);
+    }
+
+    /// <summary>
+    /// Redirects both <see cref="Console.In"/> and <see cref="Console.Out"/> to the session.
+    /// </summary>
+    /// <param name="session">Target session.</param>
+    public static void RedirectFullConsole(this ITerminalSession session)
+    {
+        RedirectConsole(session);
+        RedirectConsoleInput(session);
+    }
+
+    /// <summary>
+    /// Reads a string from the session input.
+    /// </summary>
+    /// <param name="session">Target session.</param>
+    /// <returns>The read string, or empty if no data available.</returns>
+    public static string ReadString(this ITerminalSession session)
+    {
+        byte[] data = session.ReadAll();
+        return data.Length > 0 ? session.OutputEncoding.GetString(data) : string.Empty;
+    }
+
+    /// <summary>
+    /// Reads a line from the session input.
+    /// </summary>
+    /// <param name="session">Target session.</param>
+    /// <returns>The read line, or null if no complete line available.</returns>
+    public static string? ReadLine(this ITerminalSession session)
+    {
+        StringBuilder line = new StringBuilder();
+        bool lineBreakFound = false;
+
+        while (session.AvailableDataLength > 0 && !lineBreakFound)
+        {
+            byte[] buffer = new byte[1];
+            int bytesRead = session.Read(buffer);
+
+            if (bytesRead > 0)
+            {
+                char c = session.OutputEncoding.GetChars(buffer, 0, 1)[0];
+
+                if (c == '\r')
+                {
+                    // Skip carriage return, next character might be line feed
+                    continue;
+                }
+
+                if (c == '\n')
+                {
+                    lineBreakFound = true;
+                }
+                else
+                {
+                    line.Append(c);
+                }
+            }
+        }
+
+        return lineBreakFound ? line.ToString() : null;
     }
 }

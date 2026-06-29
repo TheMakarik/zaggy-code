@@ -3,10 +3,10 @@ using Avalonia.Interactivity;
 using AvaloniaEdit.TextMate;
 using ReactiveUI.Avalonia;
 using System.Collections.Generic;
+using System.IO;
 using System.Reactive;
 using TextMateSharp.Grammars;
 using ZaggyCode.Avalonia.ViewModels;
-using ZaggyCode.Avalonia.Views.TerminalEngine.Session;
 
 namespace ZaggyCode.Avalonia.Views;
 
@@ -21,17 +21,23 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
     {
         InitializeComponent();
 
+        // на.
+        TextReader reader = Terminal.Reader;
+        TextWriter writer = Terminal.Writer;
+
         this.DataContextChanged += (_, __) =>
         {
-            
             ViewModel!.ClearTerminalContent.RegisterHandler(context =>
             {
-                
+
                 /*
                  Кое кто забыл добавить поддержку очистки терминала 
-                 Terminal.Clear();
-                          
+
+                RikitavTimur:
+                Нахуй иди
                  */
+
+                Terminal.Clear();
                 context.SetOutput(Unit.Default);
             });
 
@@ -40,12 +46,12 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
                 if (!_isMaximized && !_isTerminalMaximized)
                 {
                     SaveGridState();
-                    
+
                     MainContentGrid.RowDefinitions.Clear();
                     MainContentGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
                     MainContentGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) });
                     MainContentGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(0, GridUnitType.Pixel) });
-                    
+
                     foreach (var child in MainContentGrid.Children)
                     {
                         if (child is GridSplitter)
@@ -53,11 +59,11 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
                         else
                             Grid.SetRow(child, 0);
                     }
-                    
+
                     _isMaximized = true;
                     MainContentGrid.InvalidateMeasure();
                 }
-                
+
                 context.SetOutput(Unit.Default);
             });
 
@@ -68,7 +74,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
                     MainContentGrid.RowDefinitions.Clear();
                     foreach (var rowDef in _savedRowDefinitions)
                         MainContentGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(rowDef.Height.Value, rowDef.Height.GridUnitType) });
-                    
+
                     foreach (var child in MainContentGrid.Children)
                     {
                         if (_originalRows.TryGetValue(child, out int originalRow))
@@ -78,18 +84,18 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
                             else
                                 Grid.SetRow(child, 0);
                         }
-                        
+
                         if (child is GridSplitter)
                             child.IsVisible = true;
                     }
-                    
+
                     _savedRowDefinitions = null;
                     _originalRows.Clear();
                     _isMaximized = false;
                     _isTerminalMaximized = false;
                     MainContentGrid.InvalidateMeasure();
                 }
-                
+
                 context.SetOutput(Unit.Default);
             });
         };
@@ -98,7 +104,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
     private void SaveGridState()
     {
         _originalRows.Clear();
-        
+
         _savedRowDefinitions = new RowDefinition[MainContentGrid.RowDefinitions.Count];
         for (int i = 0; i < MainContentGrid.RowDefinitions.Count; i++)
         {
@@ -116,14 +122,11 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
             var currentRow = Grid.GetRow(child);
             _originalRows[child] = currentRow;
         }
-        
     }
 
     protected override void OnLoaded(RoutedEventArgs e)
     {
         base.OnLoaded(e);
-
-        Terminal.Session.Append("\x1b[38;2;75;0;130mДобро пожаловать в Zaggy's Code!\x1b[0m");
 
         var registryOptions = new RegistryOptions(ThemeName.VisualStudioLight);
         var textMateInstallation = Editor.InstallTextMate(registryOptions);

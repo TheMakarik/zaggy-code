@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Text;
-using ZaggyCode.Avalonia.Views.TerminalEngine;
 using ZaggyCode.Avalonia.Views.TerminalEngine.Interfaces;
 
 namespace ZaggyCode.Avalonia.Views.TerminalEngine.Session;
@@ -22,6 +21,11 @@ public interface ITerminalSession : IDisposable
     public event EventHandler? Disconnected;
 
     /// <summary>
+    /// Raised when input data is available to be read.
+    /// </summary>
+    public event EventHandler? InputAvailable;
+
+    /// <summary>
     /// Gets the underlying screen buffer used for rendering.
     /// </summary>
     public TerminalScreenBuffer Buffer { get; }
@@ -32,14 +36,24 @@ public interface ITerminalSession : IDisposable
     public ITerminalDecoder Decoder { get; }
 
     /// <summary>
-    /// Gets the encoding expected by <see cref="WriteInput(ReadOnlySpan{byte})"/>.
+    /// Gets the encoding expected by <see cref="Write"/>.
     /// </summary>
     public Encoding InputEncoding { get; }
+
+    /// <summary>
+    /// Gets the encoding used by <see cref="Read"/>.
+    /// </summary>
+    public Encoding OutputEncoding { get; }
 
     /// <summary>
     /// Gets the logical session title (for tabs/windows).
     /// </summary>
     public string Title { get; }
+
+    /// <summary>
+    /// Gets the number of bytes available to be read.
+    /// </summary>
+    public int AvailableDataLength { get; }
 
     /// <summary>
     /// Resizes the session to the specified terminal dimensions.
@@ -52,5 +66,18 @@ public interface ITerminalSession : IDisposable
     /// Writes input bytes into the session backend.
     /// </summary>
     /// <param name="data">Input bytes (encoding depends on <see cref="InputEncoding"/>).</param>
-    public void WriteInput(ReadOnlySpan<byte> data);
+    public void Write(ReadOnlySpan<byte> data);
+
+    /// <summary>
+    /// Reads output bytes from the session.
+    /// </summary>
+    /// <param name="buffer">Buffer to store the read bytes.</param>
+    /// <returns>The number of bytes actually read (0 if no data available).</returns>
+    public int Read(Span<byte> buffer);
+
+    /// <summary>
+    /// Reads all available output bytes from the session.
+    /// </summary>
+    /// <returns>Array containing all available read bytes; empty if no data available.</returns>
+    public byte[] ReadAll();
 }

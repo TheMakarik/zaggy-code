@@ -11,9 +11,6 @@ namespace ZaggyCode.Avalonia.Views.TerminalEngine;
 
 public sealed class TerminalDecoder : EscapeSequenceDecoder
 {
-    private const int defaultCols = 512;
-    private const int defaultRows = 1024;
-
     private static readonly byte[] CubeLevels = [0, 95, 135, 175, 215, 255];
 
     private static readonly Color[] SystemColors =
@@ -58,9 +55,9 @@ public sealed class TerminalDecoder : EscapeSequenceDecoder
         private set;
     }
 
-    public TerminalDecoder()
+    public TerminalDecoder(TerminalScreenBuffer? buffer = null)
     {
-        Buffer = new TerminalScreenBuffer(defaultCols, defaultRows);
+        Buffer = buffer ?? new TerminalScreenBuffer(128, 20);
     }
 
     protected override void ProcessCsiCommand(byte command, ReadOnlySpan<int> parameters, bool privateMode)

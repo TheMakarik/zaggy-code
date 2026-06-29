@@ -6,19 +6,20 @@ using System.Text;
 
 namespace ZaggyCode.Avalonia.Views.TerminalEngine;
 
-public sealed class TerminalScreenBuffer(ushort initCols, ushort initRows, int rowsMaxLength = 2048, int columnsMaxLength = 512) : IDisposable //, IEnumerable<Span<TerminalCellInfo>>
+public sealed class TerminalScreenBuffer : IDisposable
 {
     private readonly object _dirtyLock = new object();
     private readonly object _rowsLock = new object();
-    private readonly int _columnsMaxLength = columnsMaxLength;
-    private readonly List<TerminalCellInfo[]> _rows = new List<TerminalCellInfo[]>(initRows);
-    private readonly BitArray _dirtyLines = new BitArray(rowsMaxLength);
+    private readonly int _columnsMaxLength;
+    private readonly int _rowsMaxLength;
 
-    private Size gridSize = new Size(initCols, initRows);
+    private readonly List<TerminalCellInfo[]> _rows;
+    private BitArray _dirtyLines;
+
+    private Size gridSize;
     private int dirtyLinesCount = 0;
     private int version = 0;
     private bool disposed;
-    private bool disposing;
 
     public Size GridSize => gridSize;
     public int Length => (int)(gridSize.Height * gridSize.Width);
@@ -27,69 +28,117 @@ public sealed class TerminalScreenBuffer(ushort initCols, ushort initRows, int r
     public int ColumnsCount => (int)gridSize.Width;
     public int RowsCount => _rows.Count;
 
-    public static Encoding Encoding
+    public static Encoding Encoding => Encoding.UTF8;
+
+    public TerminalScreenBuffer(ushort initCols, ushort initRows, int rowsMaxLength = 32768, int columnsMaxLength = 512)
     {
-        get => Encoding.ASCII;
+        _columnsMaxLength = columnsMaxLength;
+        _rowsMaxLength = rowsMaxLength;
+
+        _rows = new List<TerminalCellInfo[]>(initRows);
+        _dirtyLines = new BitArray(initRows, true);
+        dirtyLinesCount = initRows;
+
+        gridSize = new Size(initCols, initRows);
+
+        lock (_rowsLock)
+        {
+            for (int i = 0; i < initRows; i++)
+            {
+                _rows.Add(new TerminalCellInfo[initCols]);
+            }
+        }
+    }
+
+    public void ClearAll()
+    {
+        lock (_rowsLock)
+        {
+            lock (_dirtyLock)
+            {
+                for (int i = 0; i < _rows.Count; i++)
+                {
+                    Array.Clear(_rows[i], 0, _rows[i].Length);
+                    _dirtyLines[i] = true;
+                }
+
+                dirtyLinesCount = _rows.Count;
+                version++;
+            }
+        }
     }
 
     public Span<TerminalCellInfo> GetRow(int y)
     {
-        if (disposed || disposing)
-            throw new ObjectDisposedException(GetType().Name);
+        ThrowIfDisposed();
 
         lock (_rowsLock)
+        {
+            if (y < 0 || y >= _rows.Count)
+                throw new ArgumentOutOfRangeException(nameof(y));
+
             return _rows[y].AsSpan(0, (int)gridSize.Width);
+        }
     }
 
     public ref TerminalCellInfo GetCell(int i)
     {
-        if (disposed || disposing)
-            throw new ObjectDisposedException(GetType().Name);
+        ThrowIfDisposed();
 
         lock (_rowsLock)
-            return ref GetRow((int)(i / gridSize.Width))[(int)(i % gridSize.Height)];
+        {
+            int width = (int)gridSize.Width;
+            int y = i / width;
+            int x = i % width;
+            return ref _rows[y].AsSpan(0, width)[x];
+        }
     }
 
     public ref TerminalCellInfo GetCell(int y, int x)
     {
+        ThrowIfDisposed();
+
         lock (_rowsLock)
-            return ref GetRow(y)[x];
+        {
+            return ref _rows[y].AsSpan(0, (int)gridSize.Width)[x];
+        }
     }
 
     public ref TerminalCellInfo GetCell(Point cursor)
     {
-        if (disposed || disposing)
-            throw new ObjectDisposedException(GetType().Name);
+        ThrowIfDisposed();
 
         lock (_rowsLock)
-            return ref GetRow((int)cursor.Y)[(int)cursor.X];
+        {
+            return ref _rows[(int)cursor.Y].AsSpan(0, (int)gridSize.Width)[(int)cursor.X];
+        }
     }
 
     public bool HasDirtyLines()
     {
-        if (disposed || disposing)
-            throw new ObjectDisposedException(GetType().Name);
-
+        ThrowIfDisposed();
         lock (_dirtyLock)
             return dirtyLinesCount > 0;
     }
 
     public bool IsLineDirty(int line)
     {
-        if (disposed || disposing)
-            throw new ObjectDisposedException(GetType().Name);
-
+        ThrowIfDisposed();
         lock (_dirtyLock)
+        {
+            if (line < 0 || line >= _dirtyLines.Length)
+                return false;
+
             return _dirtyLines[line];
+        }
     }
 
     public void MarkLineDirty(int line)
     {
-        if (disposed || disposing)
-            throw new ObjectDisposedException(GetType().Name);
-
+        ThrowIfDisposed();
         lock (_dirtyLock)
         {
+            EnsureDirtyLinesCapacity(line + 1);
             if (!_dirtyLines[line])
             {
                 _dirtyLines[line] = true;
@@ -101,115 +150,118 @@ public sealed class TerminalScreenBuffer(ushort initCols, ushort initRows, int r
 
     public void MarkLineClean(int line)
     {
-        if (disposed || disposing)
-            throw new ObjectDisposedException(GetType().Name);
-
+        ThrowIfDisposed();
         lock (_dirtyLock)
         {
-            if (_dirtyLines[line])
+            if (line >= 0 && line < _dirtyLines.Length && _dirtyLines[line])
             {
                 _dirtyLines[line] = false;
                 dirtyLinesCount -= 1;
-                //version += 1;
             }
         }
     }
 
     public void AppendRow()
     {
-        if (disposed || disposing)
-            throw new ObjectDisposedException(GetType().Name);
+        ThrowIfDisposed();
 
         lock (_rowsLock)
         {
-            _rows.Add(new TerminalCellInfo[ColumnsMaxLength]);
+            if (_rows.Count >= _rowsMaxLength)
+            {
+                _rows.RemoveAt(0);
+                ShiftDirtyLinesUp();
+            }
+
+            _rows.Add(new TerminalCellInfo[(int)gridSize.Width]);
             MarkLineDirty(_rows.Count - 1);
         }
     }
 
     public void Resize(ushort cols, ushort rows)
     {
-        if (disposed || disposing)
-            throw new ObjectDisposedException(GetType().Name);
+        ThrowIfDisposed();
+
+        if (cols > _columnsMaxLength || rows > _rowsMaxLength)
+            throw new ArgumentOutOfRangeException("Dimensions exceed max limits.");
 
         lock (_rowsLock)
         {
-            /*
-            if (GridSize.Width == cols && GridSize.Height == rows)
-                return;
+            while (_rows.Count < rows)
+            {
+                _rows.Add(new TerminalCellInfo[cols]);
+                MarkLineDirty(_rows.Count - 1);
+            }
 
-            TerminalCellInfo[] newCells = new TerminalCellInfo[cols * rows];
-            int rowsToCopy = Math.Min(rows, GridSize.Height);
-            int colsToCopy = Math.Min(cols, GridSize.Width);
+            while (_rows.Count > rows)
+            {
+                _rows.RemoveAt(_rows.Count - 1);
+            }
 
-            for (int y = 0; y < rowsToCopy; y++)
-                Array.Copy(Cells, y * GridSize.Width, newCells, y * cols, colsToCopy);
+            for (int i = 0; i < _rows.Count; i++)
+            {
+                if (_rows[i].Length < cols)
+                {
+                    var newRow = new TerminalCellInfo[cols];
+                    Array.Copy(_rows[i], newRow, _rows[i].Length);
+                    _rows[i] = newRow;
+                }
 
-            Cells = newCells;
-            */
-
-            if (cols > _columnsMaxLength)
-                throw new IndexOutOfRangeException();
+                MarkLineDirty(i);
+            }
 
             gridSize = new Size(cols, rows);
             version += 1;
         }
     }
 
+    private void EnsureDirtyLinesCapacity(int requiredLength)
+    {
+        if (_dirtyLines.Length < requiredLength)
+        {
+            var newDirty = new BitArray(Math.Max(requiredLength, _dirtyLines.Length * 2));
+            for (int i = 0; i < _dirtyLines.Length; i++)
+                newDirty[i] = _dirtyLines[i];
+            _dirtyLines = newDirty;
+        }
+    }
+
+    private void ShiftDirtyLinesUp()
+    {
+        lock (_dirtyLock)
+        {
+            int count = _dirtyLines.Length;
+            bool lastDirty = _dirtyLines[0];
+
+            for (int i = 0; i < count - 1; i++)
+                _dirtyLines[i] = _dirtyLines[i + 1];
+
+            _dirtyLines[count - 1] = true;
+            if (!lastDirty)
+                dirtyLinesCount++;
+        }
+    }
+
+    private void ThrowIfDisposed()
+    {
+        if (disposed)
+            throw new ObjectDisposedException(GetType().Name);
+    }
+
     public void Dispose()
     {
-        if (disposed || disposing)
+        if (disposed)
             return;
 
-        disposing = true;
-        version = 0;
-        dirtyLinesCount = 0;
-        _rows.Clear();
-
-        GC.SuppressFinalize(this);
-        disposed = true;
-    }
-
-    /*
-    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-    public IEnumerator<Span<TerminalCellInfo>> GetEnumerator() => new TerminalScreenBufferEnumerator(this);
-
-    private class TerminalScreenBufferEnumerator(TerminalScreenBuffer buffer) : IEnumerator<Span<TerminalCellInfo>>
-    {
-        private int version = buffer.version;
-        private int position = -1;
-
-        object IEnumerator.Current => throw new NotImplementedException();
-        
-        public Span<TerminalCellInfo> Current
+        lock (_rowsLock)
         {
-            get
+            lock (_dirtyLock)
             {
-                if (version != buffer.version)
-                    throw new InvalidOperationException();
-
-                return buffer.Cells.AsSpan(position, buffer.GridSize.Width);
+                version = 0;
+                dirtyLinesCount = 0;
+                _rows.Clear();
+                disposed = true;
             }
         }
-
-        public void Reset()
-        {
-            position = 0;
-        }
-
-        public bool MoveNext()
-        {
-            if (version != buffer.version)
-                throw new InvalidOperationException();
-
-            position += position == -1 ? 1 : buffer.GridSize.Width;
-            return position >= buffer.Cells.Length;
-        }
-
-        public void Dispose()
-        {
-
-        }
     }
-    */
 }

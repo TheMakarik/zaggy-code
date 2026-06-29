@@ -32,6 +32,14 @@ public class BufferStreamWriter : TextWriter
         NewLine = Environment.NewLine;
     }
 
+    public BufferStreamWriter(ITerminalSession session)
+    {
+        _buffer = session.Buffer;
+        _decoder = session.Decoder;
+
+        NewLine = Environment.NewLine;
+    }
+
     /// <inheritdoc />
     public override void Write(char[] buffer, int index, int count)
     {

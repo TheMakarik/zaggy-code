@@ -8,9 +8,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Threading;
 using ZaggyCode.Avalonia.Views.TerminalEngine;
-using ZaggyCode.Avalonia.Views.TerminalEngine.Extensions;
 using ZaggyCode.Avalonia.Views.TerminalEngine.Session;
 
 namespace ZaggyCode.Avalonia.Views.Controls;
@@ -30,7 +30,6 @@ public class TerminalControl : TemplatedControl, IDisposable
     private readonly ITerminalSession _session;
 
     private bool cursorState = true;
-    private bool _cursorVisible = true;
     private bool needsFullInvalidation = true;
 
     public double TerminalFontSize
@@ -62,6 +61,16 @@ public class TerminalControl : TemplatedControl, IDisposable
         get => _session;
     }
 
+    public TextWriter Writer
+    {
+        get => field ?? new BufferStreamWriter(_session);
+    }
+
+    public TextReader Reader
+    {
+        get => field ?? new BufferStreamReader(_session);
+    }
+
     public Point CursorPosition
     {
         get;
@@ -70,8 +79,7 @@ public class TerminalControl : TemplatedControl, IDisposable
 
     public TerminalControl()
     {
-        ITerminalSession session = new DummyTerminalSession();
-        session.Resize(512, 10240);
+        ITerminalSession session = new InMemoryTerminalEngineSession();
 
         _session = session;
         _renderLock = new Lock();
@@ -81,12 +89,11 @@ public class TerminalControl : TemplatedControl, IDisposable
         CurrentBuffer = _session.Buffer;
         _rootDrawingGroup.Children.Add(_cursorVisual);
         _session.BufferUpdated += OnSessionBufferUpdated;
-        _renderTimer.Start();
     }
 
     public void Clear()
     {
-        _session.Decoder.Write("\033[3J\033[H\033[2J");
+        _session.Buffer.ClearAll();
     }
 
     private void OnSessionBufferUpdated(object? sender, EventArgs e)
@@ -96,6 +103,12 @@ public class TerminalControl : TemplatedControl, IDisposable
             needsFullInvalidation = true;
             InvalidateVisual();
         });
+    }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        (Session as InMemoryTerminalEngineSession)?.PrintPrompt();
     }
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
@@ -114,63 +127,102 @@ public class TerminalControl : TemplatedControl, IDisposable
     protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
     {
         base.OnAttachedToVisualTree(e);
+        _renderTimer.Start();
         _blinkTimer.Start();
     }
 
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
     {
         base.OnDetachedFromVisualTree(e);
+        _renderTimer.Stop();
         _blinkTimer.Stop();
     }
 
     protected override void OnGotFocus(FocusChangedEventArgs e)
     {
         base.OnGotFocus(e);
-        _cursorVisible = true;
+
+        lock (_renderLock)
+        {
+            RenderCursorFromBuffer();
+        }
+
         InvalidateVisual();
     }
 
     protected override void OnLostFocus(FocusChangedEventArgs e)
     {
         base.OnLostFocus(e);
-        _cursorVisible = true;
+
+        lock (_renderLock)
+        {
+            cursorState = false;
+            RenderCursorFromBuffer();
+        }
+
         InvalidateVisual();
     }
 
     protected override void OnSizeChanged(SizeChangedEventArgs e)
     {
         base.OnSizeChanged(e);
+
+        if (CurrentBuffer == null)
+            return;
+
+        Size cellSize = GetCellSize();
+
+        ushort columns = (ushort)Math.Max(1, Math.Floor(e.NewSize.Width / cellSize.Width));
+        ushort rows = (ushort)Math.Max(1, Math.Floor(e.NewSize.Height / cellSize.Height));
+
+        _session.Resize(columns, rows);
+        lock (_renderLock)
+        {
+            needsFullInvalidation = true;
+        }
+
+        InvalidateVisual();
+    }
+
+    protected override void OnTextInput(TextInputEventArgs e)
+    {
+        if (string.IsNullOrEmpty(e.Text))
+            return;
+
+        base.OnTextInput(e);
+
+        _session.Append(e.Text);
+        e.Handled = true;
     }
 
     protected override void OnKeyDown(KeyEventArgs e)
     {
         base.OnKeyDown(e);
-    }
 
-    protected override void OnTextInput(TextInputEventArgs e)
-    {
-        base.OnTextInput(e);
-    }
+        string? sequence = e.Key switch
+        {
+            Key.Enter => "\r",
+            Key.Back => "\b",
+            Key.Tab => "\t",
+            Key.Escape => "\x1b",
 
-    protected override void OnPointerPressed(PointerPressedEventArgs e)
-    {
-        base.OnPointerPressed(e);
-        Focus();
-    }
+            Key.Up => "\x1b[A",
+            Key.Down => "\x1b[B",
+            Key.Right => "\x1b[C",
+            Key.Left => "\x1b[D",
 
-    protected override void OnPointerReleased(PointerReleasedEventArgs e)
-    {
-        base.OnPointerReleased(e);
-    }
+            Key.Home => "\x1b[H",
+            Key.End => "\x1b[F",
+            Key.Delete => "\x1b[3~",
 
-    protected override void OnPointerMoved(PointerEventArgs e)
-    {
-        base.OnPointerMoved(e);
-    }
+            _ => null,
+        };
 
-    protected override void OnPointerWheelChanged(PointerWheelEventArgs e)
-    {
-        base.OnPointerWheelChanged(e);
+        if (sequence != null)
+        {
+            _session.Append(sequence);
+            e.Handled = true;
+        }
     }
 
     public override void Render(DrawingContext context)
@@ -197,30 +249,42 @@ public class TerminalControl : TemplatedControl, IDisposable
         if (CurrentBuffer == null)
             return;
 
+        bool hasAnyChanges = false;
         if (CurrentBuffer.HasDirtyLines())
+            return;
+
+        lock (_renderLock)
         {
+            CorrectVisualsCountForBuffer();
             for (int i = 0; i < CurrentBuffer.RowsCount; i++)
             {
-                if (CurrentBuffer.IsLineDirty(i))
-                {
-                    InvalidateRow(i);
-                    CurrentBuffer.MarkLineClean(i);
-                }
+                if (!CurrentBuffer.IsLineDirty(i))
+                    continue;
+
+                if (i < _lineDrawings.Count)
+                    RenderRowFromBuffer(i);
+
+                CurrentBuffer.MarkLineClean(i);
+                hasAnyChanges = true;
             }
+        }
+
+        if (hasAnyChanges)
+        {
+            Dispatcher.UIThread.Post(InvalidateVisual, DispatcherPriority.Render);
         }
     }
 
     private void DispatcherBlinkHandler(object? sender, EventArgs e)
     {
-        if (!CursorVisible)
-        {
-            cursorState = false;
-            RenderCursorFromBuffer();
+        if (!IsFocused || !CursorVisible)
             return;
-        }
 
         cursorState = !cursorState;
-        RenderCursorFromBuffer();
+        lock (_renderLock)
+            RenderCursorFromBuffer();
+
+        InvalidateVisual();
     }
 
     void RenderFullBuffer()
@@ -408,7 +472,9 @@ public class TerminalControl : TemplatedControl, IDisposable
 
             using DrawingContext dc = _cursorVisual.Open();
             IBrush? background = cursorState ? Foreground : Brushes.Transparent;
-            dc.DrawRectangle(background, new Pen(), new Rect(0, 0, 1, GetCellSize().Height));
+
+            Size cellSize = GetCellSize();
+            dc.DrawRectangle(background, null, new Rect(0, 0, 1, cellSize.Height));
         }
         catch (Exception exc)
         {
