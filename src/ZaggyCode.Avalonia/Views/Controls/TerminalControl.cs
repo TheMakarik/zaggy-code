@@ -8,7 +8,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
-using System.IO;
 using System.Threading;
 using ZaggyCode.Avalonia.Views.TerminalEngine;
 using ZaggyCode.Avalonia.Views.TerminalEngine.Session;
@@ -27,7 +26,6 @@ public class TerminalControl : TemplatedControl, IDisposable
     private readonly Lock _renderLock;
     private readonly DispatcherTimer _renderTimer;
     private readonly DispatcherTimer _blinkTimer;
-    private readonly ITerminalSession _session;
 
     private bool cursorState = true;
     private bool needsFullInvalidation = true;
@@ -44,10 +42,10 @@ public class TerminalControl : TemplatedControl, IDisposable
         set => SetValue(TerminalFontFamilyProperty, value);
     }
 
-    public TerminalScreenBuffer? CurrentBuffer
+    public ITerminalSession? CurrentSession
     {
-        get => GetValue(CurrentBufferProperty);
-        set => SetValue(CurrentBufferProperty, value);
+        get => GetValue(CurrentSessionProperty);
+        set => SetValue(CurrentSessionProperty, value);
     }
 
     public bool CursorVisible
@@ -56,11 +54,12 @@ public class TerminalControl : TemplatedControl, IDisposable
         set => SetValue(CursorVisibleProperty, value);
     }
 
-    public ITerminalSession Session
+    public TerminalScreenBuffer? CurrentBuffer
     {
-        get => _session;
+        get => CurrentSession?.Buffer;
     }
 
+    /*
     public TextWriter Writer
     {
         get => field ?? new BufferStreamWriter(_session);
@@ -70,6 +69,7 @@ public class TerminalControl : TemplatedControl, IDisposable
     {
         get => field ?? new BufferStreamReader(_session);
     }
+    */
 
     public Point CursorPosition
     {
@@ -79,21 +79,16 @@ public class TerminalControl : TemplatedControl, IDisposable
 
     public TerminalControl()
     {
-        ITerminalSession session = new InMemoryTerminalEngineSession();
-
-        _session = session;
         _renderLock = new Lock();
         _renderTimer = new DispatcherTimer(TimeSpan.FromMilliseconds(16), DispatcherPriority.Background, Dispatcher.CurrentDispatcher, DispatcherRenderHandler);
         _blinkTimer = new DispatcherTimer(TimeSpan.FromMilliseconds(530), DispatcherPriority.Background, Dispatcher.CurrentDispatcher, DispatcherBlinkHandler);
 
-        CurrentBuffer = _session.Buffer;
         _rootDrawingGroup.Children.Add(_cursorVisual);
-        _session.BufferUpdated += OnSessionBufferUpdated;
     }
 
     public void Clear()
     {
-        _session.Buffer.ClearAll();
+        CurrentSession?.Buffer?.ClearAll();
     }
 
     private void OnSessionBufferUpdated(object? sender, EventArgs e)
@@ -108,14 +103,27 @@ public class TerminalControl : TemplatedControl, IDisposable
     protected override void OnInitialized()
     {
         base.OnInitialized();
-        (Session as InMemoryTerminalEngineSession)?.PrintPrompt();
     }
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {
         base.OnPropertyChanged(change);
 
-        if (change.Property == CurrentBufferProperty ||
+        if (change.Property == CurrentSessionProperty)
+        {
+            if (change.OldValue is ITerminalSession { } oldSession)
+            {
+                oldSession.BufferUpdated -= OnSessionBufferUpdated;
+            }
+
+            if (change.NewValue is ITerminalSession { } newSession)
+            {
+                newSession.BufferUpdated += OnSessionBufferUpdated;
+                newSession?.Resize((ushort)Bounds.Size.Width, (ushort)Bounds.Size.Height);
+            }
+        }
+
+        if (change.Property == CurrentSessionProperty ||
             change.Property == TerminalFontSizeProperty ||
             change.Property == TerminalFontFamilyProperty)
         {
@@ -171,11 +179,10 @@ public class TerminalControl : TemplatedControl, IDisposable
             return;
 
         Size cellSize = GetCellSize();
-
         ushort columns = (ushort)Math.Max(1, Math.Floor(e.NewSize.Width / cellSize.Width));
         ushort rows = (ushort)Math.Max(1, Math.Floor(e.NewSize.Height / cellSize.Height));
 
-        _session.Resize(columns, rows);
+        CurrentSession?.Resize(columns, rows);
         lock (_renderLock)
         {
             needsFullInvalidation = true;
@@ -191,7 +198,7 @@ public class TerminalControl : TemplatedControl, IDisposable
 
         base.OnTextInput(e);
 
-        _session.Append(e.Text);
+        CurrentSession?.Append(e.Text);
         e.Handled = true;
     }
 
@@ -220,7 +227,7 @@ public class TerminalControl : TemplatedControl, IDisposable
 
         if (sequence != null)
         {
-            _session.Append(sequence);
+            CurrentSession?.Append(sequence);
             e.Handled = true;
         }
     }
@@ -454,7 +461,7 @@ public class TerminalControl : TemplatedControl, IDisposable
         if (CurrentBuffer == null)
             return;
 
-        if (_session.Decoder is TerminalDecoder decoder)
+        if (CurrentSession?.Decoder is TerminalDecoder { } decoder)
             CursorPosition = decoder.CursorPosition;
 
         Size cellSize = GetCellSize();
@@ -500,12 +507,10 @@ public class TerminalControl : TemplatedControl, IDisposable
     {
         _renderTimer.Stop();
         _blinkTimer.Stop();
-        _session.BufferUpdated -= OnSessionBufferUpdated;
-        _session.Dispose();
     }
 
-    public static readonly StyledProperty<TerminalScreenBuffer?> CurrentBufferProperty =
-        AvaloniaProperty.Register<TerminalControl, TerminalScreenBuffer?>(nameof(CurrentBuffer), null);
+    public static readonly StyledProperty<ITerminalSession?> CurrentSessionProperty =
+        AvaloniaProperty.Register<TerminalControl, ITerminalSession?>(nameof(CurrentSession), null);
 
     public static readonly StyledProperty<bool> CursorVisibleProperty =
         AvaloniaProperty.Register<TerminalControl, bool>(nameof(CursorVisible), true);

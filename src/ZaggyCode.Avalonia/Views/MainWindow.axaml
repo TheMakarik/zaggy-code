@@ -107,7 +107,8 @@
                 </Grid.Styles>
 
                 <Grid Grid.Row="0" RowDefinitions="Auto,Auto,Auto,Auto, Auto, Auto, Auto">
-                    <Button
+					<Button
+						Click="OnButtonClick"
                         Content="{materialIcons:MaterialIconExt Kind=Play}"
                         Grid.Row="0"
                         ToolTip.Tip="Запустить Зигги" />

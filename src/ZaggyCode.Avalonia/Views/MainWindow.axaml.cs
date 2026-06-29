@@ -5,25 +5,39 @@ using ReactiveUI.Avalonia;
 using System.Collections.Generic;
 using System.IO;
 using System.Reactive;
+using System.Threading.Tasks;
 using TextMateSharp.Grammars;
 using ZaggyCode.Avalonia.ViewModels;
+using ZaggyCode.Avalonia.Views.TerminalEngine.Session;
 
 namespace ZaggyCode.Avalonia.Views;
 
 public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
 {
     private RowDefinition[]? _savedRowDefinitions = null;
-    private Dictionary<object, int> _originalRows = new();
+    private Dictionary<object, int> _originalRows = [];
     private bool _isMaximized = false;
     private bool _isTerminalMaximized = false;
+    private ScriptCommandLineSession _terminalSession = new ScriptCommandLineSession();
+
+    private void OnButtonClick(object? sender, RoutedEventArgs e)
+    {
+        _ = Task.Run(async () =>
+        {
+            _terminalSession.Writer.Write("Твоё имя : ");
+            string? line = _terminalSession.Reader.ReadLine();
+            _terminalSession.Writer.WriteLine(line);
+        });
+    }
 
     public MainWindow()
     {
         InitializeComponent();
+        Terminal.CurrentSession = _terminalSession;
 
         // на.
-        TextReader reader = Terminal.Reader;
-        TextWriter writer = Terminal.Writer;
+        TextReader reader = _terminalSession.Reader;
+        TextWriter writer = _terminalSession.Writer;
 
         this.DataContextChanged += (_, __) =>
         {
