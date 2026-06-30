@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Text;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using ZaggyCode.Games.Events;
@@ -43,6 +44,7 @@ end
     public void Execute(string code, ExecutionSpeed speed, IRobotMover mover)
     {
         //var speedMilliseconds = (int)options.GetType().GetProperty(speed.ToString()!)!.GetValue(speed)!;
+        _lua.State.Encoding = Encoding.UTF8;
         _lua.DoString(code);
     }
     

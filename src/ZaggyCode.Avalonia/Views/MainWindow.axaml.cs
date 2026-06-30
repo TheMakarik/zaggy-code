@@ -1,3 +1,4 @@
+using System;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using AvaloniaEdit.TextMate;
@@ -38,7 +39,6 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
             if (args.Property.Name == nameof(Height) && Terminal.Height <= Terminal.MinHeight)
                 await ViewModel?.ResizeGridToMax.Handle(Unit.Default)!;
         };
-        
 
         this.DataContextChanged += (_, __) =>
         {
@@ -143,9 +143,9 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         base.OnLoaded(e);
 
 
-        var registryOptions = new RegistryOptions(ThemeName.VisualStudioLight);
-        var textMateInstallation = Editor.InstallTextMate(registryOptions);
-        textMateInstallation.SetGrammar(registryOptions.GetScopeByLanguageId(registryOptions.GetLanguageByExtension(".lua").Id));
-    
+         var registryOptions = new RegistryOptions(ThemeName.VisualStudioLight);
+         var textMateInstallation = Editor.InstallTextMate(registryOptions);
+         textMateInstallation.SetGrammar(registryOptions.GetScopeByLanguageId(registryOptions.GetLanguageByExtension(".lua").Id));
+        
     }
 }
