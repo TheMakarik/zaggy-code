@@ -1,28 +1,26 @@
-﻿using System;
+﻿using DynamicData.Binding;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using ReactiveUI;
+using ReactiveUI.SourceGenerators;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
-using DynamicData.Binding;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using Microsoft.VisualBasic;
-using ReactiveUI;
-using ReactiveUI.SourceGenerators;
 using ZaggyCode.Avalonia.Options;
 using ZaggyCode.Data.Interfaces;
 using ZaggyCode.Games;
 using ZaggyCode.Languages.Enums;
 using ZaggyCode.Languages.Interfaces;
-using ZaggyCode.Shared.Attributes;
 
 namespace ZaggyCode.Avalonia.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
 {
-    
+
     #region Reactive properties
 
     [Reactive] private bool _isTerminalVisible = true;
@@ -32,10 +30,10 @@ public partial class MainWindowViewModel : ViewModelBase
     [Reactive] private ExecutionSpeed _executionSpeed;
     [Reactive] private int _textEditorFontSize;
 
-    #endregion    
-    
+    #endregion
+
     #region Properties
-    
+
     public int MaxFontSize { get; init; }
     public int MinFontSize { get; init; }
 
@@ -43,14 +41,14 @@ public partial class MainWindowViewModel : ViewModelBase
     public TextWriter? TerminalWriter { get; set; }
 
     #endregion
-    
+
     #region Interaction
 
     public readonly Interaction<Unit, Unit> ResizeGridToMax = new();
     public readonly Interaction<Unit, Unit> ClearTerminalContent = new();
     public readonly Interaction<Unit, Unit> BackGridToNormal = new();
     public readonly Interaction<Unit, string> GetCodeToExecute = new();
-    
+
     #endregion
 
     #region Services
@@ -78,12 +76,12 @@ public partial class MainWindowViewModel : ViewModelBase
         MaxFontSize = _fontSizeOptions.MaxFontSize;
         MinFontSize = _fontSizeOptions.MinFontSize;
         _logger = logger;
-        
-        
+
+
 
         this.WhenAnyPropertyChanged().Subscribe(context =>
         {
-            
+
             this.WhenAnyValue(vm => vm.IsTerminalVisible)
                 .Where(isVisible => !isVisible)
                 .Subscribe(async void (onNext) => await ResizeGridToMax.Handle(Unit.Default));
@@ -91,14 +89,14 @@ public partial class MainWindowViewModel : ViewModelBase
             this.WhenAnyValue(vm => vm.IsTerminalVisible)
                 .Where(isVisible => isVisible)
                 .Subscribe(async void (onNext) => await BackGridToNormal.Handle(Unit.Default));
-            
+
             this.WhenAnyValue(vm => vm.IsTerminalExists)
                 .Where(isVisible => !isVisible)
                 .Subscribe(async void (onNext) => await ClearTerminalContent.Handle(Unit.Default));
-            
+
             this.WhenAnyValue(vm => vm.TextEditorFontSize)
                 .Where(size => size != _userStorage.Current.CodeFontSize)
-                .Subscribe(onNext =>  userStorage.Current.CodeFontSize = _textEditorFontSize);
+                .Subscribe(onNext => userStorage.Current.CodeFontSize = _textEditorFontSize);
         });
 
     }
@@ -123,12 +121,12 @@ public partial class MainWindowViewModel : ViewModelBase
             {
                 var codeObservable = GetCodeToExecute.Handle(Unit.Default);
                 await using var scope = _factory.CreateAsyncScope();
-                var runner = scope.ServiceProvider.GetRequiredKeyedService<ILanguageRunner>(".lua");
+                var runner = scope.ServiceProvider.GetRequiredKeyedService<ILanguageRunner>(".cs");
                 var code = await codeObservable;
-                
+
                 Debug.Assert(TerminalReader is not null);
                 Debug.Assert(TerminalWriter is not null);
-                
+
                 runner.RedirectIoStreams(TerminalReader, TerminalWriter);
                 runner.Execute(code, ExecutionSpeed.X2, new RobotMover(null!, null!, null!));
             }
@@ -136,26 +134,26 @@ public partial class MainWindowViewModel : ViewModelBase
             {
                 _logger.LogError(e, "Error while running code");
             }
-            
+
         }, TaskCreationOptions.LongRunning);
     }
 
     [ReactiveCommand]
     private void IncrementEditorFontSize()
     {
-        if(TextEditorFontSize < MaxFontSize)
-          TextEditorFontSize += 1;
+        if (TextEditorFontSize < MaxFontSize)
+            TextEditorFontSize += 1;
     }
-    
-    
+
+
     [ReactiveCommand]
     private void DecrementEditorFontSize()
     {
-        if(TextEditorFontSize  > MinFontSize)
-             TextEditorFontSize -= 1;
+        if (TextEditorFontSize > MinFontSize)
+            TextEditorFontSize -= 1;
     }
 
-    
+
     [ReactiveCommand]
     private void ChangeTerminalVisibility()
     {
@@ -170,14 +168,14 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     #endregion
-    
+
     #region Static and private methods
- 
-    
+
+
     #endregion
-  
 
-   
 
-   
+
+
+
 }

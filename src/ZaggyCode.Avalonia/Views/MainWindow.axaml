@@ -1,7 +1,7 @@
 <rxui:ReactiveWindow
     Icon="/Assets/avalonia-logo.ico"
     Name="ThisWindow"
-    Title="Программирование с Загги"
+    Title="Программирование с Зигой"
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d"
@@ -111,7 +111,7 @@
                         Command="{Binding ExecuteCodeCommand}"
                         Content="{materialIcons:MaterialIconExt Kind=Play}"
                         Grid.Row="0"
-                        ToolTip.Tip="Запустить Зигги" />
+                        ToolTip.Tip="Запустить Зигу" />
                     <Button
                         Content="{materialIcons:MaterialIconExt Kind=ViewListOutline}"
                         Grid.Row="2"

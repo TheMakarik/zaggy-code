@@ -1,4 +1,3 @@
-using System;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using AvaloniaEdit.TextMate;
@@ -8,11 +7,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Reactive;
 using System.Reactive.Linq;
-using System.Threading.Tasks;
-using AvaloniaEdit;
 using TextMateSharp.Grammars;
 using ZaggyCode.Avalonia.ViewModels;
-using ZaggyCode.Avalonia.Views.Controls;
 using ZaggyCode.Avalonia.Views.TerminalEngine.Session;
 
 namespace ZaggyCode.Avalonia.Views;
@@ -24,13 +20,13 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
     private bool _isMaximized = false;
     private bool _isTerminalMaximized = false;
     private ScriptCommandLineSession _terminalSession = new ScriptCommandLineSession();
-    
+
 
     public MainWindow()
     {
         InitializeComponent();
         Terminal.CurrentSession = _terminalSession;
-        
+
         TextReader reader = _terminalSession.Reader;
         TextWriter writer = _terminalSession.Writer;
 
@@ -43,10 +39,10 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         this.DataContextChanged += (_, __) =>
         {
             Debug.Assert(ViewModel is not null);
-           
+
             ViewModel.GetCodeToExecute.RegisterHandler(context =>
                 Dispatcher.Invoke(() => context.SetOutput(Editor.Text)));
-            
+
             ViewModel.TerminalReader = reader;
             ViewModel.TerminalWriter = writer;
             ViewModel.ClearTerminalContent.RegisterHandler(context =>
@@ -143,9 +139,9 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         base.OnLoaded(e);
 
 
-         var registryOptions = new RegistryOptions(ThemeName.VisualStudioLight);
-         var textMateInstallation = Editor.InstallTextMate(registryOptions);
-         textMateInstallation.SetGrammar(registryOptions.GetScopeByLanguageId(registryOptions.GetLanguageByExtension(".lua").Id));
-        
+        var registryOptions = new RegistryOptions(ThemeName.VisualStudioLight);
+        var textMateInstallation = Editor.InstallTextMate(registryOptions);
+        textMateInstallation.SetGrammar(registryOptions.GetScopeByLanguageId(registryOptions.GetLanguageByExtension(".lua").Id));
+
     }
 }

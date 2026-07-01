@@ -1,13 +1,21 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <OutputType>WinExe</OutputType>
         <TargetFramework>net10.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ApplicationManifest>app.manifest</ApplicationManifest>
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
         <WarningsAsErrors>true</WarningsAsErrors>
     </PropertyGroup>
+	
+	<PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+		<OutputType>Exe</OutputType>
+		<DisableWinExeOutputInference>false</DisableWinExeOutputInference>
+	</PropertyGroup>
 
+	<PropertyGroup Condition="'$(Configuration)' == 'Release'">
+		<OutputType>WinExe</OutputType>
+	</PropertyGroup>
+	
     <ItemGroup>
         <AvaloniaResource Include="Assets\**" />
     </ItemGroup>
