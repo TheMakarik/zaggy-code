@@ -118,18 +118,23 @@ public sealed partial class CSharpLanguageRunner(ILogger<CSharpLanguageRunner> l
     {
         private readonly int _delayMs = delayMs;
 
-        public override SyntaxNode? VisitExpressionStatement(ExpressionStatementSyntax node)
+        public override SyntaxNode? VisitCompilationUnit(CompilationUnitSyntax node)
         {
-            var processedNode = base.VisitExpressionStatement(node);
-            if (processedNode is ExpressionStatementSyntax expressionNode)
+            var newMembers = SyntaxFactory.List<MemberDeclarationSyntax>();
+            foreach (var member in node.Members)
             {
-                var delayStatement = SyntaxFactory.ParseStatement($"System.Threading.Tasks.Task.Delay({_delayMs}).Wait();\r\n")
-                    .WithTrailingTrivia(SyntaxFactory.ElasticCarriageReturnLineFeed);
-
-                return SyntaxFactory.Block(expressionNode, delayStatement);
+                newMembers = newMembers.Add((MemberDeclarationSyntax)Visit(member));
+                if (member is GlobalStatementSyntax globalStatement)
+                {
+                    if (globalStatement.Statement is ExpressionStatementSyntax)
+                    {
+                        var delayStatement = SyntaxFactory.ParseStatement($"System.Threading.Tasks.Task.Delay({_delayMs}).Wait();\r\n");
+                        newMembers = newMembers.Add(SyntaxFactory.GlobalStatement(delayStatement));
+                    }
+                }
             }
 
-            return processedNode;
+            return node.WithMembers(newMembers);
         }
     }
 }
