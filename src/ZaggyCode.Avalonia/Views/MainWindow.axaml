@@ -1,9 +1,13 @@
 <rxui:ReactiveWindow
+    Background="{DynamicResource BackgroundBrush}"
+    CanResize="True"
+    Foreground="{DynamicResource ForegroundBrush}"
     Icon="/Assets/avalonia-logo.ico"
     Name="ThisWindow"
-    Title="Программирование с Зигой"
-    d:DesignHeight="450"
-    d:DesignWidth="800"
+    Title="Программирование с Загги"
+    WindowDecorations="{Binding UseOsDecoration, Converter={converters:BoolToWindowDecorationsConverter}}"
+    d:DesignHeight="600"
+    d:DesignWidth="1100"
     mc:Ignorable="d"
     x:Class="ZaggyCode.Avalonia.Views.MainWindow"
     x:DataType="vm:MainWindowViewModel"
@@ -12,7 +16,9 @@
     xmlns:avaloniaEdit="https://github.com/avaloniaui/avaloniaedit"
     xmlns:behaviors="clr-namespace:ZaggyCode.Avalonia.Views.Behaviors"
     xmlns:controls="clr-namespace:ZaggyCode.Avalonia.Views.Controls"
+    xmlns:converters="clr-namespace:ZaggyCode.Avalonia.Views.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:enums="using:ZaggyCode.Languages.Enums"
     xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:rxui="http://reactiveui.net"
@@ -23,158 +29,327 @@
         <vm:MainWindowViewModel />
     </Design.DataContext>
 
-    <Grid RowDefinitions="Auto,*,Auto">
-        <Menu Background="{DynamicResource SystemColorWindowColor}" Grid.Row="0">
+    <rxui:ReactiveWindow.Resources />
 
-            <Menu.Styles>
-                <Style Selector="Menu">
-                    <Setter Property="Background" Value="{DynamicResource ButtonBackground}" />
-                </Style>
-                <Style Selector="MenuItem">
-                    <Setter Property="Background" Value="{DynamicResource ButtonBackground}" />
-                </Style>
-            </Menu.Styles>
+    <Grid Classes="main-background" RowDefinitions="Auto,*">
+        <!--  Header  -->
+        <Border
+            Classes="header-bar"
+            Grid.Row="0"
+            Name="HeaderBar"
+            Padding="12,8">
+            <Grid ColumnDefinitions="Auto,*,Auto">
+                <StackPanel
+                    Grid.Column="0"
+                    Orientation="Horizontal"
+                    Spacing="12"
+                    VerticalAlignment="Center">
+                    <Image
+                        Height="24"
+                        IsVisible="{Binding UseOsDecoration, Converter={converters:InverseBooleanConverter}}"
+                        Source="{Binding Icon, ElementName=ThisWindow}"
+                        Width="24" />
 
-            <MenuItem Background="Transparent" Header="Уровни">
-                <MenuItem Header="Открыть уровень из файловой системы" Icon="{materialIcons:MaterialIconExt Kind=Games}" />
-                <MenuItem Header="Создать уровень" Icon="{materialIcons:MaterialIconExt Kind=Create}" />
-                <MenuItem Header="Загрузить уровень из репозитория" Icon="{materialIcons:MaterialIconExt Kind=Download}" />
-                <MenuItem Header="Скорость" Icon="{materialIcons:MaterialIconExt Kind=Speedometer}">
-                    <MenuItem Header="X1" />
-                    <MenuItem Header="X2" />
-                    <MenuItem Header="X5" />
-                    <MenuItem Header="X10" />
-                </MenuItem>
-            </MenuItem>
-            <MenuItem Background="Transparent" Header="Файл">
-                <MenuItem Header="Сохранить" Icon="{materialIcons:MaterialIconExt Kind=ContentSave}" />
-                <MenuItem Header="Копировать выделенное" Icon="{materialIcons:MaterialIconExt Kind=ContentCopy}" />
-                <MenuItem Header="Вставить" Icon="{materialIcons:MaterialIconExt Kind=ContentPaste}" />
-                <MenuItem Header="Удалить выделенное" Icon="{materialIcons:MaterialIconExt Kind=TrashCan}" />
-                <MenuItem Header="Вырезать выделенное" Icon="{materialIcons:MaterialIconExt Kind=ContentCut}" />
-            </MenuItem>
-            <MenuItem Background="Transparent" Header="Вид">
-                <MenuItem Header="Тема подцветски синтаксиса" Icon="{materialIcons:MaterialIconExt Kind=CodeBlockBraces}" />
-                <MenuItem Header="Показывать боковое меню" Icon="{materialIcons:MaterialIconExt Kind=PageLayoutSidebarLeft}" />
-                <MenuItem Header="Текст" Icon="{materialIcons:MaterialIconExt Kind=FontSize}">
-                    <MenuItem
-                        Command="{Binding IncrementEditorFontSizeCommand}"
-                        Header="Увевличить размер текста редактора"
-                        Icon="{materialIcons:MaterialIconExt Kind=FormatFontSizeIncrease}"
-                        InputGesture="Ctrl++" />
-                    <MenuItem
-                        Command="{Binding DecrementEditorFontSizeCommand}"
-                        Header="Уменьшить размер текста редактора"
-                        Icon="{materialIcons:MaterialIconExt Kind=FormatFontSizeDecrease}"
-                        InputGesture="Ctrl+-" />
-                    <MenuItem Header="Увевличить размер текста терминала" Icon="{materialIcons:MaterialIconExt Kind=FormatFontSizeIncrease}" />
-                    <MenuItem Header="Уменьшить размер текста терминала" Icon="{materialIcons:MaterialIconExt Kind=FormatFontSizeDecrease}" />
+                    <Menu Classes="full-menu" IsVisible="{Binding #ThisWindow.Bounds.Width, Converter={converters:WidthToVisibilityConverter}, ConverterParameter='&gt;=900'}">
+                        <MenuItem Header="Уровни" Icon="{materialIcons:MaterialIconExt Kind=Games}">
+                            <MenuItem Header="Открыть уровень из файловой системы" Icon="{materialIcons:MaterialIconExt Kind=Games}" />
+                            <MenuItem Header="Создать уровень" Icon="{materialIcons:MaterialIconExt Kind=Create}" />
+                            <MenuItem Header="Загрузить уровень из репозитория" Icon="{materialIcons:MaterialIconExt Kind=Download}" />
+                            <MenuItem
+                                Header="Скорость"
+                                Icon="{materialIcons:MaterialIconExt Kind=Speedometer}"
+                                ItemsSource="{Binding Source={x:Type enums:ExecutionSpeed}, Converter={converters:EnumValuesConverter}}">
+                                <MenuItem.ItemContainerTheme>
+                                    <ControlTheme
+                                        BasedOn="{StaticResource {x:Type MenuItem}}"
+                                        TargetType="MenuItem"
+                                        x:DataType="enums:ExecutionSpeed">
+                                        <Setter Property="Header" Value="{Binding ., Mode=OneWay}" />
+                                        <Setter Property="Command" Value="{Binding DataContext.ChangeExecutionSpeedCommand, ElementName=ThisWindow}" />
+                                        <Setter Property="CommandParameter" Value="{Binding .}" />
+                                    </ControlTheme>
+                                </MenuItem.ItemContainerTheme>
+                            </MenuItem>
+                        </MenuItem>
 
-                </MenuItem>
-            </MenuItem>
-            <MenuItem Background="Transparent" Header="Сервис">
-                <MenuItem Header="Настройки" Icon="{materialIcons:MaterialIconExt Kind=Settings}" />
-                <MenuItem Header="Управления горячими клавишами" Icon="{materialIcons:MaterialIconExt Kind=KeyboardSettings}" />
-                <MenuItem
-                    Command="{Binding ChangeTerminalVisibilityCommand}"
-                    Header="Терминал"
-                    Icon="{materialIcons:MaterialIconExt Kind=Terminal}" />
-            </MenuItem>
-            <MenuItem Background="Transparent" Header="Справка">
-                <MenuItem Header="О приложении" Icon="{materialIcons:MaterialIconExt Kind=About}" />
-                <MenuItem Header="Руководство по програмированию на языке..." Icon="{materialIcons:MaterialIconExt Kind=Code}">
-                    <MenuItem Header="C# (Си Шарп)" Icon="{materialIcons:MaterialIconExt Kind=LanguageCsharp}" />
-                    <MenuItem Header="Lua (Луа)" Icon="{materialIcons:MaterialIconExt Kind=LanguageLua}" />
-                </MenuItem>
-                <MenuItem Header="Руководство по програмированию Загги на языке..." Icon="{materialIcons:MaterialIconExt Kind=Code}">
-                    <MenuItem Header="C# (Си Шарп)" Icon="{materialIcons:MaterialIconExt Kind=LanguageCsharp}" />
-                    <MenuItem Header="Lua (Луа)" Icon="{materialIcons:MaterialIconExt Kind=LanguageLua}" />
-                </MenuItem>
-            </MenuItem>
-        </Menu>
+                        <MenuItem Header="Файл" Icon="{materialIcons:MaterialIconExt Kind=File}">
+                            <MenuItem Header="Сохранить" Icon="{materialIcons:MaterialIconExt Kind=ContentSave}" />
+                            <MenuItem Header="Копировать выделенное" Icon="{materialIcons:MaterialIconExt Kind=ContentCopy}" />
+                            <MenuItem Header="Вставить" Icon="{materialIcons:MaterialIconExt Kind=ContentPaste}" />
+                            <MenuItem Header="Удалить выделенное" Icon="{materialIcons:MaterialIconExt Kind=TrashCan}" />
+                            <MenuItem Header="Вырезать выделенное" Icon="{materialIcons:MaterialIconExt Kind=ContentCut}" />
+                        </MenuItem>
 
-        <Grid ColumnDefinitions="Auto, *" Grid.Row="1">
-            <Grid Background="{DynamicResource ButtonBackground}" RowDefinitions="Auto, *">
-                <Grid.Styles>
-                    <Style Selector="Button">
-                        <Setter Property="Background" Value="Transparent" />
-                        <Setter Property="Padding" Value="2" />
-                    </Style>
-                    <Style Selector="Button materialIcons|MaterialIcon">
-                        <Setter Property="Width" Value="25" />
-                        <Setter Property="Height" Value="25" />
-                    </Style>
-                </Grid.Styles>
+                        <MenuItem Header="Вид" Icon="{materialIcons:MaterialIconExt Kind=Eye}">
+                            <MenuItem Header="Тема подсветки синтаксиса" Icon="{materialIcons:MaterialIconExt Kind=CodeBlockBraces}" />
+                            <MenuItem Header="Показывать боковое меню" Icon="{materialIcons:MaterialIconExt Kind=PageLayoutSidebarLeft}" />
+                            <MenuItem Header="Текст" Icon="{materialIcons:MaterialIconExt Kind=FontSize}">
+                                <MenuItem
+                                    Command="{Binding IncrementEditorFontSizeCommand}"
+                                    Header="Увеличить размер текста редактора"
+                                    Icon="{materialIcons:MaterialIconExt Kind=FormatFontSizeIncrease}" />
+                                <MenuItem
+                                    Command="{Binding DecrementEditorFontSizeCommand}"
+                                    Header="Уменьшить размер текста редактора"
+                                    Icon="{materialIcons:MaterialIconExt Kind=FormatFontSizeDecrease}" />
+                                <MenuItem
+                                    Command="{Binding IncrementTerminalFontSizeCommand}"
+                                    Header="Увеличить размер текста терминала"
+                                    Icon="{materialIcons:MaterialIconExt Kind=FormatFontSizeIncrease}" />
+                                <MenuItem
+                                    Command="{Binding DecrementTerminalFontSizeCommand}"
+                                    Header="Уменьшить размер текста терминала"
+                                    Icon="{materialIcons:MaterialIconExt Kind=FormatFontSizeDecrease}" />
+                            </MenuItem>
+                        </MenuItem>
 
-                <Grid Grid.Row="0" RowDefinitions="Auto,Auto,Auto,Auto, Auto, Auto, Auto">
-                    <Button
-                        Command="{Binding ExecuteCodeCommand}"
-                        Content="{materialIcons:MaterialIconExt Kind=Play}"
-                        Grid.Row="0"
-                        ToolTip.Tip="Запустить Зигу" />
-                    <Button
-                        Content="{materialIcons:MaterialIconExt Kind=ViewListOutline}"
-                        Grid.Row="2"
-                        ToolTip.Tip="Открыть загруженные уровени" />
-                    <Button
-                        Content="{materialIcons:MaterialIconExt Kind=Download}"
-                        Grid.Row="3"
-                        ToolTip.Tip="Установить уровень из интернета" />
-                    <Button
-                        Content="{materialIcons:MaterialIconExt Kind=FileDownload}"
-                        Grid.Row="4"
-                        ToolTip.Tip="Установить уровень из файла" />
-                    <Button
-                        Content="{materialIcons:MaterialIconExt Kind=ContentSave}"
-                        Grid.Row="5"
-                        ToolTip.Tip="Сохранить" />
-                    <Label
-                        Grid.Row="6"
-                        Height="25"
-                        Width="25">
-                        X2
-                    </Label>
-                </Grid>
+                        <MenuItem Header="Сервис" Icon="{materialIcons:MaterialIconExt Kind=Settings}">
+                            <MenuItem Header="Настройки" Icon="{materialIcons:MaterialIconExt Kind=Settings}" />
+                            <MenuItem Header="Управление горячими клавишами" Icon="{materialIcons:MaterialIconExt Kind=KeyboardSettings}" />
+                            <MenuItem
+                                Command="{Binding ChangeTerminalVisibilityCommand}"
+                                Header="Терминал"
+                                Icon="{materialIcons:MaterialIconExt Kind=Terminal}" />
+                        </MenuItem>
 
-                <Grid
-                    Grid.Row="1"
-                    RowDefinitions="Auto,Auto,Auto"
-                    VerticalAlignment="Bottom">
+                        <MenuItem Header="Справка" Icon="{materialIcons:MaterialIconExt Kind=HelpBox}">
+                            <MenuItem Header="О приложении" Icon="{materialIcons:MaterialIconExt Kind=About}" />
+                            <MenuItem Header="Руководство по программированию" Icon="{materialIcons:MaterialIconExt Kind=Code}">
+                                <MenuItem Header="C# (Си Шарп)" Icon="{materialIcons:MaterialIconExt Kind=LanguageCsharp}" />
+                                <MenuItem Header="Lua (Луа)" Icon="{materialIcons:MaterialIconExt Kind=LanguageLua}" />
+                            </MenuItem>
+                        </MenuItem>
+                    </Menu>
+
+                    <Menu
+                        Classes="compact-menu"
+                        IsVisible="{Binding #ThisWindow.Bounds.Width, Converter={converters:WidthToVisibilityConverter}, ConverterParameter='&lt;900'}"
+                        ToolTip.Tip="Меню">
+                        <MenuItem Background="Transparent" Padding="8">
+                            <MenuItem.Header>
+                                <materialIcons:MaterialIcon
+                                    Foreground="{DynamicResource ForegroundBrush}"
+                                    Height="24"
+                                    Kind="Menu"
+                                    Width="24" />
+                            </MenuItem.Header>
+
+                            <MenuItem Header="Уровни" Icon="{materialIcons:MaterialIconExt Kind=Games}">
+                                <MenuItem Header="Открыть уровень из файловой системы" Icon="{materialIcons:MaterialIconExt Kind=Games}" />
+                                <MenuItem Header="Создать уровень" Icon="{materialIcons:MaterialIconExt Kind=Create}" />
+                                <MenuItem Header="Загрузить уровень из репозитория" Icon="{materialIcons:MaterialIconExt Kind=Download}" />
+                                <MenuItem
+                                    Header="Скорость"
+                                    Icon="{materialIcons:MaterialIconExt Kind=Speedometer}"
+                                    ItemsSource="{Binding Source={x:Type enums:ExecutionSpeed}, Converter={converters:EnumValuesConverter}}">
+                                    <MenuItem.ItemContainerTheme>
+                                        <ControlTheme
+                                            BasedOn="{StaticResource {x:Type MenuItem}}"
+                                            TargetType="MenuItem"
+                                            x:DataType="enums:ExecutionSpeed">
+                                            <Setter Property="Header" Value="{Binding ., Mode=OneWay}" />
+                                            <Setter Property="Command" Value="{Binding DataContext.ChangeExecutionSpeedCommand, ElementName=ThisWindow}" />
+                                            <Setter Property="CommandParameter" Value="{Binding .}" />
+                                        </ControlTheme>
+                                    </MenuItem.ItemContainerTheme>
+                                </MenuItem>
+                            </MenuItem>
+
+                            <MenuItem Header="Файл" Icon="{materialIcons:MaterialIconExt Kind=File}">
+                                <MenuItem Header="Сохранить" Icon="{materialIcons:MaterialIconExt Kind=ContentSave}" />
+                                <MenuItem Header="Копировать выделенное" Icon="{materialIcons:MaterialIconExt Kind=ContentCopy}" />
+                                <MenuItem Header="Вставить" Icon="{materialIcons:MaterialIconExt Kind=ContentPaste}" />
+                                <MenuItem Header="Удалить выделенное" Icon="{materialIcons:MaterialIconExt Kind=TrashCan}" />
+                                <MenuItem Header="Вырезать выделенное" Icon="{materialIcons:MaterialIconExt Kind=ContentCut}" />
+                            </MenuItem>
+
+                            <MenuItem Header="Вид" Icon="{materialIcons:MaterialIconExt Kind=Eye}">
+                                <MenuItem Header="Тема подсветки синтаксиса" Icon="{materialIcons:MaterialIconExt Kind=CodeBlockBraces}" />
+                                <MenuItem Header="Показывать боковое меню" Icon="{materialIcons:MaterialIconExt Kind=PageLayoutSidebarLeft}" />
+                                <MenuItem Header="Текст" Icon="{materialIcons:MaterialIconExt Kind=FontSize}">
+                                    <MenuItem
+                                        Command="{Binding IncrementEditorFontSizeCommand}"
+                                        Header="Увеличить размер текста редактора"
+                                        Icon="{materialIcons:MaterialIconExt Kind=FormatFontSizeIncrease}" />
+                                    <MenuItem
+                                        Command="{Binding DecrementEditorFontSizeCommand}"
+                                        Header="Уменьшить размер текста редактора"
+                                        Icon="{materialIcons:MaterialIconExt Kind=FormatFontSizeDecrease}" />
+                                    <MenuItem
+                                        Command="{Binding IncrementTerminalFontSizeCommand}"
+                                        Header="Увеличить размер текста терминала"
+                                        Icon="{materialIcons:MaterialIconExt Kind=FormatFontSizeIncrease}" />
+                                    <MenuItem
+                                        Command="{Binding DecrementTerminalFontSizeCommand}"
+                                        Header="Уменьшить размер текста терминала"
+                                        Icon="{materialIcons:MaterialIconExt Kind=FormatFontSizeDecrease}" />
+                                </MenuItem>
+                            </MenuItem>
+
+                            <MenuItem Header="Сервис" Icon="{materialIcons:MaterialIconExt Kind=Settings}">
+                                <MenuItem Header="Настройки" Icon="{materialIcons:MaterialIconExt Kind=Settings}" />
+                                <MenuItem Header="Управление горячими клавишами" Icon="{materialIcons:MaterialIconExt Kind=KeyboardSettings}" />
+                                <MenuItem
+                                    Command="{Binding ChangeTerminalVisibilityCommand}"
+                                    Header="Терминал"
+                                    Icon="{materialIcons:MaterialIconExt Kind=Terminal}" />
+                            </MenuItem>
+
+                            <MenuItem Header="Справка" Icon="{materialIcons:MaterialIconExt Kind=HelpBox}">
+                                <MenuItem Header="О приложении" Icon="{materialIcons:MaterialIconExt Kind=About}" />
+                                <MenuItem Header="Руководство по программированию" Icon="{materialIcons:MaterialIconExt Kind=Code}">
+                                    <MenuItem Header="C# (Си Шарп)" Icon="{materialIcons:MaterialIconExt Kind=LanguageCsharp}" />
+                                    <MenuItem Header="Lua (Луа)" Icon="{materialIcons:MaterialIconExt Kind=LanguageLua}" />
+                                </MenuItem>
+                            </MenuItem>
+                        </MenuItem>
+                    </Menu>
+
+                    <ComboBox
+                        Classes="language-selector"
+                        ItemsSource="{Binding Source={x:Type enums:Language}, Converter={converters:EnumValuesConverter}}"
+                        SelectedItem="{Binding SelectedLanguage}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate x:DataType="enums:Language">
+                                <TextBlock Text="{Binding .}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </StackPanel>
+
+                <StackPanel
+                    Grid.Column="2"
+                    IsVisible="{Binding UseOsDecoration, Converter={converters:InverseBooleanConverter}}"
+                    Orientation="Horizontal"
+                    Spacing="4"
+                    VerticalAlignment="Center">
                     <Button
-                        Content="{materialIcons:MaterialIconExt Kind=HelpBox}"
-                        Grid.Row="0"
-                        ToolTip.Tip="Справка по приложению" />
+                        Classes="icon-button window-control"
+                        Name="MinimizeButton"
+                        ToolTip.Tip="Свернуть">
+                        <materialIcons:MaterialIcon Kind="WindowMinimize" />
+                    </Button>
                     <Button
-                        Content="{materialIcons:MaterialIconExt Kind=Settings}"
-                        Grid.Row="1"
-                        ToolTip.Tip="Настройки" />
+                        Classes="icon-button window-control"
+                        Name="MaximizeButton"
+                        ToolTip.Tip="Развернуть">
+                        <materialIcons:MaterialIcon Kind="WindowMaximize" Name="MaximizeIcon" />
+                    </Button>
                     <Button
-                        Command="{Binding ChangeTerminalVisibilityCommand}"
-                        Content="{materialIcons:MaterialIconExt Kind=Terminal}"
-                        Grid.Row="2"
-                        ToolTip.Tip="Терминал" />
-                </Grid>
+                        Classes="icon-button window-control close"
+                        Name="CloseButton"
+                        ToolTip.Tip="Закрыть">
+                        <materialIcons:MaterialIcon Kind="WindowClose" />
+                    </Button>
+                </StackPanel>
             </Grid>
+        </Border>
 
+        <!--  Main workspace  -->
+        <Grid
+            Classes="main-background"
+            ColumnDefinitions="Auto,*"
+            Grid.Row="1">
+            <!--  Left sidebar  -->
+            <Border
+                Classes="sidebar"
+                Padding="6"
+                Width="45">
+                <Grid RowDefinitions="Auto,*,Auto">
+                    <StackPanel
+                        Grid.Row="0"
+                        Orientation="Vertical"
+                        Spacing="6">
+                        <Button
+                            Classes="icon-button run-button"
+                            Command="{Binding ExecuteCodeCommand}"
+                            Content="{materialIcons:MaterialIconExt Kind=Play}"
+                            ToolTip.Tip="Запустить Зигу" />
+                        <Button
+                            Classes="icon-button"
+                            Content="{materialIcons:MaterialIconExt Kind=ViewListOutline}"
+                            ToolTip.Tip="Открыть загруженные уровни" />
+                        <Button
+                            Classes="icon-button"
+                            Content="{materialIcons:MaterialIconExt Kind=Download}"
+                            ToolTip.Tip="Установить уровень из интернета" />
+                        <Button
+                            Classes="icon-button"
+                            Content="{materialIcons:MaterialIconExt Kind=FileDownload}"
+                            ToolTip.Tip="Установить уровень из файла" />
+                        <Button
+                            Classes="icon-button"
+                            Content="{materialIcons:MaterialIconExt Kind=ContentSave}"
+                            ToolTip.Tip="Сохранить" />
+                        <Button
+                            Classes="speed-button"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            VerticalContentAlignment="Center">
+                            <TextBlock HorizontalAlignment="Center" Text="{Binding ExecutionSpeed}" />
+                            <Button.Flyout>
+                                <Flyout FlyoutPresenterClasses="speed-flyout-presenter" Placement="RightEdgeAlignedTop">
+                                    <Border
+                                        Background="{DynamicResource SurfaceBrush}"
+                                        CornerRadius="{DynamicResource SmallCornerRadius}"
+                                        Padding="4">
+                                        <ItemsControl ItemsSource="{Binding Source={x:Type enums:ExecutionSpeed}, Converter={converters:EnumValuesConverter}}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate x:DataType="enums:ExecutionSpeed">
+                                                    <Button
+                                                        Classes="speed-flyout-button"
+                                                        Command="{Binding DataContext.ChangeExecutionSpeedCommand, ElementName=ThisWindow}"
+                                                        CommandParameter="{Binding .}"
+                                                        Content="{Binding .}" />
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </Border>
+                                </Flyout>
+                            </Button.Flyout>
+                        </Button>
+                    </StackPanel>
+
+                    <StackPanel
+                        Grid.Row="2"
+                        Orientation="Vertical"
+                        Spacing="6">
+                        <Button
+                            Classes="icon-button"
+                            Content="{materialIcons:MaterialIconExt Kind=HelpBox}"
+                            ToolTip.Tip="Справка по приложению" />
+                        <Button
+                            Classes="icon-button"
+                            Content="{materialIcons:MaterialIconExt Kind=Settings}"
+                            ToolTip.Tip="Настройки" />
+                        <Button
+                            Classes="icon-button"
+                            Command="{Binding ChangeTerminalVisibilityCommand}"
+                            Content="{materialIcons:MaterialIconExt Kind=Terminal}"
+                            ToolTip.Tip="Терминал" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!--  Content  -->
             <Grid
                 Grid.Column="1"
-                Grid.RowDefinitions="Auto, 1.3*, Auto, 0.7*"
-                Name="MainContentGrid">
+                Name="MainContentGrid"
+                RowDefinitions="Auto,1.3*,Auto,0.7*">
+
                 <Grid Grid.Row="1" Name="GameAndCodeGrid">
-                    <Grid ColumnDefinitions="1.15*, Auto, 0.85*">
+                    <Grid ColumnDefinitions="1.15*,Auto,0.85*">
                         <Border
-                            BorderBrush="{DynamicResource ButtonBackground}"
-                            BorderThickness="1"
-                            CornerRadius="8"
+                            Classes="card"
                             Grid.Column="0"
-                            Margin="5">
+                            Margin="12,12,6,12">
                             <avaloniaEdit:TextEditor
-                                FontFamily="Cascadia Code,Consolas,Menlo,Monospace"
+                                Background="{DynamicResource EditorBackgroundBrush}"
                                 FontSize="{Binding TextEditorFontSize}"
-                                Grid.Column="0"
+                                Foreground="{DynamicResource EditorForegroundBrush}"
+                                LineNumbersForeground="{DynamicResource EditorLineNumberBrush}"
                                 Name="Editor"
                                 ShowLineNumbers="True">
-
                                 <Interaction.Behaviors>
                                     <behaviors:TextEditorZoomBehavior
                                         MaxFontSize="{Binding MaxFontSize, Mode=OneTime}"
@@ -182,100 +357,101 @@
                                         UpdateFontSizeCommand="{Binding UpdateFontSizeCommand}"
                                         ZoomStep="1" />
                                 </Interaction.Behaviors>
-
                             </avaloniaEdit:TextEditor>
                         </Border>
-                        <GridSplitter Grid.Column="1" />
+
+                        <GridSplitter Classes="subtle" Grid.Column="1" />
+
                         <Border
-                            BorderBrush="{DynamicResource ButtonBackground}"
-                            BorderThickness="1"
-                            CornerRadius="8"
+                            Classes="card"
                             Grid.Column="2"
-                            Margin="0,5,5,5" />
+                            Margin="6,12,12,12">
+                            <Grid>
+                                <TextBlock
+                                    Classes="muted"
+                                    HorizontalAlignment="Center"
+                                    Text="Предпросмотр / Игра"
+                                    VerticalAlignment="Center" />
+                            </Grid>
+                        </Border>
                     </Grid>
                 </Grid>
-                <GridSplitter Grid.Row="2" />
+
+                <GridSplitter Classes="subtle" Grid.Row="2" />
+
                 <Border
-                    BorderBrush="{DynamicResource ButtonBackground}"
-                    BorderThickness="1"
-                    CornerRadius="10"
+                    Classes="card"
                     Grid.Row="3"
                     IsVisible="{Binding IsTerminalVisible}"
-                    Margin="5,0,5,5"
-                    MinHeight="100">
-                    <Grid RowDefinitions="Auto, *">
-                        <Border
-                            BorderBrush="{DynamicResource ButtonBackground}"
-                            BorderThickness="0,0,0,1"
-                            CornerRadius="10 10 0 0"
-                            Grid.Row="0"
-                            IsVisible="{Binding IsTerminalVisible}"
-                            Padding="10,5">
-                            <Grid ColumnDefinitions="Auto, *, Auto">
+                    Margin="12,0,12,12"
+                    MinHeight="120">
+                    <Grid RowDefinitions="Auto,*">
+                        <Border Classes="terminal-header" Padding="10,6">
+                            <Grid ColumnDefinitions="Auto,*,Auto">
                                 <StackPanel
                                     Grid.Column="0"
-                                    IsVisible="{Binding IsTerminalVisible}"
                                     Orientation="Horizontal"
-                                    Spacing="8">
+                                    Spacing="8"
+                                    VerticalAlignment="Center">
                                     <materialIcons:MaterialIcon
+                                        Foreground="{DynamicResource PrimaryBrush}"
                                         Height="18"
                                         Kind="Terminal"
                                         Width="18" />
                                     <TextBlock
                                         FontWeight="SemiBold"
-                                        IsVisible="{Binding IsTerminalVisible}"
                                         Text="Терминал"
                                         VerticalAlignment="Center" />
                                 </StackPanel>
 
-                                <StackPanel Grid.Column="2" Orientation="Horizontal">
+                                <StackPanel
+                                    Grid.Column="2"
+                                    Orientation="Horizontal"
+                                    Spacing="4">
                                     <Button
-                                        Background="Transparent"
-                                        BorderThickness="0"
                                         Classes="window-control"
                                         Command="{Binding ChangeTerminalVisibilityCommand}"
-                                        Cursor="Hand"
-                                        IsVisible="{Binding IsTerminalVisible}"
-                                        Padding="8,4">
+                                        ToolTip.Tip="Свернуть терминал">
                                         <materialIcons:MaterialIcon
                                             Height="16"
-                                            IsVisible="{Binding IsTerminalVisible}"
                                             Kind="Minus"
                                             Width="16" />
                                     </Button>
                                     <Button
-                                        Background="Transparent"
-                                        BorderThickness="0"
                                         Classes="window-control close"
                                         Command="{Binding CloseTheTerminalCommand}"
-                                        Cursor="Hand"
-                                        IsVisible="{Binding IsTerminalVisible}"
-                                        Padding="8,4">
+                                        ToolTip.Tip="Закрыть терминал">
                                         <materialIcons:MaterialIcon
                                             Height="16"
-                                            IsVisible="{Binding IsTerminalVisible}"
                                             Kind="Close"
                                             Width="16" />
                                     </Button>
                                 </StackPanel>
                             </Grid>
                         </Border>
+
                         <controls:TerminalControl
-                            Background="{Binding #ThisWindow.Background}"
+                            Background="{DynamicResource TerminalBackgroundBrush}"
                             Focusable="True"
-                            Foreground="{Binding #ThisWindow.Foreground}"
+                            Foreground="{DynamicResource TerminalForegroundBrush}"
                             Grid.Row="1"
-                            IsVisible="{Binding IsTerminalVisible}"
-                            Margin="7,0"
+                            Margin="8,0"
                             MinHeight="100"
                             TerminalFontFamily="Cascadia Code"
-                            TerminalFontSize="14"
-                            x:Name="Terminal" />
+                            TerminalFontSize="{Binding TerminalFontSize}"
+                            x:Name="Terminal">
+                            <Interaction.Behaviors>
+                                <behaviors:TerminalZoomBehavior
+                                    DefaultFontSize="{Binding TerminalFontSize, Mode=OneTime}"
+                                    MaxFontSize="{Binding MaxFontSize, Mode=OneTime}"
+                                    MinFontSize="{Binding MinFontSize, Mode=OneTime}"
+                                    UpdateFontSizeCommand="{Binding UpdateTerminalFontSizeCommand}"
+                                    ZoomStep="1" />
+                            </Interaction.Behaviors>
+                        </controls:TerminalControl>
                     </Grid>
                 </Border>
             </Grid>
         </Grid>
-
-        <Border Grid.Row="2" />
     </Grid>
 </rxui:ReactiveWindow>

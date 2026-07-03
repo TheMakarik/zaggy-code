@@ -44,7 +44,6 @@ public class GameCodeStorageTests : IDisposable
     [Theory]
     [InlineData("/path/to/game.exe", Language.CSharp, ".cs")]
     [InlineData("/path/to/game.exe", Language.Lua, ".lua")]
-    [InlineData("/path/to/game.exe", Language.Python, ".py")]
     [InlineData("/path/to/script.lua", Language.Lua, ".lua")]
     [InlineData("/path/to/game", Language.CSharp, ".cs")]
     public async Task AddGameCode_WhenCalled_CreatesFileWithCorrectExtension(string gamePath, Language language, string expectedExtension)
@@ -66,7 +65,7 @@ public class GameCodeStorageTests : IDisposable
     [Theory]
     [InlineData("/path/to/game1.exe", "/path/to/game2.exe", Language.CSharp, ".cs")]
     [InlineData("/path/to/game1.exe", "/path/to/game2.exe", Language.Lua, ".lua")]
-    [InlineData("/path/to/script1.py", "/path/to/script2.py", Language.Python, ".py")]
+    [InlineData("/path/to/script1.py", "/path/to/script2.ss", Language.ShardScript, ".py")]
     public async Task AddGameCode_MultipleGames_CreatesSeparateFilesWithCorrectExtensions(
         string gamePath1, string gamePath2, Language language, string expectedExtension)
     {
@@ -102,7 +101,6 @@ public class GameCodeStorageTests : IDisposable
     [Theory]
     [InlineData(Language.CSharp, ".cs")]
     [InlineData(Language.Lua, ".lua")]
-    [InlineData(Language.Python, ".py")]
     public async Task AddGameCode_DifferentLanguages_CreatesFilesWithRespectiveExtensions(Language language, string expectedExtension)
     {
         // Arrange
@@ -133,7 +131,7 @@ public class GameCodeStorageTests : IDisposable
         // Act
         systemUnderTests.AddGameCode(gamePath, "csharp code", Language.CSharp);
         systemUnderTests.AddGameCode(gamePath, "lua code", Language.Lua);
-        systemUnderTests.AddGameCode(gamePath, "python code", Language.Python);
+        systemUnderTests.AddGameCode(gamePath, "ShardScript code", Language.ShardScript);
         await systemUnderTests.FlushUpdatesAsync();
         
         // Assert
@@ -143,7 +141,6 @@ public class GameCodeStorageTests : IDisposable
         var extensions = files.Select(Path.GetExtension).ToList();
         extensions.Should().Contain(".cs");
         extensions.Should().Contain(".lua");
-        extensions.Should().Contain(".py");
         
         var contents = new List<string>();
         foreach (var file in files)
@@ -164,7 +161,6 @@ public class GameCodeStorageTests : IDisposable
         {
             (Path: "/path/to/game1.exe", Lang: Language.CSharp, Code: "// Hello World\nConsole.WriteLine();"),
             (Path: "/path/to/game2.lua", Lang: Language.Lua, Code: "-- Lua script\nprint('hello')"),
-            (Path: "/path/to/game3.py", Lang: Language.Python, Code: "# Python code\nprint('hello')"),
             (Path: "/path/to/game4.exe", Lang: Language.CSharp, Code: "class Program {}"),
             (Path: "/path/to/game5.exe", Lang: Language.Lua, Code: "function test() end"),
         };
@@ -222,7 +218,7 @@ public class GameCodeStorageTests : IDisposable
     {
         // Arrange
         var gamePath = "/path/to/game.exe";
-        var language = Language.Python;
+        var language = Language.ShardScript;
         var expectedCode = "def main():\n    print('Hello')\n    return True";
         
         var systemUnderTests = new GameCodeStorage(_userStorageMock, _logger, _storageOptions);

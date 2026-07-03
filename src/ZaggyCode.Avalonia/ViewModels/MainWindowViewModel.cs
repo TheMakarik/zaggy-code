@@ -1,4 +1,4 @@
-﻿using DynamicData.Binding;
+using DynamicData.Binding;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -25,10 +25,12 @@ public partial class MainWindowViewModel : ViewModelBase
 
     [Reactive] private bool _isTerminalVisible = true;
     [Reactive] private bool _isTerminalExists = true;
-    [Reactive] private bool _isTerminalMaximized = true;
     [Reactive] private bool _isRunning = false;
+    [Reactive] private bool _useOsDecoration = false;
     [Reactive] private ExecutionSpeed _executionSpeed;
+    [Reactive] private Language _selectedLanguage;
     [Reactive] private int _textEditorFontSize;
+    [Reactive] private int _terminalFontSize;
 
     #endregion
 
@@ -71,7 +73,9 @@ public partial class MainWindowViewModel : ViewModelBase
         _factory = factory;
         _userStorage = userStorage;
         _executionSpeed = userStorage.Current.LastSpeed;
+        _selectedLanguage = userStorage.Current.LastLanguage;
         _textEditorFontSize = userStorage.Current.CodeFontSize;
+        _terminalFontSize = userStorage.Current.TerminalFontSize;
         _fontSizeOptions = textFontSize.Value;
         MaxFontSize = _fontSizeOptions.MaxFontSize;
         MinFontSize = _fontSizeOptions.MinFontSize;
@@ -97,6 +101,18 @@ public partial class MainWindowViewModel : ViewModelBase
             this.WhenAnyValue(vm => vm.TextEditorFontSize)
                 .Where(size => size != _userStorage.Current.CodeFontSize)
                 .Subscribe(onNext => userStorage.Current.CodeFontSize = _textEditorFontSize);
+
+            this.WhenAnyValue(vm => vm.TerminalFontSize)
+                .Where(size => size != _userStorage.Current.TerminalFontSize)
+                .Subscribe(onNext => userStorage.Current.TerminalFontSize = _terminalFontSize);
+
+            this.WhenAnyValue(vm => vm.ExecutionSpeed)
+                .Where(speed => speed != _userStorage.Current.LastSpeed)
+                .Subscribe(onNext => userStorage.Current.LastSpeed = _executionSpeed);
+
+            this.WhenAnyValue(vm => vm.SelectedLanguage)
+                .Where(language => language != _userStorage.Current.LastLanguage)
+                .Subscribe(onNext => userStorage.Current.LastLanguage = _selectedLanguage);
         });
 
     }
@@ -121,14 +137,14 @@ public partial class MainWindowViewModel : ViewModelBase
             {
                 var codeObservable = GetCodeToExecute.Handle(Unit.Default);
                 await using var scope = _factory.CreateAsyncScope();
-                var runner = scope.ServiceProvider.GetRequiredKeyedService<ILanguageRunner>(".cs");
+                var runner = scope.ServiceProvider.GetRequiredKeyedService<ILanguageRunner>(SelectedLanguage.GetLanguageExtension());
                 var code = await codeObservable;
 
                 Debug.Assert(TerminalReader is not null);
                 Debug.Assert(TerminalWriter is not null);
 
                 runner.RedirectIoStreams(TerminalReader, TerminalWriter);
-                runner.Execute(code, ExecutionSpeed.X2, new RobotMover(null!, null!, null!));
+                runner.Execute(code, ExecutionSpeed, new RobotMover(null!, null!, null!));
             }
             catch (Exception e)
             {
@@ -165,6 +181,38 @@ public partial class MainWindowViewModel : ViewModelBase
     private void UpdateFontSize(int fontSize)
     {
         TextEditorFontSize = fontSize;
+    }
+
+    [ReactiveCommand]
+    private void IncrementTerminalFontSize()
+    {
+        if (TerminalFontSize < MaxFontSize)
+            TerminalFontSize += 1;
+    }
+
+    [ReactiveCommand]
+    private void DecrementTerminalFontSize()
+    {
+        if (TerminalFontSize > MinFontSize)
+            TerminalFontSize -= 1;
+    }
+
+    [ReactiveCommand]
+    private void UpdateTerminalFontSize(int fontSize)
+    {
+        TerminalFontSize = fontSize;
+    }
+
+    [ReactiveCommand]
+    private void ChangeExecutionSpeed(ExecutionSpeed speed)
+    {
+        ExecutionSpeed = speed;
+    }
+
+    [ReactiveCommand]
+    private void ChangeLanguage(Language language)
+    {
+        SelectedLanguage = language;
     }
 
     #endregion

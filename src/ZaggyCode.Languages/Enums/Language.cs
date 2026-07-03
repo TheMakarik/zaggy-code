@@ -10,9 +10,6 @@ public enum Language
     [LanguageExtension(".lua")]
     Lua,
 
-    [LanguageExtension(".py")]
-    Python,
-
     [LanguageExtension(".ss")]
     ShardScript
 }

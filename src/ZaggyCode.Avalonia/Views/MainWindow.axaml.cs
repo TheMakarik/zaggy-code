@@ -25,6 +25,28 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
     public MainWindow()
     {
         InitializeComponent();
+
+        HeaderBar.PointerPressed += (_, e) =>
+        {
+            if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
+                BeginMoveDrag(e);
+        };
+
+        MinimizeButton.Click += (_, __) => WindowState = WindowState.Minimized;
+        MaximizeButton.Click += (_, __) =>
+            WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
+        CloseButton.Click += (_, __) => Close();
+
+        PropertyChanged += (_, args) =>
+        {
+            if (args.Property.Name == nameof(WindowState))
+            {
+                MaximizeIcon.Kind = WindowState == WindowState.Maximized
+                    ? Material.Icons.MaterialIconKind.WindowRestore
+                    : Material.Icons.MaterialIconKind.WindowMaximize;
+            }
+        };
+
         Terminal.CurrentSession = _terminalSession;
 
         TextReader reader = _terminalSession.Reader;
@@ -139,7 +161,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         base.OnLoaded(e);
 
 
-        var registryOptions = new RegistryOptions(ThemeName.VisualStudioLight);
+        var registryOptions = new RegistryOptions(ThemeName.VisualStudioDark);
         var textMateInstallation = Editor.InstallTextMate(registryOptions);
         textMateInstallation.SetGrammar(registryOptions.GetScopeByLanguageId(registryOptions.GetLanguageByExtension(".lua").Id));
 
