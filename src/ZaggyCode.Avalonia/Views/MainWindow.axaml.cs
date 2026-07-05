@@ -33,8 +33,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         };
 
         MinimizeButton.Click += (_, __) => WindowState = WindowState.Minimized;
-        MaximizeButton.Click += (_, __) =>
-            WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
+        MaximizeButton.Click += (_, __) => WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
         CloseButton.Click += (_, __) => Close();
 
         PropertyChanged += (_, args) =>
