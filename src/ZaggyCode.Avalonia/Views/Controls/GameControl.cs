@@ -30,21 +30,5 @@ public sealed class GameControl : ContentControl
         get => _robotEvents;
         set => SetAndRaise(RobotEventsProperty, ref _robotEvents, value);
     }
-
-    public GameControl()
-    {
-        UpdateMap();
-    }
-
-    private void UpdateMap()
-    {
-        if (_game is null)
-            return;
-        
-        _grid.Columns = _game.Map.Width;
-        _grid.Rows = _game.Map.Height;
-        _grid.Children.Clear();
-        
-        this.Content = _grid; 
-    }
+    
 }
