@@ -1,17 +1,3 @@
-using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Controls.Primitives;
-using Avalonia.Input;
-using Avalonia.Media;
-using Avalonia.Threading;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Globalization;
-using System.Threading;
-using ZaggyCode.Avalonia.Views.TerminalEngine;
-using ZaggyCode.Avalonia.Views.TerminalEngine.Session;
-
 namespace ZaggyCode.Avalonia.Views.Controls;
 
 public class TerminalControl : TemplatedControl, IDisposable

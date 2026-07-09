@@ -23,11 +23,11 @@ public class ShardScriptLanguageRunner(ILogger<ShardScriptLanguageRunner> logger
 
     public EventHandler<DebugLineUpdatedEventArgs>? DebugLineUpdated { get; set; }
 
-    public void Execute(string code, ExecutionSpeed speed, IRobotMover mover)
+    public void Execute(string code, ExecutionSpeed speed, IRobotExecutor executor)
     {
         using ShardScriptState state = new ShardScriptState(_options);
         RegisterIo(state.Context, _writer, _reader);
-        RegisterRobot(state.Context, mover);
+        RegisterRobot(state.Context, executor);
 
         state.AddSource("user_script", code);
         if (!state.TryCompile())
@@ -45,18 +45,27 @@ public class ShardScriptLanguageRunner(ILogger<ShardScriptLanguageRunner> logger
         _reader = input;
     }
 
-    private static void RegisterRobot(CompilationContext context, IRobotMover mover)
+    private static void RegisterRobot(CompilationContext context, IRobotExecutor executor)
     {
-        SymbolBuilder.CreateNamespace(context, "zaggy", ns =>
+        SymbolBuilder.CreateNamespace(context, "Robot", ns =>
         {
             ns.WithClass("Robot", cls =>
             {
                 cls.Public();
-
-                cls.WithMethod("Up", () => mover.Up());
-                cls.WithMethod("Down", () => mover.Down());
-                cls.WithMethod("Left", () => mover.Left());
-                cls.WithMethod("Right", () => mover.Right());
+                
+                cls.WithMethod("MoveUp", executor.MoveUp);
+                cls.WithMethod("MoveDown", executor.MoveDown);
+                cls.WithMethod("MoveLeft", executor.MoveLeft);
+                cls.WithMethod("MoveRight", executor.MoveRight);
+                cls.WithMethod("Draw", executor.Draw);
+                cls.WithMethod("CanMoveUp", executor.CanMoveUp);
+                cls.WithMethod("CanMoveDown", executor.CanMoveDown);
+                cls.WithMethod("CanMoveLeft", executor.CanMoveLeft);
+                cls.WithMethod("CanMoveRight", executor.CanMoveRight);
+                cls.WithMethod("IsWallFromUp", executor.IsWallFromUp);
+                cls.WithMethod("IsWallFromDown", executor.IsWallFromDown);
+                cls.WithMethod("IsWallFromLeft", executor.IsWallFromLeft);
+                cls.WithMethod("IsWallFromRight", executor.IsWallFromRight);
             });
         });
     }

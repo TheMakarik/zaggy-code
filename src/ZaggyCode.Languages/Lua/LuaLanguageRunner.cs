@@ -14,7 +14,9 @@ using ZaggyCode.Shared.Attributes;
 namespace ZaggyCode.Languages.Lua;
 
 [LanguageExtension(".lua")]
-public sealed class LuaLanguageRunner(ILogger<LuaLanguageRunner> logger, IOptions<SpeedMillisecondsOptions> options) : ILanguageRunner
+public sealed class LuaLanguageRunner(ILogger<LuaLanguageRunner> logger,
+    IOptions<SpeedMillisecondsOptions> speedOptions, 
+    IOptions<LuaPathsOptions> luaOptions) : ILanguageRunner
 {
     private readonly NLua.Lua _lua = new();
     
@@ -24,24 +26,10 @@ public sealed class LuaLanguageRunner(ILogger<LuaLanguageRunner> logger, IOption
     {
         _lua["__clr_input"] = input;
         _lua["__clr_output"] = output;
-        _lua.DoString(@"
-
-io.read = function()
-    return __clr_input:ReadLine()
-end
-
-io.write = function(text)
-    __clr_output:Write(tostring(text))
-end
-
-print = function(text)
-     __clr_output:WriteLine(tostring(text))
-end
-
-");
+        _lua["TABLE_CONTENT_CHECKER"] = true;
     }
 
-    public void Execute(string code, ExecutionSpeed speed, IRobotMover mover)
+    public void Execute(string code, ExecutionSpeed speed, IRobotExecutor executor)
     {
         //var speedMilliseconds = (int)options.GetType().GetProperty(speed.ToString()!)!.GetValue(speed)!;
         _lua.State.Encoding = Encoding.UTF8;

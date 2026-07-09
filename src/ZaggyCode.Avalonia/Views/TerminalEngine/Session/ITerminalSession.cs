@@ -1,8 +1,4 @@
-﻿using System;
-using System.Text;
-using ZaggyCode.Avalonia.Views.TerminalEngine.Interfaces;
-
-namespace ZaggyCode.Avalonia.Views.TerminalEngine.Session;
+﻿namespace ZaggyCode.Avalonia.Views.TerminalEngine.Session;
 
 /// <summary>
 /// Represents a terminal backend session that can provide output via a <see cref="TerminalScreenBuffer"/>

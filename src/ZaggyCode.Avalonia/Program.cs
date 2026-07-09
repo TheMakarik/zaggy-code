@@ -1,8 +1,4 @@
-﻿using Avalonia;
-using ReactiveUI.Avalonia;
-using System;
-
-namespace ZaggyCode.Avalonia;
+﻿namespace ZaggyCode.Avalonia;
 
 sealed class Program
 {

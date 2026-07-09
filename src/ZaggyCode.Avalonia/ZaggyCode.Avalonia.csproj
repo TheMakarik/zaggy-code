@@ -50,13 +50,16 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\ZaggyCode.Data\ZaggyCode.Data.csproj" />
-      <ProjectReference Include="..\ZaggyCode.Games\ZaggyCode.Games.csproj" />
+      <ProjectReference Include="..\ZaggyCode.Core\ZaggyCode.Core.csproj" />
     </ItemGroup>
 
     <ItemGroup>
       <None Remove="appsettings.json" />
       <Content Include="appsettings.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Languages\Lua\Documentation\NewFile1.txt" />
+      <Content Include="Languages\Lua\Documentation\NewFile1.txt">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
     </ItemGroup>

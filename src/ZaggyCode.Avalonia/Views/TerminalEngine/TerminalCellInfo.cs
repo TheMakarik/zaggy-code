@@ -1,8 +1,3 @@
-using System;
-using System.Diagnostics;
-using Avalonia.Media;
-using ZaggyCode.Avalonia.Views.TerminalEngine.Enums;
-
 namespace ZaggyCode.Avalonia.Views.TerminalEngine;
 
 [DebuggerDisplay("'{Character}'")]

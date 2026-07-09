@@ -13,11 +13,7 @@ using ZaggyCode.Languages.Interfaces;
 
 namespace ZaggyCode.Languages.CSharp;
 
-public record class CSharpLanguageRunnerScriptGlobals(
-    IRobotMover Robot,
-    TextWriter Output,
-    TextReader Input
-);
+
 
 [LanguageExtension(".cs")]
 public sealed partial class CSharpLanguageRunner(ILogger<CSharpLanguageRunner> logger) : ILanguageRunner
@@ -26,7 +22,7 @@ public sealed partial class CSharpLanguageRunner(ILogger<CSharpLanguageRunner> l
 
     private static readonly ScriptOptions scriptOptions = ScriptOptions.Default
         .WithImports("ZaggyCode.Languages.CSharp", "System")
-        .WithReferences([typeof(object).Assembly, typeof(Console).Assembly, typeof(CSharpLanguageRunner).Assembly, typeof(IRobotMover).Assembly, typeof(Task).Assembly]);
+        .WithReferences([typeof(object).Assembly, typeof(Console).Assembly, typeof(CSharpLanguageRunner).Assembly, typeof(IRobotExecutor).Assembly, typeof(Task).Assembly]);
 
     private TextWriter? Output;
     private TextReader? Input;
@@ -43,7 +39,7 @@ public sealed partial class CSharpLanguageRunner(ILogger<CSharpLanguageRunner> l
         Output = output;
     }
 
-    public void Execute(string code, ExecutionSpeed speed, IRobotMover mover)
+    public void Execute(string code, ExecutionSpeed speed, IRobotExecutor executor)
     {
         try
         {
@@ -75,7 +71,7 @@ public sealed partial class CSharpLanguageRunner(ILogger<CSharpLanguageRunner> l
                 return;
             }
 
-            CSharpLanguageRunnerScriptGlobals globals = new CSharpLanguageRunnerScriptGlobals(mover, Output, Input);
+            CSharpLanguageRunnerScriptGlobals globals = new CSharpLanguageRunnerScriptGlobals(executor, Output, Input);
             ScriptState state = script.RunAsync(globals, cts.Token).Result;
         }
         catch (TaskCanceledException)

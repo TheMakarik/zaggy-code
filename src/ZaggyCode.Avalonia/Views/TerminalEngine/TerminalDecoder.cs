@@ -1,13 +1,4 @@
-﻿using Avalonia;
-using Avalonia.Media;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using ZaggyCode.Avalonia.Views.TerminalEngine.Enums;
-using ZaggyCode.Avalonia.Views.TerminalEngine.Exceptions;
-using ZaggyCode.Avalonia.Views.TerminalEngine.Interfaces;
-
-namespace ZaggyCode.Avalonia.Views.TerminalEngine;
+﻿namespace ZaggyCode.Avalonia.Views.TerminalEngine;
 
 public sealed class TerminalDecoder : EscapeSequenceDecoder
 {

@@ -1,12 +1,4 @@
-﻿using System;
-using System.Buffers;
-using System.Collections.Concurrent;
-using System.IO;
-using System.Text;
-using System.Threading.Tasks;
-using ZaggyCode.Avalonia.Views.TerminalEngine.Interfaces;
-
-namespace ZaggyCode.Avalonia.Views.TerminalEngine.Session;
+﻿namespace ZaggyCode.Avalonia.Views.TerminalEngine.Session;
 
 public class ScriptCommandLineSession : ITerminalSession, IDisposable
 {

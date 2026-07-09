@@ -1,10 +1,4 @@
-﻿using Avalonia;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ZaggyCode.Avalonia.Views.TerminalEngine;
+﻿namespace ZaggyCode.Avalonia.Views.TerminalEngine;
 
 public sealed class TerminalScreenBuffer : IDisposable
 {

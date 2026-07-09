@@ -1,25 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Reflection;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using Serilog;
-using ZaggyCode.Avalonia.Options;
-using ZaggyCode.Data.Interfaces;
-using ZaggyCode.Data.Options;
-using ZaggyCode.Games.Interfaces;
-using ZaggyCode.Languages.Attributes;
-using ZaggyCode.Languages.Enums;
-using ZaggyCode.Languages.Options;
-using ZaggyCode.Shared.Attributes;
-using ZaggyCode.Shared.Extensions;
-using Scrutor;
-
 namespace ZaggyCode.Avalonia;
 
 public sealed class Bootstrapper
@@ -29,8 +7,6 @@ public sealed class Bootstrapper
         var builder = Host.CreateApplicationBuilder(args: Environment.GetCommandLineArgs());
         var assemblies = (IReadOnlyCollection<Assembly>)[
             typeof(Bootstrapper).Assembly,
-            typeof(IStorage).Assembly,
-            typeof(IGameEditor).Assembly,
             typeof(Language).Assembly];
 
         builder.Configuration.AddJsonFile("appsettings.json");
@@ -78,6 +54,7 @@ public sealed class Bootstrapper
             .AddOptions<FontSizeOptions>()
             .AddOptions<DefaultUser>()
             .AddOptions<StorageOptions>()
+            .AddOptions<LuaPathsOptions>()
             .AddOptions<SpeedMillisecondsOptions>();
         
         

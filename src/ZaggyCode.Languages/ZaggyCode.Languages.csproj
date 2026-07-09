@@ -17,7 +17,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\ZaggyCode.Games\ZaggyCode.Games.csproj" />
       <ProjectReference Include="..\ZaggyCode.Shared\ZaggyCode.Shared.csproj" />
     </ItemGroup>
 
@@ -25,6 +24,21 @@
       <Reference Include="Microsoft.Extensions.Options">
         <HintPath>..\..\..\..\.nuget\packages\microsoft.extensions.options\10.0.9\lib\net10.0\Microsoft.Extensions.Options.dll</HintPath>
       </Reference>
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Lua\RegisterRobot.lua" />
+      <Content Include="Lua\RegisterRobot.lua">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Lua\RegisterIORedirect.lua" />
+      <Content Include="Lua\RegisterIORedirect.lua">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Lua\RegisterIncorrentWriteNameChecker.lua" />
+      <Content Include="Lua\RegisterIncorrentWriteNameChecker.lua">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
     </ItemGroup>
 
 </Project>

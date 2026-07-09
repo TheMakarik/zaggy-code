@@ -1,9 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Text;
-using ZaggyCode.Avalonia.Views.TerminalEngine.Session;
-
-namespace ZaggyCode.Avalonia.Views.TerminalEngine;
+﻿namespace ZaggyCode.Avalonia.Views.TerminalEngine;
 
 /// <summary>
 /// A <see cref="TextReader"/> implementation that reads character input directly from an <see cref="ITerminalSession"/>.

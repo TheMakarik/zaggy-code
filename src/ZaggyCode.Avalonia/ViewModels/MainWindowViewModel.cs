@@ -1,21 +1,3 @@
-using DynamicData.Binding;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using ReactiveUI;
-using ReactiveUI.SourceGenerators;
-using System;
-using System.Diagnostics;
-using System.IO;
-using System.Reactive;
-using System.Reactive.Linq;
-using System.Threading.Tasks;
-using ZaggyCode.Avalonia.Options;
-using ZaggyCode.Data.Interfaces;
-using ZaggyCode.Games;
-using ZaggyCode.Languages.Enums;
-using ZaggyCode.Languages.Interfaces;
-
 namespace ZaggyCode.Avalonia.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
@@ -144,7 +126,7 @@ public partial class MainWindowViewModel : ViewModelBase
                 Debug.Assert(TerminalWriter is not null);
 
                 runner.RedirectIoStreams(TerminalReader, TerminalWriter);
-                runner.Execute(code, ExecutionSpeed, new RobotMover(null!, null!, null!));
+                runner.Execute(code, ExecutionSpeed, new RobotExecutor(null!, null!, null!));
             }
             catch (Exception e)
             {

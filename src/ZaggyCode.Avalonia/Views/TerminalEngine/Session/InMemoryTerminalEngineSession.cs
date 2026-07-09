@@ -1,8 +1,4 @@
-﻿using System;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ZaggyCode.Avalonia.Views.TerminalEngine.Session;
+﻿namespace ZaggyCode.Avalonia.Views.TerminalEngine.Session;
 
 /// <summary>
 /// An in-memory terminal session that emulates a basic command line shell (CLI).

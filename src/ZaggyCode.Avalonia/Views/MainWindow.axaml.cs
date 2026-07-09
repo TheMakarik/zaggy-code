@@ -1,16 +1,3 @@
-using Avalonia.Controls;
-using Avalonia.Interactivity;
-using AvaloniaEdit.TextMate;
-using ReactiveUI.Avalonia;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Reactive;
-using System.Reactive.Linq;
-using TextMateSharp.Grammars;
-using ZaggyCode.Avalonia.ViewModels;
-using ZaggyCode.Avalonia.Views.TerminalEngine.Session;
-
 namespace ZaggyCode.Avalonia.Views;
 
 public partial class MainWindow : ReactiveWindow<MainWindowViewModel>

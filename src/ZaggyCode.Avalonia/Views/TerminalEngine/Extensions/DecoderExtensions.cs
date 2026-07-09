@@ -1,8 +1,4 @@
-﻿using System;
-using System.Text;
-using ZaggyCode.Avalonia.Views.TerminalEngine.Interfaces;
-
-namespace ZaggyCode.Avalonia.Views.TerminalEngine.Extensions;
+﻿namespace ZaggyCode.Avalonia.Views.TerminalEngine.Extensions;
 
 public static class DecoderExtensions
 {

@@ -1,9 +1,3 @@
-using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Controls.Primitives;
-using ZaggyCode.Games.Events;
-using ZaggyCode.Games.Models;
-
 namespace ZaggyCode.Avalonia.Views.Controls;
 
 public sealed class GameControl : ContentControl

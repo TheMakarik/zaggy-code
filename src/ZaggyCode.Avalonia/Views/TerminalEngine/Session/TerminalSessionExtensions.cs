@@ -1,8 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Text;
-
-namespace ZaggyCode.Avalonia.Views.TerminalEngine.Session;
+﻿namespace ZaggyCode.Avalonia.Views.TerminalEngine.Session;
 
 /// <summary>
 /// Convenience extension methods for working with <see cref="ITerminalSession"/>:

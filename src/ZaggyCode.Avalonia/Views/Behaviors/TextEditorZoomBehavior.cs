@@ -1,11 +1,3 @@
-using System;
-using System.Windows.Input;
-using Avalonia;
-using Avalonia.Input;
-using Avalonia.Interactivity;
-using Avalonia.Xaml.Interactivity;
-using AvaloniaEdit;
-
 namespace ZaggyCode.Avalonia.Views.Behaviors;
 
 public class TextEditorZoomBehavior : Behavior<TextEditor>

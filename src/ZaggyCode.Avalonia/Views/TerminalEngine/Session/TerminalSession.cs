@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using ZaggyCode.Avalonia.Views.TerminalEngine.Interfaces;
-
-namespace ZaggyCode.Avalonia.Views.TerminalEngine.Session;
+﻿namespace ZaggyCode.Avalonia.Views.TerminalEngine.Session;
 
 /// <summary>
 /// Base implementation of <see cref="ITerminalSession"/> that owns a <see cref="TerminalScreenBuffer"/>
