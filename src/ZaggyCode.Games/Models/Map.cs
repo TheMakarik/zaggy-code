@@ -6,9 +6,11 @@ using System.Xml.Serialization;
 
 namespace ZaggyCode.Games.Models;
 
+[XmlRoot("map")]
 public sealed class Map : INotifyPropertyChanged, INotifyCollectionChanged
 {
-    [XmlArray("point")]
+    [XmlArray("points-collection")]
+    [XmlArrayItem("point")]
     public required ObservableCollection<Point> Points 
     { 
         get;
@@ -18,7 +20,13 @@ public sealed class Map : INotifyPropertyChanged, INotifyCollectionChanged
             if (!SetField(ref field, value))
                 return;
             
-            oldCollection.CollectionChanged -= OnPointsCollectionChanged;
+            #pragma warning disable ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+            
+            if(oldCollection is not null)
+                oldCollection.CollectionChanged -= OnPointsCollectionChanged;
+            
+            #pragma warning restore ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+            
             value.CollectionChanged += OnPointsCollectionChanged;
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
         }

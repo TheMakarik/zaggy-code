@@ -6,6 +6,7 @@ using System.Xml.Serialization;
 using ZaggyCode.Games.Enums;
 
 namespace ZaggyCode.Games.Models;
+
 [XmlRoot("game")]
 public sealed class Game : INotifyPropertyChanged, INotifyCollectionChanged
 {
@@ -21,7 +22,8 @@ public sealed class Game : INotifyPropertyChanged, INotifyCollectionChanged
     [XmlAttribute("author")]
     public string? Author { get; set => SetField(ref field, value); }
     
-    [XmlElement("maps")]
+    [XmlArray("maps-collection")]
+    [XmlArrayItem("map")]
     public required ObservableCollection<Map> Maps 
     { 
         get;
@@ -31,7 +33,14 @@ public sealed class Game : INotifyPropertyChanged, INotifyCollectionChanged
             if (!SetField(ref field, value))
                 return;
             
-            oldCollection.CollectionChanged -= OnMapsCollectionChanged;
+#pragma warning disable ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+            
+            if(oldCollection is not null)
+                oldCollection.CollectionChanged -= OnMapsCollectionChanged;
+            
+#pragma warning restore ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+
+            
             value.CollectionChanged += OnMapsCollectionChanged;
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
         }

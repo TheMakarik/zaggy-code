@@ -5,6 +5,7 @@ using ZaggyCode.Games.Enums;
 
 namespace ZaggyCode.Games.Models;
 
+[XmlRoot("point")]
 public class Point : INotifyPropertyChanged
 {
     [XmlAttribute("x")]
@@ -17,12 +18,15 @@ public class Point : INotifyPropertyChanged
     public WallType WallType { get; set => SetField(ref field, value); }
     
     [XmlAttribute("want-draw")]
+    [DefaultValue(false)]
     public bool RequireDraw { get; set => SetField(ref field, value); }
     
     [XmlAttribute("spawn")]
+    [DefaultValue(false)]
     public bool IsSpawn { get; set => SetField(ref field, value); }
     
     [XmlAttribute("coin")]
+    [DefaultValue(false)]
     public bool HasCoin { get; set => SetField(ref field, value); }
 
     public event PropertyChangedEventHandler? PropertyChanged;
