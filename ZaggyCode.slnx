@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/ZaggyCode.Avalonia/ZaggyCode.Avalonia.csproj" />
+    <Project Path="src/ZaggyCode.Core/ZaggyCode.Core.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests\ZaggyCode.Core.Tests\ZaggyCode.Core.Tests.csproj" />
+  </Folder>
+</Solution>
