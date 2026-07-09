@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Xml.Serialization;
+using ZaggyCode.Games.Enums;
 
 namespace ZaggyCode.Games.Models;
 
@@ -12,8 +13,8 @@ public class Point : INotifyPropertyChanged
     [XmlAttribute("y")]
     public int Y { get; set => SetField(ref field, value); }
     
-    [XmlAttribute("wall")]
-    public bool IsWall { get; set => SetField(ref field, value); }
+    [XmlAttribute("wall-type")]
+    public WallType WallType { get; set => SetField(ref field, value); }
     
     [XmlAttribute("want-draw")]
     public bool RequireDraw { get; set => SetField(ref field, value); }
