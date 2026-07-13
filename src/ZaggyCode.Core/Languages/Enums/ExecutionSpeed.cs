@@ -6,4 +6,5 @@ public enum ExecutionSpeed
     X2,
     X5,
     X10,
+    X20
 }

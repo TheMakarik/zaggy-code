@@ -1,8 +1,10 @@
+using ZaggyCode.Core.Languages.EventArgs;
+using ZaggyCode.Core.Languages.Exceptions;
+
 namespace ZaggyCode.Avalonia.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
 {
-
     #region Reactive properties
 
     [Reactive] private bool _isTerminalVisible = true;
@@ -32,6 +34,8 @@ public partial class MainWindowViewModel : ViewModelBase
     public readonly Interaction<Unit, Unit> ClearTerminalContent = new();
     public readonly Interaction<Unit, Unit> BackGridToNormal = new();
     public readonly Interaction<Unit, string> GetCodeToExecute = new();
+    public readonly Interaction<int, Unit> UpdateCodeLine = new();
+    public readonly Interaction<Unit, Unit> StopCodeExecution = new();
 
     #endregion
 
@@ -41,6 +45,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly IUserStorage _userStorage;
     private readonly FontSizeOptions _fontSizeOptions;
     private readonly ILogger<MainWindowViewModel> _logger;
+    private CancellationTokenSource? _cancellationTokenSource;
 
     #endregion
 
@@ -63,11 +68,9 @@ public partial class MainWindowViewModel : ViewModelBase
         MinFontSize = _fontSizeOptions.MinFontSize;
         _logger = logger;
 
-
-
         this.WhenAnyPropertyChanged().Subscribe(context =>
         {
-
+#pragma warning disable AsyncVoidMethod
             this.WhenAnyValue(vm => vm.IsTerminalVisible)
                 .Where(isVisible => !isVisible)
                 .Subscribe(async void (onNext) => await ResizeGridToMax.Handle(Unit.Default));
@@ -95,8 +98,8 @@ public partial class MainWindowViewModel : ViewModelBase
             this.WhenAnyValue(vm => vm.SelectedLanguage)
                 .Where(language => language != _userStorage.Current.LastLanguage)
                 .Subscribe(onNext => userStorage.Current.LastLanguage = _selectedLanguage);
+#pragma warning restore AsyncVoidMethod
         });
-
     }
 
     #endregion
@@ -115,24 +118,9 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         _ = Task.Factory.StartNew(async () =>
         {
-            try
-            {
-                var codeObservable = GetCodeToExecute.Handle(Unit.Default);
-                await using var scope = _factory.CreateAsyncScope();
-                var runner = scope.ServiceProvider.GetRequiredKeyedService<ILanguageRunner>(SelectedLanguage.GetLanguageExtension());
-                var code = await codeObservable;
-
-                Debug.Assert(TerminalReader is not null);
-                Debug.Assert(TerminalWriter is not null);
-
-                runner.RedirectIoStreams(TerminalReader, TerminalWriter);
-                runner.Execute(code, ExecutionSpeed, new RobotExecutor(null!, null!, null!));
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e, "Error while running code");
-            }
-
+            await PrepareExecution();
+            await RunCode();
+            await FinalizeExecution();
         }, TaskCreationOptions.LongRunning);
     }
 
@@ -143,14 +131,12 @@ public partial class MainWindowViewModel : ViewModelBase
             TextEditorFontSize += 1;
     }
 
-
     [ReactiveCommand]
     private void DecrementEditorFontSize()
     {
         if (TextEditorFontSize > MinFontSize)
             TextEditorFontSize -= 1;
     }
-
 
     [ReactiveCommand]
     private void ChangeTerminalVisibility()
@@ -199,13 +185,88 @@ public partial class MainWindowViewModel : ViewModelBase
 
     #endregion
 
-    #region Static and private methods
+    #region Private methods
 
+    private async Task PrepareExecution()
+    {
+        lock (this)
+        {
+            if (_isRunning)
+            {
+                _cancellationTokenSource?.Cancel();
+                _cancellationTokenSource?.Dispose();
+                _cancellationTokenSource = new CancellationTokenSource();
+            }
+            else
+            {
+                _isRunning = true;
+                _cancellationTokenSource = new CancellationTokenSource();
+            }
+        }
+
+        await StopCodeExecution.Handle(Unit.Default);
+    }
+
+    private async Task RunCode()
+    {
+        try
+        {
+            var code = await GetCodeToExecute.Handle(Unit.Default);
+            
+            await using var scope = _factory.CreateAsyncScope();
+            var runner = scope.ServiceProvider.GetRequiredKeyedService<ILanguageRunner>(SelectedLanguage.GetLanguageExtension());
+
+            Debug.Assert(TerminalReader is not null);
+            Debug.Assert(TerminalWriter is not null);
+
+            runner.DebugLineUpdated += OnDebugLineUpdated;
+            runner.CodeErrorOccurred += OnCodeErrorOccurred;
+                
+            Debug.Assert(_cancellationTokenSource is not null);;
+
+            runner
+                .RedirectIo(TerminalReader, TerminalWriter)
+                .SetExecutor(null!)
+                .SetSpeed(ExecutionSpeed)
+                .Execute(code, _cancellationTokenSource.Token);
+        }
+        catch (LuaIncorrectlyWroteNameException e)
+        {
+            await TerminalWriter!.WriteLineAsync(
+                $"{e.Actual} не существуект, возможно вы имели ввиде {e.Suggestion}? \nДля отключение автоматического остановления программы при nil:  TABLE_CONTENT_CHECKER = false");
+        }
+        catch (OperationCanceledException)
+        {
+            _logger.LogDebug("Code execution was cancelled");
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error while running code");
+        }
+    }
+
+    private async Task FinalizeExecution()
+    {
+        lock (this)
+        {
+            _isRunning = false;
+            _cancellationTokenSource?.Dispose();
+            _cancellationTokenSource = null;
+        }
+        
+        await StopCodeExecution.Handle(Unit.Default);
+    }
+#pragma warning disable AsyncVoidEventHandlerMethod
+    private async void OnDebugLineUpdated(object? sender, DebugLineUpdatedEventArgs args)
+#pragma warning restore AsyncVoidEventHandlerMethod
+    {
+        await UpdateCodeLine.Handle(args.LineNumber);
+    }
+
+    private void OnCodeErrorOccurred(object? sender, CodeErrorOccurredEventArgs args)
+    {
+        _logger.LogError("Code error: {Text}", args.Text);
+    }
 
     #endregion
-
-
-
-
-
 }

@@ -1,5 +1,4 @@
-﻿using ShardScript.Syntax.Builders;
-
+﻿/*
 namespace ZaggyCode.Core.Languages.ShardScript;
 
 [LanguageExtension(".ss")]
@@ -13,6 +12,7 @@ public class ShardScriptLanguageRunner(ILogger<ShardScriptLanguageRunner> logger
     private TextReader? _reader = null;
 
     public EventHandler<DebugLineUpdatedEventArgs>? DebugLineUpdated { get; set; }
+    public EventHandler<CodeErrorOccurredEventArgs>? CodeErrorOccurred { get; set; }
 
     public void Execute(string code, ExecutionSpeed speed, IRobotExecutor executor)
     {
@@ -30,7 +30,7 @@ public class ShardScriptLanguageRunner(ILogger<ShardScriptLanguageRunner> logger
         state.Run();
     }
 
-    public void RedirectIoStreams(TextReader input, TextWriter output)
+    public void RedirectIo(TextReader input, TextWriter output)
     {
         _writer = output;
         _reader = input;
@@ -79,4 +79,10 @@ public class ShardScriptLanguageRunner(ILogger<ShardScriptLanguageRunner> logger
     {
 
     }
+
+    public async ValueTask DisposeAsync()
+    {
+        // TODO release managed resources here
+    }
 }
+*/

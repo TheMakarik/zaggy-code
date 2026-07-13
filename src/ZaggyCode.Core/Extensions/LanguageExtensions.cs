@@ -1,4 +1,4 @@
-namespace ZaggyCode.Core.Languages.Extensions;
+namespace ZaggyCode.Core.Extensions;
 
 public static class LanguageExtensions
 {

@@ -54,3 +54,4 @@ function robot.is_wall_from_right()
 end
 
 package.preload["robot"] = robot;
+__debug("Robot was added to preload package successfully")

@@ -1,13 +1,16 @@
+using Avalonia.Markup.Xaml.MarkupExtensions;
+using ZaggyCode.Avalonia.Views.TextEditing;
+
 namespace ZaggyCode.Avalonia.Views;
 
 public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
 {
     private RowDefinition[]? _savedRowDefinitions = null;
-    private Dictionary<object, int> _originalRows = [];
+    private readonly Dictionary<object, int> _originalRows = [];
     private bool _isMaximized = false;
     private bool _isTerminalMaximized = false;
-    private ScriptCommandLineSession _terminalSession = new ScriptCommandLineSession();
-
+    private readonly ScriptCommandLineSession _terminalSession = new ScriptCommandLineSession();
+    private LineHighlighter? _currentHighlighter;
 
     public MainWindow()
     {
@@ -59,6 +62,44 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
                 context.SetOutput(Unit.Default);
             });
 
+            ViewModel.UpdateCodeLine.RegisterHandler(context =>
+            {
+                var lineNumber = context.Input; 
+                
+                var wasFoundColor = Application.Current!.TryFindResource("ForegroundDarkColor", out var color);
+                Debug.Assert(wasFoundColor);
+
+                this.Dispatcher.Invoke(() =>
+                {
+                    if (_currentHighlighter is not null)
+                    {
+                        Editor.TextArea.TextView.BackgroundRenderers.Remove(_currentHighlighter);
+                        _currentHighlighter = null;
+                    }
+                    
+                    _currentHighlighter = new LineHighlighter(lineNumber, (Color)color!);
+                    Editor.TextArea.TextView.BackgroundRenderers.Add(_currentHighlighter);
+                    Editor.TextArea.TextView.Redraw();
+                });
+           
+                context.SetOutput(Unit.Default);
+            });
+
+            ViewModel.StopCodeExecution.RegisterHandler(context =>
+            {
+                this.Dispatcher.Invoke(() =>
+                {
+                    if (_currentHighlighter is not null)
+                    {
+                        Editor.TextArea.TextView.BackgroundRenderers.Remove(_currentHighlighter);
+                        _currentHighlighter = null;
+                        Editor.TextArea.TextView.Redraw();
+                    }
+                });
+                
+                context.SetOutput(Unit.Default);
+            });
+
             ViewModel.ResizeGridToMax.RegisterHandler(context =>
             {
                 if (!_isMaximized && !_isTerminalMaximized)
@@ -87,7 +128,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
 
             ViewModel.BackGridToNormal.RegisterHandler(context =>
             {
-                if (_savedRowDefinitions != null)
+                if (_savedRowDefinitions is not null)
                 {
                     MainContentGrid.RowDefinitions.Clear();
                     foreach (var rowDef in _savedRowDefinitions)
@@ -146,10 +187,9 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
     {
         base.OnLoaded(e);
 
-
         var registryOptions = new RegistryOptions(ThemeName.VisualStudioDark);
         var textMateInstallation = Editor.InstallTextMate(registryOptions);
         textMateInstallation.SetGrammar(registryOptions.GetScopeByLanguageId(registryOptions.GetLanguageByExtension(".lua").Id));
-
     }
 }
+

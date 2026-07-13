@@ -1,15 +1,14 @@
-#:project ../../src/ZaggyCode.Games
+#:project ../../src/ZaggyCode.Core
 
 #pragma warning  disable IL2026
 #pragma warning  disable IL3050
 
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Drawing;
 using System.Xml.Serialization;
-using ZaggyCode.Games;
-using ZaggyCode.Games.Enums;
-using ZaggyCode.Games.Models;
+using ZaggyCode.Core.Game.Enums;
+using ZaggyCode.Core.Game.Models;
+using Point = System.Drawing.Point;
 
 var map1 = CreateMap(verticalLength: 3, horizontalLength: 2, startX: 9, startY: 9);
 var map2 = CreateMap(verticalLength: 5, horizontalLength: 3, startX: 9, startY: 9);

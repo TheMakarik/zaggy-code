@@ -28,6 +28,10 @@
       <Content Include="Languages\Lua\RegisterRobot.lua">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
+      <None Remove="Languages\Lua\SetNewLineHook.lua" />
+      <Content Include="Languages\Lua\SetNewLineHook.lua">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
     </ItemGroup>
 
     <ItemGroup>

@@ -1,7 +1,5 @@
-﻿using SyntaxNode = Microsoft.CodeAnalysis.SyntaxNode;
-
+﻿/*
 namespace ZaggyCode.Core.Languages.CSharp;
-
 
 [LanguageExtension(".cs")]
 public sealed partial class CSharpLanguageRunner(ILogger<CSharpLanguageRunner> logger) : ILanguageRunner
@@ -21,7 +19,9 @@ public sealed partial class CSharpLanguageRunner(ILogger<CSharpLanguageRunner> l
         set;
     }
 
-    public void RedirectIoStreams(TextReader input, TextWriter output)
+    public EventHandler<CodeErrorOccurredEventArgs>? CodeErrorOccurred { get; set; }
+
+    public void RedirectIo(TextReader input, TextWriter output)
     {
         Input = input;
         Output = output;
@@ -121,4 +121,10 @@ public sealed partial class CSharpLanguageRunner(ILogger<CSharpLanguageRunner> l
             return node.WithMembers(newMembers);
         }
     }
+
+    public async ValueTask DisposeAsync()
+    {
+        // TODO release managed resources here
+    }
 }
+*/

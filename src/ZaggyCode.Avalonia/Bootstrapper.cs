@@ -37,7 +37,7 @@ public sealed class Bootstrapper
             .AddClasses(c => c.WithAttribute<LanguageExtensionAttribute>())
             .AsImplementedInterfaces()
             .WithServiceKey(type => type.GetCustomAttribute<LanguageExtensionAttribute>()!.Extension)
-            .WithSingletonLifetime()
+            .WithScopedLifetime()
             
             .AddClasses(c => c.Where(t => 
                 !t.IsAssignableTo(typeof(IDisposable)) && 

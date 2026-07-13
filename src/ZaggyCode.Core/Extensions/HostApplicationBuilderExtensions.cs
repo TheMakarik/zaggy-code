@@ -1,6 +1,3 @@
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-
 namespace ZaggyCode.Core.Extensions;
 
 public static class HostApplicationBuilderExtensions

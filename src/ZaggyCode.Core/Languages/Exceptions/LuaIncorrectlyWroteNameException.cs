@@ -1,6 +1,6 @@
 namespace ZaggyCode.Core.Languages.Exceptions;
 
-public sealed class IncorrectlyWroteNameException(string actual, string suggestion) : Exception
+public sealed class LuaIncorrectlyWroteNameException(string actual, string suggestion) : Exception
 {
     public override string Message => $"{Actual} is not exists. Maybe you mean {Suggestion}";
 

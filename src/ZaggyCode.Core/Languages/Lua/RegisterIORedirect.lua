@@ -10,3 +10,5 @@ end
 print = function(text)
     __clr_output:WriteLine(tostring(text))
 end
+
+__debug("IO Was redirected")
