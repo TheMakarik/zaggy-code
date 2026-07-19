@@ -1,11 +1,3 @@
-using Avalonia.Data.Converters;
-using Avalonia.Markup.Xaml;
-using System;
-using System.Globalization;
-using System.Linq;
-using System.Reflection;
-using ZaggyCode.Languages.Attributes;
-
 namespace ZaggyCode.Avalonia.Views.Converters;
 
 public class EnumValuesConverter : MarkupExtension, IValueConverter

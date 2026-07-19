@@ -1,11 +1,3 @@
-using Avalonia;
-using Avalonia.Input;
-using Avalonia.Interactivity;
-using Avalonia.Xaml.Interactivity;
-using System;
-using System.Windows.Input;
-using VirtualTerminal;
-
 namespace ZaggyCode.Avalonia.Views.Behaviors;
 
 public class TerminalZoomBehavior : Behavior<TerminalControl>

@@ -1,17 +1,3 @@
-using System;
-using System.Linq;
-using System.Threading.Tasks;
-using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Markup.Xaml;
-using Avalonia.Media;
-using Avalonia.Styling;
-using Avalonia.Threading;
-using Microsoft.Extensions.DependencyInjection;
-using ZaggyCode.Avalonia.ViewModels;
-using ZaggyCode.Avalonia.Views;
-
 namespace ZaggyCode.Avalonia;
 
 public partial class App : Application

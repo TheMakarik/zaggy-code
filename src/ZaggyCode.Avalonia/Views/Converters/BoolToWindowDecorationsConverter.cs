@@ -1,10 +1,3 @@
-using Avalonia.Controls;
-using Avalonia.Data.Converters;
-using Avalonia.Markup.Xaml;
-using System;
-using System.Globalization;
-using Material.Icons;
-
 namespace ZaggyCode.Avalonia.Views.Converters;
 
 public class BoolToWindowDecorationsConverter : MarkupExtension, IValueConverter
