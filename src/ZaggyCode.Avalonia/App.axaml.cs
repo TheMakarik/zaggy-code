@@ -30,7 +30,7 @@ public partial class App : Application
 
       
         desktop.MainWindow = new MainWindow();
-        var loading = new Window();
+        Window loading = new Window();
         loading.Show();
         new Bootstrapper()
             .LoadApplicationAsync()

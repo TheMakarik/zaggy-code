@@ -9,7 +9,7 @@ public sealed class SealedClassesTests
     public void AllClasses_MustBeSealed()
     {
         //Arrange
-        var classes = Assembly.GetAssembly(typeof(GameCodeStorage))!
+        IEnumerable<Type> classes = Assembly.GetAssembly(typeof(GameCodeStorage))!
             .GetTypes()!
             .Where(type => type is { IsClass: true, IsAbstract: false });
 

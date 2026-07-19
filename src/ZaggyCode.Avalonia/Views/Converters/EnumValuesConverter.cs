@@ -16,7 +16,7 @@ public class EnumValuesConverter : MarkupExtension, IValueConverter
 
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
-        var type = value as Type ?? EnumType;
+        Type? type = value as Type ?? EnumType;
         if (type is null || !type.IsEnum)
             return Array.Empty<object>();
         
@@ -24,8 +24,8 @@ public class EnumValuesConverter : MarkupExtension, IValueConverter
             .Where(f => !f.IsSpecialName) //скрыть value__ - настоящие чисдовое значение у System.Enum
             .Select(f =>
         {
-            
-            var attribute = f.GetCustomAttribute<LanguagePrettyNameAttribute>();
+
+            LanguagePrettyNameAttribute? attribute = f.GetCustomAttribute<LanguagePrettyNameAttribute>();
             return attribute is not null 
                 ? attribute.Name
                 : f.Name;

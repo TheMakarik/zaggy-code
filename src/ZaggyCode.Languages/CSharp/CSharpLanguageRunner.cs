@@ -91,11 +91,11 @@ public sealed partial class CSharpLanguageRunner(ILogger<CSharpLanguageRunner> l
 
     private static string ApplySleep(string code, int delayMs)
     {
-        var tree = CSharpSyntaxTree.ParseText(code);
-        var root = tree.GetRoot();
+        SyntaxTree tree = CSharpSyntaxTree.ParseText(code);
+        SyntaxNode root = tree.GetRoot();
 
-        var rewriter = new LineDelayRewriter(delayMs);
-        var modifiedRoot = rewriter.Visit(root);
+        LineDelayRewriter rewriter = new LineDelayRewriter(delayMs);
+        SyntaxNode modifiedRoot = rewriter.Visit(root);
         string modifiedCode = modifiedRoot.ToFullString();
 
         return modifiedCode;
@@ -120,15 +120,15 @@ public sealed partial class CSharpLanguageRunner(ILogger<CSharpLanguageRunner> l
 
         public override SyntaxNode? VisitCompilationUnit(CompilationUnitSyntax node)
         {
-            var newMembers = SyntaxFactory.List<MemberDeclarationSyntax>();
-            foreach (var member in node.Members)
+            SyntaxList<MemberDeclarationSyntax> newMembers = SyntaxFactory.List<MemberDeclarationSyntax>();
+            foreach (MemberDeclarationSyntax member in node.Members)
             {
                 newMembers = newMembers.Add((MemberDeclarationSyntax)Visit(member));
                 if (member is GlobalStatementSyntax globalStatement)
                 {
                     if (globalStatement.Statement is ExpressionStatementSyntax)
                     {
-                        var delayStatement = SyntaxFactory.ParseStatement($"System.Threading.Tasks.Task.Delay({_delayMs}).Wait();\r\n");
+                        StatementSyntax delayStatement = SyntaxFactory.ParseStatement($"System.Threading.Tasks.Task.Delay({_delayMs}).Wait();\r\n");
                         newMembers = newMembers.Add(SyntaxFactory.GlobalStatement(delayStatement));
                     }
                 }

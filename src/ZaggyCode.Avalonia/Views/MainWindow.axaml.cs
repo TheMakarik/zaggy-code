@@ -1,6 +1,8 @@
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using AvaloniaEdit.TextMate;
+using ReactiveUI;
 using ReactiveUI.Avalonia;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -8,8 +10,8 @@ using System.IO;
 using System.Reactive;
 using System.Reactive.Linq;
 using TextMateSharp.Grammars;
+using VirtualTerminal.Session;
 using ZaggyCode.Avalonia.ViewModels;
-using ZaggyCode.Avalonia.Views.TerminalEngine.Session;
 
 namespace ZaggyCode.Avalonia.Views;
 
@@ -21,10 +23,23 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
     private bool _isTerminalMaximized = false;
     private ScriptCommandLineSession _terminalSession = new ScriptCommandLineSession();
 
-
     public MainWindow()
     {
         InitializeComponent();
+
+        Editor.TextArea.KeyBindings.Add(new KeyBinding
+        {
+            Gesture = new KeyGesture(Key.V, KeyModifiers.Control),
+            Command = ReactiveCommand.Create(() =>
+            {
+                IAsyncDataTransfer? clipboardData = Clipboard?.TryGetDataAsync().Result;
+                var textData = clipboardData?.TryGetTextAsync().Result;
+                if (textData != null)
+                {
+                    Editor.Text = textData;
+                }
+            })
+        });
 
         HeaderBar.PointerPressed += (_, e) =>
         {
@@ -83,7 +98,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
                     MainContentGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) });
                     MainContentGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(0, GridUnitType.Pixel) });
 
-                    foreach (var child in MainContentGrid.Children)
+                    foreach (Control child in MainContentGrid.Children)
                     {
                         if (child is GridSplitter)
                             Grid.SetRow(child, 1);
@@ -103,10 +118,10 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
                 if (_savedRowDefinitions != null)
                 {
                     MainContentGrid.RowDefinitions.Clear();
-                    foreach (var rowDef in _savedRowDefinitions)
+                    foreach (RowDefinition rowDef in _savedRowDefinitions)
                         MainContentGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(rowDef.Height.Value, rowDef.Height.GridUnitType) });
 
-                    foreach (var child in MainContentGrid.Children)
+                    foreach (Control child in MainContentGrid.Children)
                     {
                         if (_originalRows.TryGetValue(child, out int originalRow))
                         {
@@ -148,7 +163,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
             };
         }
 
-        foreach (var child in MainContentGrid.Children)
+        foreach (Control child in MainContentGrid.Children)
         {
             var currentRow = Grid.GetRow(child);
             _originalRows[child] = currentRow;
@@ -160,8 +175,8 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         base.OnLoaded(e);
 
 
-        var registryOptions = new RegistryOptions(ThemeName.VisualStudioDark);
-        var textMateInstallation = Editor.InstallTextMate(registryOptions);
+        RegistryOptions registryOptions = new RegistryOptions(ThemeName.VisualStudioDark);
+        TextMate.Installation textMateInstallation = Editor.InstallTextMate(registryOptions);
         textMateInstallation.SetGrammar(registryOptions.GetScopeByLanguageId(registryOptions.GetLanguageByExtension(".lua").Id));
 
     }

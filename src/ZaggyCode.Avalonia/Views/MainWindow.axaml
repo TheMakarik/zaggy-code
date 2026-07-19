@@ -13,6 +13,7 @@
     x:DataType="vm:MainWindowViewModel"
     x:TypeArguments="vm:MainWindowViewModel"
     xmlns="https://github.com/avaloniaui"
+	xmlns:vt="using:VirtualTerminal"
     xmlns:avaloniaEdit="https://github.com/avaloniaui/avaloniaedit"
     xmlns:behaviors="clr-namespace:ZaggyCode.Avalonia.Views.Behaviors"
     xmlns:controls="clr-namespace:ZaggyCode.Avalonia.Views.Controls"
@@ -386,7 +387,7 @@
                     Margin="12,0,12,12"
                     MinHeight="120">
                     <Grid RowDefinitions="Auto,*">
-                        <Border Classes="terminal-header" Padding="10,6">
+                        <Border Classes="terminal-header" Padding="10,6" Grid.Row="0">
                             <Grid ColumnDefinitions="Auto,*,Auto">
                                 <StackPanel
                                     Grid.Column="0"
@@ -430,13 +431,14 @@
                             </Grid>
                         </Border>
 
-                        <controls:TerminalControl
+                        <vt:TerminalControl
                             Background="{DynamicResource TerminalBackgroundBrush}"
                             Focusable="True"
                             Foreground="{DynamicResource TerminalForegroundBrush}"
                             Grid.Row="1"
                             Margin="8,0"
                             MinHeight="100"
+                            Padding="0,10,0,0"
                             TerminalFontFamily="Cascadia Code"
                             TerminalFontSize="{Binding TerminalFontSize}"
                             x:Name="Terminal">
@@ -448,7 +450,7 @@
                                     UpdateFontSizeCommand="{Binding UpdateTerminalFontSizeCommand}"
                                     ZoomStep="1" />
                             </Interaction.Behaviors>
-                        </controls:TerminalControl>
+                        </vt:TerminalControl>
                     </Grid>
                 </Border>
             </Grid>

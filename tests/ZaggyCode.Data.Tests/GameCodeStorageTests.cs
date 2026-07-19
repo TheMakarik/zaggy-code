@@ -50,7 +50,7 @@ public class GameCodeStorageTests : IDisposable
     {
         // Arrange
         var code = "test code content";
-        var systemUnderTests = new GameCodeStorage(_userStorageMock, _logger, _storageOptions);
+        GameCodeStorage systemUnderTests = new GameCodeStorage(_userStorageMock, _logger, _storageOptions);
         
         // Act
         systemUnderTests.AddGameCode(gamePath, code, language);
@@ -72,7 +72,7 @@ public class GameCodeStorageTests : IDisposable
         // Arrange
         var code1 = "code for first game";
         var code2 = "code for second game";
-        var systemUnderTests = new GameCodeStorage(_userStorageMock, _logger, _storageOptions);
+        GameCodeStorage systemUnderTests = new GameCodeStorage(_userStorageMock, _logger, _storageOptions);
         
         // Act
         systemUnderTests.AddGameCode(gamePath1, code1, language);
@@ -87,8 +87,8 @@ public class GameCodeStorageTests : IDisposable
         {
             Path.GetExtension(file).Should().Be(expectedExtension);
         }
-        
-        var contents = new List<string>();
+
+        List<string> contents = new List<string>();
         foreach (var file in files)
         {
             contents.Add(await File.ReadAllTextAsync(file));
@@ -106,7 +106,7 @@ public class GameCodeStorageTests : IDisposable
         // Arrange
         var gamePath = "/path/to/game.exe";
         var code = $"code for {language}";
-        var systemUnderTests = new GameCodeStorage(_userStorageMock, _logger, _storageOptions);
+        GameCodeStorage systemUnderTests = new GameCodeStorage(_userStorageMock, _logger, _storageOptions);
         
         // Act
         systemUnderTests.AddGameCode(gamePath, code, language);
@@ -126,7 +126,7 @@ public class GameCodeStorageTests : IDisposable
     {
         // Arrange
         var gamePath = "/path/to/game.exe";
-        var systemUnderTests = new GameCodeStorage(_userStorageMock, _logger, _storageOptions);
+        GameCodeStorage systemUnderTests = new GameCodeStorage(_userStorageMock, _logger, _storageOptions);
         
         // Act
         systemUnderTests.AddGameCode(gamePath, "csharp code", Language.CSharp);
@@ -137,12 +137,12 @@ public class GameCodeStorageTests : IDisposable
         // Assert
         var files = Directory.GetFiles(_gameCodeDataPath);
         files.Should().HaveCount(3);
-        
-        var extensions = files.Select(Path.GetExtension).ToList();
+
+        List<string?> extensions = files.Select(Path.GetExtension).ToList();
         extensions.Should().Contain(".cs");
         extensions.Should().Contain(".lua");
-        
-        var contents = new List<string>();
+
+        List<string> contents = new List<string>();
         foreach (var file in files)
         {
             contents.Add(await File.ReadAllTextAsync(file));
@@ -157,18 +157,18 @@ public class GameCodeStorageTests : IDisposable
     public async Task FlushUpdatesAsync_AfterMultipleAdds_CreatesAllFilesWithCorrectContent()
     {
         // Arrange
-        var games = new[]
+        (string Path, Language Lang, string Code)[] games = new[]
         {
             (Path: "/path/to/game1.exe", Lang: Language.CSharp, Code: "// Hello World\nConsole.WriteLine();"),
             (Path: "/path/to/game2.lua", Lang: Language.Lua, Code: "-- Lua script\nprint('hello')"),
             (Path: "/path/to/game4.exe", Lang: Language.CSharp, Code: "class Program {}"),
             (Path: "/path/to/game5.exe", Lang: Language.Lua, Code: "function test() end"),
         };
-        
-        var systemUnderTests = new GameCodeStorage(_userStorageMock, _logger, _storageOptions);
+
+        GameCodeStorage systemUnderTests = new GameCodeStorage(_userStorageMock, _logger, _storageOptions);
         
         // Act
-        foreach (var game in games)
+        foreach ((string Path, Language Lang, string Code) game in games)
         {
             systemUnderTests.AddGameCode(game.Path, game.Code, game.Lang);
         }
@@ -177,14 +177,14 @@ public class GameCodeStorageTests : IDisposable
         // Assert
         var files = Directory.GetFiles(_gameCodeDataPath);
         files.Should().HaveCount(games.Length);
-        
-        var contents = new List<string>();
+
+        List<string> contents = new List<string>();
         foreach (var file in files)
         {
             contents.Add(await File.ReadAllTextAsync(file));
         }
         
-        foreach (var game in games)
+        foreach ((string Path, Language Lang, string Code) game in games)
         {
             contents.Should().Contain(game.Code);
         }
@@ -201,9 +201,9 @@ public class GameCodeStorageTests : IDisposable
     {
         // Arrange
         var gamePath = "/path/to/game.exe";
-        var language = Language.CSharp;
+        Language language = Language.CSharp;
         var code = "code not yet flushed";
-        var systemUnderTests = new GameCodeStorage(_userStorageMock, _logger, _storageOptions);
+        GameCodeStorage systemUnderTests = new GameCodeStorage(_userStorageMock, _logger, _storageOptions);
         
         // Act
         systemUnderTests.AddGameCode(gamePath, code, language);
@@ -218,10 +218,10 @@ public class GameCodeStorageTests : IDisposable
     {
         // Arrange
         var gamePath = "/path/to/game.exe";
-        var language = Language.ShardScript;
+        Language language = Language.ShardScript;
         var expectedCode = "def main():\n    print('Hello')\n    return True";
-        
-        var systemUnderTests = new GameCodeStorage(_userStorageMock, _logger, _storageOptions);
+
+        GameCodeStorage systemUnderTests = new GameCodeStorage(_userStorageMock, _logger, _storageOptions);
         
         // Act
         systemUnderTests.AddGameCode(gamePath, expectedCode, language);

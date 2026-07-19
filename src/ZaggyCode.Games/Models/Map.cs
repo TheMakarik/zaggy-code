@@ -14,7 +14,7 @@ public sealed class Map : INotifyPropertyChanged, INotifyCollectionChanged
         get;
         set
         {
-            var oldCollection = field;
+            ObservableCollection<Point> oldCollection = field;
             if (!SetField(ref field, value))
                 return;
             

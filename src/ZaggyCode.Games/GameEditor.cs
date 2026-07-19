@@ -13,7 +13,7 @@ public sealed class GameEditor : IGameEditor
         if (File.Exists(path))
         {
             _stream = File.Open(path, FileMode.Open);
-            var game = new XmlSerializer(typeof(Game)).Deserialize(_stream) as Game;
+            Game? game = new XmlSerializer(typeof(Game)).Deserialize(_stream) as Game;
             game.Path = path;
         }
         

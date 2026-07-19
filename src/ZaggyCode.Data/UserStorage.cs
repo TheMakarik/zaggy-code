@@ -22,12 +22,12 @@ public sealed class UserStorage(ILogger<UserStorage> logger, IOptions<StorageOpt
         Current.PropertyChanged += (_, args) =>
         {
             logger.LogInformation("User property changed: {path}", args.PropertyName);
-            using var scope = _locker.EnterScope();
+            using Lock.Scope scope = _locker.EnterScope();
             _requireUpdate = true;
         };
         Task.Factory.StartNew(async () =>
         {
-            using var timer = new PeriodicTimer(TimeSpan.FromSeconds(storageOptions.Value.WaitUserDataUpdateSeconds));
+            using PeriodicTimer timer = new PeriodicTimer(TimeSpan.FromSeconds(storageOptions.Value.WaitUserDataUpdateSeconds));
             while (await timer.WaitForNextTickAsync())
                 await TryExpandUpdatesAsync();
         }, TaskCreationOptions.LongRunning);
@@ -52,7 +52,7 @@ public sealed class UserStorage(ILogger<UserStorage> logger, IOptions<StorageOpt
 
         try
         {
-            await using var file = File.Open(storageOptions.Value.DataFilePath, FileMode.Open);
+            await using FileStream file = File.Open(storageOptions.Value.DataFilePath, FileMode.Open);
             Current = await JsonSerializer.DeserializeAsync<UserData>(file, UserDataSerializerContext.Default.Options) ?? throw new InvalidOperationException("User data file corrupted");
         }
         catch (Exception e)
@@ -73,10 +73,10 @@ public sealed class UserStorage(ILogger<UserStorage> logger, IOptions<StorageOpt
         }
         
         logger.LogInformation("User data was not found. Creating user config file {path}", valueDataFilePath);
-        await using var file = File.Create(valueDataFilePath);
+        await using FileStream file = File.Create(valueDataFilePath);
         Current = defaultUser.Value.User;
         await JsonSerializer.SerializeAsync(file, defaultUser.Value.User, UserDataSerializerContext.Default.Options);
-        using var streamReader = new StreamReader(file);    
+        using StreamReader streamReader = new StreamReader(file);    
         logger.LogDebug("User config file created successfully: {text}", await streamReader.ReadToEndAsync()) ;
         
     }
@@ -86,7 +86,7 @@ public sealed class UserStorage(ILogger<UserStorage> logger, IOptions<StorageOpt
         if (!_requireUpdate)
             return;
         
-        await using(var file = File.Open(storageOptions.Value.DataFilePath, FileMode.Truncate))
+        await using(FileStream file = File.Open(storageOptions.Value.DataFilePath, FileMode.Truncate))
             await JsonSerializer.SerializeAsync(file, Current, UserDataSerializerContext.Default.Options);
         _requireUpdate = false;
         logger.LogInformation("User config file expanded successfully. Content: {content}", await File.ReadAllTextAsync(storageOptions.Value.DataFilePath));

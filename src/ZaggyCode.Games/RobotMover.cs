@@ -44,7 +44,7 @@ public sealed class RobotMover : IRobotMover
     
     private bool CanMoveLeft()
     {
-        var nextPoint = _pointsCache.GetValueRefOrNullRef(new System.Drawing.Point(_zaggyCurrent.X - 1, _zaggyCurrent.Y));
+        Point nextPoint = _pointsCache.GetValueRefOrNullRef(new System.Drawing.Point(_zaggyCurrent.X - 1, _zaggyCurrent.Y));
         return false;
     }
 

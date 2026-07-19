@@ -135,9 +135,9 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             try
             {
-                var codeObservable = GetCodeToExecute.Handle(Unit.Default);
-                await using var scope = _factory.CreateAsyncScope();
-                var runner = scope.ServiceProvider.GetRequiredKeyedService<ILanguageRunner>(SelectedLanguage.GetLanguageExtension());
+                IObservable<string> codeObservable = GetCodeToExecute.Handle(Unit.Default);
+                await using AsyncServiceScope scope = _factory.CreateAsyncScope();
+                ILanguageRunner runner = scope.ServiceProvider.GetRequiredKeyedService<ILanguageRunner>(SelectedLanguage.GetLanguageExtension());
                 var code = await codeObservable;
 
                 Debug.Assert(TerminalReader is not null);

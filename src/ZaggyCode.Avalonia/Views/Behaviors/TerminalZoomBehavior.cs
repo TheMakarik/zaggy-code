@@ -1,10 +1,10 @@
-using System;
-using System.Windows.Input;
 using Avalonia;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Xaml.Interactivity;
-using ZaggyCode.Avalonia.Views.Controls;
+using System;
+using System.Windows.Input;
+using VirtualTerminal;
 
 namespace ZaggyCode.Avalonia.Views.Behaviors;
 
@@ -60,7 +60,8 @@ public class TerminalZoomBehavior : Behavior<TerminalControl>
     protected override void OnAttached()
     {
         base.OnAttached();
-        if (AssociatedObject is null) return;
+        if (AssociatedObject is null)
+            return;
 
         AssociatedObject.AddHandler(InputElement.KeyDownEvent, OnKeyDown, RoutingStrategies.Tunnel);
         AssociatedObject.AddHandler(InputElement.PointerWheelChangedEvent, OnPointerWheelChanged, RoutingStrategies.Tunnel);
@@ -69,7 +70,8 @@ public class TerminalZoomBehavior : Behavior<TerminalControl>
     protected override void OnDetaching()
     {
         base.OnDetaching();
-        if (AssociatedObject is null) return;
+        if (AssociatedObject is null)
+            return;
 
         AssociatedObject.RemoveHandler(InputElement.KeyDownEvent, OnKeyDown);
         AssociatedObject.RemoveHandler(InputElement.PointerWheelChangedEvent, OnPointerWheelChanged);
@@ -77,7 +79,8 @@ public class TerminalZoomBehavior : Behavior<TerminalControl>
 
     private void OnKeyDown(object? sender, KeyEventArgs e)
     {
-        if (AssociatedObject is null) return;
+        if (AssociatedObject is null)
+            return;
 
         if ((e.KeyModifiers & KeyModifiers.Control) == 0)
             return;
@@ -103,7 +106,8 @@ public class TerminalZoomBehavior : Behavior<TerminalControl>
 
     private void OnPointerWheelChanged(object? sender, PointerWheelEventArgs e)
     {
-        if (AssociatedObject is null) return;
+        if (AssociatedObject is null)
+            return;
 
         if ((e.KeyModifiers & KeyModifiers.Control) == 0)
             return;
@@ -114,7 +118,8 @@ public class TerminalZoomBehavior : Behavior<TerminalControl>
 
     private void ChangeFontSize(double delta)
     {
-        if (AssociatedObject is null) return;
+        if (AssociatedObject is null)
+            return;
 
         var newSize = Math.Clamp(AssociatedObject.TerminalFontSize + delta, MinFontSize, MaxFontSize);
         AssociatedObject.TerminalFontSize = newSize;
@@ -123,7 +128,8 @@ public class TerminalZoomBehavior : Behavior<TerminalControl>
 
     private void ResetFontSize()
     {
-        if (AssociatedObject is null) return;
+        if (AssociatedObject is null)
+            return;
 
         AssociatedObject.TerminalFontSize = DefaultFontSize;
         UpdateFontSizeCommand?.Execute(Convert.ToInt32(DefaultFontSize));
