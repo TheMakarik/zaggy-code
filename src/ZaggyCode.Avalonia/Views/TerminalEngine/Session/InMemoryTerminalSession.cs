@@ -9,7 +9,7 @@ public class InMemoryTerminalSession : ITerminalSession
     private readonly ConcurrentQueue<byte> _outputQueue = [];
     private readonly TerminalScreenBuffer _buffer;
     private readonly ITerminalDecoder _decoder;
-    private string _title = "In-Memory Session";
+    
     private bool _isDisposed;
 
     public event EventHandler? BufferUpdated;
@@ -38,11 +38,7 @@ public class InMemoryTerminalSession : ITerminalSession
     public Encoding InputEncoding => Encoding.UTF8;
     public Encoding OutputEncoding => Encoding.UTF8;
 
-    public string Title
-    {
-        get => _title;
-        set => _title = value ?? throw new ArgumentNullException(nameof(value));
-    }
+    public string Title { get; set; } = null!;
 
     public int AvailableDataLength => _outputQueue.Count;
 

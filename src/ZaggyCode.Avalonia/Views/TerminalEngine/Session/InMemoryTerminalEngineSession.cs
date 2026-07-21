@@ -12,7 +12,7 @@ public class InMemoryTerminalEngineSession : InMemoryTerminalSession
 
     public InMemoryTerminalEngineSession() : base()
     {
-        Title = "In-Memory Shell";
+        Title = null!;
     }
 
     public Task<string> ReadLineAsync()
