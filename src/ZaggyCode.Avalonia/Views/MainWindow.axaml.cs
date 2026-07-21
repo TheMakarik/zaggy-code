@@ -1,6 +1,3 @@
-using Avalonia.Markup.Xaml.MarkupExtensions;
-using ZaggyCode.Avalonia.Views.TextEditing;
-
 namespace ZaggyCode.Avalonia.Views;
 
 public partial class MainWindow : ReactiveWindow<MainWindowViewModel>

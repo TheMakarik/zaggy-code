@@ -1,5 +1,3 @@
-using AvaloniaEdit.Rendering;
-
 namespace ZaggyCode.Avalonia.Views.TextEditing;
 
 public class LineHighlighter(int lineNumber, Color color) : IBackgroundRenderer

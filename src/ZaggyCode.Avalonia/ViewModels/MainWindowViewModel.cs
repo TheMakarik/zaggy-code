@@ -1,6 +1,3 @@
-using ZaggyCode.Core.Languages.EventArgs;
-using ZaggyCode.Core.Languages.Exceptions;
-
 namespace ZaggyCode.Avalonia.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
