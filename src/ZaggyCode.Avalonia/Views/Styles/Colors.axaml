@@ -1,76 +1,69 @@
-<ResourceDictionary
-    xmlns="https://github.com/avaloniaui"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+<ResourceDictionary xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <!-- Core purple dark palette -->
-    <Color x:Key="BackgroundColor">#16101E</Color>
-    <Color x:Key="BackgroundSecondaryColor">#1E1528</Color>
-    <Color x:Key="SurfaceColor">#251D30</Color>
-    <Color x:Key="SurfaceLightColor">#2E243D</Color>
-    <Color x:Key="SurfaceHoverColor">#382C4A</Color>
+    <Color x:Key="BackgroundColor">#1A1A1A</Color>
+    <Color x:Key="BackgroundSecondaryColor">#242424</Color>
+    <Color x:Key="SurfaceColor">#2E2E2E</Color>
+    <Color x:Key="SurfaceLightColor">#383838</Color>
+    <Color x:Key="SurfaceHoverColor">#444444</Color>
 
-    <Color x:Key="PrimaryColor">#B07CFF</Color>
-    <Color x:Key="PrimaryLightColor">#D1A8FF</Color>
-    <Color x:Key="PrimaryDarkColor">#8A5ECC</Color>
+    <Color x:Key="PrimaryColor">#7A8A9A</Color>
+    <Color x:Key="PrimaryLightColor">#9AACBC</Color>
+    <Color x:Key="PrimaryDarkColor">#5A6A7A</Color>
 
-    <Color x:Key="ForegroundColor">#F2F0F5</Color>
-    <Color x:Key="ForegroundMutedColor">#A99FB8</Color>
-    <Color x:Key="ForegroundDarkColor">#6B5F7A</Color>
+    <Color x:Key="ForegroundColor">#F0F0F0</Color>
+    <Color x:Key="ForegroundMutedColor">#A8A8A8</Color>
+    <Color x:Key="ForegroundDarkColor">#707070</Color>
 
-    <Color x:Key="BorderColor">#3A2F4A</Color>
-    <Color x:Key="BorderLightColor">#4D3F61</Color>
+    <Color x:Key="BorderColor">#3D3D3D</Color>
+    <Color x:Key="BorderLightColor">#505050</Color>
 
-    <!-- Semantic colors -->
-    <Color x:Key="SuccessColor">#4ADE80</Color>
-    <Color x:Key="SuccessDarkColor">#22C55E</Color>
-    <Color x:Key="ErrorColor">#F87171</Color>
-    <Color x:Key="WarningColor">#FACC15</Color>
+    <Color x:Key="SuccessColor">#6ABA6A</Color>
+    <Color x:Key="SuccessDarkColor">#4AA84A</Color>
+    <Color x:Key="ErrorColor">#D87060</Color>
+    <Color x:Key="WarningColor">#E8B840</Color>
 
-    <!-- Component specific colors -->
-    <Color x:Key="EditorBackgroundColor">#1A1322</Color>
-    <Color x:Key="EditorForegroundColor">#F2F0F5</Color>
-    <Color x:Key="EditorLineNumberColor">#6B5F7A</Color>
+    <Color x:Key="EditorBackgroundColor">#161616</Color>
+    <Color x:Key="EditorForegroundColor">#F0F0F0</Color>
+    <Color x:Key="EditorLineNumberColor">#707070</Color>
 
-    <Color x:Key="TerminalBackgroundColor">#16101E</Color>
-    <Color x:Key="TerminalForegroundColor">#F2F0F5</Color>
+    <Color x:Key="TerminalBackgroundColor">#1A1A1A</Color>
+    <Color x:Key="TerminalForegroundColor">#F0F0F0</Color>
 
-    <Color x:Key="SidebarBackgroundColor">#1E1528</Color>
+    <Color x:Key="SidebarBackgroundColor">#242424</Color>
 
-    <!-- Accent override for FluentTheme -->
-    <Color x:Key="SystemAccentColor">#B07CFF</Color>
-    <Color x:Key="SystemAccentColorLight1">#D1A8FF</Color>
-    <Color x:Key="SystemAccentColorDark1">#8A5ECC</Color>
+    <Color x:Key="SystemAccentColor">#7A8A9A</Color>
+    <Color x:Key="SystemAccentColorLight1">#9AACBC</Color>
+    <Color x:Key="SystemAccentColorDark1">#5A6A7A</Color>
 
-    <!-- Brushes -->
-    <SolidColorBrush x:Key="BackgroundBrush" Color="{StaticResource BackgroundColor}" />
-    <SolidColorBrush x:Key="BackgroundSecondaryBrush" Color="{StaticResource BackgroundSecondaryColor}" />
-    <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource SurfaceColor}" />
-    <SolidColorBrush x:Key="SurfaceLightBrush" Color="{StaticResource SurfaceLightColor}" />
-    <SolidColorBrush x:Key="SurfaceHoverBrush" Color="{StaticResource SurfaceHoverColor}" />
+    <SolidColorBrush Color="{StaticResource BackgroundColor}" x:Key="BackgroundBrush" />
+    <SolidColorBrush Color="{StaticResource BackgroundSecondaryColor}" x:Key="BackgroundSecondaryBrush" />
+    <SolidColorBrush Color="{StaticResource SurfaceColor}" x:Key="SurfaceBrush" />
+    <SolidColorBrush Color="{StaticResource SurfaceLightColor}" x:Key="SurfaceLightBrush" />
+    <SolidColorBrush Color="{StaticResource SurfaceHoverColor}" x:Key="SurfaceHoverBrush" />
 
-    <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource PrimaryColor}" />
-    <SolidColorBrush x:Key="PrimaryLightBrush" Color="{StaticResource PrimaryLightColor}" />
-    <SolidColorBrush x:Key="PrimaryDarkBrush" Color="{StaticResource PrimaryDarkColor}" />
+    <SolidColorBrush Color="{StaticResource PrimaryColor}" x:Key="PrimaryBrush" />
+    <SolidColorBrush Color="{StaticResource PrimaryLightColor}" x:Key="PrimaryLightBrush" />
+    <SolidColorBrush Color="{StaticResource PrimaryDarkColor}" x:Key="PrimaryDarkBrush" />
 
-    <SolidColorBrush x:Key="ForegroundBrush" Color="{StaticResource ForegroundColor}" />
-    <SolidColorBrush x:Key="ForegroundMutedBrush" Color="{StaticResource ForegroundMutedColor}" />
-    <SolidColorBrush x:Key="ForegroundDarkBrush" Color="{StaticResource ForegroundDarkColor}" />
+    <SolidColorBrush Color="{StaticResource ForegroundColor}" x:Key="ForegroundBrush" />
+    <SolidColorBrush Color="{StaticResource ForegroundMutedColor}" x:Key="ForegroundMutedBrush" />
+    <SolidColorBrush Color="{StaticResource ForegroundDarkColor}" x:Key="ForegroundDarkBrush" />
 
-    <SolidColorBrush x:Key="BorderBrush" Color="{StaticResource BorderColor}" />
-    <SolidColorBrush x:Key="BorderLightBrush" Color="{StaticResource BorderLightColor}" />
+    <SolidColorBrush Color="{StaticResource BorderColor}" x:Key="BorderBrush" />
+    <SolidColorBrush Color="{StaticResource BorderLightColor}" x:Key="BorderLightBrush" />
 
-    <SolidColorBrush x:Key="SuccessBrush" Color="{StaticResource SuccessColor}" />
-    <SolidColorBrush x:Key="SuccessDarkBrush" Color="{StaticResource SuccessDarkColor}" />
-    <SolidColorBrush x:Key="ErrorBrush" Color="{StaticResource ErrorColor}" />
-    <SolidColorBrush x:Key="WarningBrush" Color="{StaticResource WarningColor}" />
+    <SolidColorBrush Color="{StaticResource SuccessColor}" x:Key="SuccessBrush" />
+    <SolidColorBrush Color="{StaticResource SuccessDarkColor}" x:Key="SuccessDarkBrush" />
+    <SolidColorBrush Color="{StaticResource ErrorColor}" x:Key="ErrorBrush" />
+    <SolidColorBrush Color="{StaticResource WarningColor}" x:Key="WarningBrush" />
 
-    <SolidColorBrush x:Key="EditorBackgroundBrush" Color="{StaticResource EditorBackgroundColor}" />
-    <SolidColorBrush x:Key="EditorForegroundBrush" Color="{StaticResource EditorForegroundColor}" />
-    <SolidColorBrush x:Key="EditorLineNumberBrush" Color="{StaticResource EditorLineNumberColor}" />
+    <SolidColorBrush Color="{StaticResource EditorBackgroundColor}" x:Key="EditorBackgroundBrush" />
+    <SolidColorBrush Color="{StaticResource EditorForegroundColor}" x:Key="EditorForegroundBrush" />
+    <SolidColorBrush Color="{StaticResource EditorLineNumberColor}" x:Key="EditorLineNumberBrush" />
 
-    <SolidColorBrush x:Key="TerminalBackgroundBrush" Color="{StaticResource TerminalBackgroundColor}" />
-    <SolidColorBrush x:Key="TerminalForegroundBrush" Color="{StaticResource TerminalForegroundColor}" />
+    <SolidColorBrush Color="{StaticResource TerminalBackgroundColor}" x:Key="TerminalBackgroundBrush" />
+    <SolidColorBrush Color="{StaticResource TerminalForegroundColor}" x:Key="TerminalForegroundBrush" />
 
-    <SolidColorBrush x:Key="SidebarBackgroundBrush" Color="{StaticResource SidebarBackgroundColor}" />
+    <SolidColorBrush Color="{StaticResource SidebarBackgroundColor}" x:Key="SidebarBackgroundBrush" />
 
 </ResourceDictionary>
