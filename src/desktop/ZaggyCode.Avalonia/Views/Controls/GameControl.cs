@@ -1,5 +1,6 @@
 namespace ZaggyCode.Avalonia.Views.Controls;
 
+//#:NO_AI
 public sealed class GameControl : ContentControl
 {
     private Game? _game;

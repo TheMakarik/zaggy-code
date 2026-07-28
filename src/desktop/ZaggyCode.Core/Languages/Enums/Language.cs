@@ -1,5 +1,3 @@
-using ZaggyCode.Core.Languages.Attributes;
-
 namespace ZaggyCode.Core.Languages.Enums;
 
 public enum Language

@@ -1,5 +1,3 @@
-using ZaggyCode.Core.Game.Events;
-
 namespace ZaggyCode.Core.Game.Interfaces;
 
 public interface IRobotMoverFactory

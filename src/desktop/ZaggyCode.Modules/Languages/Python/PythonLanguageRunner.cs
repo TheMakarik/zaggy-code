@@ -5,6 +5,7 @@ using ZaggyCode.Core.Languages.Interfaces;
 
 namespace ZaggyCode.Modules.Languages.Python;
 
+//#:NO_AI
 public sealed class PythonLanguageRunner : ILanguageRunner
 {
     public EventHandler<DebugLineUpdatedEventArgs>? DebugLineUpdated { get; set; }

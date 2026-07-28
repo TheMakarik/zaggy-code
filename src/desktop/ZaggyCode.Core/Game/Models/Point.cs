@@ -1,5 +1,3 @@
-using ZaggyCode.Core.Game.Enums;
-
 namespace ZaggyCode.Core.Game.Models;
 
 [XmlRoot("point")]

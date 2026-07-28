@@ -6,6 +6,6 @@
     <Project Path="src\desktop\ZaggyCode.Modules\ZaggyCode.Modules.csproj" />
   </Folder>
   <Folder Name="/tests/">
-    <Project Path="tests\ZaggyCode.Core.Tests\ZaggyCode.Core.Tests.csproj" />
+    <Project Path="tests\ZaggyCode.Tests\ZaggyCode.Tests.csproj" />
   </Folder>
 </Solution>

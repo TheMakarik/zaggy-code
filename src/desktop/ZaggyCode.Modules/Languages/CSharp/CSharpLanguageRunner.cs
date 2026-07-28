@@ -1,6 +1,7 @@
 /*
 namespace ZaggyCode.Modules.Modules.Languages.CSharp;
 
+//#:NO_AI
 [LanguageExtension(".cs")]
 public sealed partial class CSharpLanguageRunner(ILogger<CSharpLanguageRunner> logger) : ILanguageRunner
 {

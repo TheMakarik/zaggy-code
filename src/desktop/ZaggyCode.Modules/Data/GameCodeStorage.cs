@@ -4,6 +4,7 @@ using ZaggyCode.Modules.Data.Options;
 
 namespace ZaggyCode.Modules.Data;
 
+//#:NO_AI
 public sealed class GameCodeStorage(
     IUserStorage userStorage,
     ILogger<GameCodeStorage> logger,

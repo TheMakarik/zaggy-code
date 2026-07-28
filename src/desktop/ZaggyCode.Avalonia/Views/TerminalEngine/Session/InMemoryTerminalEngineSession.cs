@@ -3,6 +3,7 @@
 /// <summary>
 /// An in-memory terminal session that emulates a basic command line shell (CLI).
 /// </summary>
+//#:NO_AI
 public class InMemoryTerminalEngineSession : InMemoryTerminalSession
 {
     private readonly StringBuilder _currentInputBuffer = new StringBuilder();

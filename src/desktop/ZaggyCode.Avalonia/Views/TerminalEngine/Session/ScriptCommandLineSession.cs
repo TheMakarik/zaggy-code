@@ -1,5 +1,6 @@
 ﻿namespace ZaggyCode.Avalonia.Views.TerminalEngine.Session;
 
+//#:NO_AI
 public class ScriptCommandLineSession : ITerminalSession, IDisposable
 {
     private readonly ITerminalDecoder _decoder;

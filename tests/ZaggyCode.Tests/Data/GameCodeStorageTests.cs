@@ -1,4 +1,4 @@
-namespace ZaggyCode.Data.Tests.Data;
+namespace ZaggyCode.Tests.Data;
 
 public class GameCodeStorageTests : IDisposable
 {

@@ -4,6 +4,7 @@ using ZaggyCode.Modules.Data.Options;
 
 namespace ZaggyCode.Modules.Data;
 
+//#:NO_AI
 public sealed class UserStorage(ILogger<UserStorage> logger, IOptions<StorageOptions> storageOptions, IOptions<DefaultUser> defaultUser, ISpecialFolderProvider folderProvider) : IUserStorage
 {
     private readonly Lock _locker = new Lock();

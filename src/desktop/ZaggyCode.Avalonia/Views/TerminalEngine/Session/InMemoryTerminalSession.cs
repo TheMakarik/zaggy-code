@@ -4,6 +4,7 @@
 /// A completely in-memory implementation of <see cref="ITerminalSession"/>.
 /// Useful for testing, embedding local sub-shells, or mocking terminal behavior.
 /// </summary>
+//#:NO_AI
 public class InMemoryTerminalSession : ITerminalSession
 {
     private readonly ConcurrentQueue<byte> _outputQueue = [];

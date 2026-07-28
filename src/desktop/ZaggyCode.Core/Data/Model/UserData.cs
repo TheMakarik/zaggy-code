@@ -1,5 +1,3 @@
-using ZaggyCode.Core.Languages.Enums;
-
 namespace ZaggyCode.Core.Data.Model;
 
 public sealed class UserData : INotifyPropertyChanged
