@@ -10,7 +10,7 @@ public class InMemoryTerminalSession : ITerminalSession
     private readonly ConcurrentQueue<byte> _outputQueue = [];
     private readonly TerminalScreenBuffer _buffer;
     private readonly ITerminalDecoder _decoder;
-    
+
     private bool _isDisposed;
 
     public event EventHandler? BufferUpdated;
@@ -55,10 +55,10 @@ public class InMemoryTerminalSession : ITerminalSession
         _decoder = new TerminalDecoder(_buffer);
     }
 
-    public void Resize(ushort columns, ushort rows)
+    public void Resize(ushort columns, ushort rows, bool pushScrollback)
     {
         ThrowIfDisposed();
-        _buffer.Resize(columns, rows);
+        _buffer.Resize(columns, rows, null, pushScrollback);
         TriggerBufferUpdated();
     }
 

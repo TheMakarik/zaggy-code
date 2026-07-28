@@ -186,10 +186,10 @@ public class ScriptCommandLineSession : ITerminalSession, IDisposable
         return result;
     }
 
-    public void Resize(ushort columns, ushort rows)
+    public void Resize(ushort columns, ushort rows, bool pushScrollback)
     {
         ThrowIfDisposed();
-        _buffer.Resize(columns, rows);
+        _buffer.Resize(columns, rows, null, pushScrollback);
         TriggerBufferUpdated();
     }
 
