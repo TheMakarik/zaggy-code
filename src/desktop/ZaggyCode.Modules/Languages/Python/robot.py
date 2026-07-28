@@ -1,4 +1,5 @@
+import typing
 
 def move_up():
-    pass
+    __clr_move_up()
 
