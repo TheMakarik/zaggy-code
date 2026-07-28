@@ -30,8 +30,8 @@ public class GameCodeStorageTests : IDisposable
 
     [Theory]
     [InlineData("/path/to/game.exe", Language.CSharp, ".cs")]
-    [InlineData("/path/to/game.exe", Language.Lua, ".lua")]
-    [InlineData("/path/to/script.lua", Language.Lua, ".lua")]
+    [InlineData("/path/to/game.exe", Language.Python, ".py")]
+    [InlineData("/path/to/script.py", Language.Python, ".py")]
     [InlineData("/path/to/game", Language.CSharp, ".cs")]
     public async Task AddGameCode_WhenCalled_CreatesFileWithCorrectExtension(string gamePath, Language language, string expectedExtension)
     {
@@ -51,8 +51,8 @@ public class GameCodeStorageTests : IDisposable
 
     [Theory]
     [InlineData("/path/to/game1.exe", "/path/to/game2.exe", Language.CSharp, ".cs")]
-    [InlineData("/path/to/game1.exe", "/path/to/game2.exe", Language.Lua, ".lua")]
-    [InlineData("/path/to/script1.py", "/path/to/script2.ss", Language.ShardScript, ".py")]
+    [InlineData("/path/to/game1.exe", "/path/to/game2.exe", Language.Python, ".py")]
+    [InlineData("/path/to/script1.py", "/path/to/script2.py", Language.Python, ".py")]
     public async Task AddGameCode_MultipleGames_CreatesSeparateFilesWithCorrectExtensions(
         string gamePath1, string gamePath2, Language language, string expectedExtension)
     {
@@ -87,7 +87,7 @@ public class GameCodeStorageTests : IDisposable
 
     [Theory]
     [InlineData(Language.CSharp, ".cs")]
-    [InlineData(Language.Lua, ".lua")]
+    [InlineData(Language.Python, ".py")]
     public async Task AddGameCode_DifferentLanguages_CreatesFilesWithRespectiveExtensions(Language language, string expectedExtension)
     {
         // Arrange
@@ -117,17 +117,16 @@ public class GameCodeStorageTests : IDisposable
         
         // Act
         systemUnderTests.AddGameCode(gamePath, "csharp code", Language.CSharp);
-        systemUnderTests.AddGameCode(gamePath, "lua code", Language.Lua);
-        systemUnderTests.AddGameCode(gamePath, "ShardScript code", Language.ShardScript);
+        systemUnderTests.AddGameCode(gamePath, "python code", Language.Python);
         await systemUnderTests.FlushUpdatesAsync();
-        
+
         // Assert
         var files = Directory.GetFiles(_gameCodeDataPath);
-        files.Should().HaveCount(3);
+        files.Should().HaveCount(2);
 
         List<string?> extensions = files.Select(Path.GetExtension).ToList();
         extensions.Should().Contain(".cs");
-        extensions.Should().Contain(".lua");
+        extensions.Should().Contain(".py");
 
         List<string> contents = new List<string>();
         foreach (var file in files)
@@ -136,7 +135,6 @@ public class GameCodeStorageTests : IDisposable
         }
         
         contents.Should().Contain("csharp code");
-        contents.Should().Contain("lua code");
         contents.Should().Contain("python code");
     }
 
@@ -147,9 +145,9 @@ public class GameCodeStorageTests : IDisposable
         (string Path, Language Lang, string Code)[] games = new[]
         {
             (Path: "/path/to/game1.exe", Lang: Language.CSharp, Code: "// Hello World\nConsole.WriteLine();"),
-            (Path: "/path/to/game2.lua", Lang: Language.Lua, Code: "-- Lua script\nprint('hello')"),
+            (Path: "/path/to/game2.py", Lang: Language.Python, Code: "# Python script\nprint('hello')"),
             (Path: "/path/to/game4.exe", Lang: Language.CSharp, Code: "class Program {}"),
-            (Path: "/path/to/game5.exe", Lang: Language.Lua, Code: "function test() end"),
+            (Path: "/path/to/game5.exe", Lang: Language.Python, Code: "def test(): pass"),
         };
 
         GameCodeStorage systemUnderTests = new GameCodeStorage(_userStorageMock, _logger, _storageOptions);
@@ -205,7 +203,7 @@ public class GameCodeStorageTests : IDisposable
     {
         // Arrange
         var gamePath = "/path/to/game.exe";
-        Language language = Language.ShardScript;
+        Language language = Language.Python;
         var expectedCode = "def main():\n    print('Hello')\n    return True";
 
         GameCodeStorage systemUnderTests = new GameCodeStorage(_userStorageMock, _logger, _storageOptions);

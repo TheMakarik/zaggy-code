@@ -26,11 +26,10 @@ public class UserStorageTests : IDisposable
                 ShowCodeLineNumbers = true,
                 CodeFontSize = 14,
                 CodeTheme = "Light",
-                LastLanguage = Language.Lua,
+                LastLanguage = Language.CSharp,
                 LastGamePath = null,
                 LastSpeed = ExecutionSpeed.X2,
-                TerminalFontSize = 17,
-                LuaData = A.Dummy<LuaData>()
+                TerminalFontSize = 17
             }
         });
         A.CallTo(() => _stubProvider.GetFolder(An<Environment.SpecialFolder>.Ignored, _jsonPath)).Returns(_jsonPath);
