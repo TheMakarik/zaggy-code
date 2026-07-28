@@ -18,7 +18,7 @@
 
 ### DI и композиция
 
-Регистрация зависимостей находится в `ZaggyCode.Avalonia` (`Bootstrapper` + `DependencyInjection/ZaggyCodeAvaloniaServiceCollectionExtensions.cs`).
+Регистрация зависимостей находится в `ZaggyCode.Avalonia` (`Bootstrapper.cs`).
 Используется **Scrutor** для сканирования сборок:
 
 - `ViewModel`-ы (`AssignableTo<ViewModelBase>`) → `Singleton`, `AsSelf`.
