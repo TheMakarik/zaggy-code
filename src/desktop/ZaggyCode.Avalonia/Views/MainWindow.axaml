@@ -365,13 +365,7 @@
                             Classes="card"
                             Grid.Column="2"
                             Margin="6,12,12,12">
-                            <Grid>
-                                <TextBlock
-                                    Classes="muted"
-                                    HorizontalAlignment="Center"
-                                    Text="Предпросмотр / Игра"
-                                    VerticalAlignment="Center" />
-                            </Grid>
+                            <controls:MapView x:Name="GameMap" Margin="8"/>
                         </Border>
                     </Grid>
                 </Grid>

@@ -1,9 +1,16 @@
-/*
-namespace ZaggyCode.Modules.Modules.Languages.CSharp;
+using System.Collections.Immutable;
+using ZaggyCode.Core.Game.Interfaces;
+using ZaggyCode.Core.Languages.Attributes;
+using ZaggyCode.Core.Languages.Enums;
+using ZaggyCode.Core.Languages.EventArgs;
+using ZaggyCode.Core.Languages.Interfaces;
+using ZaggyCode.Modules.Languages.Options;
+
+namespace ZaggyCode.Modules.Languages.CSharp;
 
 //#:NO_AI
-[LanguageExtension(".cs")]
-public sealed partial class CSharpLanguageRunner(ILogger<CSharpLanguageRunner> logger) : ILanguageRunner
+[LanguageExtension(".cs"), LanguagePrettyName("C#")]
+public sealed partial class CSharpLanguageRunner(ILogger<CSharpLanguageRunner> logger, IOptions<SpeedMillisecondsOptions> millisecondsOptions) : ILanguageRunner
 {
     private const string InitialCode = "Console.SetIn(Input);\r\nConsole.SetOut(Output);\r\n";
 
@@ -13,6 +20,8 @@ public sealed partial class CSharpLanguageRunner(ILogger<CSharpLanguageRunner> l
 
     private TextWriter? Output;
     private TextReader? Input;
+    private ExecutionSpeed ExecSpeed;
+    private IRobotExecutor? Executor;
 
     public EventHandler<DebugLineUpdatedEventArgs>? DebugLineUpdated
     {
@@ -20,15 +29,13 @@ public sealed partial class CSharpLanguageRunner(ILogger<CSharpLanguageRunner> l
         set;
     }
 
-    public EventHandler<CodeErrorOccurredEventArgs>? CodeErrorOccurred { get; set; }
-
-    public void RedirectIo(TextReader input, TextWriter output)
+    public EventHandler<CodeErrorOccurredEventArgs>? CodeErrorOccurred
     {
-        Input = input;
-        Output = output;
+        get;
+        set;
     }
 
-    public void Execute(string code, ExecutionSpeed speed, IRobotExecutor executor)
+    public void Execute(string code, CancellationToken source)
     {
         try
         {
@@ -38,13 +45,16 @@ public sealed partial class CSharpLanguageRunner(ILogger<CSharpLanguageRunner> l
             if (Input is null)
                 throw new Exception();
 
+            if (Executor is null)
+                throw new Exception();
+
             using CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromMinutes(2));
             if (logger.IsEnabled(LogLevel.Trace))
                 logger.LogTrace("Executing C# code.\n{code}", code);
 
             Script script = CSharpScript
                 .Create(InitialCode, scriptOptions, typeof(CSharpLanguageRunnerScriptGlobals))
-                .ContinueWith(ApplySleep(code, SpeedToMilliseconds(speed)));
+                .ContinueWith(ApplySleep(code, ExecSpeed.GetActual(millisecondsOptions.Value)));
 
             ImmutableArray<Diagnostic> diagnostics = script.Compile(cts.Token);
             if (diagnostics.Any())
@@ -57,7 +67,7 @@ public sealed partial class CSharpLanguageRunner(ILogger<CSharpLanguageRunner> l
                 return;
             }
 
-            CSharpLanguageRunnerScriptGlobals globals = new CSharpLanguageRunnerScriptGlobals(executor, Output, Input);
+            CSharpLanguageRunnerScriptGlobals globals = new CSharpLanguageRunnerScriptGlobals(Executor, Output, Input);
             ScriptState state = script.RunAsync(globals, cts.Token).Result;
         }
         catch (TaskCanceledException)
@@ -71,6 +81,35 @@ public sealed partial class CSharpLanguageRunner(ILogger<CSharpLanguageRunner> l
         }
     }
 
+    public ILanguageRunner RedirectIo(TextReader input, TextWriter output)
+    {
+        Input = input;
+        Output = output;
+        return this;
+    }
+
+    public ILanguageRunner SetSpeed(ExecutionSpeed speed)
+    {
+        ExecSpeed = speed;
+        return this;
+    }
+
+    public ILanguageRunner SetExecutor(IRobotExecutor executor)
+    {
+        Executor = executor;
+        return this;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        // TODO release managed resources here
+    }
+
+    public void Dispose()
+    {
+        // TODO release managed resources here
+    }
+
     private static string ApplySleep(string code, int delayMs)
     {
         SyntaxTree tree = CSharpSyntaxTree.ParseText(code);
@@ -81,19 +120,6 @@ public sealed partial class CSharpLanguageRunner(ILogger<CSharpLanguageRunner> l
         string modifiedCode = modifiedRoot.ToFullString();
 
         return modifiedCode;
-    }
-
-    private static int SpeedToMilliseconds(ExecutionSpeed speed) => speed switch
-    {
-        ExecutionSpeed.X10 => 10,
-        ExecutionSpeed.X5 => 200,
-        ExecutionSpeed.X2 => 500,
-        ExecutionSpeed.X1 or _ => 1000,
-    };
-
-    public void Dispose()
-    {
-
     }
 
     public class LineDelayRewriter(int delayMs) : CSharpSyntaxRewriter
@@ -119,10 +145,4 @@ public sealed partial class CSharpLanguageRunner(ILogger<CSharpLanguageRunner> l
             return node.WithMembers(newMembers);
         }
     }
-
-    public async ValueTask DisposeAsync()
-    {
-        // TODO release managed resources here
-    }
 }
-*/

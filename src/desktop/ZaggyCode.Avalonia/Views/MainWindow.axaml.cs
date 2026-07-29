@@ -13,6 +13,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
     {
         InitializeComponent();
 
+        /*
         Editor.TextArea.KeyBindings.Add(new KeyBinding
         {
             Gesture = new KeyGesture(Key.V, KeyModifiers.Control),
@@ -22,10 +23,11 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
                 var textData = clipboardData?.TryGetTextAsync().Result;
                 if (textData != null)
                 {
-                    Editor.Text = textData;
+                    Editor.Text = Editor.Text.Insert(Editor.CaretOffset, textData);
                 }
             })
         });
+        */
 
         HeaderBar.PointerPressed += (_, e) =>
         {
@@ -67,6 +69,27 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
 
             ViewModel.TerminalReader = reader;
             ViewModel.TerminalWriter = writer;
+            ViewModel.Executor = GameMap.Executor;
+
+            ViewModel.ResetMap.RegisterHandler(context =>
+            {
+                Dispatcher.Invoke(() => GameMap.Reset());
+                context.SetOutput(Unit.Default);
+            });
+
+            ViewModel.ConcludeRun.RegisterHandler(context =>
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    if (!GameMap.IsCompleted && !GameMap.IsDead)
+                        writer.WriteLine("Цель не достигнута.");
+
+                    GameMap.Reset();
+                });
+
+                context.SetOutput(Unit.Default);
+            });
+
             ViewModel.ClearTerminalContent.RegisterHandler(context =>
             {
                 Terminal.Clear();
@@ -75,8 +98,8 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
 
             ViewModel.UpdateCodeLine.RegisterHandler(context =>
             {
-                var lineNumber = context.Input; 
-                
+                var lineNumber = context.Input;
+
                 var wasFoundColor = Application.Current!.TryFindResource("ForegroundDarkColor", out var color);
                 Debug.Assert(wasFoundColor);
 
@@ -87,12 +110,12 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
                         Editor.TextArea.TextView.BackgroundRenderers.Remove(_currentHighlighter);
                         _currentHighlighter = null;
                     }
-                    
+
                     _currentHighlighter = new LineHighlighter(lineNumber, (Color)color!);
                     Editor.TextArea.TextView.BackgroundRenderers.Add(_currentHighlighter);
                     Editor.TextArea.TextView.Redraw();
                 });
-           
+
                 context.SetOutput(Unit.Default);
             });
 
@@ -107,7 +130,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
                         Editor.TextArea.TextView.Redraw();
                     }
                 });
-                
+
                 context.SetOutput(Unit.Default);
             });
 
@@ -202,6 +225,11 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         RegistryOptions registryOptions = new RegistryOptions(ThemeName.VisualStudioDark);
         TextMate.Installation textMateInstallation = Editor.InstallTextMate(registryOptions);
         textMateInstallation.SetGrammar(registryOptions.GetScopeByLanguageId(registryOptions.GetLanguageByExtension(".cs").Id));
+
+        GameMap.Map = MapView.CreateSampleMap();
+
+        GameMap.Events.LevelCompleted += (_, _) => _terminalSession.Writer.WriteLine("Уровень пройден!");
+        GameMap.Events.RobotDead += (_, _) => _terminalSession.Writer.WriteLine("Загги врезался и погиб.");
     }
 }
 

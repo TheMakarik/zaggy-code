@@ -11,14 +11,13 @@ public class EnumValuesConverter : MarkupExtension, IValueConverter
         Type? type = value as Type ?? EnumType;
         if (type is null || !type.IsEnum)
             return Array.Empty<object>();
-        
+
         return type.GetFields()
             .Where(f => !f.IsSpecialName) //скрыть value__ - настоящие чисдовое значение у System.Enum
             .Select(f =>
         {
-
             LanguagePrettyNameAttribute? attribute = f.GetCustomAttribute<LanguagePrettyNameAttribute>();
-            return attribute is not null 
+            return attribute is not null
                 ? attribute.Name
                 : f.Name;
         });

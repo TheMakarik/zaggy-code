@@ -9,7 +9,7 @@ public sealed class Bootstrapper
         builder.Configuration.AddJsonFile("appsettings.json");
 
         Log.Logger = new LoggerConfiguration().ReadFrom.Configuration(builder.Configuration).CreateLogger();
-        
+
         Assembly[] assemblies =
         [
             typeof(IUserStorage).Assembly,
@@ -54,7 +54,6 @@ public sealed class Bootstrapper
             .AddOptions<DefaultUser>()
             .AddOptions<StorageOptions>()
             .AddOptions<SpeedMillisecondsOptions>();
-
 
         IHost app = builder.Build();
 

@@ -24,6 +24,10 @@ public class Point : INotifyPropertyChanged
     [DefaultValue(false)]
     public bool HasCoin { get; set => SetField(ref field, value); }
 
+    [XmlAttribute("goal")]
+    [DefaultValue(false)]
+    public bool IsGoal { get; set => SetField(ref field, value); }
+
     public event PropertyChangedEventHandler? PropertyChanged;
 
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null)

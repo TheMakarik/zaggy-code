@@ -10,6 +10,7 @@ public sealed class PythonLanguageRunner : ILanguageRunner
 {
     public EventHandler<DebugLineUpdatedEventArgs>? DebugLineUpdated { get; set; }
     public EventHandler<CodeErrorOccurredEventArgs>? CodeErrorOccurred { get; set; }
+
     public ILanguageRunner RedirectIo(TextReader input, TextWriter output)
     {
         throw new NotImplementedException();

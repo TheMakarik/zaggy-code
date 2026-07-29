@@ -1,3 +1,5 @@
+using ZaggyCode.Core.Game.Interfaces;
+
 namespace ZaggyCode.Avalonia.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
@@ -20,6 +22,7 @@ public partial class MainWindowViewModel : ViewModelBase
     public int MaxFontSize { get; init; }
     public int MinFontSize { get; init; }
 
+    public IRobotExecutor? Executor { get; set; }
     public TextReader? TerminalReader { get; set; }
     public TextWriter? TerminalWriter { get; set; }
 
@@ -33,6 +36,8 @@ public partial class MainWindowViewModel : ViewModelBase
     public readonly Interaction<Unit, string> GetCodeToExecute = new();
     public readonly Interaction<int, Unit> UpdateCodeLine = new();
     public readonly Interaction<Unit, Unit> StopCodeExecution = new();
+    public readonly Interaction<Unit, Unit> ResetMap = new();
+    public readonly Interaction<Unit, Unit> ConcludeRun = new();
 
     #endregion
 
@@ -208,24 +213,31 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         try
         {
+            _logger.LogDebug("Code execution was requested");
             var code = await GetCodeToExecute.Handle(Unit.Default);
-            
+
+#if DEBUG
+            SelectedLanguage = Language.CSharp;
+#endif
             await using var scope = _factory.CreateAsyncScope();
             var runner = scope.ServiceProvider.GetRequiredKeyedService<ILanguageRunner>(SelectedLanguage.GetLanguageExtension());
 
             Debug.Assert(TerminalReader is not null);
             Debug.Assert(TerminalWriter is not null);
+            Debug.Assert(Executor is not null);
 
             runner.DebugLineUpdated += OnDebugLineUpdated;
             runner.CodeErrorOccurred += OnCodeErrorOccurred;
-                
-            Debug.Assert(_cancellationTokenSource is not null);;
+
+            Debug.Assert(_cancellationTokenSource is not null);
 
             runner
                 .RedirectIo(TerminalReader, TerminalWriter)
-                .SetExecutor(null!)
+                .SetExecutor(Executor)
                 .SetSpeed(ExecutionSpeed)
                 .Execute(code, _cancellationTokenSource.Token);
+
+            await ConcludeRun.Handle(Unit.Default);
         }
         catch (OperationCanceledException)
         {
@@ -245,8 +257,9 @@ public partial class MainWindowViewModel : ViewModelBase
             _cancellationTokenSource?.Dispose();
             _cancellationTokenSource = null;
         }
-        
+
         await StopCodeExecution.Handle(Unit.Default);
+        await ResetMap.Handle(Unit.Default);
     }
 #pragma warning disable AsyncVoidEventHandlerMethod
     private async void OnDebugLineUpdated(object? sender, DebugLineUpdatedEventArgs args)
