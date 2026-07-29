@@ -5,6 +5,7 @@ global using System.Collections.Specialized;
 global using System.ComponentModel;
 global using System.Reflection;
 global using System.Runtime.CompilerServices;
+global using System.Xml;
 global using System.Xml.Serialization;
 global using ZaggyCode.Core.Archiving.Model;
 global using ZaggyCode.Core.Data.Model;

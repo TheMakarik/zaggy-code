@@ -1,21 +1,18 @@
-namespace ZaggyCode.Data.Tests.Data;
+namespace ZaggyCode.Tests.Data;
 
 public class UserStorageTests : IDisposable
 {
-    private readonly IFileSystem _fileSystem;
-    private string _jsonPath;
-    private string _stubDirectoryPath;
-    private ISpecialFolderProvider _stubProvider = A.Fake<ISpecialFolderProvider>();
+    private readonly TestFileSystem _fileSystem;
+    private readonly string _jsonPath;
+    private readonly string _stubDirectoryPath;
+    private readonly ISpecialFolderProvider _stubProvider = A.Fake<ISpecialFolderProvider>();
     private readonly IOptions<DefaultUser> _userDefaultMock;
 
     public UserStorageTests()
     {
-        _fileSystem = FileSystem.BeginBuilding()
-            .AddRandomInTempRootName()
-            .AddNameGenerator(NameGenerationType.RandomName)
-            .AddFileWithNameGeneraing(".json", out _jsonPath)
-            .AddDirectoryWithNameGenerating(out _stubDirectoryPath, (_, innerBuilder) => innerBuilder)
-            .Build();
+        _fileSystem = new TestFileSystem();
+        _jsonPath = _fileSystem.CreateFile(".json");
+        _stubDirectoryPath = _fileSystem.CreateDirectory();
 
         _userDefaultMock = A.Fake<IOptions<DefaultUser>>();
         A.CallTo(() => _userDefaultMock.Value).Returns(new DefaultUser()
@@ -39,15 +36,15 @@ public class UserStorageTests : IDisposable
     public async Task UserProperty_AfterFlush_UpdateUserDataForce()
     {
         //Arrange
-        ILogger<UserStorage> logger = A.Dummy<ILogger<UserStorage>>();
-        IOptions<StorageOptions> options = A.Fake<IOptions<StorageOptions>>();
+        var logger = A.Dummy<ILogger<UserStorage>>();
+        var options = A.Fake<IOptions<StorageOptions>>();
         A.CallTo(() => options.Value).Returns(new StorageOptions()
         {
             DataFilePath = _jsonPath,
             WaitUserDataUpdateSeconds = 3,
             GameCodeDataPath = _stubDirectoryPath
         });
-        UserStorage systemUnderTests = new UserStorage(logger, options, _userDefaultMock, _stubProvider);
+        var systemUnderTests = new UserStorage(logger, options, _userDefaultMock, _stubProvider);
         await systemUnderTests.LoadAsync();
         var firstContent = await File.ReadAllTextAsync(_jsonPath);
 
@@ -56,17 +53,16 @@ public class UserStorageTests : IDisposable
         await systemUnderTests.FlushUpdatesAsync();
 
         //Assert
-        _fileSystem.Should()
-            .No
-            .FileContentEquals(_jsonPath, firstContent);
+        var actualContent = await File.ReadAllTextAsync(_jsonPath);
+        actualContent.Should().NotBe(firstContent);
     }
 
     [Fact]
     public async Task LoadAsync_WhenFileCorrupted_DeletesAndCreatesNewFile()
     {
         // Arrange
-        ILogger<UserStorage> logger = A.Dummy<ILogger<UserStorage>>();
-        IOptions<StorageOptions> options = A.Fake<IOptions<StorageOptions>>();
+        var logger = A.Dummy<ILogger<UserStorage>>();
+        var options = A.Fake<IOptions<StorageOptions>>();
 
         A.CallTo(() => options.Value).Returns(new StorageOptions()
         {
@@ -77,26 +73,26 @@ public class UserStorageTests : IDisposable
 
         await File.WriteAllTextAsync(_jsonPath, "{ invalid: json }");
         var corruptedContent = await File.ReadAllTextAsync(_jsonPath);
-        UserData expectedUser = _userDefaultMock.Value.User;
+        var expectedUser = _userDefaultMock.Value.User;
 
-        UserStorage systemUnderTests = new UserStorage(logger, options, _userDefaultMock, _stubProvider);
+        var systemUnderTests = new UserStorage(logger, options, _userDefaultMock, _stubProvider);
 
         // Act
         await systemUnderTests.LoadAsync();
 
         // Assert
-        _fileSystem.Should()
-            .FileContains(_jsonPath, expectedUser.CodeFontSize.ToString())
-            .FileContains(_jsonPath, expectedUser.EnableCodeHighlighting.ToString().ToLower())
-            .No.FileContentEquals(_jsonPath, corruptedContent);
+        var actualContent = await File.ReadAllTextAsync(_jsonPath);
+        actualContent.Should().Contain(expectedUser.CodeFontSize.ToString());
+        actualContent.Should().Contain(expectedUser.EnableCodeHighlighting.ToString().ToLower());
+        actualContent.Should().NotBe(corruptedContent);
     }
 
     [Fact]
     public async Task BeginObserve_WhenPropertyChanged_AutoSavesAfterDelay()
     {
         // Arrange
-        ILogger<UserStorage> logger = A.Dummy<ILogger<UserStorage>>();
-        IOptions<StorageOptions> options = A.Fake<IOptions<StorageOptions>>();
+        var logger = A.Dummy<ILogger<UserStorage>>();
+        var options = A.Fake<IOptions<StorageOptions>>();
         A.CallTo(() => options.Value).Returns(new StorageOptions()
         {
             DataFilePath = _jsonPath,
@@ -104,7 +100,7 @@ public class UserStorageTests : IDisposable
             GameCodeDataPath = _stubDirectoryPath
         });
 
-        UserStorage systemUnderTests = new UserStorage(logger, options, _userDefaultMock, _stubProvider);
+        var systemUnderTests = new UserStorage(logger, options, _userDefaultMock, _stubProvider);
         await systemUnderTests.LoadAsync();
 
         var firstContent = await File.ReadAllTextAsync(_jsonPath);
@@ -118,10 +114,10 @@ public class UserStorageTests : IDisposable
         await Task.Delay(1500);
 
         // Assert
-        _fileSystem.Should()
-            .FileContains(_jsonPath, newTheme)
-            .FileContains(_jsonPath, newLineNumbers.ToString().ToLower())
-            .No.FileContentEquals(_jsonPath, firstContent);
+        var actualContent = await File.ReadAllTextAsync(_jsonPath);
+        actualContent.Should().Contain(newTheme);
+        actualContent.Should().Contain(newLineNumbers.ToString().ToLower());
+        actualContent.Should().NotBe(firstContent);
     }
 
 
@@ -129,8 +125,8 @@ public class UserStorageTests : IDisposable
     public async Task LoadAsync_CalledTwice_DoesNotDuplicateObservers()
     {
         // Arrange
-        ILogger<UserStorage> logger = A.Dummy<ILogger<UserStorage>>();
-        IOptions<StorageOptions> options = A.Fake<IOptions<StorageOptions>>();
+        var logger = A.Dummy<ILogger<UserStorage>>();
+        var options = A.Fake<IOptions<StorageOptions>>();
         A.CallTo(() => options.Value).Returns(new StorageOptions()
         {
             DataFilePath = _jsonPath,
@@ -138,7 +134,7 @@ public class UserStorageTests : IDisposable
             GameCodeDataPath = _stubDirectoryPath
         });
 
-        UserStorage systemUnderTests = new UserStorage(logger, options, _userDefaultMock, _stubProvider);
+        var systemUnderTests = new UserStorage(logger, options, _userDefaultMock, _stubProvider);
         await systemUnderTests.LoadAsync();
 
         var firstContent = await File.ReadAllTextAsync(_jsonPath);
@@ -150,17 +146,17 @@ public class UserStorageTests : IDisposable
         await systemUnderTests.FlushUpdatesAsync();
 
         // Assert 
-        _fileSystem.Should()
-            .FileContains(_jsonPath, newFontSize.ToString())
-            .No.FileContentEquals(_jsonPath, firstContent);
+        var actualContent = await File.ReadAllTextAsync(_jsonPath);
+        actualContent.Should().Contain(newFontSize.ToString());
+        actualContent.Should().NotBe(firstContent);
     }
 
     [Fact]
     public async Task FlushUpdatesAsync_AfterPropertyChange_WritesCorrectValuesToFile()
     {
         // Arrange
-        ILogger<UserStorage> logger = A.Dummy<ILogger<UserStorage>>();
-        IOptions<StorageOptions> options = A.Fake<IOptions<StorageOptions>>();
+        var logger = A.Dummy<ILogger<UserStorage>>();
+        var options = A.Fake<IOptions<StorageOptions>>();
         A.CallTo(() => options.Value).Returns(new StorageOptions()
         {
             DataFilePath = _jsonPath,
@@ -168,7 +164,7 @@ public class UserStorageTests : IDisposable
             GameCodeDataPath = _stubDirectoryPath
         });
 
-        UserStorage systemUnderTests = new UserStorage(logger, options, _userDefaultMock, _stubProvider);
+        var systemUnderTests = new UserStorage(logger, options, _userDefaultMock, _stubProvider);
         await systemUnderTests.LoadAsync();
 
         var originalContent = await File.ReadAllTextAsync(_jsonPath);
@@ -181,10 +177,10 @@ public class UserStorageTests : IDisposable
         await systemUnderTests.FlushUpdatesAsync();
 
         // Assert
-        _fileSystem.Should()
-            .FileContains(_jsonPath, expectedFontSize.ToString())
-            .FileContains(_jsonPath, expectedTheme)
-            .No.FileContentEquals(_jsonPath, originalContent);
+        var actualContent = await File.ReadAllTextAsync(_jsonPath);
+        actualContent.Should().Contain(expectedFontSize.ToString());
+        actualContent.Should().Contain(expectedTheme);
+        actualContent.Should().NotBe(originalContent);
     }
 
     public void Dispose()
