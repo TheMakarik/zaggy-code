@@ -7,6 +7,9 @@ public class SpecialFolderProvider : ISpecialFolderProvider
 {
     public string GetFolder(Environment.SpecialFolder folder, string path)
     {
+        if (Path.IsPathRooted(path))
+            return path;
+
         return Path.Join(Environment.GetFolderPath(folder), path);
     }
 }

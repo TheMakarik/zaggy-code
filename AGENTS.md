@@ -28,6 +28,23 @@
 
 Настройки (`IOptions<T>`) биндятся из `appsettings.json` через `AddOptions<T>`.
 
+### Переменные окружения
+
+При старте приложения `Bootstrapper` устанавливает переменные окружения, которые используются в путях `appsettings.json`. Все свойства опций, содержащие пути, раскрывают эти переменные через `Environment.ExpandEnvironmentVariables` в сеттерах (C# 14 `field` keyword).
+
+| Переменная | Назначение | Windows | Linux (FreeDesktop) | macOS |
+|------------|-----------|---------|---------------------|-------|
+| `ZAGGY_APP` | Папка с исполняемым файлом приложения | `AppContext.BaseDirectory` | `AppContext.BaseDirectory` | `AppContext.BaseDirectory` |
+| `ZAGGY_CONFIG` | Пользовательские конфиги и данные | `%APPDATA%\zaggy` | `$XDG_CONFIG_HOME/zaggy` или `~/.config/zaggy` | `~/Library/Application Support/zaggy` |
+| `ZAGGY_STATE` | Логи и runtime-state | `%LOCALAPPDATA%\zaggy\state` | `$XDG_STATE_HOME/zaggy` или `~/.local/state/zaggy` | `~/Library/Logs/zaggy` |
+| `ZAGGY_TEMP` | Временные файлы | `%TEMP%\zaggy` | `$XDG_RUNTIME_DIR/zaggy` или `/tmp/zaggy-{user}` | `~/Library/Caches/zaggy` |
+
+Правила:
+
+- В `appsettings.json` пути пишутся через эти переменные, например: `%ZAGGY_CONFIG%/data.json`.
+- Если добавляешь новую опцию с путём, её сеттер должен вызывать `Environment.ExpandEnvironmentVariables(value)`.
+- `Bootstrapper.SetEnvironmentVariables()` создаёт недостающие директории перед биндингом конфигурации.
+
 ---
 
 ## Код-стайл

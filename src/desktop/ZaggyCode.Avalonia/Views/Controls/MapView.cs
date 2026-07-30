@@ -1,10 +1,3 @@
-using System.Collections.ObjectModel;
-using System.Collections.Specialized;
-using ZaggyCode.Core.Game.Enums;
-using ZaggyCode.Core.Game.Interfaces;
-using GamePoint = ZaggyCode.Core.Game.Models.Point;
-using RobotMovedEventArgs = ZaggyCode.Core.Game.EventArgs.RobotMovedEventArgs;
-
 namespace ZaggyCode.Avalonia.Views.Controls;
 
 // Game field rendered as an island: cells are grass, walls/obstacles are rocks,
@@ -167,8 +160,7 @@ public sealed class MapView : Control
             Points = points
         };
     }
-
-    // Возвращает чилипиздрика на спавн и очищает прогресс
+    
     public void Reset()
     {
         if (!Dispatcher.UIThread.CheckAccess())

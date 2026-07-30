@@ -1,5 +1,3 @@
-using ZaggyCode.Core.Game.Interfaces;
-
 namespace ZaggyCode.Avalonia.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase

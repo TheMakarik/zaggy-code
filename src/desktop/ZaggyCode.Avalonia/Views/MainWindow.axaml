@@ -30,7 +30,9 @@
         <vm:MainWindowViewModel />
     </Design.DataContext>
 
-    <rxui:ReactiveWindow.Resources />
+    <rxui:ReactiveWindow.Resources>
+        <converters:IsNotEqualConverter x:Key="IsNotEqualConverter" />
+    </rxui:ReactiveWindow.Resources>
 
     <Grid Classes="main-background" RowDefinitions="Auto,*">
         <!--  Header  -->
@@ -299,7 +301,14 @@
                                                         Classes="speed-flyout-button"
                                                         Command="{Binding DataContext.ChangeExecutionSpeedCommand, ElementName=ThisWindow}"
                                                         CommandParameter="{Binding .}"
-                                                        Content="{Binding .}" />
+                                                        Content="{Binding .}">
+                                                        <Button.IsEnabled>
+                                                            <MultiBinding Converter="{StaticResource IsNotEqualConverter}">
+                                                                <Binding Path="." />
+                                                                <Binding ElementName="ThisWindow" Path="DataContext.ExecutionSpeed" />
+                                                            </MultiBinding>
+                                                        </Button.IsEnabled>
+                                                    </Button>
                                                 </DataTemplate>
                                             </ItemsControl.ItemTemplate>
                                         </ItemsControl>

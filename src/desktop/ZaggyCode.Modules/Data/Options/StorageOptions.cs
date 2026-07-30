@@ -2,7 +2,21 @@ namespace ZaggyCode.Modules.Data.Options;
 
 public sealed class StorageOptions
 {
-    public required string GameCodeDataPath { get; set ; }
-    public required string DataFilePath { get; set; }
-    public required int WaitUserDataUpdateSeconds { get; set; }
+    public required string GameCodeDataPath
+    {
+        get => field;
+        set => field = Environment.ExpandEnvironmentVariables(value);
+    }
+
+    public required string DataFilePath
+    {
+        get => field;
+        set => field = Environment.ExpandEnvironmentVariables(value);
+    }
+
+    public required int WaitUserDataUpdateSeconds
+    {
+        get => field;
+        set => field = value;
+    }
 }

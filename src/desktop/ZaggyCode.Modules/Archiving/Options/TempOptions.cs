@@ -2,5 +2,9 @@ namespace ZaggyCode.Modules.Archiving.Options;
 
 public class TempOptions
 {
-    public required string TempDirectoryName { get; set; }
+    public required string TempDirectoryPath
+    {
+        get => field;
+        set => field = Environment.ExpandEnvironmentVariables(value);
+    }
 }
