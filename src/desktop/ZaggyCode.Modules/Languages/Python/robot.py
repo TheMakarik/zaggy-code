@@ -1,5 +1,10 @@
 import typing
 
+"""
+Zaggy's Code - Python robot модуль
+Вызывает методы из RobotExecutor, которые получает из IronPython
+"""
+
 def move_up() -> None:
     __clr_RobotExecutor_MoveUp() # type: ignore
 

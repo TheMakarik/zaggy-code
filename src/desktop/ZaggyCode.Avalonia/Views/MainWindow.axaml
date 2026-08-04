@@ -169,6 +169,12 @@
                                 Icon="{materialIcons:MaterialIconExt Kind=PageLayoutSidebarLeft}"
                                 IsChecked="{Binding DataContext.ShowSidebar, ElementName=ThisWindow}"
                                 Theme="{StaticResource ZaggyToggleMenuItem}" />
+                            <MenuItem
+                                Command="{Binding DataContext.ToggleUseSystemTitleBarCommand, ElementName=ThisWindow}"
+                                Header="Использовать системную рамку окна"
+                                Icon="{materialIcons:MaterialIconExt Kind=WindowMaximize}"
+                                IsChecked="{Binding DataContext.UseOsDecoration, ElementName=ThisWindow}"
+                                Theme="{StaticResource ZaggyToggleMenuItem}" />
                             <MenuItem Header="Текст" Icon="{materialIcons:MaterialIconExt Kind=FontSize}">
                                 <MenuItem
                                     Command="{Binding IncrementEditorFontSizeCommand}"
@@ -274,6 +280,12 @@
                                     Header="Показывать боковое меню"
                                     Icon="{materialIcons:MaterialIconExt Kind=PageLayoutSidebarLeft}"
                                     IsChecked="{Binding DataContext.ShowSidebar, ElementName=ThisWindow}"
+                                    Theme="{StaticResource ZaggyToggleMenuItem}" />
+                                <MenuItem
+                                    Command="{Binding DataContext.ToggleUseSystemTitleBarCommand, ElementName=ThisWindow}"
+                                    Header="Использовать системную рамку окна"
+                                    Icon="{materialIcons:MaterialIconExt Kind=WindowMaximize}"
+                                    IsChecked="{Binding DataContext.UseOsDecoration, ElementName=ThisWindow}"
                                     Theme="{StaticResource ZaggyToggleMenuItem}" />
                                 <MenuItem Header="Текст" Icon="{materialIcons:MaterialIconExt Kind=FontSize}">
                                     <MenuItem
@@ -396,26 +408,28 @@
                             Classes="icon-button"
                             Content="{materialIcons:MaterialIconExt Kind=ContentSave}"
                             ToolTip.Tip="Сохранить" />
-                        <Button
-                            Classes="speed-button"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            VerticalContentAlignment="Center">
+                        <Button Classes="icon-button" ToolTip.Tip="Скорость">
                             <TextBlock HorizontalAlignment="Center" Text="{Binding ExecutionSpeed}" />
                             <Button.Flyout>
-                                <Flyout FlyoutPresenterClasses="speed-flyout-presenter" Placement="RightEdgeAlignedTop">
+                                <Flyout Placement="RightEdgeAlignedTop">
                                     <Border
                                         Background="{DynamicResource SurfaceBrush}"
                                         CornerRadius="{DynamicResource SmallCornerRadius}"
                                         Padding="4">
                                         <ItemsControl ItemsSource="{Binding Source={x:Type enums:ExecutionSpeed}, Converter={converters:EnumValuesConverter}}">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <StackPanel Orientation="Horizontal" />
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
                                             <ItemsControl.ItemTemplate>
-                                                <DataTemplate x:DataType="enums:ExecutionSpeed">
+                                                <DataTemplate x:DataType="x:String">
                                                     <Button
                                                         Classes="speed-flyout-button"
                                                         Command="{Binding DataContext.ChangeExecutionSpeedCommand, ElementName=ThisWindow}"
                                                         CommandParameter="{Binding .}"
-                                                        Content="{Binding .}">
+                                                        Content="{Binding .}"
+                                                        Margin="5,0">
                                                         <Button.IsEnabled>
                                                             <MultiBinding Converter="{StaticResource IsNotEqualConverter}">
                                                                 <Binding Path="." />

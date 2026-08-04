@@ -56,6 +56,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly IOptions<CodeThemeDisplayNameOptions> _displayNameOptions;
     private readonly IOptions<CodeThemeIconOptions> _iconOptions;
     private readonly ILogger<MainWindowViewModel> _logger;
+    private readonly ILogger<SettingsViewModel> _settingsLogger;
     private CancellationTokenSource? _cancellationTokenSource;
 
     #endregion
@@ -71,7 +72,8 @@ public partial class MainWindowViewModel : ViewModelBase
         IOptions<PopupOptions> popupOptions,
         IOptions<FontSizeOptions> textFontSize,
         IOptions<CodeThemeDisplayNameOptions> displayNameOptions,
-        IOptions<CodeThemeIconOptions> iconOptions)
+        IOptions<CodeThemeIconOptions> iconOptions,
+        ILogger<SettingsViewModel> settingsLogger)
     {
         _factory = factory;
         _userStorage = userStorage;
@@ -79,6 +81,7 @@ public partial class MainWindowViewModel : ViewModelBase
         _codeExamplePathOptions = codeExamplePathOptions;
         _displayNameOptions = displayNameOptions;
         _iconOptions = iconOptions;
+        _settingsLogger = settingsLogger;
         _executionSpeed = userStorage.Current.LastSpeed;
         _selectedLanguage = userStorage.Current.LastLanguage;
         _textEditorFontSize = userStorage.Current.CodeFontSize;
@@ -190,15 +193,21 @@ public partial class MainWindowViewModel : ViewModelBase
     [ReactiveCommand]
     private void IncrementEditorFontSize()
     {
-        if (TextEditorFontSize < _fontSizeOptions.Value.MaxFontSize)
-            TextEditorFontSize += 1;
+        if (TextEditorFontSize >= _fontSizeOptions.Value.MaxFontSize)
+            return;
+
+        TextEditorFontSize += 1;
+        MessageBus.Current.SendMessage(new FontSizeToastMessage("редактора", TextEditorFontSize));
     }
 
     [ReactiveCommand]
     private void DecrementEditorFontSize()
     {
-        if (TextEditorFontSize > _fontSizeOptions.Value.MinFontSize)
-            TextEditorFontSize -= 1;
+        if (TextEditorFontSize <= _fontSizeOptions.Value.MinFontSize)
+            return;
+
+        TextEditorFontSize -= 1;
+        MessageBus.Current.SendMessage(new FontSizeToastMessage("редактора", TextEditorFontSize));
     }
 
     [ReactiveCommand]
@@ -218,15 +227,21 @@ public partial class MainWindowViewModel : ViewModelBase
     [ReactiveCommand]
     private void IncrementTerminalFontSize()
     {
-        if (TerminalFontSize < _fontSizeOptions.Value.MaxFontSize)
-            TerminalFontSize += 1;
+        if (TerminalFontSize >= _fontSizeOptions.Value.MaxFontSize)
+            return;
+
+        TerminalFontSize += 1;
+        MessageBus.Current.SendMessage(new FontSizeToastMessage("терминала", TerminalFontSize));
     }
 
     [ReactiveCommand]
     private void DecrementTerminalFontSize()
     {
-        if (TerminalFontSize > _fontSizeOptions.Value.MinFontSize)
-            TerminalFontSize -= 1;
+        if (TerminalFontSize <= _fontSizeOptions.Value.MinFontSize)
+            return;
+
+        TerminalFontSize -= 1;
+        MessageBus.Current.SendMessage(new FontSizeToastMessage("терминала", TerminalFontSize));
     }
 
     [ReactiveCommand]
@@ -271,7 +286,7 @@ public partial class MainWindowViewModel : ViewModelBase
     [ReactiveCommand]
     private async Task OpenSettingsAsync()
     {
-        var settingsViewModel = new SettingsViewModel(_userStorage, _defaultUserOptions, _codeExamplePathOptions, _fontSizeOptions, _displayNameOptions, _iconOptions);
+        var settingsViewModel = new SettingsViewModel(_userStorage, _defaultUserOptions, _codeExamplePathOptions, _fontSizeOptions, _displayNameOptions, _iconOptions, _settingsLogger);
         await OpenSettings.Handle(settingsViewModel);
     }
 

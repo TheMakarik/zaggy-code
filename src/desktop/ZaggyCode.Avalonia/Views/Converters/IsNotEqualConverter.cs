@@ -7,6 +7,6 @@ public sealed class IsNotEqualConverter : IMultiValueConverter
         if (values.Count != 2)
             return false;
 
-        return !Equals(values[0], values[1]);
+        return !string.Equals(values[0]?.ToString(), values[1]?.ToString(), StringComparison.Ordinal);
     }
 }

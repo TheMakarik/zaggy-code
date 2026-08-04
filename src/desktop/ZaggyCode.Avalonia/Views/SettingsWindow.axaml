@@ -172,13 +172,15 @@
                                         <Button
                                             Classes="settings-font-button"
                                             Command="{Binding ChangeCodeFontSizeCommand}"
-                                            CommandParameter="-1">
+                                            CommandParameter="-1"
+                                            IsEnabled="{Binding CanDecreaseCodeFontSize}">
                                             <materialIcons:MaterialIcon Kind="ChevronDown" />
                                         </Button>
                                         <Button
                                             Classes="settings-font-button"
                                             Command="{Binding ChangeCodeFontSizeCommand}"
-                                            CommandParameter="1">
+                                            CommandParameter="1"
+                                            IsEnabled="{Binding CanIncreaseCodeFontSize}">
                                             <materialIcons:MaterialIcon Kind="ChevronUp" />
                                         </Button>
                                         <TextBlock
@@ -201,13 +203,15 @@
                                         <Button
                                             Classes="settings-font-button"
                                             Command="{Binding ChangeTerminalFontSizeCommand}"
-                                            CommandParameter="-1">
+                                            CommandParameter="-1"
+                                            IsEnabled="{Binding CanDecreaseTerminalFontSize}">
                                             <materialIcons:MaterialIcon Kind="ChevronDown" />
                                         </Button>
                                         <Button
                                             Classes="settings-font-button"
                                             Command="{Binding ChangeTerminalFontSizeCommand}"
-                                            CommandParameter="1">
+                                            CommandParameter="1"
+                                            IsEnabled="{Binding CanIncreaseTerminalFontSize}">
                                             <materialIcons:MaterialIcon Kind="ChevronUp" />
                                         </Button>
                                         <TextBlock

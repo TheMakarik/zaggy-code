@@ -23,22 +23,36 @@
             <Grid ColumnDefinitions="*,Auto">
                 <TextBlock
                     Grid.Column="0"
-                    Text="{Binding Title, RelativeSource={RelativeSource AncestorType=Window}}"
+                    Text="Сохранение изменений"
                     VerticalAlignment="Center" />
-                <Button
-                    Classes="icon-button window-control close"
-                    Click="CloseButton_Click"
-                    Grid.Column="1">
-                    <materialIcons:MaterialIcon Kind="WindowClose" />
-                </Button>
+                <StackPanel
+                    Grid.Column="1"
+                    Orientation="Horizontal"
+                    Spacing="4">
+                    <Button
+                        Classes="icon-button window-control"
+                        Click="MinimizeButton_Click"
+                        ToolTip.Tip="Свернуть">
+                        <materialIcons:MaterialIcon Kind="WindowMinimize" />
+                    </Button>
+                    <Button
+                        Classes="icon-button window-control close"
+                        Click="CloseButton_Click"
+                        ToolTip.Tip="Закрыть">
+                        <materialIcons:MaterialIcon Kind="WindowClose" />
+                    </Button>
+                </StackPanel>
             </Grid>
         </Border>
 
-        <Grid Grid.Row="1" Margin="20" RowDefinitions="*,Auto">
+        <Grid
+            Grid.Row="1"
+            Margin="20"
+            RowDefinitions="*,Auto">
             <TextBlock
                 Grid.Row="0"
                 HorizontalAlignment="Center"
-                Text="Вы хотите сохранить изменения в настройках?"
+                Text="Вы дейстительно хотите сохранить изменения, совершенные в настройках?"
                 TextWrapping="Wrap"
                 VerticalAlignment="Center" />
 
