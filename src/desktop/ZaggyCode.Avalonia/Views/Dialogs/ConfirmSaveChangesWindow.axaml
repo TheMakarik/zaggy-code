@@ -2,7 +2,7 @@
     Background="{DynamicResource BackgroundBrush}"
     CanResize="False"
     Foreground="{DynamicResource ForegroundBrush}"
-    Height="160"
+    Height="180"
     ShowInTaskbar="False"
     SizeToContent="Height"
     Title="Сохранение изменений"
@@ -10,29 +10,52 @@
     WindowStartupLocation="CenterOwner"
     x:Class="ZaggyCode.Avalonia.Views.Dialogs.ConfirmSaveChangesWindow"
     xmlns="https://github.com/avaloniaui"
+    xmlns:converters="clr-namespace:ZaggyCode.Avalonia.Views.Converters"
+    xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <Grid Margin="20" RowDefinitions="Auto,*">
-        <TextBlock
+    <Grid RowDefinitions="Auto,*,Auto">
+        <Border
+            Classes="header-bar"
             Grid.Row="0"
-            Text="Вы хотите сохранить изменения в настройках?"
-            TextWrapping="Wrap"
-            VerticalAlignment="Center" />
+            Name="CustomTitleBar"
+            Padding="12,8">
+            <Grid ColumnDefinitions="*,Auto">
+                <TextBlock
+                    Grid.Column="0"
+                    Text="{Binding Title, RelativeSource={RelativeSource AncestorType=Window}}"
+                    VerticalAlignment="Center" />
+                <Button
+                    Classes="icon-button window-control close"
+                    Click="CloseButton_Click"
+                    Grid.Column="1">
+                    <materialIcons:MaterialIcon Kind="WindowClose" />
+                </Button>
+            </Grid>
+        </Border>
 
-        <StackPanel
-            Grid.Row="1"
-            HorizontalAlignment="Right"
-            Orientation="Horizontal"
-            Spacing="10"
-            VerticalAlignment="Bottom">
-            <Button
-                Click="YesButton_Click"
-                Content="Да"
-                IsDefault="True" />
-            <Button
-                Click="NoButton_Click"
-                Content="Нет"
-                IsCancel="True" />
-        </StackPanel>
+        <Grid Grid.Row="1" Margin="20" RowDefinitions="*,Auto">
+            <TextBlock
+                Grid.Row="0"
+                HorizontalAlignment="Center"
+                Text="Вы хотите сохранить изменения в настройках?"
+                TextWrapping="Wrap"
+                VerticalAlignment="Center" />
+
+            <StackPanel
+                Grid.Row="1"
+                HorizontalAlignment="Right"
+                Orientation="Horizontal"
+                Spacing="10">
+                <Button
+                    Click="YesButton_Click"
+                    Content="Да"
+                    IsDefault="True" />
+                <Button
+                    Click="NoButton_Click"
+                    Content="Нет"
+                    IsCancel="True" />
+            </StackPanel>
+        </Grid>
     </Grid>
 </Window>

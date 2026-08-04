@@ -1,3 +1,5 @@
+using System.Collections.ObjectModel;
+
 namespace ZaggyCode.Avalonia.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
@@ -22,6 +24,7 @@ public partial class MainWindowViewModel : ViewModelBase
     public int MinFontSize { get; init; }
     public string CodeTheme { get; private set; }
     public PopupOptions PopupOptions { get; }
+    public ObservableCollection<string> AvailableCodeThemes { get; } = [];
 
     public IRobotExecutor? Executor { get; set; }
     public TextReader? TerminalReader { get; set; }
@@ -90,6 +93,7 @@ public partial class MainWindowViewModel : ViewModelBase
         _logger = logger;
 
         InitializeMessageBusSubscriptions();
+        InitializeAvailableCodeThemes();
 
         this.WhenAnyPropertyChanged().Subscribe(context =>
         {
@@ -131,6 +135,12 @@ public partial class MainWindowViewModel : ViewModelBase
                 .Subscribe(onNext => userStorage.Current.LastLanguage = _selectedLanguage);
 #pragma warning restore AsyncVoidMethod
         });
+    }
+
+    private void InitializeAvailableCodeThemes()
+    {
+        foreach (var property in typeof(CodeThemeDisplayNameOptions).GetProperties())
+            AvailableCodeThemes.Add(property.Name);
     }
 
     private void InitializeMessageBusSubscriptions()
@@ -227,9 +237,10 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     [ReactiveCommand]
-    private void ChangeExecutionSpeed(ExecutionSpeed speed)
+    private void ChangeExecutionSpeed(string? speed)
     {
-        ExecutionSpeed = speed;
+        if (Enum.TryParse<ExecutionSpeed>(speed, out var value))
+            ExecutionSpeed = value;
     }
 
     [ReactiveCommand]

@@ -98,6 +98,7 @@
                 <Border
                     Classes="header-bar"
                     Grid.Row="0"
+                    IsVisible="{Binding UseSystemTitleBar, Converter={converters:InverseBooleanConverter}}"
                     Name="HeaderBar"
                     Padding="12,8">
                     <Grid ColumnDefinitions="Auto,*,Auto">

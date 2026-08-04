@@ -325,7 +325,7 @@ public sealed class MapView : Control
 
             case Key.D:
                 {
-                    Executor.Draw();
+                    Executor.FillCell();
                     e.Handled = true;
                     break;
                 }
@@ -800,13 +800,17 @@ public sealed class MapView : Control
         public void MoveUp() => _owner.Move(0, -1);
         public void MoveDown() => _owner.Move(0, 1);
         public void MoveLeft() => _owner.Move(-1, 0);
+        public void FillCell()
+        {
+            _owner.Paint();
+        }
+
+        public bool IsCellFilled()
+        {
+            throw new NotImplementedException();
+        }
+
         public void MoveRight() => _owner.Move(1, 0);
-
-        public bool CanMoveUp() => _owner.CanMove(0, -1);
-        public bool CanMoveDown() => _owner.CanMove(0, 1);
-        public bool CanMoveLeft() => _owner.CanMove(-1, 0);
-        public bool CanMoveRight() => _owner.CanMove(1, 0);
-
         public void Draw() => _owner.Paint();
 
         public bool IsWallFromUp() => _owner.IsBlocked(_owner._logicalCol, _owner._logicalRow, 0, -1);

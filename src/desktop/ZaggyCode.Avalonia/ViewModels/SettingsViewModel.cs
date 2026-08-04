@@ -22,9 +22,6 @@ public sealed partial class SettingsViewModel : ViewModelBase
     private readonly bool _originalShowSidebar;
     private readonly string _originalCodeTheme;
 
-    public int MinFontSize => _fontSizeOptions.MinFontSize;
-    public int MaxFontSize => _fontSizeOptions.MaxFontSize;
-
     public ObservableCollection<CodeThemeItem> AvailableCodeThemes { get; } = [];
     public Interaction<Unit, Unit> CloseSettingsInteraction { get; } = new();
     public Interaction<string, string> ApplyCodeThemeInteraction { get; } = new();
@@ -154,14 +151,20 @@ public sealed partial class SettingsViewModel : ViewModelBase
     }
 
     [ReactiveCommand]
-    private void ChangeCodeFontSize(int delta)
+    private void ChangeCodeFontSize(string? deltaText)
     {
+        if (!int.TryParse(deltaText, out var delta))
+            return;
+
         CodeFontSize = Math.Clamp(CodeFontSize + delta, _fontSizeOptions.MinFontSize, _fontSizeOptions.MaxFontSize);
     }
 
     [ReactiveCommand]
-    private void ChangeTerminalFontSize(int delta)
+    private void ChangeTerminalFontSize(string? deltaText)
     {
+        if (!int.TryParse(deltaText, out var delta))
+            return;
+
         TerminalFontSize = Math.Clamp(TerminalFontSize + delta, _fontSizeOptions.MinFontSize, _fontSizeOptions.MaxFontSize);
     }
 

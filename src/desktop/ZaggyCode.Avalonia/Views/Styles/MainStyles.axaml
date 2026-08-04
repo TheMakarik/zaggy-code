@@ -244,6 +244,90 @@
                 </Style>
             </ControlTheme>
 
+            <!--  Toggle menu item (check box + icon + header)  -->
+            <ControlTheme TargetType="MenuItem" x:Key="ZaggyToggleMenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                <Setter Property="Template">
+                    <ControlTemplate>
+                        <Panel>
+                            <Border
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="{TemplateBinding CornerRadius}"
+                                Name="PART_LayoutRoot"
+                                Padding="{TemplateBinding Padding}">
+                                <Grid ColumnDefinitions="Auto,Auto,*,Auto,Auto">
+                                    <CheckBox
+                                        Grid.Column="0"
+                                        IsChecked="{TemplateBinding IsChecked}"
+                                        IsHitTestVisible="False"
+                                        Margin="0,0,8,0"
+                                        VerticalAlignment="Center" />
+                                    <Border
+                                        BorderBrush="{DynamicResource BorderBrush}"
+                                        BorderThickness="0.3"
+                                        CornerRadius="4"
+                                        Grid.Column="1"
+                                        Margin="0,0,8,0"
+                                        Padding="2">
+                                        <ContentControl
+                                            Content="{TemplateBinding Icon}"
+                                            Theme="{StaticResource ZaggyMenuItemIconTheme}" />
+                                    </Border>
+                                    <ContentPresenter
+                                        Content="{TemplateBinding Header}"
+                                        ContentTemplate="{TemplateBinding HeaderTemplate}"
+                                        Grid.Column="2"
+                                        HorizontalAlignment="Stretch"
+                                        Name="PART_HeaderPresenter"
+                                        VerticalAlignment="Center" />
+                                    <TextBlock
+                                        Foreground="{DynamicResource ForegroundMutedBrush}"
+                                        Grid.Column="3"
+                                        HorizontalAlignment="Right"
+                                        Margin="12,0,0,0"
+                                        Name="PART_InputGestureText"
+                                        Text="{TemplateBinding InputGesture,
+                                                               Converter={StaticResource KeyGestureConverter}}"
+                                        VerticalAlignment="Center" />
+                                    <Path
+                                        Data="{StaticResource MenuItemChevronPathData}"
+                                        Fill="{DynamicResource ForegroundMutedBrush}"
+                                        Grid.Column="4"
+                                        Height="10"
+                                        Margin="8,0,0,0"
+                                        Name="PART_ChevronPath"
+                                        Stretch="Uniform"
+                                        VerticalAlignment="Center"
+                                        Width="7" />
+                                </Grid>
+                            </Border>
+                            <Popup
+                                HorizontalOffset="-4"
+                                IsLightDismissEnabled="False"
+                                IsOpen="{TemplateBinding IsSubMenuOpen,
+                                                         Mode=TwoWay}"
+                                Name="PART_Popup"
+                                Placement="RightEdgeAlignedTop"
+                                WindowManagerAddShadowHint="False">
+                                <Border
+                                    Background="{DynamicResource SurfaceBrush}"
+                                    BorderBrush="{DynamicResource BorderBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="{DynamicResource SmallCornerRadius}"
+                                    Padding="0">
+                                    <ScrollViewer Theme="{StaticResource FluentMenuScrollViewer}">
+                                        <ItemsPresenter
+                                            Grid.IsSharedSizeScope="True"
+                                            ItemsPanel="{TemplateBinding ItemsPanel}"
+                                            Margin="0"
+                                            Name="PART_ItemsPresenter" />
+                                    </ScrollViewer>
+                                </Border>
+                            </Popup>
+                        </Panel>
+                    </ControlTemplate>
+                </Setter>
+            </ControlTheme>
+
             <!--  Menu  -->
             <ControlTheme TargetType="Menu" x:Key="{x:Type Menu}">
                 <Setter Property="Background" Value="Transparent" />

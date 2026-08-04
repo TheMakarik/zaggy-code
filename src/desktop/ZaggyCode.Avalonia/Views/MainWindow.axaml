@@ -148,8 +148,27 @@
                         </MenuItem>
 
                         <MenuItem Header="Вид" Icon="{materialIcons:MaterialIconExt Kind=Eye}">
-                            <MenuItem Header="Тема подсветки синтаксиса" Icon="{materialIcons:MaterialIconExt Kind=CodeBlockBraces}" />
-                            <MenuItem Header="Показывать боковое меню" Icon="{materialIcons:MaterialIconExt Kind=PageLayoutSidebarLeft}" />
+                            <MenuItem
+                                Header="Тема подсветки синтаксиса"
+                                Icon="{materialIcons:MaterialIconExt Kind=CodeBlockBraces}"
+                                ItemsSource="{Binding AvailableCodeThemes}">
+                                <MenuItem.ItemContainerTheme>
+                                    <ControlTheme
+                                        BasedOn="{StaticResource {x:Type MenuItem}}"
+                                        TargetType="MenuItem"
+                                        x:DataType="x:String">
+                                        <Setter Property="Header" Value="{Binding ., Mode=OneWay}" />
+                                        <Setter Property="Command" Value="{Binding DataContext.SelectCodeThemeCommand, ElementName=ThisWindow}" />
+                                        <Setter Property="CommandParameter" Value="{Binding .}" />
+                                    </ControlTheme>
+                                </MenuItem.ItemContainerTheme>
+                            </MenuItem>
+                            <MenuItem
+                                Command="{Binding DataContext.ToggleShowSidebarCommand, ElementName=ThisWindow}"
+                                Header="Показывать боковое меню"
+                                Icon="{materialIcons:MaterialIconExt Kind=PageLayoutSidebarLeft}"
+                                IsChecked="{Binding DataContext.ShowSidebar, ElementName=ThisWindow}"
+                                Theme="{StaticResource ZaggyToggleMenuItem}" />
                             <MenuItem Header="Текст" Icon="{materialIcons:MaterialIconExt Kind=FontSize}">
                                 <MenuItem
                                     Command="{Binding IncrementEditorFontSizeCommand}"
@@ -177,9 +196,11 @@
                                 Icon="{materialIcons:MaterialIconExt Kind=Settings}" />
                             <MenuItem Header="Управление горячими клавишами" Icon="{materialIcons:MaterialIconExt Kind=KeyboardSettings}" />
                             <MenuItem
-                                Command="{Binding ChangeTerminalVisibilityCommand}"
+                                Command="{Binding DataContext.ChangeTerminalVisibilityCommand, ElementName=ThisWindow}"
                                 Header="Терминал"
-                                Icon="{materialIcons:MaterialIconExt Kind=Terminal}" />
+                                Icon="{materialIcons:MaterialIconExt Kind=Terminal}"
+                                IsChecked="{Binding DataContext.IsTerminalVisible, ElementName=ThisWindow}"
+                                Theme="{StaticResource ZaggyToggleMenuItem}" />
                         </MenuItem>
 
                         <MenuItem Header="Справка" Icon="{materialIcons:MaterialIconExt Kind=HelpBox}">
@@ -233,8 +254,27 @@
                             </MenuItem>
 
                             <MenuItem Header="Вид" Icon="{materialIcons:MaterialIconExt Kind=Eye}">
-                                <MenuItem Header="Тема подсветки синтаксиса" Icon="{materialIcons:MaterialIconExt Kind=CodeBlockBraces}" />
-                                <MenuItem Header="Показывать боковое меню" Icon="{materialIcons:MaterialIconExt Kind=PageLayoutSidebarLeft}" />
+                                <MenuItem
+                                    Header="Тема подсветки синтаксиса"
+                                    Icon="{materialIcons:MaterialIconExt Kind=CodeBlockBraces}"
+                                    ItemsSource="{Binding AvailableCodeThemes}">
+                                    <MenuItem.ItemContainerTheme>
+                                        <ControlTheme
+                                            BasedOn="{StaticResource {x:Type MenuItem}}"
+                                            TargetType="MenuItem"
+                                            x:DataType="x:String">
+                                            <Setter Property="Header" Value="{Binding ., Mode=OneWay}" />
+                                            <Setter Property="Command" Value="{Binding DataContext.SelectCodeThemeCommand, ElementName=ThisWindow}" />
+                                            <Setter Property="CommandParameter" Value="{Binding .}" />
+                                        </ControlTheme>
+                                    </MenuItem.ItemContainerTheme>
+                                </MenuItem>
+                                <MenuItem
+                                    Command="{Binding DataContext.ToggleShowSidebarCommand, ElementName=ThisWindow}"
+                                    Header="Показывать боковое меню"
+                                    Icon="{materialIcons:MaterialIconExt Kind=PageLayoutSidebarLeft}"
+                                    IsChecked="{Binding DataContext.ShowSidebar, ElementName=ThisWindow}"
+                                    Theme="{StaticResource ZaggyToggleMenuItem}" />
                                 <MenuItem Header="Текст" Icon="{materialIcons:MaterialIconExt Kind=FontSize}">
                                     <MenuItem
                                         Command="{Binding IncrementEditorFontSizeCommand}"
@@ -262,9 +302,11 @@
                                     Icon="{materialIcons:MaterialIconExt Kind=Settings}" />
                                 <MenuItem Header="Управление горячими клавишами" Icon="{materialIcons:MaterialIconExt Kind=KeyboardSettings}" />
                                 <MenuItem
-                                    Command="{Binding ChangeTerminalVisibilityCommand}"
+                                    Command="{Binding DataContext.ChangeTerminalVisibilityCommand, ElementName=ThisWindow}"
                                     Header="Терминал"
-                                    Icon="{materialIcons:MaterialIconExt Kind=Terminal}" />
+                                    Icon="{materialIcons:MaterialIconExt Kind=Terminal}"
+                                    IsChecked="{Binding DataContext.IsTerminalVisible, ElementName=ThisWindow}"
+                                    Theme="{StaticResource ZaggyToggleMenuItem}" />
                             </MenuItem>
 
                             <MenuItem Header="Справка" Icon="{materialIcons:MaterialIconExt Kind=HelpBox}">
@@ -325,6 +367,7 @@
             <!--  Left sidebar  -->
             <Border
                 Classes="sidebar"
+                IsVisible="{Binding ShowSidebar}"
                 Padding="6"
                 Width="45">
                 <Grid RowDefinitions="Auto,*,Auto">
@@ -446,12 +489,12 @@
                             Classes="card"
                             Grid.Column="2"
                             Margin="6,12,12,12">
-                            <controls:MapView x:Name="GameMap" Margin="8"/>
+                            <controls:MapView Margin="8" x:Name="GameMap" />
                         </Border>
                     </Grid>
                 </Grid>
 
-                <GridSplitter Classes="subtle" Grid.Row="2" />
+                <GridSplitter Classes="horizontal" Grid.Row="2" />
 
                 <Border
                     Classes="card"

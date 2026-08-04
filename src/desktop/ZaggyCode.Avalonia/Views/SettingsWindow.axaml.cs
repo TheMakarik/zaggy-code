@@ -76,7 +76,10 @@ public partial class SettingsWindow : ReactiveWindow<SettingsViewModel>
 
     private async Task HandleCloseWithUnsavedChangesAsync()
     {
-        var confirmationWindow = new ConfirmSaveChangesWindow();
+        var confirmationWindow = new ConfirmSaveChangesWindow
+        {
+            WindowDecorations = WindowDecorations
+        };
         var result = await confirmationWindow.ShowDialog<bool?>(this);
 
         if (result != true)

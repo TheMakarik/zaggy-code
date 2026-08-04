@@ -6,11 +6,8 @@ public interface IRobotExecutor
     void MoveRight();
     void MoveDown();
     void MoveLeft();
-    bool CanMoveUp();
-    bool CanMoveRight();
-    bool CanMoveDown();
-    bool CanMoveLeft();
-    void Draw();
+    void FillCell();
+    bool IsCellFilled();
     bool IsWallFromUp();
     bool IsWallFromDown();
     bool IsWallFromLeft();
