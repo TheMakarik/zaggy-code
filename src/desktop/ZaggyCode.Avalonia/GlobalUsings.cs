@@ -54,6 +54,7 @@ global using VirtualTerminal.Session;
 global using ZaggyCode.Avalonia.Extensions;
 global using ZaggyCode.Avalonia.Options;
 global using ZaggyCode.Avalonia.ViewModels;
+global using ZaggyCode.Avalonia.ViewModels.Messages;
 global using ZaggyCode.Avalonia.Views;
 global using ZaggyCode.Avalonia.Views.Controls;
 global using ZaggyCode.Avalonia.Views.TerminalEngine;

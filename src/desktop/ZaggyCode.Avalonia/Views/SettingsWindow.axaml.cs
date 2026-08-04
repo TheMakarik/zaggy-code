@@ -1,0 +1,145 @@
+using System;
+using System.IO;
+using System.Reactive;
+using System.Reactive.Linq;
+using System.Threading.Tasks;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Input;
+using Avalonia.Interactivity;
+using Avalonia.Markup.Xaml;
+using Avalonia.Platform;
+using AvaloniaEdit;
+using AvaloniaEdit.TextMate;
+using Material.Icons.Avalonia;
+using ReactiveUI;
+using TextMateSharp.Grammars;
+using ZaggyCode.Avalonia.ViewModels;
+using ZaggyCode.Avalonia.Views.Dialogs;
+
+namespace ZaggyCode.Avalonia.Views;
+
+public partial class SettingsWindow : ReactiveWindow<SettingsViewModel>
+{
+    private TextMate.Installation? _csharpTextMateInstallation;
+    private TextMate.Installation? _pythonTextMateInstallation;
+
+    public SettingsWindow()
+    {
+        InitializeComponent();
+
+        HeaderBar.PointerPressed += (_, e) =>
+        {
+            if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
+                BeginMoveDrag(e);
+        };
+
+        MinimizeButton.Click += (_, __) => WindowState = WindowState.Minimized;
+        MaximizeButton.Click += (_, __) => WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
+        CloseButton.Click += (_, __) => Close();
+
+        PropertyChanged += (_, args) =>
+        {
+            if (args.Property.Name == nameof(WindowState))
+            {
+                MaximizeIcon.Kind = WindowState == WindowState.Maximized
+                    ? Material.Icons.MaterialIconKind.WindowRestore
+                    : Material.Icons.MaterialIconKind.WindowMaximize;
+            }
+        };
+
+        this.DataContextChanged += (_, _) =>
+        {
+            if (ViewModel is null)
+                return;
+
+            ViewModel.CloseSettingsInteraction.RegisterHandler(context =>
+            {
+                Close();
+                context.SetOutput(Unit.Default);
+            });
+
+            ViewModel.WhenAnyValue(viewModel => viewModel.SelectedCodeTheme)
+                .Subscribe(ApplyCodeTheme);
+
+            InitializeExampleEditors();
+        };
+    }
+
+    protected override void OnClosing(WindowClosingEventArgs eventArgs)
+    {
+        base.OnClosing(eventArgs);
+
+        if (eventArgs.IsProgrammatic || ViewModel is null || !ViewModel.HasChanges)
+            return;
+
+        eventArgs.Cancel = true;
+
+        _ = HandleCloseWithUnsavedChangesAsync();
+    }
+
+    private async Task HandleCloseWithUnsavedChangesAsync()
+    {
+        var confirmationWindow = new ConfirmSaveChangesWindow();
+        var result = await confirmationWindow.ShowDialog<bool?>(this);
+
+        if (result != true)
+        {
+            Close();
+            return;
+        }
+
+        if (ViewModel is null)
+            return;
+
+        ViewModel.SaveSettingsCommand.Execute(Unit.Default).Subscribe();
+    }
+
+    private void InitializeExampleEditors()
+    {
+        if (!Enum.TryParse<ThemeName>(ViewModel!.SelectedCodeTheme, out var themeName))
+            themeName = ThemeName.VisualStudioDark;
+
+        var registryOptions = new RegistryOptions(themeName);
+
+        _csharpTextMateInstallation = CSharpExampleEditor.InstallTextMate(registryOptions);
+        _csharpTextMateInstallation.SetGrammar(
+            registryOptions.GetScopeByLanguageId(registryOptions.GetLanguageByExtension(".cs").Id));
+
+        _pythonTextMateInstallation = PythonExampleEditor.InstallTextMate(registryOptions);
+        _pythonTextMateInstallation.SetGrammar(
+            registryOptions.GetScopeByLanguageId(registryOptions.GetLanguageByExtension(".py").Id));
+
+        LoadExampleCode(CSharpExampleEditor, ViewModel!.CSharpExamplePath);
+        LoadExampleCode(PythonExampleEditor, ViewModel.PythonExamplePath);
+    }
+
+    private static void LoadExampleCode(TextEditor editor, string filePath)
+    {
+        if (!File.Exists(filePath))
+            return;
+
+        editor.Text = File.ReadAllText(filePath);
+    }
+
+    private void ApplyCodeTheme(string themeName)
+    {
+        if (!Enum.TryParse<ThemeName>(themeName, out var theme))
+            return;
+
+        var registryOptions = new RegistryOptions(theme);
+        _csharpTextMateInstallation?.SetTheme(registryOptions.LoadTheme(theme));
+        _pythonTextMateInstallation?.SetTheme(registryOptions.LoadTheme(theme));
+    }
+
+    private void ResizeHandle_PointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (sender is not Border border || border.Tag is not string edgeText)
+            return;
+
+        if (!Enum.TryParse<WindowEdge>(edgeText, out var edge))
+            return;
+
+        BeginResizeDrag(edge, e);
+    }
+}

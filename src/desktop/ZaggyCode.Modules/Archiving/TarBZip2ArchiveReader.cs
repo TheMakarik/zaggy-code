@@ -1,18 +1,14 @@
-using System.Diagnostics;
-using SharpCompress.Archives;
-using SharpCompress.Archives.Tar;
-using SharpCompress.Compressors;
-using SharpCompress.Compressors.BZip2;
-using SharpCompress.Writers.Tar;
-using ZaggyCode.Core.Archiving.Interfaces;
-using ZaggyCode.Core.Archiving.Model;
-
 namespace ZaggyCode.Modules.Archiving;
 
-public sealed class TarBZip2ArchiveReader(ILogger<TarBZip2ArchiveReader> logger, IMetadataParser metadataParser) : IArchiveReader
+public sealed class TarBZip2ArchiveReader(
+    ILogger<TarBZip2ArchiveReader> logger,
+    IMetadataParser metadataParser,
+    IOptions<TempOptions> tempOptions) : IArchiveReader
 {
-    public async IAsyncEnumerable<T> EnumerateMetadata<T>(IReadOnlyCollection<string> archiveDirectories,
-        string extension, bool recursive) where T : ArchiveMetadata
+    public async IAsyncEnumerable<T> EnumerateMetadata<T>(
+        IReadOnlyCollection<string> archiveDirectories,
+        string extension,
+        bool recursive) where T : ArchiveMetadata
     {
         Debug.Assert(extension.StartsWith('.'), "extensions must starts with '.'");
         Debug.Assert(archiveDirectories.All(Directory.Exists), "All directories must exists");
@@ -22,7 +18,7 @@ public sealed class TarBZip2ArchiveReader(ILogger<TarBZip2ArchiveReader> logger,
 
         var files = ReadArchiveFiles(extension, recursive, archiveDirectories);
         var metadataFilesCount = 0;
-        foreach (var file in files)
+        await foreach (var file in files.ToAsyncEnumerable())
         {
             await using var archive = await OpenArchive(file);
             if (archive is null)
@@ -31,7 +27,7 @@ public sealed class TarBZip2ArchiveReader(ILogger<TarBZip2ArchiveReader> logger,
             var tarEntries = archive.EntriesAsync
                 .Where(entry => entry is { Key: not null, IsDirectory: false })
                 .Select(entry => entry.Key!);
-            
+
             var metadata = await ParseMetadataAsync<T>(tarEntries, archive, file);
 
             if (metadata is null)
@@ -40,7 +36,7 @@ public sealed class TarBZip2ArchiveReader(ILogger<TarBZip2ArchiveReader> logger,
             metadataFilesCount++;
             yield return metadata;
         }
-        
+
         logger.LogInformation("Enumerated {c} metadata files", metadataFilesCount);
     }
 
@@ -67,7 +63,7 @@ public sealed class TarBZip2ArchiveReader(ILogger<TarBZip2ArchiveReader> logger,
         foreach (var directory in archiveDirectories)
         {
             logger.LogDebug("Searching archives in directory: {directory}", directory);
-            var files = Directory.EnumerateDirectories(directory, $"*.{extension}",
+            var files = Directory.EnumerateFiles(directory, $"*{extension}",
                 recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
             foreach (var file in files)
                 yield return file;
@@ -80,7 +76,6 @@ public sealed class TarBZip2ArchiveReader(ILogger<TarBZip2ArchiveReader> logger,
 
         if (!await BZip2Stream.IsBZip2Async(stream))
         {
-            
             logger.LogError("File {file} is not BZip2 archive", file);
             await stream.DisposeAsync();
             return null;
@@ -108,7 +103,7 @@ public sealed class TarBZip2ArchiveReader(ILogger<TarBZip2ArchiveReader> logger,
     {
         Debug.Assert(File.Exists(archivePath));
 
-        var tempDirectory = Directory.CreateTempSubdirectory("zaggy-code-");
+        var tempDirectory = CreateTempDirectory();
         var archive = await OpenArchive(archivePath);
 
         if (archive is null)
@@ -116,31 +111,17 @@ public sealed class TarBZip2ArchiveReader(ILogger<TarBZip2ArchiveReader> logger,
 
         await using (archive)
         {
-            await foreach (var entry in archive.EntriesAsync)
-            {
-                if (entry.IsDirectory || entry.Key is null)
-                    continue;
-
-                var destinationPath = Path.Join(tempDirectory.FullName, entry.Key);
-                var fullDestinationPath = Path.GetFullPath(destinationPath);
-                var fullTempPath = Path.GetFullPath(tempDirectory.FullName);
-
-                if (!fullDestinationPath.StartsWith(fullTempPath + Path.DirectorySeparatorChar))
-                {
-                    logger.LogWarning("Skipping entry '{entry}' because it escapes extraction directory", entry.Key);
-                    
-                }
-
-                var destinationDirectory = Path.GetDirectoryName(destinationPath);
-                if (destinationDirectory is not null)
-                    Directory.CreateDirectory(destinationDirectory);
-
-                await using var entryStream = await entry.OpenEntryStreamAsync();
-                await using var fileStream = File.Create(destinationPath);
-                await entryStream.CopyToAsync(fileStream);
-            }
+            await archive.WriteToDirectoryAsync(
+                tempDirectory.FullName,
+                new ExtractionOptions { ExtractFullPath = true, Overwrite = true });
         }
 
         return tempDirectory;
+    }
+
+    private DirectoryInfo CreateTempDirectory()
+    {
+        var tempPath = Path.Join(tempOptions.Value.TempDirectoryPath, Guid.NewGuid().ToString("N"));
+        return Directory.CreateDirectory(tempPath);
     }
 }

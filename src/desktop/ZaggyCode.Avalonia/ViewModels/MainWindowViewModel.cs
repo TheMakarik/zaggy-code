@@ -1,3 +1,7 @@
+using System.Collections.ObjectModel;
+using Material.Icons;
+using TextMateSharp.Grammars;
+
 namespace ZaggyCode.Avalonia.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
@@ -8,6 +12,7 @@ public partial class MainWindowViewModel : ViewModelBase
     [Reactive] private bool _isTerminalExists = true;
     [Reactive] private bool _isRunning = false;
     [Reactive] private bool _useOsDecoration = false;
+    [Reactive] private bool _showSidebar = true;
     [Reactive] private ExecutionSpeed _executionSpeed;
     [Reactive] private Language _selectedLanguage;
     [Reactive] private int _textEditorFontSize;
@@ -19,6 +24,9 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public int MaxFontSize { get; init; }
     public int MinFontSize { get; init; }
+    public string CodeTheme { get; private set; }
+    public PopupOptions PopupOptions { get; }
+    public ObservableCollection<CodeThemeItem> AvailableCodeThemes { get; } = [];
 
     public IRobotExecutor? Executor { get; set; }
     public TextReader? TerminalReader { get; set; }
@@ -36,6 +44,7 @@ public partial class MainWindowViewModel : ViewModelBase
     public readonly Interaction<Unit, Unit> StopCodeExecution = new();
     public readonly Interaction<Unit, Unit> ResetMap = new();
     public readonly Interaction<Unit, Unit> ConcludeRun = new();
+    public readonly Interaction<SettingsViewModel, Unit> OpenSettings = new();
 
     #endregion
 
@@ -43,7 +52,9 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private readonly IServiceScopeFactory _factory;
     private readonly IUserStorage _userStorage;
-    private readonly FontSizeOptions _fontSizeOptions;
+    private readonly IOptions<DefaultUser> _defaultUserOptions;
+    private readonly IOptions<CodeExamplePathOptions> _codeExamplePathOptions;
+    private readonly IOptions<FontSizeOptions> _fontSizeOptions;
     private readonly ILogger<MainWindowViewModel> _logger;
     private CancellationTokenSource? _cancellationTokenSource;
 
@@ -55,18 +66,30 @@ public partial class MainWindowViewModel : ViewModelBase
         ILogger<MainWindowViewModel> logger,
         IServiceScopeFactory factory,
         IUserStorage userStorage,
+        IOptions<DefaultUser> defaultUserOptions,
+        IOptions<CodeExamplePathOptions> codeExamplePathOptions,
+        IOptions<PopupOptions> popupOptions,
         IOptions<FontSizeOptions> textFontSize)
     {
         _factory = factory;
         _userStorage = userStorage;
+        _defaultUserOptions = defaultUserOptions;
+        _codeExamplePathOptions = codeExamplePathOptions;
         _executionSpeed = userStorage.Current.LastSpeed;
         _selectedLanguage = userStorage.Current.LastLanguage;
         _textEditorFontSize = userStorage.Current.CodeFontSize;
         _terminalFontSize = userStorage.Current.TerminalFontSize;
-        _fontSizeOptions = textFontSize.Value;
-        MaxFontSize = _fontSizeOptions.MaxFontSize;
-        MinFontSize = _fontSizeOptions.MinFontSize;
+        _useOsDecoration = userStorage.Current.UseSystemTitleBar;
+        _showSidebar = userStorage.Current.ShowSidebar;
+        CodeTheme = userStorage.Current.CodeTheme;
+        PopupOptions = popupOptions.Value;
+        _fontSizeOptions = textFontSize;
+        MaxFontSize = _fontSizeOptions.Value.MaxFontSize;
+        MinFontSize = _fontSizeOptions.Value.MinFontSize;
         _logger = logger;
+
+        InitializeAvailableCodeThemes();
+        InitializeMessageBusSubscriptions();
 
         this.WhenAnyPropertyChanged().Subscribe(context =>
         {
@@ -91,6 +114,14 @@ public partial class MainWindowViewModel : ViewModelBase
                 .Where(size => size != _userStorage.Current.TerminalFontSize)
                 .Subscribe(onNext => userStorage.Current.TerminalFontSize = _terminalFontSize);
 
+            this.WhenAnyValue(vm => vm.UseOsDecoration)
+                .Where(useOsDecoration => useOsDecoration != _userStorage.Current.UseSystemTitleBar)
+                .Subscribe(onNext => userStorage.Current.UseSystemTitleBar = _useOsDecoration);
+
+            this.WhenAnyValue(vm => vm.ShowSidebar)
+                .Where(showSidebar => showSidebar != _userStorage.Current.ShowSidebar)
+                .Subscribe(onNext => userStorage.Current.ShowSidebar = _showSidebar);
+
             this.WhenAnyValue(vm => vm.ExecutionSpeed)
                 .Where(speed => speed != _userStorage.Current.LastSpeed)
                 .Subscribe(onNext => userStorage.Current.LastSpeed = _executionSpeed);
@@ -100,6 +131,39 @@ public partial class MainWindowViewModel : ViewModelBase
                 .Subscribe(onNext => userStorage.Current.LastLanguage = _selectedLanguage);
 #pragma warning restore AsyncVoidMethod
         });
+    }
+
+    private void InitializeMessageBusSubscriptions()
+    {
+        MessageBus.Current.Listen<CodeFontSizeChangedMessage>()
+            .Subscribe(message => TextEditorFontSize = message.FontSize);
+
+        MessageBus.Current.Listen<TerminalFontSizeChangedMessage>()
+            .Subscribe(message => TerminalFontSize = message.FontSize);
+
+        MessageBus.Current.Listen<UseSystemTitleBarChangedMessage>()
+            .Subscribe(message => UseOsDecoration = message.UseSystemTitleBar);
+
+        MessageBus.Current.Listen<ShowSidebarChangedMessage>()
+            .Subscribe(message => ShowSidebar = message.ShowSidebar);
+
+        MessageBus.Current.Listen<CodeThemeChangedMessage>()
+            .Subscribe(message =>
+            {
+                _userStorage.Current.CodeTheme = message.ThemeName;
+                CodeTheme = message.ThemeName;
+            });
+    }
+
+    private void InitializeAvailableCodeThemes()
+    {
+        foreach (ThemeName themeName in Enum.GetValues<ThemeName>())
+        {
+            AvailableCodeThemes.Add(new CodeThemeItem(
+                themeName.ToString(),
+                SettingsViewModel.GetCodeThemeDisplayName(themeName),
+                SettingsViewModel.GetCodeThemeIconKind(themeName)));
+        }
     }
 
     #endregion
@@ -127,14 +191,14 @@ public partial class MainWindowViewModel : ViewModelBase
     [ReactiveCommand]
     private void IncrementEditorFontSize()
     {
-        if (TextEditorFontSize < MaxFontSize)
+        if (TextEditorFontSize < _fontSizeOptions.Value.MaxFontSize)
             TextEditorFontSize += 1;
     }
 
     [ReactiveCommand]
     private void DecrementEditorFontSize()
     {
-        if (TextEditorFontSize > MinFontSize)
+        if (TextEditorFontSize > _fontSizeOptions.Value.MinFontSize)
             TextEditorFontSize -= 1;
     }
 
@@ -149,19 +213,20 @@ public partial class MainWindowViewModel : ViewModelBase
     private void UpdateFontSize(int fontSize)
     {
         TextEditorFontSize = fontSize;
+        MessageBus.Current.SendMessage(new FontSizeToastMessage("редактора", fontSize));
     }
 
     [ReactiveCommand]
     private void IncrementTerminalFontSize()
     {
-        if (TerminalFontSize < MaxFontSize)
+        if (TerminalFontSize < _fontSizeOptions.Value.MaxFontSize)
             TerminalFontSize += 1;
     }
 
     [ReactiveCommand]
     private void DecrementTerminalFontSize()
     {
-        if (TerminalFontSize > MinFontSize)
+        if (TerminalFontSize > _fontSizeOptions.Value.MinFontSize)
             TerminalFontSize -= 1;
     }
 
@@ -169,6 +234,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private void UpdateTerminalFontSize(int fontSize)
     {
         TerminalFontSize = fontSize;
+        MessageBus.Current.SendMessage(new FontSizeToastMessage("терминала", fontSize));
     }
 
     [ReactiveCommand]
@@ -181,6 +247,32 @@ public partial class MainWindowViewModel : ViewModelBase
     private void ChangeLanguage(Language language)
     {
         SelectedLanguage = language;
+    }
+
+    [ReactiveCommand]
+    private void ToggleShowSidebar()
+    {
+        ShowSidebar = !ShowSidebar;
+    }
+
+    [ReactiveCommand]
+    private void ToggleUseSystemTitleBar()
+    {
+        UseOsDecoration = !UseOsDecoration;
+    }
+
+    [ReactiveCommand]
+    private void SelectCodeTheme(string themeName)
+    {
+        _userStorage.Current.CodeTheme = themeName;
+        MessageBus.Current.SendMessage(new CodeThemeChangedMessage(themeName));
+    }
+
+    [ReactiveCommand]
+    private async Task OpenSettingsAsync()
+    {
+        var settingsViewModel = new SettingsViewModel(_userStorage, _defaultUserOptions, _codeExamplePathOptions, _fontSizeOptions);
+        await OpenSettings.Handle(settingsViewModel);
     }
 
     #endregion

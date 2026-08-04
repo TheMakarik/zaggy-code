@@ -1,0 +1,38 @@
+<Window
+    Background="{DynamicResource BackgroundBrush}"
+    CanResize="False"
+    Foreground="{DynamicResource ForegroundBrush}"
+    Height="160"
+    ShowInTaskbar="False"
+    SizeToContent="Height"
+    Title="Сохранение изменений"
+    Width="420"
+    WindowStartupLocation="CenterOwner"
+    x:Class="ZaggyCode.Avalonia.Views.Dialogs.ConfirmSaveChangesWindow"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Grid Margin="20" RowDefinitions="Auto,*">
+        <TextBlock
+            Grid.Row="0"
+            Text="Вы хотите сохранить изменения в настройках?"
+            TextWrapping="Wrap"
+            VerticalAlignment="Center" />
+
+        <StackPanel
+            Grid.Row="1"
+            HorizontalAlignment="Right"
+            Orientation="Horizontal"
+            Spacing="10"
+            VerticalAlignment="Bottom">
+            <Button
+                Click="YesButton_Click"
+                Content="Да"
+                IsDefault="True" />
+            <Button
+                Click="NoButton_Click"
+                Content="Нет"
+                IsCancel="True" />
+        </StackPanel>
+    </Grid>
+</Window>

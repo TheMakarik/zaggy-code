@@ -56,6 +56,8 @@ public sealed class Bootstrapper
 
         builder
             .AddOptions<FontSizeOptions>()
+            .AddOptions<CodeExamplePathOptions>()
+            .AddOptions<PopupOptions>()
             .AddOptions<DefaultUser>()
             .AddOptions<StorageOptions>()
             .AddOptions<SpeedMillisecondsOptions>()
@@ -63,27 +65,22 @@ public sealed class Bootstrapper
             .AddOptions<TempOptions>()
             .AddOptions<LoggingCompressOptions>();
 
-        IHost app = builder.Build();
+        var app = builder.Build();
 
         _ = app.RunAsync();
 
-        await using AsyncServiceScope scope = app.Services.CreateAsyncScope();
+        await using var scope = app.Services.CreateAsyncScope();
 
 #if DEBUG
         try
         {
 #endif
-            IStorageFacade storageFacade = scope.ServiceProvider.GetRequiredService<IStorageFacade>();
+            var storageFacade = scope.ServiceProvider.GetRequiredService<IStorageFacade>();
             await storageFacade.LoadAllAsync();
 #if DEBUG
         }
         catch (Exception e)
         {
-            Log.Error(@$"
-Произошла ошибка при загрузке пользовательских данных. Возможно это произошло из за требования к миграциям, которые пока что не реализованы
-Самый простой способ удалить файл, который использовал сервис, и он будет создан по новой.
-Например {Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), app.Services.GetRequiredService<IOptions<StorageOptions>>().Value.DataFilePath)} для {nameof(IUserStorage)}
-");
             Console.WriteLine(e);
         }
 #endif
@@ -114,31 +111,31 @@ public sealed class Bootstrapper
     private static string GetTempDirectory()
     {
         if (OperatingSystem.IsWindows())
-            return Path.Combine(Environment.GetEnvironmentVariable("TEMP") ?? Path.GetTempPath(), "zaggy");
+            return Path.Join(Environment.GetEnvironmentVariable("TEMP") ?? Path.GetTempPath(), "zaggy");
 
         if (OperatingSystem.IsMacOS())
-            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Library", "Caches", "zaggy");
+            return Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Library", "Caches", "zaggy");
 
         string? runtimeDir = Environment.GetEnvironmentVariable("XDG_RUNTIME_DIR");
         if (!string.IsNullOrEmpty(runtimeDir))
-            return Path.Combine(runtimeDir, "zaggy");
+            return Path.Join(runtimeDir, "zaggy");
 
-        return Path.Combine(Path.GetTempPath(), $"zaggy-{Environment.UserName}");
+        return Path.Join(Path.GetTempPath(), $"zaggy-{Environment.UserName}");
     }
 
     private static string GetConfigDirectory()
     {
         if (OperatingSystem.IsWindows())
-            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "zaggy");
+            return Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "zaggy");
 
         if (OperatingSystem.IsMacOS())
-            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Library", "Application Support", "zaggy");
+            return Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Library", "Application Support", "zaggy");
 
         string? configHome = Environment.GetEnvironmentVariable("XDG_CONFIG_HOME");
         if (!string.IsNullOrEmpty(configHome))
-            return Path.Combine(configHome, "zaggy");
+            return Path.Join(configHome, "zaggy");
 
-        return Path.Combine(
+        return Path.Join(
             Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
             ".config",
             "zaggy");
@@ -147,16 +144,16 @@ public sealed class Bootstrapper
     private static string GetStateDirectory()
     {
         if (OperatingSystem.IsWindows())
-            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "zaggy", "state");
+            return Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "zaggy", "state");
 
         if (OperatingSystem.IsMacOS())
-            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Library", "Logs", "zaggy");
+            return Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Library", "Logs", "zaggy");
 
         string? stateHome = Environment.GetEnvironmentVariable("XDG_STATE_HOME");
         if (!string.IsNullOrEmpty(stateHome))
-            return Path.Combine(stateHome, "zaggy");
+            return Path.Join(stateHome, "zaggy");
 
-        return Path.Combine(
+        return Path.Join(
             Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
             ".local",
             "state",

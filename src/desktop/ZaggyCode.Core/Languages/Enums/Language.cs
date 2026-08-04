@@ -7,6 +7,5 @@ public enum Language
     CSharp,
 
     [LanguageExtension(".py")]
-    [LanguagePrettyName("Python")]
     Python
 }

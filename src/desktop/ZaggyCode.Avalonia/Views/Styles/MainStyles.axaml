@@ -19,7 +19,7 @@
             <conv:PlatformKeyGestureConverter x:Key="KeyGestureConverter" />
             <StreamGeometry x:Key="MenuItemChevronPathData">M 1,0 10,10 l -9,10 -1,-1 L 8,10 -0,1 Z</StreamGeometry>
 
-            <ControlTheme x:Key="ZaggyMenuItemIconTheme" TargetType="ContentControl">
+            <ControlTheme TargetType="ContentControl" x:Key="ZaggyMenuItemIconTheme">
                 <Setter Property="Width" Value="18" />
                 <Setter Property="Height" Value="18" />
                 <Setter Property="Template">
@@ -28,14 +28,14 @@
                             HorizontalAlignment="Center"
                             StretchDirection="DownOnly"
                             VerticalAlignment="Center">
-                            <ContentPresenter x:Name="PART_ContentPresenter" Content="{TemplateBinding Content}" />
+                            <ContentPresenter Content="{TemplateBinding Content}" x:Name="PART_ContentPresenter" />
                         </Viewbox>
                     </ControlTemplate>
                 </Setter>
             </ControlTheme>
 
-            <!-- Nested MenuItem (submenu items) -->
-            <ControlTheme x:Key="{x:Type MenuItem}" TargetType="MenuItem">
+            <!--  Nested MenuItem (submenu items)  -->
+            <ControlTheme TargetType="MenuItem" x:Key="{x:Type MenuItem}">
                 <Setter Property="Background" Value="Transparent" />
                 <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}" />
                 <Setter Property="Padding" Value="10,7" />
@@ -69,7 +69,8 @@
                                         HorizontalAlignment="Right"
                                         Margin="12,0,0,0"
                                         Name="PART_InputGestureText"
-                                        Text="{TemplateBinding InputGesture, Converter={StaticResource KeyGestureConverter}}"
+                                        Text="{TemplateBinding InputGesture,
+                                                               Converter={StaticResource KeyGestureConverter}}"
                                         VerticalAlignment="Center" />
                                     <Path
                                         Data="{StaticResource MenuItemChevronPathData}"
@@ -86,7 +87,8 @@
                             <Popup
                                 HorizontalOffset="-4"
                                 IsLightDismissEnabled="False"
-                                IsOpen="{TemplateBinding IsSubMenuOpen, Mode=TwoWay}"
+                                IsOpen="{TemplateBinding IsSubMenuOpen,
+                                                         Mode=TwoWay}"
                                 Name="PART_Popup"
                                 Placement="RightEdgeAlignedTop"
                                 WindowManagerAddShadowHint="False">
@@ -156,8 +158,8 @@
                 </Style>
             </ControlTheme>
 
-            <!-- Top-level MenuItem (menu bar items) -->
-            <ControlTheme x:Key="ZaggyTopLevelMenuItem" TargetType="MenuItem">
+            <!--  Top-level MenuItem (menu bar items)  -->
+            <ControlTheme TargetType="MenuItem" x:Key="ZaggyTopLevelMenuItem">
                 <Setter Property="Background" Value="Transparent" />
                 <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}" />
                 <Setter Property="Padding" Value="12,10" />
@@ -187,7 +189,8 @@
                                 </Grid>
                                 <Popup
                                     IsLightDismissEnabled="True"
-                                    IsOpen="{TemplateBinding IsSubMenuOpen, Mode=TwoWay}"
+                                    IsOpen="{TemplateBinding IsSubMenuOpen,
+                                                             Mode=TwoWay}"
                                     MinWidth="{Binding Bounds.Width, RelativeSource={RelativeSource TemplatedParent}}"
                                     Name="PART_Popup"
                                     OverlayInputPassThroughElement="{Binding $parent[Menu]}"
@@ -241,8 +244,8 @@
                 </Style>
             </ControlTheme>
 
-            <!-- Menu -->
-            <ControlTheme x:Key="{x:Type Menu}" TargetType="Menu">
+            <!--  Menu  -->
+            <ControlTheme TargetType="Menu" x:Key="{x:Type Menu}">
                 <Setter Property="Background" Value="Transparent" />
                 <Setter Property="Padding" Value="0" />
                 <Setter Property="ItemContainerTheme" Value="{StaticResource ZaggyTopLevelMenuItem}" />
@@ -267,13 +270,13 @@
         </ResourceDictionary>
     </Styles.Resources>
 
-    <!-- Window base -->
+    <!--  Window base  -->
     <Style Selector="Window">
         <Setter Property="Background" Value="{DynamicResource BackgroundBrush}" />
         <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}" />
     </Style>
 
-    <!-- Panels and general backgrounds -->
+    <!--  Panels and general backgrounds  -->
     <Style Selector="Grid.main-background">
         <Setter Property="Background" Value="{DynamicResource BackgroundBrush}" />
     </Style>
@@ -282,7 +285,7 @@
         <Setter Property="Background" Value="{DynamicResource SidebarBackgroundBrush}" />
     </Style>
 
-    <!-- Generic text -->
+    <!--  Generic text  -->
     <Style Selector="TextBlock">
         <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}" />
     </Style>
@@ -295,7 +298,7 @@
         <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}" />
     </Style>
 
-    <!-- Cards / surfaces -->
+    <!--  Cards / surfaces  -->
     <Style Selector="Border.card">
         <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
         <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
@@ -316,7 +319,7 @@
         <Setter Property="CornerRadius" Value="10,10,0,0" />
     </Style>
 
-    <!-- Icon buttons (sidebar / header) -->
+    <!--  Icon buttons (sidebar / header)  -->
     <Style Selector="Button.icon-button">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}" />
@@ -343,7 +346,7 @@
         <Setter Property="Height" Value="24" />
     </Style>
 
-    <!-- Run button (green accent, no border) -->
+    <!--  Run button  -->
     <Style Selector="Button.run-button">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Foreground" Value="{DynamicResource SuccessBrush}" />
@@ -366,7 +369,7 @@
         <Setter Property="Height" Value="22" />
     </Style>
 
-    <!-- Window control buttons (terminal header) -->
+    <!--  Window control buttons (terminal header)  -->
     <Style Selector="Button.window-control">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Foreground" Value="{DynamicResource ForegroundMutedBrush}" />
@@ -386,32 +389,32 @@
         <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}" />
     </Style>
 
-    <!-- Full integrated menu bar -->
+    <!--  Full integrated menu bar  -->
     <Style Selector="Menu.full-menu">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="VerticalAlignment" Value="Center" />
     </Style>
 
-    <Style Selector="Menu.full-menu > MenuItem">
+    <Style Selector="Menu.full-menu &gt; MenuItem">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Padding" Value="12,10" />
         <Setter Property="FontSize" Value="14" />
         <Setter Property="CornerRadius" Value="{DynamicResource ButtonCornerRadius}" />
     </Style>
 
-    <!-- Compact hamburger menu -->
+    <!--  Compact hamburger menu  -->
     <Style Selector="Menu.compact-menu">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="VerticalAlignment" Value="Center" />
     </Style>
 
-    <Style Selector="Menu.compact-menu > MenuItem">
+    <Style Selector="Menu.compact-menu &gt; MenuItem">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Padding" Value="8" />
         <Setter Property="CornerRadius" Value="{DynamicResource ButtonCornerRadius}" />
     </Style>
 
-    <!-- Language selector -->
+    <!--  Language selector  -->
     <Style Selector="ComboBox.language-selector">
         <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
         <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}" />
@@ -428,16 +431,16 @@
         <Setter Property="Background" Value="{DynamicResource SurfaceHoverBrush}" />
     </Style>
 
-    <Style Selector="ComboBox.language-selector > ComboBoxItem">
+    <Style Selector="ComboBox.language-selector &gt; ComboBoxItem">
         <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
         <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}" />
     </Style>
 
-    <Style Selector="ComboBox.language-selector > ComboBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
+    <Style Selector="ComboBox.language-selector &gt; ComboBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
         <Setter Property="Background" Value="{DynamicResource PrimaryDarkBrush}" />
     </Style>
 
-    <!-- Execution speed button -->
+    <!--  Execution speed button  -->
     <Style Selector="Button.speed-button">
         <Setter Property="Background" Value="{DynamicResource SurfaceHoverBrush}" />
         <Setter Property="Foreground" Value="{DynamicResource PrimaryLightBrush}" />
@@ -459,13 +462,19 @@
     </Style>
 
     <Style Selector="Button.speed-flyout-button">
-        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
         <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}" />
-        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
         <Setter Property="CornerRadius" Value="{DynamicResource ButtonCornerRadius}" />
-        <Setter Property="Padding" Value="8,4" />
-        <Setter Property="MinWidth" Value="50" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Width" Value="42" />
+        <Setter Property="Height" Value="42" />
+        <Setter Property="Margin" Value="2" />
         <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontWeight" Value="SemiBold" />
     </Style>
 
     <Style Selector="Button.speed-flyout-button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
@@ -485,7 +494,7 @@
         <Setter Property="BorderThickness" Value="0" />
     </Style>
 
-    <!-- AvaloniaEdit -->
+    <!--  AvaloniaEdit  -->
     <Style Selector="avaloniaEdit|TextEditor">
         <Setter Property="Background" Value="{DynamicResource EditorBackgroundBrush}" />
         <Setter Property="Foreground" Value="{DynamicResource EditorForegroundBrush}" />
@@ -497,20 +506,20 @@
         <Setter Property="Background" Value="{DynamicResource EditorBackgroundBrush}" />
     </Style>
 
-    <!-- Grid splitters -->
+    <!--  Grid splitters  -->
     <Style Selector="GridSplitter">
         <Setter Property="Background" Value="{DynamicResource SurfaceHoverBrush}" />
         <Setter Property="HorizontalAlignment" Value="Stretch" />
     </Style>
 
-    <!-- Invisible splitter between editor and game/preview -->
+    <!--  Invisible splitter between editor and game/preview  -->
     <Style Selector="GridSplitter.subtle">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Width" Value="4" />
         <Setter Property="Cursor" Value="SizeWestEast" />
     </Style>
 
-    <!-- Prominent splitter between terminal and upper grid -->
+    <!--  Prominent splitter between terminal and upper grid  -->
     <Style Selector="GridSplitter.horizontal">
         <Setter Property="Background" Value="{DynamicResource SurfaceHoverBrush}" />
         <Setter Property="Height" Value="8" />
@@ -521,13 +530,106 @@
         <Setter Property="Background" Value="{DynamicResource PrimaryBrush}" />
     </Style>
 
-    <!-- ToolTip -->
+    <!--  ToolTip  -->
     <Style Selector="ToolTip">
         <Setter Property="Background" Value="{DynamicResource SurfaceLightBrush}" />
         <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}" />
         <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="CornerRadius" Value="{DynamicResource SmallCornerRadius}" />
+    </Style>
+
+    <!--  Settings window  -->
+    <Style Selector="TabControl.settings-tab-control">
+        <Setter Property="Background" Value="{DynamicResource BackgroundBrush}" />
+    </Style>
+
+    <Style Selector="TabControl.settings-tab-control &gt; TabItem">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}" />
+        <Setter Property="Padding" Value="16,12" />
+        <Setter Property="FontSize" Value="14" />
+    </Style>
+
+    <Style Selector="TabControl.settings-tab-control &gt; TabItem:selected">
+        <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryLightBrush}" />
+    </Style>
+
+    <Style Selector="TextBlock.settings-section-title">
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}" />
+        <Setter Property="Margin" Value="0,0,0,4" />
+    </Style>
+
+    <Style Selector="Button.settings-theme-button">
+        <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+    </Style>
+
+    <Style Selector="Button.settings-theme-button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource SurfaceHoverBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryLightBrush}" />
+    </Style>
+
+    <Style Selector="Button.settings-footer-button">
+        <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{DynamicResource ButtonCornerRadius}" />
+        <Setter Property="Padding" Value="16,8" />
+        <Setter Property="MinWidth" Value="100" />
+    </Style>
+
+    <Style Selector="Button.settings-footer-button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource SurfaceHoverBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryLightBrush}" />
+    </Style>
+
+    <Style Selector="Button.settings-footer-button.primary">
+        <Setter Property="Background" Value="{DynamicResource PrimaryBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource BackgroundBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBrush}" />
+    </Style>
+
+    <Style Selector="Button.settings-footer-button.primary:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource PrimaryLightBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource BackgroundBrush}" />
+    </Style>
+
+    <Style Selector="Button.settings-font-button">
+        <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="6" />
+        <Setter Property="Padding" Value="4" />
+        <Setter Property="Width" Value="28" />
+        <Setter Property="Height" Value="28" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="Button.settings-font-button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource SurfaceHoverBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryLightBrush}" />
+    </Style>
+
+    <Style Selector="Button.settings-font-button materialIcons|MaterialIcon">
+        <Setter Property="Width" Value="16" />
+        <Setter Property="Height" Value="16" />
+    </Style>
+
+    <Style Selector="Border.settings-toast">
+        <Setter Property="Background" Value="{DynamicResource SurfaceLightBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{DynamicResource SmallCornerRadius}" />
+        <Setter Property="Padding" Value="16,10" />
     </Style>
 
 </Styles>

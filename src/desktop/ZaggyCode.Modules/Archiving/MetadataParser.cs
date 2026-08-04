@@ -1,9 +1,3 @@
-using Microsoft.Extensions.DependencyInjection;
-using ZaggyCode.Core.Archiving.Interfaces;
-using ZaggyCode.Core.Archiving.Model;
-using ZaggyCode.Core.Common.Utils;
-using ZaggyCode.Modules.Archiving.Options;
-
 namespace ZaggyCode.Modules.Archiving;
 
 public sealed class MetadataParser(IServiceProvider provider, IOptions<MetadataOptions> options) : IMetadataParser

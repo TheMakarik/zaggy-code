@@ -8,26 +8,14 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
     private bool _isTerminalMaximized = false;
     private readonly ScriptCommandLineSession _terminalSession = new ScriptCommandLineSession();
     private LineHighlighter? _currentHighlighter;
+    private TextMate.Installation? _textMateInstallation;
+    private DispatcherTimer? _fontSizeToastTimer;
+    private DispatcherTimer? _fontSizeToastFadeOutTimer;
 
     public MainWindow()
     {
         InitializeComponent();
-
-        /*
-        Editor.TextArea.KeyBindings.Add(new KeyBinding
-        {
-            Gesture = new KeyGesture(Key.V, KeyModifiers.Control),
-            Command = ReactiveCommand.Create(() =>
-            {
-                IAsyncDataTransfer? clipboardData = Clipboard?.TryGetDataAsync().Result;
-                var textData = clipboardData?.TryGetTextAsync().Result;
-                if (textData != null)
-                {
-                    Editor.Text = Editor.Text.Insert(Editor.CaretOffset, textData);
-                }
-            })
-        });
-        */
+        
 
         HeaderBar.PointerPressed += (_, e) =>
         {
@@ -66,6 +54,19 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
 
             ViewModel.GetCodeToExecute.RegisterHandler(context =>
                 Dispatcher.Invoke(() => context.SetOutput(Editor.Text)));
+
+            ViewModel.OpenSettings.RegisterHandler(async context =>
+            {
+                var settingsWindow = new SettingsWindow { DataContext = context.Input };
+                await settingsWindow.ShowDialog(this);
+                context.SetOutput(Unit.Default);
+            });
+
+            MessageBus.Current.Listen<CodeThemeChangedMessage>()
+                .Subscribe(message => ApplyCodeTheme(message.ThemeName));
+
+            MessageBus.Current.Listen<FontSizeToastMessage>()
+                .Subscribe(message => ShowFontSizeToast($"Размер шрифта {message.Source} изменён на {message.FontSize}"));
 
             ViewModel.TerminalReader = reader;
             ViewModel.TerminalWriter = writer;
@@ -220,16 +221,110 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
     protected override void OnLoaded(RoutedEventArgs e)
     {
         base.OnLoaded(e);
+        
+        var initialThemeName = ViewModel?.CodeTheme ?? "VisualStudioDark";
+        if (!Enum.TryParse<ThemeName>(initialThemeName, out var initialTheme))
+            initialTheme = ThemeName.VisualStudioDark;
 
-
-        RegistryOptions registryOptions = new RegistryOptions(ThemeName.VisualStudioDark);
-        TextMate.Installation textMateInstallation = Editor.InstallTextMate(registryOptions);
-        textMateInstallation.SetGrammar(registryOptions.GetScopeByLanguageId(registryOptions.GetLanguageByExtension(".cs").Id));
+        var registryOptions = new RegistryOptions(initialTheme);
+        _textMateInstallation = Editor.InstallTextMate(registryOptions);
+        _textMateInstallation.SetGrammar(registryOptions.GetScopeByLanguageId(registryOptions.GetLanguageByExtension(".cs").Id));
+        ApplyCodeTheme(initialThemeName);
 
         GameMap.Map = MapView.CreateSampleMap();
 
         GameMap.Events.LevelCompleted += (_, _) => _terminalSession.Writer.WriteLine("Уровень пройден!");
         GameMap.Events.RobotDead += (_, _) => _terminalSession.Writer.WriteLine("Загги врезался и погиб.");
+    }
+
+    private void ApplyCodeTheme(string themeName)
+    {
+        if (_textMateInstallation is null)
+            return;
+
+        if (!Enum.TryParse<ThemeName>(themeName, out var theme))
+            theme = ThemeName.VisualStudioDark;
+
+        var registryOptions = new RegistryOptions(theme);
+        _textMateInstallation.SetTheme(registryOptions.LoadTheme(theme));
+    }
+    
+    private void ShowFontSizeToast(string message)
+    {
+        FontSizeToastText.Text = message;
+        FontSizeToast.IsVisible = true;
+        FontSizeToast.Opacity = 1;
+
+        _fontSizeToastTimer?.Stop();
+        _fontSizeToastFadeOutTimer?.Stop();
+
+        var popupOptions = ViewModel?.PopupOptions;
+        var displaySeconds = popupOptions?.PopupDisplaySeconds ?? 1.5;
+        var fadeOutSeconds = popupOptions?.PopupFadeOutSeconds ?? 0.5;
+
+        _fontSizeToastTimer = new DispatcherTimer
+        {
+            Interval = TimeSpan.FromSeconds(displaySeconds)
+        };
+
+        _fontSizeToastTimer.Tick += (_, _) =>
+        {
+            _fontSizeToastTimer?.Stop();
+            StartFontSizeToastFadeOut(fadeOutSeconds);
+        };
+
+        _fontSizeToastTimer.Start();
+    }
+
+    private void StartFontSizeToastFadeOut(double fadeOutSeconds)
+    {
+        const double tickSeconds = 0.05;
+        var totalTicks = (int)(fadeOutSeconds / tickSeconds);
+        var currentTick = 0;
+
+        _fontSizeToastFadeOutTimer = new DispatcherTimer
+        {
+            Interval = TimeSpan.FromSeconds(tickSeconds)
+        };
+
+        _fontSizeToastFadeOutTimer.Tick += (_, _) =>
+        {
+            currentTick++;
+            var opacity = 1.0 - (double)currentTick / totalTicks;
+            FontSizeToast.Opacity = Math.Max(0, opacity);
+
+            if (currentTick < totalTicks)
+                return;
+
+            _fontSizeToastFadeOutTimer?.Stop();
+            HideFontSizeToast();
+        };
+
+        _fontSizeToastFadeOutTimer.Start();
+    }
+
+    private void HideFontSizeToast()
+    {
+        FontSizeToast.Opacity = 0;
+        FontSizeToast.IsVisible = false;
+    }
+
+    private void CloseFontSizeToastButton_Click(object? sender, RoutedEventArgs e)
+    {
+        _fontSizeToastTimer?.Stop();
+        _fontSizeToastFadeOutTimer?.Stop();
+        HideFontSizeToast();
+    }
+
+    private void ResizeHandle_PointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (sender is not Border border || border.Tag is not string edgeText)
+            return;
+
+        if (!Enum.TryParse<WindowEdge>(edgeText, out var edge))
+            return;
+
+        BeginResizeDrag(edge, e);
     }
 }
 

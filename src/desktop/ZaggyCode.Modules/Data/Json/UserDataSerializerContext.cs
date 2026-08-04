@@ -1,5 +1,3 @@
-using ZaggyCode.Core.Data.Model;
-
 namespace ZaggyCode.Modules.Data.Json;
 
 [JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]

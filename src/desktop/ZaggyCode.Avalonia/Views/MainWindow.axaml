@@ -32,13 +32,77 @@
 
     <rxui:ReactiveWindow.Resources>
         <converters:IsNotEqualConverter x:Key="IsNotEqualConverter" />
+        <converters:BooleanToDynamicTextConverter x:Key="BooleanToDynamicTextConverter" />
     </rxui:ReactiveWindow.Resources>
 
-    <Grid Classes="main-background" RowDefinitions="Auto,*">
+    <Grid
+        Classes="main-background"
+        ColumnDefinitions="6,*,6"
+        RowDefinitions="6,Auto,*,6">
+        <Border
+            Background="Transparent"
+            Cursor="TopLeftCorner"
+            Grid.Column="0"
+            Grid.Row="0"
+            PointerPressed="ResizeHandle_PointerPressed"
+            Tag="TopLeft" />
+        <Border
+            Background="Transparent"
+            Cursor="TopSide"
+            Grid.Column="1"
+            Grid.Row="0"
+            PointerPressed="ResizeHandle_PointerPressed"
+            Tag="Top" />
+        <Border
+            Background="Transparent"
+            Cursor="TopRightCorner"
+            Grid.Column="2"
+            Grid.Row="0"
+            PointerPressed="ResizeHandle_PointerPressed"
+            Tag="TopRight" />
+        <Border
+            Background="Transparent"
+            Cursor="LeftSide"
+            Grid.Column="0"
+            Grid.Row="1"
+            Grid.RowSpan="2"
+            PointerPressed="ResizeHandle_PointerPressed"
+            Tag="Left" />
+        <Border
+            Background="Transparent"
+            Cursor="RightSide"
+            Grid.Column="2"
+            Grid.Row="1"
+            Grid.RowSpan="2"
+            PointerPressed="ResizeHandle_PointerPressed"
+            Tag="Right" />
+        <Border
+            Background="Transparent"
+            Cursor="BottomLeftCorner"
+            Grid.Column="0"
+            Grid.Row="3"
+            PointerPressed="ResizeHandle_PointerPressed"
+            Tag="BottomLeft" />
+        <Border
+            Background="Transparent"
+            Cursor="BottomSide"
+            Grid.Column="1"
+            Grid.Row="3"
+            PointerPressed="ResizeHandle_PointerPressed"
+            Tag="Bottom" />
+        <Border
+            Background="Transparent"
+            Cursor="BottomRightCorner"
+            Grid.Column="2"
+            Grid.Row="3"
+            PointerPressed="ResizeHandle_PointerPressed"
+            Tag="BottomRight" />
+
         <!--  Header  -->
         <Border
             Classes="header-bar"
-            Grid.Row="0"
+            Grid.Column="1"
+            Grid.Row="1"
             Name="HeaderBar"
             Padding="12,8">
             <Grid ColumnDefinitions="Auto,*,Auto">
@@ -107,7 +171,10 @@
                         </MenuItem>
 
                         <MenuItem Header="Сервис" Icon="{materialIcons:MaterialIconExt Kind=Settings}">
-                            <MenuItem Header="Настройки" Icon="{materialIcons:MaterialIconExt Kind=Settings}" />
+                            <MenuItem
+                                Command="{Binding OpenSettingsCommand}"
+                                Header="Настройки"
+                                Icon="{materialIcons:MaterialIconExt Kind=Settings}" />
                             <MenuItem Header="Управление горячими клавишами" Icon="{materialIcons:MaterialIconExt Kind=KeyboardSettings}" />
                             <MenuItem
                                 Command="{Binding ChangeTerminalVisibilityCommand}"
@@ -189,7 +256,10 @@
                             </MenuItem>
 
                             <MenuItem Header="Сервис" Icon="{materialIcons:MaterialIconExt Kind=Settings}">
-                                <MenuItem Header="Настройки" Icon="{materialIcons:MaterialIconExt Kind=Settings}" />
+                                <MenuItem
+                                    Command="{Binding OpenSettingsCommand}"
+                                    Header="Настройки"
+                                    Icon="{materialIcons:MaterialIconExt Kind=Settings}" />
                                 <MenuItem Header="Управление горячими клавишами" Icon="{materialIcons:MaterialIconExt Kind=KeyboardSettings}" />
                                 <MenuItem
                                     Command="{Binding ChangeTerminalVisibilityCommand}"
@@ -250,7 +320,8 @@
         <Grid
             Classes="main-background"
             ColumnDefinitions="Auto,*"
-            Grid.Row="1">
+            Grid.Column="1"
+            Grid.Row="2">
             <!--  Left sidebar  -->
             <Border
                 Classes="sidebar"
@@ -328,6 +399,7 @@
                             ToolTip.Tip="Справка по приложению" />
                         <Button
                             Classes="icon-button"
+                            Command="{Binding OpenSettingsCommand}"
                             Content="{materialIcons:MaterialIconExt Kind=Settings}"
                             ToolTip.Tip="Настройки" />
                         <Button
@@ -459,5 +531,31 @@
                 </Border>
             </Grid>
         </Grid>
+
+        <Border
+            Classes="settings-toast"
+            Grid.Column="0"
+            Grid.ColumnSpan="3"
+            Grid.Row="0"
+            Grid.RowSpan="4"
+            HorizontalAlignment="Center"
+            IsVisible="False"
+            Margin="0,0,0,20"
+            Name="FontSizeToast"
+            Opacity="0"
+            VerticalAlignment="Bottom"
+            ZIndex="100">
+            <Grid ColumnDefinitions="*,Auto">
+                <TextBlock
+                    Grid.Column="0"
+                    Name="FontSizeToastText"
+                    VerticalAlignment="Center" />
+                <Button
+                    Classes="icon-button"
+                    Click="CloseFontSizeToastButton_Click"
+                    Content="{materialIcons:MaterialIconExt Kind=Close}"
+                    Grid.Column="1" />
+            </Grid>
+        </Border>
     </Grid>
 </rxui:ReactiveWindow>

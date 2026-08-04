@@ -6,9 +6,9 @@
     <Color x:Key="SurfaceLightColor">#383838</Color>
     <Color x:Key="SurfaceHoverColor">#444444</Color>
 
-    <Color x:Key="PrimaryColor">#7A8A9A</Color>
-    <Color x:Key="PrimaryLightColor">#9AACBC</Color>
-    <Color x:Key="PrimaryDarkColor">#5A6A7A</Color>
+    <Color x:Key="PrimaryColor">#8A9A7A</Color>
+    <Color x:Key="PrimaryLightColor">#A8BC9A</Color>
+    <Color x:Key="PrimaryDarkColor">#6A7A5A</Color>
 
     <Color x:Key="ForegroundColor">#F0F0F0</Color>
     <Color x:Key="ForegroundMutedColor">#A8A8A8</Color>
@@ -31,9 +31,9 @@
 
     <Color x:Key="SidebarBackgroundColor">#242424</Color>
 
-    <Color x:Key="SystemAccentColor">#7A8A9A</Color>
-    <Color x:Key="SystemAccentColorLight1">#9AACBC</Color>
-    <Color x:Key="SystemAccentColorDark1">#5A6A7A</Color>
+    <Color x:Key="SystemAccentColor">#8A9A7A</Color>
+    <Color x:Key="SystemAccentColorLight1">#A8BC9A</Color>
+    <Color x:Key="SystemAccentColorDark1">#6A7A5A</Color>
 
     <SolidColorBrush Color="{StaticResource BackgroundColor}" x:Key="BackgroundBrush" />
     <SolidColorBrush Color="{StaticResource BackgroundSecondaryColor}" x:Key="BackgroundSecondaryBrush" />

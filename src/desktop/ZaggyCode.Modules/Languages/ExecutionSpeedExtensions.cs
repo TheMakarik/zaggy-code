@@ -1,6 +1,3 @@
-using ZaggyCode.Core.Languages.Enums;
-using ZaggyCode.Modules.Languages.Options;
-
 namespace ZaggyCode.Modules.Languages;
 
 public static class ExecutionSpeedExtensions

@@ -1,7 +1,3 @@
-using SharpCompress.Common;
-using SharpCompress.Writers;
-using ZaggyCode.Modules.HostedServices.Options;
-
 namespace ZaggyCode.Modules.HostedServices;
 
 public sealed class LoggingCompressHostedService(

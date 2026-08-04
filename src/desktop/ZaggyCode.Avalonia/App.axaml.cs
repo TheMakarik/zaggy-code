@@ -9,35 +9,35 @@ public partial class App : Application
         AvaloniaXamlLoader.Load(this);
     }
 
-    public override void OnFrameworkInitializationCompleted()
+    public override async void OnFrameworkInitializationCompleted()
     {
         if (ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            base.OnFrameworkInitializationCompleted();
             return;
+        }
 
-      
-        desktop.MainWindow = new MainWindow();
-        Window loading = new Window();
+        var mainWindow = new MainWindow();
+        desktop.MainWindow = mainWindow;
+
+        var loading = new Window();
         loading.Show();
-        new Bootstrapper()
-            .LoadApplicationAsync()
-            .ContinueWith(async task =>
-                await this.Dispatcher
-                    .InvokeAsync(() =>
-                    {
-                        if (task.Exception is not null)
-                            Console.WriteLine(
-                                $"Error was happen while loading: {string.Join(", ", task.Exception.InnerExceptions)}");
-                        loading.Close();
+         
+        base.OnFrameworkInitializationCompleted();
 
-                        //Не надо переносить это в констуктор MainWindow. MainWindow создается ДО регистрации всех сервисов. Если создать экземпляр MainWindow внутри вызовва
-                        //диспатчера, то Show почему то работать не будет (Show вызывается в OnFrameworkInitializationCompleted())
-                        desktop.MainWindow.DataContext = task.Result
-                            .Services
-                            .GetRequiredService<MainWindowViewModel>();
+        try
+        {
+            var host = await new Bootstrapper().LoadApplicationAsync();
 
-                        Services = task.Result.Services;
-
-                        base.OnFrameworkInitializationCompleted();
-                    }));
+            loading.Close();
+            
+            mainWindow.DataContext = host.Services.GetRequiredService<MainWindowViewModel>();
+            Services = host.Services;
+        }
+        catch (Exception ex)
+        {
+            loading.Close();
+            System.Diagnostics.Debug.WriteLine($"Error while loading: {ex}");
+        }
     }
 }

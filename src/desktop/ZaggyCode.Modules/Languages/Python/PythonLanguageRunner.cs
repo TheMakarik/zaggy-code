@@ -1,8 +1,3 @@
-using ZaggyCode.Core.Game.Interfaces;
-using ZaggyCode.Core.Languages.Enums;
-using ZaggyCode.Core.Languages.EventArgs;
-using ZaggyCode.Core.Languages.Interfaces;
-
 namespace ZaggyCode.Modules.Languages.Python;
 
 //#:NO_AI
@@ -33,12 +28,20 @@ public sealed class PythonLanguageRunner : ILanguageRunner
 
     public void Dispose()
     {
+        ClearEvents();
         throw new NotImplementedException();
     }
 
     public async ValueTask DisposeAsync()
     {
+        ClearEvents();
         throw new NotImplementedException();
+    }
+
+    private void ClearEvents()
+    {
+        DebugLineUpdated = null;
+        CodeErrorOccurred = null;
     }
 
 }

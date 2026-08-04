@@ -1,5 +1,3 @@
-using ZaggyCode.Core.Data.Interfaces;
-
 namespace ZaggyCode.Modules.Data;
 
 //Нужно чтоб мокнуть получения папки в тестах чтоб не переписывать их и не ломать свою либу
