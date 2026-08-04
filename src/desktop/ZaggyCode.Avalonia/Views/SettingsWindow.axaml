@@ -19,6 +19,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:records="clr-namespace:ZaggyCode.Avalonia.ViewModels.Records"
     xmlns:rxui="http://reactiveui.net"
     xmlns:vm="using:ZaggyCode.Avalonia.ViewModels"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
@@ -156,7 +157,7 @@
 
                         <ScrollViewer>
                             <StackPanel Margin="20" Spacing="20">
-                                <TextBlock Classes="settings-section-title" Text="Окна приложения" />
+                                <TextBlock Classes="settings-section-title" Text="Шрифты" />
 
                                 <Grid ColumnDefinitions="*,Auto">
                                     <TextBlock
@@ -216,6 +217,8 @@
                                     </StackPanel>
                                 </Grid>
 
+                                <TextBlock Classes="settings-section-title" Text="Окна" />
+
                                 <CheckBox Content="Использовать системную рамку окна" IsChecked="{Binding UseSystemTitleBar}" />
                                 <CheckBox Content="Показывать боковую панель" IsChecked="{Binding ShowSidebar}" />
 
@@ -228,7 +231,7 @@
                                         </ItemsPanelTemplate>
                                     </ItemsControl.ItemsPanel>
                                     <ItemsControl.ItemTemplate>
-                                        <DataTemplate x:DataType="vm:CodeThemeItem">
+                                        <DataTemplate x:DataType="records:CodeThemeItem">
                                             <Button
                                                 Classes="settings-theme-button"
                                                 Command="{Binding DataContext.SelectCodeThemeCommand, ElementName=SettingsRoot}"
@@ -236,7 +239,7 @@
                                                 CornerRadius="20"
                                                 Height="30"
                                                 Margin="3,10"
-                                                Width="185">
+                                                Width="190">
                                                 <Button.IsEnabled>
                                                     <MultiBinding Converter="{StaticResource IsNotEqualConverter}">
                                                         <Binding Path="ThemeName" />

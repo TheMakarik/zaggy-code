@@ -1,16 +1,3 @@
-using System;
-using System.IO;
-using System.Reactive;
-using System.Reactive.Linq;
-using System.Threading.Tasks;
-using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Input;
-using Avalonia.Interactivity;
-using Avalonia.Markup.Xaml;
-using Avalonia.Platform;
-using AvaloniaEdit;
-using AvaloniaEdit.TextMate;
 using Material.Icons.Avalonia;
 using ReactiveUI;
 using TextMateSharp.Grammars;
@@ -36,7 +23,13 @@ public partial class SettingsWindow : ReactiveWindow<SettingsViewModel>
 
         MinimizeButton.Click += (_, __) => WindowState = WindowState.Minimized;
         MaximizeButton.Click += (_, __) => WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
-        CloseButton.Click += (_, __) => Close();
+        CloseButton.Click += (_, __) =>
+        {
+            if (ViewModel is { HasChanges: true })
+                _ = HandleCloseWithUnsavedChangesAsync();
+            else
+                Close();
+        };
 
         PropertyChanged += (_, args) =>
         {
@@ -59,8 +52,11 @@ public partial class SettingsWindow : ReactiveWindow<SettingsViewModel>
                 context.SetOutput(Unit.Default);
             });
 
-            ViewModel.WhenAnyValue(viewModel => viewModel.SelectedCodeTheme)
-                .Subscribe(ApplyCodeTheme);
+            ViewModel.ApplyCodeThemeInteraction.RegisterHandler(context =>
+            {
+                ApplyCodeTheme(context.Input);
+                context.SetOutput(context.Input);
+            });
 
             InitializeExampleEditors();
         };

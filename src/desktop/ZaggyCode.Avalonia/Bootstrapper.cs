@@ -57,6 +57,8 @@ public sealed class Bootstrapper
         builder
             .AddOptions<FontSizeOptions>()
             .AddOptions<CodeExamplePathOptions>()
+            .AddOptions<CodeThemeDisplayNameOptions>()
+            .AddOptions<CodeThemeIconOptions>()
             .AddOptions<PopupOptions>()
             .AddOptions<DefaultUser>()
             .AddOptions<StorageOptions>()

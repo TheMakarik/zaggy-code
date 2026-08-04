@@ -1,15 +1,3 @@
-using System.Collections.ObjectModel;
-using System.Reactive;
-using DynamicData.Binding;
-using Material.Icons;
-using Microsoft.Extensions.Options;
-using ReactiveUI;
-using ReactiveUI.SourceGenerators;
-using TextMateSharp.Grammars;
-using ZaggyCode.Avalonia.Options;
-using ZaggyCode.Avalonia.ViewModels.Messages;
-using ZaggyCode.Core.Data.Interfaces;
-using ZaggyCode.Modules.Data.Options;
 
 namespace ZaggyCode.Avalonia.ViewModels;
 
@@ -26,6 +14,8 @@ public sealed partial class SettingsViewModel : ViewModelBase
     private readonly IUserStorage _userStorage;
     private readonly DefaultUser _defaultUser;
     private readonly FontSizeOptions _fontSizeOptions;
+    private readonly CodeThemeDisplayNameOptions _displayNameOptions;
+    private readonly CodeThemeIconOptions _iconOptions;
     private readonly int _originalCodeFontSize;
     private readonly int _originalTerminalFontSize;
     private readonly bool _originalUseSystemTitleBar;
@@ -37,6 +27,7 @@ public sealed partial class SettingsViewModel : ViewModelBase
 
     public ObservableCollection<CodeThemeItem> AvailableCodeThemes { get; } = [];
     public Interaction<Unit, Unit> CloseSettingsInteraction { get; } = new();
+    public Interaction<string, string> ApplyCodeThemeInteraction { get; } = new();
     public string CSharpExamplePath { get; }
     public string PythonExamplePath { get; }
 
@@ -44,11 +35,15 @@ public sealed partial class SettingsViewModel : ViewModelBase
         IUserStorage userStorage,
         IOptions<DefaultUser> defaultUserOptions,
         IOptions<CodeExamplePathOptions> codeExamplePathOptions,
-        IOptions<FontSizeOptions> fontSizeOptions)
+        IOptions<FontSizeOptions> fontSizeOptions,
+        IOptions<CodeThemeDisplayNameOptions> displayNameOptions,
+        IOptions<CodeThemeIconOptions> iconOptions)
     {
         _userStorage = userStorage;
         _defaultUser = defaultUserOptions.Value;
         _fontSizeOptions = fontSizeOptions.Value;
+        _displayNameOptions = displayNameOptions.Value;
+        _iconOptions = iconOptions.Value;
         CSharpExamplePath = codeExamplePathOptions.Value.CSharpExamplePath;
         PythonExamplePath = codeExamplePathOptions.Value.PythonExamplePath;
 
@@ -71,16 +66,25 @@ public sealed partial class SettingsViewModel : ViewModelBase
                 nameof(ShowSidebar),
                 nameof(SelectedCodeTheme))
             .Subscribe(_ => UpdateHasChanges());
+
+        this.WhenAnyValue(viewModel => viewModel.SelectedCodeTheme)
+            .Skip(1)
+            .SelectMany(themeName => ApplyCodeThemeInteraction.Handle(themeName))
+            .Subscribe();
     }
 
     private void InitializeAvailableCodeThemes()
     {
-        foreach (ThemeName themeName in Enum.GetValues<ThemeName>())
+        foreach (var property in typeof(CodeThemeDisplayNameOptions).GetProperties())
         {
-            AvailableCodeThemes.Add(new CodeThemeItem(
-                themeName.ToString(),
-                GetCodeThemeDisplayName(themeName),
-                GetCodeThemeIconKind(themeName)));
+            var themeName = property.Name;
+            var displayName = (string?)property.GetValue(_displayNameOptions) ?? themeName;
+
+            var iconProperty = typeof(CodeThemeIconOptions).GetProperty(themeName);
+            var iconName = (string?)iconProperty?.GetValue(_iconOptions);
+            var iconKind = Enum.TryParse<MaterialIconKind>(iconName, out var kind) ? kind : MaterialIconKind.Palette;
+
+            AvailableCodeThemes.Add(new CodeThemeItem(themeName, displayName, iconKind));
         }
     }
 
@@ -161,50 +165,5 @@ public sealed partial class SettingsViewModel : ViewModelBase
         TerminalFontSize = Math.Clamp(TerminalFontSize + delta, _fontSizeOptions.MinFontSize, _fontSizeOptions.MaxFontSize);
     }
 
-    internal static string GetCodeThemeDisplayName(ThemeName themeName) => themeName switch
-    {
-        ThemeName.VisualStudioDark => "Visual Studio Dark",
-        ThemeName.VisualStudioLight => "Visual Studio Light",
-        ThemeName.Monokai => "Monokai",
-        ThemeName.Dracula => "Dracula",
-        ThemeName.SolarizedDark => "Solarized Dark",
-        ThemeName.SolarizedLight => "Solarized Light",
-        ThemeName.AtomOneDark => "Atom One Dark",
-        ThemeName.AtomOneLight => "Atom One Light",
-        ThemeName.Dark => "Dark",
-        ThemeName.Light => "Light",
-        ThemeName.DarkPlus => "Dark Plus",
-        ThemeName.LightPlus => "Light Plus",
-        ThemeName.Abbys => "Abyss",
-        ThemeName.DimmedMonokai => "Dimmed Monokai",
-        ThemeName.KimbieDark => "Kimbie Dark",
-        ThemeName.QuietLight => "Quiet Light",
-        ThemeName.Red => "Red",
-        ThemeName.TomorrowNightBlue => "Tomorrow Night Blue",
-        ThemeName.HighContrastLight => "High Contrast Light",
-        ThemeName.HighContrastDark => "High Contrast Dark",
-        _ => themeName.ToString()
-    };
-
-    internal static MaterialIconKind GetCodeThemeIconKind(ThemeName themeName) => themeName switch
-    {
-        ThemeName.VisualStudioDark or ThemeName.VisualStudioLight => MaterialIconKind.MicrosoftVisualStudio,
-        ThemeName.LightPlus or ThemeName.DarkPlus => MaterialIconKind.Plus,
-        ThemeName.HighContrastLight or ThemeName.HighContrastDark => MaterialIconKind.ContrastCircle,
-        ThemeName.SolarizedDark or ThemeName.SolarizedLight => MaterialIconKind.WhiteBalanceSunny,
-        ThemeName.AtomOneDark or ThemeName.AtomOneLight => MaterialIconKind.Atom,
-        ThemeName.Dark => MaterialIconKind.WeatherNight,
-        ThemeName.Light => MaterialIconKind.WhiteBalanceSunny,
-        ThemeName.Dracula => MaterialIconKind.Blood,
-        ThemeName.Monokai => MaterialIconKind.FruitCitrus,
-        ThemeName.Abbys => MaterialIconKind.Water,
-        ThemeName.DimmedMonokai => MaterialIconKind.Brightness2,
-        ThemeName.KimbieDark => MaterialIconKind.Coffee,
-        ThemeName.QuietLight => MaterialIconKind.VolumeMute,
-        ThemeName.Red => MaterialIconKind.Palette,
-        ThemeName.TomorrowNightBlue => MaterialIconKind.MoonWaningCrescent,
-        _ => MaterialIconKind.Palette
-    };
 }
 
-public sealed record CodeThemeItem(string ThemeName, string DisplayName, MaterialIconKind IconKind);

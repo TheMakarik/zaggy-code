@@ -1,7 +1,3 @@
-using System.Diagnostics;
-using System.Globalization;
-using Avalonia.Data.Converters;
-
 namespace ZaggyCode.Avalonia.Views.Converters;
 
 public sealed class BooleanToDynamicTextConverter : IMultiValueConverter

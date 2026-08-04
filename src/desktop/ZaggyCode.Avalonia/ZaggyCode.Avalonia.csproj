@@ -5,6 +5,7 @@
         <ApplicationManifest>app.manifest</ApplicationManifest>
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
         <WarningsAsErrors>true</WarningsAsErrors>
+        <ImplicitUsings>enable</ImplicitUsings>
     </PropertyGroup>
 	
 	<PropertyGroup Condition="'$(Configuration)' == 'Debug'">

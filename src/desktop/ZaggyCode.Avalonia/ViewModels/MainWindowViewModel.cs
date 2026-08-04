@@ -1,7 +1,3 @@
-using System.Collections.ObjectModel;
-using Material.Icons;
-using TextMateSharp.Grammars;
-
 namespace ZaggyCode.Avalonia.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
@@ -26,7 +22,6 @@ public partial class MainWindowViewModel : ViewModelBase
     public int MinFontSize { get; init; }
     public string CodeTheme { get; private set; }
     public PopupOptions PopupOptions { get; }
-    public ObservableCollection<CodeThemeItem> AvailableCodeThemes { get; } = [];
 
     public IRobotExecutor? Executor { get; set; }
     public TextReader? TerminalReader { get; set; }
@@ -55,6 +50,8 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly IOptions<DefaultUser> _defaultUserOptions;
     private readonly IOptions<CodeExamplePathOptions> _codeExamplePathOptions;
     private readonly IOptions<FontSizeOptions> _fontSizeOptions;
+    private readonly IOptions<CodeThemeDisplayNameOptions> _displayNameOptions;
+    private readonly IOptions<CodeThemeIconOptions> _iconOptions;
     private readonly ILogger<MainWindowViewModel> _logger;
     private CancellationTokenSource? _cancellationTokenSource;
 
@@ -69,12 +66,16 @@ public partial class MainWindowViewModel : ViewModelBase
         IOptions<DefaultUser> defaultUserOptions,
         IOptions<CodeExamplePathOptions> codeExamplePathOptions,
         IOptions<PopupOptions> popupOptions,
-        IOptions<FontSizeOptions> textFontSize)
+        IOptions<FontSizeOptions> textFontSize,
+        IOptions<CodeThemeDisplayNameOptions> displayNameOptions,
+        IOptions<CodeThemeIconOptions> iconOptions)
     {
         _factory = factory;
         _userStorage = userStorage;
         _defaultUserOptions = defaultUserOptions;
         _codeExamplePathOptions = codeExamplePathOptions;
+        _displayNameOptions = displayNameOptions;
+        _iconOptions = iconOptions;
         _executionSpeed = userStorage.Current.LastSpeed;
         _selectedLanguage = userStorage.Current.LastLanguage;
         _textEditorFontSize = userStorage.Current.CodeFontSize;
@@ -88,7 +89,6 @@ public partial class MainWindowViewModel : ViewModelBase
         MinFontSize = _fontSizeOptions.Value.MinFontSize;
         _logger = logger;
 
-        InitializeAvailableCodeThemes();
         InitializeMessageBusSubscriptions();
 
         this.WhenAnyPropertyChanged().Subscribe(context =>
@@ -153,17 +153,6 @@ public partial class MainWindowViewModel : ViewModelBase
                 _userStorage.Current.CodeTheme = message.ThemeName;
                 CodeTheme = message.ThemeName;
             });
-    }
-
-    private void InitializeAvailableCodeThemes()
-    {
-        foreach (ThemeName themeName in Enum.GetValues<ThemeName>())
-        {
-            AvailableCodeThemes.Add(new CodeThemeItem(
-                themeName.ToString(),
-                SettingsViewModel.GetCodeThemeDisplayName(themeName),
-                SettingsViewModel.GetCodeThemeIconKind(themeName)));
-        }
     }
 
     #endregion
@@ -271,7 +260,7 @@ public partial class MainWindowViewModel : ViewModelBase
     [ReactiveCommand]
     private async Task OpenSettingsAsync()
     {
-        var settingsViewModel = new SettingsViewModel(_userStorage, _defaultUserOptions, _codeExamplePathOptions, _fontSizeOptions);
+        var settingsViewModel = new SettingsViewModel(_userStorage, _defaultUserOptions, _codeExamplePathOptions, _fontSizeOptions, _displayNameOptions, _iconOptions);
         await OpenSettings.Handle(settingsViewModel);
     }
 
