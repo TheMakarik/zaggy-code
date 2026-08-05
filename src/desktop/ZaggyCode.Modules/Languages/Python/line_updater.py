@@ -11,4 +11,4 @@ def trace_calls(frame, event, arg):
     return trace_calls
 
 settrace(trace_calls);
-print("Succesefully loaded new line updater.")
+print("Successfully loaded new line updater")

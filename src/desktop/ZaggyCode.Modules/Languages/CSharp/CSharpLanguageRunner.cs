@@ -15,34 +15,19 @@ public sealed partial class CSharpLanguageRunner(ILogger<CSharpLanguageRunner> l
     private ExecutionSpeed ExecSpeed;
     private IRobotExecutor? Executor;
 
-    public EventHandler<DebugLineUpdatedEventArgs>? DebugLineUpdated
-    {
-        get;
-        set;
-    }
+    public EventHandler<DebugLineUpdatedEventArgs>? DebugLineUpdated { get; set; }
 
-    public EventHandler<CodeErrorOccurredEventArgs>? CodeErrorOccurred
-    {
-        get;
-        set;
-    }
+    public EventHandler<CodeErrorOccurredEventArgs>? CodeErrorOccurred { get; set; }
 
-    public void Execute(string code, CancellationToken source)
+    public async Task Execute(string code, CancellationToken source)
     {
         try
         {
-            if (Output is null)
-                throw new Exception();
-
-            if (Input is null)
-                throw new Exception();
-
-            if (Executor is null)
-                throw new Exception();
-
+            Debug.Assert(Output is not null);
+            Debug.Assert(Input is not null);
+            Debug.Assert(Executor is not null);
+            
             using CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromMinutes(2));
-            if (logger.IsEnabled(LogLevel.Trace))
-                logger.LogTrace("Executing C# code.\n{code}", code);
 
             Script script = CSharpScript
                 .Create(InitialCode, scriptOptions, typeof(CSharpLanguageRunnerScriptGlobals))
@@ -51,16 +36,15 @@ public sealed partial class CSharpLanguageRunner(ILogger<CSharpLanguageRunner> l
             ImmutableArray<Diagnostic> diagnostics = script.Compile(cts.Token);
             if (diagnostics.Any())
             {
-                string errors = string.Join("\n", diagnostics.Select(d => d.GetMessage()));
-                if (logger.IsEnabled(LogLevel.Error))
-                    logger.LogError("{errors}", errors);
+                string errors = string.Join(Environment.NewLine, diagnostics.Select(d => d.GetMessage()));
+                logger.LogError("C# Runner errors: {errors}", errors);
 
-                Output.WriteLine(errors);
+                await Output.WriteLineAsync(errors);
                 return;
             }
 
             CSharpLanguageRunnerScriptGlobals globals = new CSharpLanguageRunnerScriptGlobals(Executor, Output, Input);
-            ScriptState state = script.RunAsync(globals, cts.Token).Result;
+            ScriptState state = await script.RunAsync(globals, cts.Token);
         }
         catch (TaskCanceledException)
         {
@@ -68,8 +52,7 @@ public sealed partial class CSharpLanguageRunner(ILogger<CSharpLanguageRunner> l
         }
         catch (Exception ex)
         {
-            if (logger.IsEnabled(LogLevel.Error))
-                logger.LogError(ex, "Unhandled exception during code execution.");
+            logger.LogError(ex, "Unhandled exception during code execution.");
         }
     }
 
@@ -114,27 +97,5 @@ public sealed partial class CSharpLanguageRunner(ILogger<CSharpLanguageRunner> l
         return modifiedCode;
     }
 
-    public class LineDelayRewriter(int delayMs) : CSharpSyntaxRewriter
-    {
-        private readonly int _delayMs = delayMs;
-
-        public override SyntaxNode? VisitCompilationUnit(CompilationUnitSyntax node)
-        {
-            SyntaxList<MemberDeclarationSyntax> newMembers = SyntaxFactory.List<MemberDeclarationSyntax>();
-            foreach (MemberDeclarationSyntax member in node.Members)
-            {
-                newMembers = newMembers.Add((MemberDeclarationSyntax)Visit(member));
-                if (member is GlobalStatementSyntax globalStatement)
-                {
-                    if (globalStatement.Statement is ExpressionStatementSyntax)
-                    {
-                        StatementSyntax delayStatement = SyntaxFactory.ParseStatement($"System.Threading.Tasks.Task.Delay({_delayMs}).Wait();\r\n");
-                        newMembers = newMembers.Add(SyntaxFactory.GlobalStatement(delayStatement));
-                    }
-                }
-            }
-
-            return node.WithMembers(newMembers);
-        }
-    }
+    
 }

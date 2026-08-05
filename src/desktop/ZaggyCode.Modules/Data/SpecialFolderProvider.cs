@@ -1,6 +1,6 @@
 namespace ZaggyCode.Modules.Data;
 
-//Нужно чтоб мокнуть получения папки в тестах чтоб не переписывать их и не ломать свою либу
+//Нужно чтоб мокнуть получения папки в тестах 
 public class SpecialFolderProvider : ISpecialFolderProvider
 {
     public string GetFolder(Environment.SpecialFolder folder, string path)

@@ -21,7 +21,7 @@ public sealed class PythonLanguageRunner : ILanguageRunner
         throw new NotImplementedException();
     }
 
-    public void Execute(string code, CancellationToken source)
+    public async Task Execute(string code, CancellationToken source)
     {
         throw new NotImplementedException();
     }
