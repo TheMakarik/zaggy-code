@@ -35,6 +35,14 @@
     </ItemGroup>
 
     <ItemGroup>
+        <PythonStdLib Include="$(NuGetPackageRoot)ironpython.stdlib\3.4.2\contentFiles\any\any\lib\**\*.*" />
+    </ItemGroup>
+
+    <Target Name="CopyPythonLibToOutput" BeforeTargets="Build">
+        <Copy SourceFiles="@(PythonStdLib)" DestinationFiles="@(PythonStdLib->'$(OutputPath)Languages\Python\Lib\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+    </Target>
+
+    <ItemGroup>
         <Content Include="Languages\**\*.py">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
@@ -48,10 +56,6 @@
         <Content Include="..\..\src\desktop\ZaggyCode.Modules\Languages\Python\PythonCode*.py">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <Link>Languages\Python\PythonCode\%(Filename)%(Extension)</Link>
-        </Content>
-        <Content Include="..\..\src\desktop\ZaggyCode.Modules\Languages\Python\Lib\**\*.*">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-            <Link>Languages\Python\Lib\%(RecursiveDir)%(Filename)%(Extension)</Link>
         </Content>
     </ItemGroup>
 
