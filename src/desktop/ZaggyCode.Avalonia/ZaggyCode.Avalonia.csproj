@@ -6,17 +6,24 @@
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
         <WarningsAsErrors>true</WarningsAsErrors>
         <ImplicitUsings>enable</ImplicitUsings>
-    </PropertyGroup>
-	
-	<PropertyGroup Condition="'$(Configuration)' == 'Debug'">
-		<OutputType>Exe</OutputType>
-		<DisableWinExeOutputInference>false</DisableWinExeOutputInference>
-	</PropertyGroup>
+        <PreserveCompilationContext>true</PreserveCompilationContext>
 
-	<PropertyGroup Condition="'$(Configuration)' == 'Release'">
-		<OutputType>WinExe</OutputType>
-	</PropertyGroup>
-	
+        <AssemblyName>ZaggyCode</AssemblyName>
+        <AssemblyTitle>Zaggy's Code</AssemblyTitle>
+        <AssemblyDescription>Редактор кода для обучения программированию</AssemblyDescription>
+        <Version>2026.0.0</Version>
+        <Company>The Zaggy's Code Project</Company>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+        <OutputType>Exe</OutputType>
+        <DisableWinExeOutputInference>false</DisableWinExeOutputInference>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+        <OutputType>WinExe</OutputType>
+    </PropertyGroup>
+
     <ItemGroup>
         <AvaloniaResource Include="Assets\**" />
     </ItemGroup>
@@ -39,8 +46,8 @@
         <PackageReference Include="Scrutor" Version="7.0.0" />
         <PackageReference Include="ReactiveUI.Avalonia" Version="12.0.3" />
         <PackageReference Include="ReactiveUI.SourceGenerators" Version="3.1.0">
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="Serilog" Version="4.3.1" />
         <PackageReference Include="Serilog.Enrichers.Environment" Version="3.0.1" />
@@ -54,25 +61,39 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\ZaggyCode.Modules\ZaggyCode.Modules.csproj" />
+        <ProjectReference Include="..\ZaggyCode.Modules\ZaggyCode.Modules.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-      <None Remove="appsettings.json" />
-      <Content Include="..\..\..\AGENTS.md">
-        <Link>AGENTS.md</Link>
-      </Content>
-      <Content Include="appsettings.json">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </Content>
-      <Compile Remove="Assets\CodeExamples\*.cs" />
-      <Content Include="Assets\CodeExamples\*">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </Content>
+        <None Remove="appsettings.json" />
+        <Content Include="appsettings.json">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+        </Content>
+        <Compile Remove="Assets\CodeExamples\*.cs" />
+        <Content Include="Assets\CodeExamples\**\*">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+        </Content>
+        <Content Include="..\ZaggyCode.Modules\Languages\Python\*.py">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+            <Link>Languages\Python\%(Filename)%(Extension)</Link>
+        </Content>
+        <Content Include="..\ZaggyCode.Modules\Languages\Python\Lib\**\*.*">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+            <Link>Languages\Python\Lib\%(RecursiveDir)%(Filename)%(Extension)</Link>
+        </Content>
     </ItemGroup>
 
+    <Target Name="CopyContentFiles" AfterTargets="Publish">
+        <Copy SourceFiles="appsettings.json" DestinationFolder="$(PublishDir)" Condition="Exists('appsettings.json')" />
+        <Copy SourceFiles="@(Content)" DestinationFiles="@(Content->'$(PublishDir)%(RelativeDir)%(Filename)%(Extension)')" Condition="'%(Content.CopyToPublishDirectory)' == 'PreserveNewest'" />
+    </Target>
+
     <ItemGroup>
-      <Folder Include="Assets\Map\" />
-      <Folder Include="Views\Converters\" />
+        <Folder Include="Assets\Map\" />
+        <Folder Include="Views\Converters\" />
     </ItemGroup>
 </Project>

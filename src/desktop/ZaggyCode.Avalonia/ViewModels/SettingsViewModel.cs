@@ -1,4 +1,6 @@
 
+using ZaggyCode.Avalonia.ViewModels.Messages;
+
 namespace ZaggyCode.Avalonia.ViewModels;
 
 public sealed partial class SettingsViewModel : ViewModelBase
@@ -18,8 +20,6 @@ public sealed partial class SettingsViewModel : ViewModelBase
     private readonly IUserStorage _userStorage;
     private readonly DefaultUser _defaultUser;
     private readonly FontSizeOptions _fontSizeOptions;
-    private readonly CodeThemeDisplayNameOptions _displayNameOptions;
-    private readonly CodeThemeIconOptions _iconOptions;
     private readonly ILogger<SettingsViewModel> _logger;
     private readonly int _originalCodeFontSize;
     private readonly int _originalTerminalFontSize;
@@ -41,20 +41,16 @@ public sealed partial class SettingsViewModel : ViewModelBase
         IOptions<DefaultUser> defaultUserOptions,
         IOptions<CodeExamplePathOptions> codeExamplePathOptions,
         IOptions<FontSizeOptions> fontSizeOptions,
-        IOptions<CodeThemeDisplayNameOptions> displayNameOptions,
-        IOptions<CodeThemeIconOptions> iconOptions,
         ILogger<SettingsViewModel> logger)
     {
         _userStorage = userStorage;
         _defaultUser = defaultUserOptions.Value;
         _fontSizeOptions = fontSizeOptions.Value;
-        _displayNameOptions = displayNameOptions.Value;
-        _iconOptions = iconOptions.Value;
         _logger = logger;
         CSharpExamplePath = codeExamplePathOptions.Value.CSharpExamplePath;
         PythonExamplePath = codeExamplePathOptions.Value.PythonExamplePath;
 
-        InitializeAvailableCodeThemes();
+        InitializeMessageBusSubscriptions();
 
         var current = userStorage.Current;
         _originalCodeFontSize = current.CodeFontSize;
@@ -94,19 +90,17 @@ public sealed partial class SettingsViewModel : ViewModelBase
             });
     }
 
-    private void InitializeAvailableCodeThemes()
+    private void InitializeMessageBusSubscriptions()
     {
-        foreach (var property in typeof(CodeThemeDisplayNameOptions).GetProperties())
-        {
-            var themeName = property.Name;
-            var displayName = (string?)property.GetValue(_displayNameOptions) ?? themeName;
+        MessageBus.Current.Listen<CodeThemesResponseMessage>()
+            .Subscribe(message =>
+            {
+                AvailableCodeThemes.Clear();
+                foreach (var theme in message.Themes)
+                    AvailableCodeThemes.Add(theme);
+            });
 
-            var iconProperty = typeof(CodeThemeIconOptions).GetProperty(themeName);
-            var iconName = (string?)iconProperty?.GetValue(_iconOptions);
-            var iconKind = Enum.TryParse<MaterialIconKind>(iconName, out var kind) ? kind : MaterialIconKind.Palette;
-
-            AvailableCodeThemes.Add(new CodeThemeItem(themeName, displayName, iconKind));
-        }
+        MessageBus.Current.SendMessage(new CodeThemesRequestMessage());
     }
 
     private void LoadFromUserData()

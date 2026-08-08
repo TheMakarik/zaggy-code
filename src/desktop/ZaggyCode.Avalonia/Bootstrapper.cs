@@ -65,7 +65,9 @@ public sealed class Bootstrapper
             .AddOptions<SpeedMillisecondsOptions>()
             .AddOptions<MetadataOptions>()
             .AddOptions<TempOptions>()
-            .AddOptions<LoggingCompressOptions>();
+            .AddOptions<LoggingCompressOptions>()
+            .AddOptions<PythonScriptsOptions>()
+            .AddOptions<PythonDefaultSettingsOptions>();
 
         var app = builder.Build();
 

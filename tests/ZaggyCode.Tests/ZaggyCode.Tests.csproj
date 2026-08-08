@@ -12,6 +12,12 @@
         <PackageReference Include="coverlet.collector" Version="6.0.4"/>
         <PackageReference Include="FakeItEasy" Version="9.0.1" />
         <PackageReference Include="FluentAssertions" Version="8.10.0" />
+        <PackageReference Include="IronPython" Version="3.4.2" />
+        <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.10" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.10" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.10" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.10" />
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.9" />
         <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.9" />
         <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.9" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1"/>
@@ -24,8 +30,29 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\src\desktop\ZaggyCode.Core\ZaggyCode.Core.csproj" />
-      <ProjectReference Include="..\..\src\desktop\ZaggyCode.Modules\ZaggyCode.Modules.csproj" />
+        <ProjectReference Include="..\..\src\desktop\ZaggyCode.Core\ZaggyCode.Core.csproj" />
+        <ProjectReference Include="..\..\src\desktop\ZaggyCode.Modules\ZaggyCode.Modules.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Content Include="Languages\**\*.py">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+        <Content Include="..\..\src\desktop\ZaggyCode.Avalonia\appsettings.json">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+        <Content Include="..\..\src\desktop\ZaggyCode.Modules\Languages\Python\*.py">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <Link>Languages\Python\%(Filename)%(Extension)</Link>
+        </Content>
+        <Content Include="..\..\src\desktop\ZaggyCode.Modules\Languages\Python\PythonCode*.py">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <Link>Languages\Python\PythonCode\%(Filename)%(Extension)</Link>
+        </Content>
+        <Content Include="..\..\src\desktop\ZaggyCode.Modules\Languages\Python\Lib\**\*.*">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <Link>Languages\Python\Lib\%(RecursiveDir)%(Filename)%(Extension)</Link>
+        </Content>
     </ItemGroup>
 
 </Project>

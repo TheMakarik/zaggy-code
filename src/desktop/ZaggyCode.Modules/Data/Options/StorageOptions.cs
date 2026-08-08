@@ -19,4 +19,10 @@ public sealed class StorageOptions
         get => field;
         set => field = value;
     }
+    
+    public required string PythonSettingsPath
+    {
+        get => field;
+        set => field = Environment.ExpandEnvironmentVariables(value);
+    }
 }

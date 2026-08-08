@@ -38,6 +38,7 @@ public partial class App : Application
         {
             loading.Close();
             System.Diagnostics.Debug.WriteLine($"Error while loading: {ex}");
+            Log.Logger.Error(ex, "Error while loading application");
         }
     }
 }

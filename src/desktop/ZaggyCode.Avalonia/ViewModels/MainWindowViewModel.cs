@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using Material.Icons;
 
 namespace ZaggyCode.Avalonia.ViewModels;
 
@@ -24,7 +25,7 @@ public partial class MainWindowViewModel : ViewModelBase
     public int MinFontSize { get; init; }
     public string CodeTheme { get; private set; }
     public PopupOptions PopupOptions { get; }
-    public ObservableCollection<string> AvailableCodeThemes { get; } = [];
+    public ObservableCollection<CodeThemeItem> AvailableCodeThemes { get; } = [];
 
     public IRobotExecutor? Executor { get; set; }
     public TextReader? TerminalReader { get; set; }
@@ -143,11 +144,23 @@ public partial class MainWindowViewModel : ViewModelBase
     private void InitializeAvailableCodeThemes()
     {
         foreach (var property in typeof(CodeThemeDisplayNameOptions).GetProperties())
-            AvailableCodeThemes.Add(property.Name);
+        {
+            var themeName = property.Name;
+            var displayName = (string?)property.GetValue(_displayNameOptions.Value) ?? themeName;
+
+            var iconProperty = typeof(CodeThemeIconOptions).GetProperty(themeName);
+            var iconName = (string?)iconProperty?.GetValue(_iconOptions.Value);
+            var iconKind = Enum.TryParse<MaterialIconKind>(iconName, out var kind) ? kind : MaterialIconKind.Palette;
+
+            AvailableCodeThemes.Add(new CodeThemeItem(themeName, displayName, iconKind));
+        }
     }
 
     private void InitializeMessageBusSubscriptions()
     {
+        MessageBus.Current.Listen<CodeThemesRequestMessage>()
+            .Subscribe(_ => MessageBus.Current.SendMessage(new CodeThemesResponseMessage(AvailableCodeThemes)));
+
         MessageBus.Current.Listen<CodeFontSizeChangedMessage>()
             .Subscribe(message => TextEditorFontSize = message.FontSize);
 
@@ -286,7 +299,7 @@ public partial class MainWindowViewModel : ViewModelBase
     [ReactiveCommand]
     private async Task OpenSettingsAsync()
     {
-        var settingsViewModel = new SettingsViewModel(_userStorage, _defaultUserOptions, _codeExamplePathOptions, _fontSizeOptions, _displayNameOptions, _iconOptions, _settingsLogger);
+        var settingsViewModel = new SettingsViewModel(_userStorage, _defaultUserOptions, _codeExamplePathOptions, _fontSizeOptions, _settingsLogger);
         await OpenSettings.Handle(settingsViewModel);
     }
 

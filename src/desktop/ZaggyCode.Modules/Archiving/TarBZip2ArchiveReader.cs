@@ -83,23 +83,37 @@ public sealed class TarBZip2ArchiveReader(
 
         stream.Seek(0, SeekOrigin.Begin);
 
-        var bzip2Stream = await BZip2Stream.CreateAsync(
+        await using var bzip2Stream = await BZip2Stream.CreateAsync(
             stream,
             CompressionMode.Decompress,
             decompressConcatenated: false);
 
-        if (!await TarArchive.IsTarFileAsync(bzip2Stream))
+        var decompressedStream = new MemoryStream();
+        try
+        {
+            await bzip2Stream.CopyToAsync(decompressedStream);
+        }
+        catch
+        {
+            await decompressedStream.DisposeAsync();
+            throw;
+        }
+
+        decompressedStream.Seek(0, SeekOrigin.Begin);
+
+        if (!await TarArchive.IsTarFileAsync(decompressedStream))
         {
             logger.LogError("File {file} is not .tar.bz2 archive", file);
-            await bzip2Stream.DisposeAsync();
+            await decompressedStream.DisposeAsync();
             return null;
         }
 
-        var tarArchive = await TarArchive.OpenAsyncArchive(bzip2Stream);
+        decompressedStream.Seek(0, SeekOrigin.Begin);
+        var tarArchive = await TarArchive.OpenAsyncArchive(decompressedStream);
         return tarArchive;
     }
 
-    public async Task<DirectoryInfo> ExtractAllToTempAsync(string archivePath)
+    public async Task<DirectoryInfo> ExtractAllToTempAsync(string archivePath, IProgress<int> oneHundredPerCentBasedProgress)
     {
         Debug.Assert(File.Exists(archivePath));
 
@@ -109,6 +123,17 @@ public sealed class TarBZip2ArchiveReader(
         if (archive is null)
             throw new InvalidOperationException($"Failed to open archive '{archivePath}'");
 
+        var innerProgress = new Progress<ProgressReport>();
+        innerProgress.ProgressChanged += (_, args) =>
+        {
+            if (args.PercentComplete is null)
+                return;
+            
+            logger.LogDebug("Extracted entry: {entry}", args.EntryPath);
+            var floorPerCent = Convert.ToInt32(args.PercentComplete.Value);
+            oneHundredPerCentBasedProgress.Report(floorPerCent);
+        };
+        
         await using (archive)
         {
             await archive.WriteToDirectoryAsync(

@@ -1,15 +1,36 @@
 // Global using directives
 
+global using System.Diagnostics;
+global using System.IO;
 global using System.Text;
 global using AutoFixture;
 global using FakeItEasy;
 global using FluentAssertions;
+global using Microsoft.Extensions.Configuration;
+global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Logging;
 global using Microsoft.Extensions.Options;
+global using SharpCompress.Common;
+global using SharpCompress.Writers;
+global using SharpCompress.Writers.Tar;
 global using Xunit;
+global using ZaggyCode.Core.Archiving.Interfaces;
+global using ZaggyCode.Core.Archiving.Model;
+global using ZaggyCode.Core.Common;
+global using ZaggyCode.Core.Common.Utils;
 global using ZaggyCode.Core.Data.Interfaces;
 global using ZaggyCode.Core.Data.Model;
+global using ZaggyCode.Core.Factories;
+global using ZaggyCode.Core.Game.Interfaces;
 global using ZaggyCode.Core.Languages.Enums;
+global using ZaggyCode.Core.Languages.EventArgs;
+global using ZaggyCode.Core.Languages.Interfaces;
+global using ZaggyCode.Modules.Archiving;
+global using ZaggyCode.Modules.Archiving.Options;
 global using ZaggyCode.Modules.Data;
 global using ZaggyCode.Modules.Data.Options;
+global using ZaggyCode.Modules.Factories;
+global using ZaggyCode.Modules.Languages.Options;
+global using ZaggyCode.Modules.Languages.Python;
 global using ZaggyCode.Tests.Infrastructure;
+global using ZaggyCode.Tests.Languages.Base;

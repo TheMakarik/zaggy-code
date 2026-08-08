@@ -7,4 +7,3 @@ while(Robot.CanMoveUp()){
    Robot.MoveUp();
 }
 Console.WriteLine("Конец!");
-]

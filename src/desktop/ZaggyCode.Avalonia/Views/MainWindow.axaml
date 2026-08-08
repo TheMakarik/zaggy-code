@@ -21,6 +21,7 @@
     xmlns:enums="clr-namespace:ZaggyCode.Core.Languages.Enums;assembly=ZaggyCode.Core"
     xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:records="clr-namespace:ZaggyCode.Avalonia.ViewModels.Records"
     xmlns:rxui="http://reactiveui.net"
     xmlns:vm="using:ZaggyCode.Avalonia.ViewModels"
     xmlns:vt="using:VirtualTerminal"
@@ -156,10 +157,17 @@
                                     <ControlTheme
                                         BasedOn="{StaticResource {x:Type MenuItem}}"
                                         TargetType="MenuItem"
-                                        x:DataType="x:String">
-                                        <Setter Property="Header" Value="{Binding ., Mode=OneWay}" />
+                                        x:DataType="records:CodeThemeItem">
+                                        <Setter Property="Header" Value="{Binding DisplayName, Mode=OneWay}" />
                                         <Setter Property="Command" Value="{Binding DataContext.SelectCodeThemeCommand, ElementName=ThisWindow}" />
-                                        <Setter Property="CommandParameter" Value="{Binding .}" />
+                                        <Setter Property="CommandParameter" Value="{Binding ThemeName}" />
+                                        <Setter Property="Icon">
+                                            <Setter.Value>
+                                                <DataTemplate x:DataType="records:CodeThemeItem">
+                                                    <materialIcons:MaterialIcon Kind="{Binding IconKind}" />
+                                                </DataTemplate>
+                                            </Setter.Value>
+                                        </Setter>
                                     </ControlTheme>
                                 </MenuItem.ItemContainerTheme>
                             </MenuItem>
@@ -268,10 +276,17 @@
                                         <ControlTheme
                                             BasedOn="{StaticResource {x:Type MenuItem}}"
                                             TargetType="MenuItem"
-                                            x:DataType="x:String">
-                                            <Setter Property="Header" Value="{Binding ., Mode=OneWay}" />
+                                            x:DataType="records:CodeThemeItem">
+                                            <Setter Property="Header" Value="{Binding DisplayName, Mode=OneWay}" />
                                             <Setter Property="Command" Value="{Binding DataContext.SelectCodeThemeCommand, ElementName=ThisWindow}" />
-                                            <Setter Property="CommandParameter" Value="{Binding .}" />
+                                            <Setter Property="CommandParameter" Value="{Binding ThemeName}" />
+                                            <Setter Property="Icon">
+                                                <Setter.Value>
+                                                    <DataTemplate x:DataType="records:CodeThemeItem">
+                                                        <materialIcons:MaterialIcon Kind="{Binding IconKind}" />
+                                                    </DataTemplate>
+                                                </Setter.Value>
+                                            </Setter>
                                         </ControlTheme>
                                     </MenuItem.ItemContainerTheme>
                                 </MenuItem>

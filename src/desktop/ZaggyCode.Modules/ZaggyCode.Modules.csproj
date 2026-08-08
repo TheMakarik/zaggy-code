@@ -1,5 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
     <PropertyGroup>
         <TargetFramework>net10.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
@@ -23,7 +22,29 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Game\Factories\" />
+        <PythonStdLib Include="$(NuGetPackageRoot)ironpython.stdlib\3.4.2\contentFiles\any\any\lib\**\*.*" />
     </ItemGroup>
 
+    <Target Name="CopyPythonStdLib" BeforeTargets="Build">
+        <Copy SourceFiles="@(PythonStdLib)" DestinationFiles="@(PythonStdLib->'$(ProjectDir)Languages\Python\Lib\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+    </Target>
+
+    <Target Name="CopyPythonLibToOutput" AfterTargets="Build">
+        <Copy SourceFiles="@(PythonStdLib)" DestinationFiles="@(PythonStdLib->'$(OutputPath)Languages\Python\Lib\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+    </Target>
+
+    <Target Name="IncludePythonLibAsContent" BeforeTargets="BeforeBuild">
+        <ItemGroup>
+            <Content Include="$(ProjectDir)Languages\Python\Lib\**\*.*" Condition="Exists('$(ProjectDir)Languages\Python\Lib\**\*.*')">
+                <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+                <Link>Languages\Python\Lib\%(RecursiveDir)%(Filename)%(Extension)</Link>
+            </Content>
+        </ItemGroup>
+    </Target>
+
+    <ItemGroup>
+        <Content Include="Languages\Python\*.py">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
 </Project>

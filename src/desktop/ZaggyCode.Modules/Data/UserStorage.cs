@@ -1,7 +1,11 @@
 namespace ZaggyCode.Modules.Data;
 
 //#:NO_AI
-public sealed class UserStorage(ILogger<UserStorage> logger, IOptions<StorageOptions> storageOptions, IOptions<DefaultUser> defaultUser, ISpecialFolderProvider folderProvider) : IUserStorage
+public sealed class UserStorage(
+    ILogger<UserStorage> logger, 
+    IOptions<StorageOptions> storageOptions, 
+    IOptions<DefaultUser> defaultUser, 
+    ISpecialFolderProvider folderProvider) : IUserStorage
 {
     private readonly Lock _locker = new Lock();
     private  volatile bool _requireUpdate = false;
@@ -13,12 +17,12 @@ public sealed class UserStorage(ILogger<UserStorage> logger, IOptions<StorageOpt
         Current.PropertyChanged += (_, args) =>
         {
             logger.LogInformation("User property changed: {path}", args.PropertyName);
-            using Lock.Scope scope = _locker.EnterScope();
+            using var scope = _locker.EnterScope();
             _requireUpdate = true;
         };
         Task.Factory.StartNew(async () =>
         {
-            using PeriodicTimer timer = new PeriodicTimer(TimeSpan.FromSeconds(storageOptions.Value.WaitUserDataUpdateSeconds));
+            using var timer = new PeriodicTimer(TimeSpan.FromSeconds(storageOptions.Value.WaitUserDataUpdateSeconds));
             while (await timer.WaitForNextTickAsync())
                 await TryExpandUpdatesAsync();
         }, TaskCreationOptions.LongRunning);
@@ -43,7 +47,7 @@ public sealed class UserStorage(ILogger<UserStorage> logger, IOptions<StorageOpt
 
         try
         {
-            await using FileStream file = File.Open(storageOptions.Value.DataFilePath, FileMode.Open);
+            await using var file = File.Open(storageOptions.Value.DataFilePath, FileMode.Open);
             Current = await JsonSerializer.DeserializeAsync<UserData>(file, Data.Json.UserDataSerializerContext.Default.Options) ?? throw new InvalidOperationException("User data file corrupted");
         }
         catch (Exception e)
@@ -64,10 +68,10 @@ public sealed class UserStorage(ILogger<UserStorage> logger, IOptions<StorageOpt
         }
 
         logger.LogInformation("User data was not found. Creating user config file {path}", valueDataFilePath);
-        await using FileStream file = File.Create(valueDataFilePath);
+        await using var file = File.Create(valueDataFilePath);
         Current = defaultUser.Value.User;
         await JsonSerializer.SerializeAsync(file, defaultUser.Value.User, Modules.Data.Json.UserDataSerializerContext.Default.Options);
-        using StreamReader streamReader = new StreamReader(file);
+        using var streamReader = new StreamReader(file);
         logger.LogDebug("User config file created successfully: {text}", await streamReader.ReadToEndAsync()) ;
 
     }
@@ -77,7 +81,7 @@ public sealed class UserStorage(ILogger<UserStorage> logger, IOptions<StorageOpt
         if (!_requireUpdate)
             return;
 
-        await using(FileStream file = File.Open(storageOptions.Value.DataFilePath, FileMode.Truncate))
+        await using(var file = File.Open(storageOptions.Value.DataFilePath, FileMode.Truncate))
             await JsonSerializer.SerializeAsync(file, Current, Modules.Data.Json.UserDataSerializerContext.Default.Options);
         _requireUpdate = false;
         logger.LogInformation("User config file expanded successfully. Content: {content}", await File.ReadAllTextAsync(storageOptions.Value.DataFilePath));

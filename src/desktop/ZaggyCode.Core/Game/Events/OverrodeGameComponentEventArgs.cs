@@ -1,5 +1,3 @@
-using ZaggyCode.Core.Game.Models;
-
 namespace ZaggyCode.Core.Game.Events;
 
 public class OverrodeGameComponentEventArgs : System.EventArgs
