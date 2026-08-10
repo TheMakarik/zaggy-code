@@ -19,7 +19,7 @@ public sealed partial class CSharpLanguageRunner(ILogger<CSharpLanguageRunner> l
 
     public EventHandler<CodeErrorOccurredEventArgs>? CodeErrorOccurred { get; set; }
 
-    public async Task Execute(string code, CancellationToken source)
+    public async Task Execute(string code, CancellationToken token)
     {
         try
         {

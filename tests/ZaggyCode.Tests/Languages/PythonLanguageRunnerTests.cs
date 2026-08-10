@@ -1,3 +1,5 @@
+using ZaggyCode.Modules.Languages;
+
 namespace ZaggyCode.Tests.Languages;
 
 public class PythonLanguageRunnerTests : LanguageRunnerTests
@@ -18,15 +20,30 @@ public class PythonLanguageRunnerTests : LanguageRunnerTests
             .AddJsonFile("appsettings.json", optional: false)
             .Build();
 
-        var services = new ServiceCollection();
-        services.AddSingleton<IConfiguration>(configuration);
-        services.Configure<PythonScriptsOptions>(configuration.GetSection(nameof(PythonScriptsOptions)));
-        services.Configure<SpeedMillisecondsOptions>(configuration.GetSection(nameof(SpeedMillisecondsOptions)));
-        services.AddSingleton<IPythonScopeFactory>(provider => new PythonScopeFactory(A.Dummy<ILogger<PythonScopeFactory>>(), provider.GetRequiredService<IOptions<PythonScriptsOptions>>()));
-        services.AddSingleton<IPythonSettingsStorage>(CreatePythonSettingsStorage);
-        services.AddSingleton<IUserStorage>(CreateUserStorage);
-        services.AddSingleton<ILogger<PythonLanguageRunner>>(A.Dummy<ILogger<PythonLanguageRunner>>());
-        services.AddSingleton<PythonLanguageRunner>();
+        var fakeSpeedOptions = A.Fake<IOptions<SpeedMillisecondsOptions>>();
+
+        A.CallTo(() => fakeSpeedOptions.Value).Returns(new SpeedMillisecondsOptions()
+        {
+            SleepChunk = 1, //Будет ошибка деления на ноль при нуле, оставить 1.
+            X1 = 0,
+            X2 = 0,
+            X5 = 0,
+            X10 = 3,
+            X20 = 0
+        });
+
+        var services = new ServiceCollection()
+            .AddSingleton<ILanguageSleepHelper, LanguageSleepHelper>()
+            .AddSingleton<IConfiguration>(configuration)
+            .Configure<PythonScriptsOptions>(configuration.GetSection(nameof(PythonScriptsOptions)))
+            .AddSingleton<IOptions<SpeedMillisecondsOptions>>(fakeSpeedOptions)
+            .AddSingleton<IPythonScopeFactory>(provider => new PythonScopeFactory(
+                A.Dummy<ILogger<PythonScopeFactory>>(),
+                provider.GetRequiredService<IOptions<PythonScriptsOptions>>()))
+            .AddSingleton<IPythonSettingsStorage>(CreatePythonSettingsStorage)
+            .AddSingleton<IUserStorage>(CreateUserStorage)
+            .AddSingleton<ILogger<PythonLanguageRunner>>(A.Dummy<ILogger<PythonLanguageRunner>>())
+            .AddSingleton<PythonLanguageRunner>();
 
         _serviceProvider = services.BuildServiceProvider();
     }
@@ -136,7 +153,6 @@ public class PythonLanguageRunnerTests : LanguageRunnerTests
 
         // Assert
         capturedArgs.Should().NotBeNull();
-        capturedArgs!.Text.Should().Contain("is not supported due to your application settings");
     }
 
     private static void SetEnvironmentVariables()

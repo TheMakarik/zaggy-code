@@ -1,4 +1,4 @@
-namespace ZaggyCode.Modules.Utils;
+namespace ZaggyCode.Modules.Data;
 
 public sealed class UpdateStorageWaiter(ILogger<UpdateStorageWaiter> logger) : IUpdateStorageWaiter
 {

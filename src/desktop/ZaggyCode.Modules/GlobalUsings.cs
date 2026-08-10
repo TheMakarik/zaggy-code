@@ -38,7 +38,6 @@ global using ZaggyCode.Core.Data.Model;
 global using ZaggyCode.Core.Factories;
 global using ZaggyCode.Core.Game.Interfaces;
 global using ZaggyCode.Core.Languages.Attributes;
-global using ZaggyCode.Core.Utils;
 global using ZaggyCode.Core.Languages.Enums;
 global using ZaggyCode.Core.Languages.EventArgs;
 global using ZaggyCode.Core.Languages.Interfaces;

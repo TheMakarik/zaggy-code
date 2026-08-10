@@ -3,7 +3,6 @@ import builtins
 
 class R:
     def __init__(self):
-
         builtins.print = self._print
         builtins.input = self._input
 
