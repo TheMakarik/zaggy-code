@@ -2,7 +2,7 @@ namespace ZaggyCode.Modules.Languages.Options;
 
 public class PythonScriptsOptions
 {
-    public required string EnableRobotPath
+    public required string PrepareModules
     {
         get => field;
         set => field = Environment.ExpandEnvironmentVariables(value);
@@ -21,6 +21,12 @@ public class PythonScriptsOptions
     }
 
     public required string RobotPath
+    {
+        get => field;
+        set => field = Environment.ExpandEnvironmentVariables(value);
+    }
+    
+    public required string DisableLineUpdating
     {
         get => field;
         set => field = Environment.ExpandEnvironmentVariables(value);

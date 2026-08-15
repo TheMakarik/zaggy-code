@@ -14,12 +14,6 @@ public sealed class PythonSettings : INotifyPropertyChanged
         set => SetField(ref field, value);
     }
 
-    public bool DetailedExceptions
-    {
-        get => field;
-        set => SetField(ref field, value);
-    }
-
     public bool SupressIo
     {
         get => field;

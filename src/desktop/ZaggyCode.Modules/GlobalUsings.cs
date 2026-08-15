@@ -35,6 +35,8 @@ global using ZaggyCode.Core.Common;
 global using ZaggyCode.Core.Common.Utils;
 global using ZaggyCode.Core.Data.Interfaces;
 global using ZaggyCode.Core.Data.Model;
+global using IUserStorage = ZaggyCode.Core.Data.Interfaces.IObservableStorage<ZaggyCode.Core.Data.Model.UserData>;
+global using IPythonSettingsStorage = ZaggyCode.Core.Data.Interfaces.IObservableStorage<ZaggyCode.Core.Data.Model.PythonSettings>;
 global using ZaggyCode.Core.Factories;
 global using ZaggyCode.Core.Game.Interfaces;
 global using ZaggyCode.Core.Languages.Attributes;

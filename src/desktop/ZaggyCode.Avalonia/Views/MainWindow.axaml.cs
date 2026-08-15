@@ -51,6 +51,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         this.DataContextChanged += (_, __) =>
         {
             Debug.Assert(ViewModel is not null);
+            CodeThemeMenu.InvalidateVisual();
 
             ViewModel.GetCodeToExecute.RegisterHandler(context =>
                 Dispatcher.Invoke(() => context.SetOutput(Editor.Text)));
@@ -228,7 +229,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
 
         var registryOptions = new RegistryOptions(initialTheme);
         _textMateInstallation = Editor.InstallTextMate(registryOptions);
-        _textMateInstallation.SetGrammar(registryOptions.GetScopeByLanguageId(registryOptions.GetLanguageByExtension(".cs").Id));
+        _textMateInstallation.SetGrammar(registryOptions.GetScopeByLanguageId(registryOptions.GetLanguageByExtension(Language.Python.GetLanguageExtension()).Id));
         ApplyCodeTheme(initialThemeName);
 
         GameMap.Map = MapView.CreateSampleMap();

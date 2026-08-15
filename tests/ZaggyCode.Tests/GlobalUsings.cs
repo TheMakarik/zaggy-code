@@ -30,6 +30,7 @@ global using ZaggyCode.Modules.Archiving.Options;
 global using ZaggyCode.Modules.Data;
 global using ZaggyCode.Modules.Data.Options;
 global using ZaggyCode.Modules.Factories;
+global using ZaggyCode.Modules.Languages;
 global using ZaggyCode.Modules.Languages.Options;
 global using ZaggyCode.Modules.Languages.Python;
 global using ZaggyCode.Tests.Infrastructure;

@@ -6,7 +6,7 @@ namespace ZaggyCode.Modules.Languages.Python;
 public sealed class PythonLanguageRunner(
     ILogger<PythonLanguageRunner> logger,
     IOptions<PythonScriptsOptions> pythonOptions,
-    IPythonSettingsStorage pythonSettingsStorage,
+    IObservableStorage<PythonSettings> pythonSettingsStorage,
     IOptions<SpeedMillisecondsOptions> speedOptions,
     IPythonScopeFactory pythonScopeFactory,
     ILanguageSleepHelper sleepHelper)
@@ -21,8 +21,8 @@ public sealed class PythonLanguageRunner(
     private const string ClrRobotPath = "robot_path";
     private const string ClrRobotExecutorPrefix = "clr_RobotExecutor_";
     private const string ClrTryCancelExection = "clr_try_cancel_execution";
-    
-    private ScriptScope _python = pythonScopeFactory.GetFactory();
+
+    private ScriptScope _python = IronPython.Hosting.Python.CreateEngine().CreateScope();
     private int _actualSpeed;
 
     public EventHandler<DebugLineUpdatedEventArgs>? DebugLineUpdated { get; set; }
@@ -51,7 +51,7 @@ public sealed class PythonLanguageRunner(
        });
 
        _python.Engine.ExecuteFile(pythonOptions.Value.RedirectIoPath, _python);
-       logger.LogInformation("Redirected IO for python (IO support = {ioSupport}", !pythonSettingsStorage.Current.SupressIo);
+       logger.LogInformation("Redirected IO for python (IO support = {ioSupport})", !pythonSettingsStorage.Current.SupressIo);
 
        return this;
     }
@@ -75,7 +75,7 @@ public sealed class PythonLanguageRunner(
         SetExecutorVariables(methods, executor);
         
         _python.SetVariable(ClrRobotPath, pythonOptions.Value.RobotPath);
-        _python.Engine.ExecuteFile(pythonOptions.Value.EnableRobotPath, _python);
+        _python.Engine.ExecuteFile(pythonOptions.Value.PrepareModules, _python);
         logger.LogInformation("Set executor for python");
         return this;
     }
@@ -91,7 +91,7 @@ public sealed class PythonLanguageRunner(
            
             await Task.Factory.StartNew(() =>
             {
-                _python.SetVariable(ClrTryCancelExection, () => token.ThrowIfCancellationRequested());
+                _python.SetVariable(ClrTryCancelExection, token.ThrowIfCancellationRequested);
                 _python.Engine.ExecuteFile(pythonOptions.Value.SetLineUpdatingPath, _python);
 
                 DebugLineUpdated += (_, _) =>
@@ -118,7 +118,7 @@ public sealed class PythonLanguageRunner(
         }
         catch (Exception e) when (IsPythonException(e))
         {
-            CodeErrorOccurred?.Invoke(this, new CodeErrorOccurredEventArgs { Text = e.Message });
+            CodeErrorOccurred?.Invoke(this, new CodeErrorOccurredEventArgs { Text = $"{e.GetType().Name} {e.Message}".Trim() });
             logger.LogWarning(e, "Python execution error: {ErrorType}", e.GetType().Name);
         }
         catch (Exception e)
@@ -132,11 +132,18 @@ public sealed class PythonLanguageRunner(
     public void Dispose()
     {
         ClearEvents();
+        _python.Engine.ExecuteFile(pythonOptions.Value.DisableLineUpdating, _python);
+        logger.LogInformation("Disposed Script Runner");
     }
 
     public async ValueTask DisposeAsync()
     {
         ClearEvents();
+        await Task.Run(() =>
+        {
+            _python.Engine.ExecuteFile(pythonOptions.Value.DisableLineUpdating, _python);
+        });
+        logger.LogInformation("Disposed Script Runner");
     }
     
     
@@ -150,7 +157,8 @@ public sealed class PythonLanguageRunner(
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private bool IsPythonException(Exception e)
     {
-        return (e.GetType().Namespace ?? string.Empty).Contains(nameof(IronPython));
+        var @namespace = e.GetType().Namespace ?? string.Empty;
+        return @namespace.Contains(nameof(IronPython)) || @namespace.Contains(nameof(Microsoft.Scripting));
     }
     
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

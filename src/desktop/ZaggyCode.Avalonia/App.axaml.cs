@@ -30,7 +30,7 @@ public partial class App : Application
             var host = await new Bootstrapper().LoadApplicationAsync();
 
             loading.Close();
-            
+
             mainWindow.DataContext = host.Services.GetRequiredService<MainWindowViewModel>();
             Services = host.Services;
         }

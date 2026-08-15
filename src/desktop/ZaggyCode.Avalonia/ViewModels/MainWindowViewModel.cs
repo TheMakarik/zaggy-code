@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using Material.Icons;
+using ZaggyCode.Core.Data.Model;
 
 namespace ZaggyCode.Avalonia.ViewModels;
 
@@ -50,15 +51,24 @@ public partial class MainWindowViewModel : ViewModelBase
     #region Services
 
     private readonly IServiceScopeFactory _factory;
-    private readonly IUserStorage _userStorage;
+    private readonly IObservableStorage<UserData> _userStorage;
+    private readonly IObservableStorage<PythonSettings> _pythonSettingsStorage;
     private readonly IOptions<DefaultUser> _defaultUserOptions;
+    private readonly IOptions<PythonDefaultSettingsOptions> _pythonDefaultSettingsOptions;
     private readonly IOptions<CodeExamplePathOptions> _codeExamplePathOptions;
     private readonly IOptions<FontSizeOptions> _fontSizeOptions;
     private readonly IOptions<CodeThemeDisplayNameOptions> _displayNameOptions;
     private readonly IOptions<CodeThemeIconOptions> _iconOptions;
+    private readonly IPythonFunctionNameValidator _pythonFunctionNameValidator;
     private readonly ILogger<MainWindowViewModel> _logger;
     private readonly ILogger<SettingsViewModel> _settingsLogger;
     private CancellationTokenSource? _cancellationTokenSource;
+
+    #endregion
+
+    #region Fields
+
+    private string _codeErrorText = "Произошла ошибка: ";
 
     #endregion
 
@@ -67,21 +77,29 @@ public partial class MainWindowViewModel : ViewModelBase
     public MainWindowViewModel(
         ILogger<MainWindowViewModel> logger,
         IServiceScopeFactory factory,
-        IUserStorage userStorage,
+        IObservableStorage<UserData> userStorage,
+        IObservableStorage<PythonSettings> pythonSettingsStorage,
         IOptions<DefaultUser> defaultUserOptions,
+        IOptions<PythonDefaultSettingsOptions> pythonDefaultSettingsOptions,
         IOptions<CodeExamplePathOptions> codeExamplePathOptions,
         IOptions<PopupOptions> popupOptions,
         IOptions<FontSizeOptions> textFontSize,
         IOptions<CodeThemeDisplayNameOptions> displayNameOptions,
         IOptions<CodeThemeIconOptions> iconOptions,
+        IPythonFunctionNameValidator pythonFunctionNameValidator,
         ILogger<SettingsViewModel> settingsLogger)
     {
         _factory = factory;
+        _logger = logger;
+        _fontSizeOptions = textFontSize;
         _userStorage = userStorage;
+        _pythonSettingsStorage = pythonSettingsStorage;
         _defaultUserOptions = defaultUserOptions;
+        _pythonDefaultSettingsOptions = pythonDefaultSettingsOptions;
         _codeExamplePathOptions = codeExamplePathOptions;
         _displayNameOptions = displayNameOptions;
         _iconOptions = iconOptions;
+        _pythonFunctionNameValidator = pythonFunctionNameValidator;
         _settingsLogger = settingsLogger;
         _executionSpeed = userStorage.Current.LastSpeed;
         _selectedLanguage = userStorage.Current.LastLanguage;
@@ -91,10 +109,8 @@ public partial class MainWindowViewModel : ViewModelBase
         _showSidebar = userStorage.Current.ShowSidebar;
         CodeTheme = userStorage.Current.CodeTheme;
         PopupOptions = popupOptions.Value;
-        _fontSizeOptions = textFontSize;
         MaxFontSize = _fontSizeOptions.Value.MaxFontSize;
         MinFontSize = _fontSizeOptions.Value.MinFontSize;
-        _logger = logger;
 
         InitializeMessageBusSubscriptions();
         InitializeAvailableCodeThemes();
@@ -193,14 +209,11 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     [ReactiveCommand]
-    private void ExecuteCode()
+    private async Task ExecuteCode()
     {
-        _ = Task.Factory.StartNew(async () =>
-        {
-            await PrepareExecution();
-            await RunCode();
-            await FinalizeExecution();
-        }, TaskCreationOptions.LongRunning);
+        await PrepareExecution();
+        await RunCode();
+        await FinalizeExecution();
     }
 
     [ReactiveCommand]
@@ -299,7 +312,15 @@ public partial class MainWindowViewModel : ViewModelBase
     [ReactiveCommand]
     private async Task OpenSettingsAsync()
     {
-        var settingsViewModel = new SettingsViewModel(_userStorage, _defaultUserOptions, _codeExamplePathOptions, _fontSizeOptions, _settingsLogger);
+        var settingsViewModel = new SettingsViewModel(
+            _userStorage,
+            _pythonSettingsStorage,
+            _defaultUserOptions,
+            _pythonDefaultSettingsOptions,
+            _codeExamplePathOptions,
+            _fontSizeOptions,
+            _pythonFunctionNameValidator,
+            _settingsLogger);
         await OpenSettings.Handle(settingsViewModel);
     }
 
@@ -335,7 +356,7 @@ public partial class MainWindowViewModel : ViewModelBase
             var code = await GetCodeToExecute.Handle(Unit.Default);
 
 #if DEBUG
-            SelectedLanguage = Language.CSharp;
+            SelectedLanguage = Language.Python;
 #endif
             await using var scope = _factory.CreateAsyncScope();
             var runner = scope.ServiceProvider.GetRequiredKeyedService<ILanguageRunner>(SelectedLanguage.GetLanguageExtension());
@@ -349,17 +370,13 @@ public partial class MainWindowViewModel : ViewModelBase
 
             Debug.Assert(_cancellationTokenSource is not null);
 
-            runner
+            await runner
                 .RedirectIo(TerminalReader, TerminalWriter)
                 .SetExecutor(Executor)
                 .SetSpeed(ExecutionSpeed)
                 .Execute(code, _cancellationTokenSource.Token);
 
             await ConcludeRun.Handle(Unit.Default);
-        }
-        catch (OperationCanceledException)
-        {
-            _logger.LogDebug("Code execution was cancelled");
         }
         catch (Exception e)
         {
@@ -386,9 +403,12 @@ public partial class MainWindowViewModel : ViewModelBase
         await UpdateCodeLine.Handle(args.LineNumber);
     }
 
-    private void OnCodeErrorOccurred(object? sender, CodeErrorOccurredEventArgs args)
+    private async void OnCodeErrorOccurred(object? sender, CodeErrorOccurredEventArgs args)
     {
-        _logger.LogError("Code error: {Text}", args.Text);
+        if (TerminalWriter is null)
+            _logger.LogError("Has no access to terminal writer");
+        else
+            await TerminalWriter.WriteLineAsync($"{_codeErrorText} {args.Text} ");
     }
 
     #endregion

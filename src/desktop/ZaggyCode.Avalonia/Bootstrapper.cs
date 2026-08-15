@@ -1,3 +1,5 @@
+using ZaggyCode.Core.Data.Model;
+
 namespace ZaggyCode.Avalonia;
 
 public sealed class Bootstrapper
@@ -14,8 +16,8 @@ public sealed class Bootstrapper
 
         Assembly[] assemblies =
         [
-            typeof(IUserStorage).Assembly,
-            typeof(UserStorage).Assembly,
+            typeof(UserData).Assembly,
+            typeof(GameCodeStorage).Assembly,
             typeof(Bootstrapper).Assembly
         ];
 
@@ -50,6 +52,42 @@ public sealed class Bootstrapper
             .WithSingletonLifetime()
         );
 
+        builder.Services.AddSingleton<IObservableStorage<UserData>>(provider =>
+        {
+            var options = provider.GetRequiredService<IOptions<StorageOptions>>();
+            var defaultUser = provider.GetRequiredService<IOptions<DefaultUser>>();
+            var folderProvider = provider.GetRequiredService<ISpecialFolderProvider>();
+            var logger = provider.GetRequiredService<ILogger<ObservableStorage<UserData>>>();
+            var updateWaiter = provider.GetRequiredService<IUpdateStorageWaiter>();
+            var path = folderProvider.GetFolder(Environment.SpecialFolder.ApplicationData, options.Value.DataFilePath);
+
+            return new ObservableStorage<UserData>(
+                logger,
+                path,
+                TimeSpan.FromSeconds(options.Value.WaitUserDataUpdateSeconds),
+                Modules.Data.Json.UserDataSerializerContext.Default.UserData,
+                updateWaiter,
+                () => defaultUser.Value.User);
+        });
+
+        builder.Services.AddSingleton<IObservableStorage<PythonSettings>>(provider =>
+        {
+            var options = provider.GetRequiredService<IOptions<StorageOptions>>();
+            var defaultSettings = provider.GetRequiredService<IOptions<PythonDefaultSettingsOptions>>();
+            var folderProvider = provider.GetRequiredService<ISpecialFolderProvider>();
+            var logger = provider.GetRequiredService<ILogger<ObservableStorage<PythonSettings>>>();
+            var updateWaiter = provider.GetRequiredService<IUpdateStorageWaiter>();
+            var path = folderProvider.GetFolder(Environment.SpecialFolder.ApplicationData, options.Value.PythonSettingsPath);
+
+            return new ObservableStorage<PythonSettings>(
+                logger,
+                path,
+                TimeSpan.FromSeconds(options.Value.WaitUserDataUpdateSeconds),
+                Modules.Data.Json.PythonSettingsSerializerContext.Default.PythonSettings,
+                updateWaiter,
+                () => defaultSettings.Value.Settings);
+        });
+
         builder.Logging
             .ClearProviders()
             .AddSerilog(Log.Logger, dispose: true);
@@ -67,7 +105,8 @@ public sealed class Bootstrapper
             .AddOptions<TempOptions>()
             .AddOptions<LoggingCompressOptions>()
             .AddOptions<PythonScriptsOptions>()
-            .AddOptions<PythonDefaultSettingsOptions>();
+            .AddOptions<PythonDefaultSettingsOptions>()
+            .AddOptions<PythonValidationOptions>();
 
         var app = builder.Build();
 

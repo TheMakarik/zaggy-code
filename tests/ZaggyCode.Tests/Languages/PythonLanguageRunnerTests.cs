@@ -1,5 +1,3 @@
-using ZaggyCode.Modules.Languages;
-
 namespace ZaggyCode.Tests.Languages;
 
 public class PythonLanguageRunnerTests : LanguageRunnerTests
@@ -40,8 +38,8 @@ public class PythonLanguageRunnerTests : LanguageRunnerTests
             .AddSingleton<IPythonScopeFactory>(provider => new PythonScopeFactory(
                 A.Dummy<ILogger<PythonScopeFactory>>(),
                 provider.GetRequiredService<IOptions<PythonScriptsOptions>>()))
-            .AddSingleton<IPythonSettingsStorage>(CreatePythonSettingsStorage)
-            .AddSingleton<IUserStorage>(CreateUserStorage)
+            .AddSingleton<IObservableStorage<PythonSettings>>(CreatePythonSettingsStorage)
+            .AddSingleton<IObservableStorage<UserData>>(CreateUserStorage)
             .AddSingleton<ILogger<PythonLanguageRunner>>(A.Dummy<ILogger<PythonLanguageRunner>>())
             .AddSingleton<PythonLanguageRunner>();
 
@@ -62,12 +60,11 @@ public class PythonLanguageRunnerTests : LanguageRunnerTests
     public async Task Execute_WhenUseEntryFunctionIsEnabled_CallsEntryFunction()
     {
         // Arrange
-        var pythonSettingsStorage = _serviceProvider.GetRequiredService<IPythonSettingsStorage>();
+        var pythonSettingsStorage = _serviceProvider.GetRequiredService<IObservableStorage<PythonSettings>>();
         A.CallTo(() => pythonSettingsStorage.Current).Returns(new PythonSettings
         {
             UseEntryFunction = true,
             EntryFunctionName = "main",
-            DetailedExceptions = true,
             SupressIo = false
         });
 
@@ -85,12 +82,11 @@ public class PythonLanguageRunnerTests : LanguageRunnerTests
     public async Task Execute_WhenUseEntryFunctionIsDisabled_DoesNotCallEntryFunction()
     {
         // Arrange
-        var pythonSettingsStorage = _serviceProvider.GetRequiredService<IPythonSettingsStorage>();
+        var pythonSettingsStorage = _serviceProvider.GetRequiredService<IObservableStorage<PythonSettings>>();
         A.CallTo(() => pythonSettingsStorage.Current).Returns(new PythonSettings
         {
             UseEntryFunction = false,
             EntryFunctionName = "main",
-            DetailedExceptions = true,
             SupressIo = false
         });
 
@@ -108,12 +104,11 @@ public class PythonLanguageRunnerTests : LanguageRunnerTests
     public async Task Execute_WhenSuppressIoIsEnabled_PrintRaisesCodeErrorOccurred()
     {
         // Arrange
-        var pythonSettingsStorage = _serviceProvider.GetRequiredService<IPythonSettingsStorage>();
+        var pythonSettingsStorage = _serviceProvider.GetRequiredService<IObservableStorage<PythonSettings>>();
         A.CallTo(() => pythonSettingsStorage.Current).Returns(new PythonSettings
         {
             UseEntryFunction = false,
             EntryFunctionName = "main",
-            DetailedExceptions = true,
             SupressIo = true
         });
 
@@ -134,12 +129,11 @@ public class PythonLanguageRunnerTests : LanguageRunnerTests
     public async Task Execute_WhenSuppressIoIsEnabled_InputRaisesCodeErrorOccurred()
     {
         // Arrange
-        var pythonSettingsStorage = _serviceProvider.GetRequiredService<IPythonSettingsStorage>();
+        var pythonSettingsStorage = _serviceProvider.GetRequiredService<IObservableStorage<PythonSettings>>();
         A.CallTo(() => pythonSettingsStorage.Current).Returns(new PythonSettings
         {
             UseEntryFunction = false,
             EntryFunctionName = "main",
-            DetailedExceptions = true,
             SupressIo = true
         });
 
@@ -168,22 +162,21 @@ public class PythonLanguageRunnerTests : LanguageRunnerTests
         Directory.CreateDirectory(Environment.GetEnvironmentVariable("ZAGGY_TEMP")!);
     }
 
-    private static IPythonSettingsStorage CreatePythonSettingsStorage(IServiceProvider provider)
+    private static IObservableStorage<PythonSettings> CreatePythonSettingsStorage(IServiceProvider provider)
     {
-        var storage = A.Fake<IPythonSettingsStorage>();
+        var storage = A.Fake<IObservableStorage<PythonSettings>>();
         A.CallTo(() => storage.Current).Returns(new PythonSettings
         {
             UseEntryFunction = false,
             EntryFunctionName = "main",
-            DetailedExceptions = true,
             SupressIo = false
         });
         return storage;
     }
 
-    private static IUserStorage CreateUserStorage(IServiceProvider provider)
+    private static IObservableStorage<UserData> CreateUserStorage(IServiceProvider provider)
     {
-        var storage = A.Fake<IUserStorage>();
+        var storage = A.Fake<IObservableStorage<UserData>>();
         A.CallTo(() => storage.Current).Returns(new UserData
         {
             EnableCodeHighlighting = true,

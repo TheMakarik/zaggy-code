@@ -30,6 +30,7 @@
 
     <rxui:ReactiveWindow.Resources>
         <converters:IsNotEqualConverter x:Key="IsNotEqualConverter" />
+        <converters:PythonValidationResultToStringConverter x:Key="PythonValidationResultToStringConverter" />
     </rxui:ReactiveWindow.Resources>
 
     <Grid>
@@ -300,12 +301,66 @@
                             </StackPanel>
                         </TabItem.Header>
 
-                        <Grid>
-                            <TextBlock
-                                HorizontalAlignment="Center"
-                                Text="Настройки Python пока недоступны"
-                                VerticalAlignment="Center" />
-                        </Grid>
+                        <ScrollViewer>
+                            <StackPanel Margin="20" Spacing="16">
+                                <Border
+                                    Background="{DynamicResource AccentBrush}"
+                                    CornerRadius="8"
+                                    Margin="0,0,0,12"
+                                    Padding="16">
+                                    <Grid ColumnDefinitions="Auto,*">
+                                        <materialIcons:MaterialIcon
+                                            Grid.Column="0"
+                                            Height="48"
+                                            Kind="LanguagePython"
+                                            Margin="0,0,16,0"
+                                            VerticalAlignment="Center"
+                                            Width="48" />
+                                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                            <TextBlock
+                                                FontSize="16"
+                                                FontWeight="Bold"
+                                                Text="Python" />
+                                            <TextBlock
+                                                FontSize="13"
+                                                Opacity="0.9"
+                                                Text="Создан Гвидо ван Россумом в 1991 году как интерпретируемый язык высокого уровня. Сегодня — лидер в области Data Science, машинного обучения и автоматизации."
+                                                TextWrapping="Wrap" />
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+
+                                <TextBlock Classes="settings-section-title" Text="Ввод-вывод" />
+                                <CheckBox
+                                    Content="Подавлять ввод и вывод"
+                                    IsChecked="{Binding SupressIo}"
+                                    ToolTip.Tip="Запрещает использование print() и input() в коде Python" />
+
+                                <TextBlock Classes="settings-section-title" Text="Точка входа" />
+                                <CheckBox
+                                    Content="Использовать явную точку входа"
+                                    IsChecked="{Binding UseEntryFunction}"
+                                    ToolTip.Tip="Если включено, выполнение кода начнется с указанной функции, а не сразу после загрузки модуля" />
+                                <TextBlock Text="Явная точка входа — это функция Python, с которой начинается выполнение программы (например, main). Без нее код выполняется построчно при загрузке." TextWrapping="Wrap" />
+
+                                <Grid ColumnDefinitions="Auto,*">
+                                    <TextBlock
+                                        Grid.Column="0"
+                                        Text="Имя функции"
+                                        VerticalAlignment="Center" />
+                                    <TextBox
+                                        Grid.Column="1"
+                                        IsEnabled="{Binding UseEntryFunction}"
+                                        Margin="10,0,0,0"
+                                        Text="{Binding EntryFunctionName}" />
+                                </Grid>
+
+                                <TextBlock
+                                    Foreground="{DynamicResource ErrorBrush}"
+                                    Text="{Binding EntryFunctionNameValidationResult, Converter={StaticResource PythonValidationResultToStringConverter}}"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+                        </ScrollViewer>
                     </TabItem>
 
                     <TabItem>
@@ -316,12 +371,44 @@
                             </StackPanel>
                         </TabItem.Header>
 
-                        <Grid>
-                            <TextBlock
-                                HorizontalAlignment="Center"
-                                Text="Настройки C# пока недоступны"
-                                VerticalAlignment="Center" />
-                        </Grid>
+                        <ScrollViewer>
+                            <StackPanel Margin="20" Spacing="16">
+                                <Border
+                                    Background="{DynamicResource AccentBrush}"
+                                    CornerRadius="8"
+                                    Margin="0,0,0,12"
+                                    Padding="16">
+                                    <Grid ColumnDefinitions="Auto,*">
+                                        <materialIcons:MaterialIcon
+                                            Grid.Column="0"
+                                            Height="48"
+                                            Kind="LanguageCsharp"
+                                            Margin="0,0,16,0"
+                                            VerticalAlignment="Center"
+                                            Width="48" />
+                                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                            <TextBlock
+                                                FontSize="16"
+                                                FontWeight="Bold"
+                                                Text="C#" />
+                                            <TextBlock
+                                                FontSize="13"
+                                                Opacity="0.9"
+                                                Text="Разработан Microsoft в 2000 году как объектно-ориентированный язык для платформы .NET. Сегодня активно используется для создания веб-приложений, игр на Unity и корпоративного ПО."
+                                                TextWrapping="Wrap" />
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+
+                                <TextBlock
+                                    FontSize="16"
+                                    Foreground="{DynamicResource SystemControlDisabledTextBrush}"
+                                    HorizontalAlignment="Center"
+                                    Margin="0,40,0,0"
+                                    Text="Настройки C# пока недоступны"
+                                    VerticalAlignment="Center" />
+                            </StackPanel>
+                        </ScrollViewer>
                     </TabItem>
                 </TabControl>
 
@@ -342,7 +429,7 @@
                             Classes="settings-footer-button primary"
                             Command="{Binding SaveSettingsCommand}"
                             Content="Сохранить"
-                            IsEnabled="{Binding HasChanges}" />
+                            IsEnabled="{Binding HasChangesAndPythonSettingsValid}" />
                     </StackPanel>
                 </Border>
             </Grid>

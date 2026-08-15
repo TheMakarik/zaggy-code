@@ -1,15 +1,15 @@
 namespace ZaggyCode.Modules.Data;
 
 public sealed class StorageFacade(
-    IUserStorage userStorage,
+    IObservableStorage<UserData> userStorage,
     IGameCodeStorage gameCodeStorage,
-    IPythonSettingsStorage pythonSettingsStorage) : IStorageFacade
+    IObservableStorage<PythonSettings> pythonSettingsStorage) : IStorageFacade
 {
-    public Task LoadAllAsync()
+    public async Task LoadAllAsync()
     {
-        return userStorage.LoadAsync()
-            .ContinueWith((_) => gameCodeStorage.LoadAsync())
-            .ContinueWith((_) => pythonSettingsStorage.LoadAsync());
+        await userStorage.LoadAsync();
+        await gameCodeStorage.LoadAsync();
+        await pythonSettingsStorage.LoadAsync();
     }
 
     public async ValueTask FlushAllAsync()

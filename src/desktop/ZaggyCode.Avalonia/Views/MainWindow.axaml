@@ -152,7 +152,8 @@
                             <MenuItem
                                 Header="Тема подсветки синтаксиса"
                                 Icon="{materialIcons:MaterialIconExt Kind=CodeBlockBraces}"
-                                ItemsSource="{Binding AvailableCodeThemes}">
+                                ItemsSource="{Binding AvailableCodeThemes}"
+                                Name="CodeThemeMenu">
                                 <MenuItem.ItemContainerTheme>
                                     <ControlTheme
                                         BasedOn="{StaticResource {x:Type MenuItem}}"
@@ -161,13 +162,6 @@
                                         <Setter Property="Header" Value="{Binding DisplayName, Mode=OneWay}" />
                                         <Setter Property="Command" Value="{Binding DataContext.SelectCodeThemeCommand, ElementName=ThisWindow}" />
                                         <Setter Property="CommandParameter" Value="{Binding ThemeName}" />
-                                        <Setter Property="Icon">
-                                            <Setter.Value>
-                                                <DataTemplate x:DataType="records:CodeThemeItem">
-                                                    <materialIcons:MaterialIcon Kind="{Binding IconKind}" />
-                                                </DataTemplate>
-                                            </Setter.Value>
-                                        </Setter>
                                     </ControlTheme>
                                 </MenuItem.ItemContainerTheme>
                             </MenuItem>
@@ -406,7 +400,7 @@
                             Classes="icon-button run-button"
                             Command="{Binding ExecuteCodeCommand}"
                             Content="{materialIcons:MaterialIconExt Kind=Play}"
-                            ToolTip.Tip="Запустить Зигу" />
+                            ToolTip.Tip="Запустить Загги" />
                         <Button
                             Classes="icon-button"
                             Content="{materialIcons:MaterialIconExt Kind=ViewListOutline}"

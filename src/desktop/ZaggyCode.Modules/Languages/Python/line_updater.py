@@ -1,5 +1,4 @@
 from sys import settrace
-from time import sleep
 import sys
 
 def on_new_line(line_number):
@@ -14,8 +13,6 @@ def trace_calls(frame, event, arg):
         if frame.f_code.co_name in ('trace_calls', 'on_new_line', '<module>'):
             if frame.f_code.co_filename == '<string>':
                 on_new_line(frame.f_lineno)
-        else:
-            on_new_line(frame.f_lineno)
     return trace_calls
 
 settrace(trace_calls)

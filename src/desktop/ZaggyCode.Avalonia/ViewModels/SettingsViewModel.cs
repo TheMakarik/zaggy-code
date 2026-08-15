@@ -1,5 +1,5 @@
-
 using ZaggyCode.Avalonia.ViewModels.Messages;
+using ZaggyCode.Core.Data.Model;
 
 namespace ZaggyCode.Avalonia.ViewModels;
 
@@ -12,20 +12,34 @@ public sealed partial class SettingsViewModel : ViewModelBase
     [Reactive] private bool _showSidebar;
     [Reactive] private string _selectedCodeTheme = string.Empty;
     [Reactive] private bool _hasChanges;
+    [Reactive] private bool _hasChangesAndPythonSettingsValid;
     [Reactive] private bool _canDecreaseCodeFontSize;
     [Reactive] private bool _canIncreaseCodeFontSize;
     [Reactive] private bool _canDecreaseTerminalFontSize;
     [Reactive] private bool _canIncreaseTerminalFontSize;
 
-    private readonly IUserStorage _userStorage;
+    [Reactive] private bool _useEntryFunction;
+    [Reactive] private string _entryFunctionName = string.Empty;
+    [Reactive] private bool _supressIo;
+    [Reactive] private PythonFunctionNameValidationResult _entryFunctionNameValidationResult;
+    [Reactive] private bool _isPythonSettingsValid;
+
+    private readonly IObservableStorage<UserData> _userStorage;
+    private readonly IObservableStorage<PythonSettings> _pythonSettingsStorage;
     private readonly DefaultUser _defaultUser;
+    private readonly PythonSettings _defaultPythonSettings;
     private readonly FontSizeOptions _fontSizeOptions;
+    private readonly IPythonFunctionNameValidator _pythonFunctionNameValidator;
     private readonly ILogger<SettingsViewModel> _logger;
     private readonly int _originalCodeFontSize;
     private readonly int _originalTerminalFontSize;
     private readonly bool _originalUseSystemTitleBar;
     private readonly bool _originalShowSidebar;
     private readonly string _originalCodeTheme;
+    private readonly bool _originalUseEntryFunction;
+    private readonly string _originalEntryFunctionName;
+    private readonly bool _originalDetailedExceptions;
+    private readonly bool _originalSupressIo;
 
     public int MinFontSize => _fontSizeOptions.MinFontSize;
     public int MaxFontSize => _fontSizeOptions.MaxFontSize;
@@ -37,15 +51,21 @@ public sealed partial class SettingsViewModel : ViewModelBase
     public string PythonExamplePath { get; }
 
     public SettingsViewModel(
-        IUserStorage userStorage,
+        IObservableStorage<UserData> userStorage,
+        IObservableStorage<PythonSettings> pythonSettingsStorage,
         IOptions<DefaultUser> defaultUserOptions,
+        IOptions<PythonDefaultSettingsOptions> pythonDefaultSettingsOptions,
         IOptions<CodeExamplePathOptions> codeExamplePathOptions,
         IOptions<FontSizeOptions> fontSizeOptions,
+        IPythonFunctionNameValidator pythonFunctionNameValidator,
         ILogger<SettingsViewModel> logger)
     {
         _userStorage = userStorage;
+        _pythonSettingsStorage = pythonSettingsStorage;
         _defaultUser = defaultUserOptions.Value;
+        _defaultPythonSettings = pythonDefaultSettingsOptions.Value.Settings;
         _fontSizeOptions = fontSizeOptions.Value;
+        _pythonFunctionNameValidator = pythonFunctionNameValidator;
         _logger = logger;
         CSharpExamplePath = codeExamplePathOptions.Value.CSharpExamplePath;
         PythonExamplePath = codeExamplePathOptions.Value.PythonExamplePath;
@@ -59,7 +79,14 @@ public sealed partial class SettingsViewModel : ViewModelBase
         _originalShowSidebar = current.ShowSidebar;
         _originalCodeTheme = current.CodeTheme;
 
+        var pythonCurrent = pythonSettingsStorage.Current;
+        _originalUseEntryFunction = pythonCurrent.UseEntryFunction;
+        _originalEntryFunctionName = pythonCurrent.EntryFunctionName;
+        _originalSupressIo = pythonCurrent.SupressIo;
+
         LoadFromUserData();
+        LoadFromPythonSettings();
+        UpdateEntryFunctionNameValidation();
         HasChanges = false;
 
         this.WhenAnyPropertyChanged(
@@ -67,8 +94,17 @@ public sealed partial class SettingsViewModel : ViewModelBase
                 nameof(TerminalFontSize),
                 nameof(UseSystemTitleBar),
                 nameof(ShowSidebar),
-                nameof(SelectedCodeTheme))
+                nameof(SelectedCodeTheme),
+                nameof(UseEntryFunction),
+                nameof(EntryFunctionName),
+                nameof(SupressIo))
             .Subscribe(_ => UpdateHasChanges());
+
+        this.WhenAnyValue(viewModel => viewModel.UseEntryFunction)
+            .Subscribe(_ => UpdateEntryFunctionNameValidation());
+
+        this.WhenAnyValue(viewModel => viewModel.EntryFunctionName)
+            .Subscribe(_ => UpdateEntryFunctionNameValidation());
 
         this.WhenAnyValue(viewModel => viewModel.SelectedCodeTheme)
             .Skip(1)
@@ -113,14 +149,41 @@ public sealed partial class SettingsViewModel : ViewModelBase
         SelectedCodeTheme = current.CodeTheme;
     }
 
+    private void LoadFromPythonSettings()
+    {
+        var current = _pythonSettingsStorage.Current;
+        UseEntryFunction = current.UseEntryFunction;
+        EntryFunctionName = current.EntryFunctionName;
+        SupressIo = current.SupressIo;
+    }
+
+    private void UpdateEntryFunctionNameValidation()
+    {
+        if (!UseEntryFunction)
+        {
+            EntryFunctionNameValidationResult = PythonFunctionNameValidationResult.Success;
+            IsPythonSettingsValid = true;
+            return;
+        }
+
+        EntryFunctionNameValidationResult = _pythonFunctionNameValidator.Validate(EntryFunctionName);
+        IsPythonSettingsValid = EntryFunctionNameValidationResult == PythonFunctionNameValidationResult.Success;
+    }
+
     private void UpdateHasChanges()
     {
-        HasChanges =
+        var hasChanges =
             CodeFontSize != _originalCodeFontSize ||
             TerminalFontSize != _originalTerminalFontSize ||
             UseSystemTitleBar != _originalUseSystemTitleBar ||
             ShowSidebar != _originalShowSidebar ||
-            SelectedCodeTheme != _originalCodeTheme;
+            SelectedCodeTheme != _originalCodeTheme ||
+            UseEntryFunction != _originalUseEntryFunction ||
+            EntryFunctionName != _originalEntryFunctionName ||
+            SupressIo != _originalSupressIo;
+
+        HasChanges = hasChanges;
+        HasChangesAndPythonSettingsValid = hasChanges && IsPythonSettingsValid;
     }
 
     [ReactiveCommand]
@@ -135,6 +198,11 @@ public sealed partial class SettingsViewModel : ViewModelBase
         current.ShowSidebar = ShowSidebar;
         current.CodeTheme = SelectedCodeTheme;
 
+        var pythonCurrent = _pythonSettingsStorage.Current;
+        pythonCurrent.UseEntryFunction = UseEntryFunction;
+        pythonCurrent.EntryFunctionName = EntryFunctionName;
+        pythonCurrent.SupressIo = SupressIo;
+
         MessageBus.Current.SendMessage(new CodeFontSizeChangedMessage(CodeFontSize));
         MessageBus.Current.SendMessage(new TerminalFontSizeChangedMessage(TerminalFontSize));
         MessageBus.Current.SendMessage(new UseSystemTitleBarChangedMessage(UseSystemTitleBar));
@@ -144,7 +212,7 @@ public sealed partial class SettingsViewModel : ViewModelBase
         MessageBus.Current.SendMessage(new FontSizeToastMessage("терминала", TerminalFontSize));
 
         HasChanges = false;
-        await CloseSettingsInteraction.Handle(Unit.Default);
+       
     }
 
     [ReactiveCommand]
@@ -169,6 +237,10 @@ public sealed partial class SettingsViewModel : ViewModelBase
         UseSystemTitleBar = defaultUserData.UseSystemTitleBar;
         ShowSidebar = defaultUserData.ShowSidebar;
         SelectedCodeTheme = defaultUserData.CodeTheme;
+
+        UseEntryFunction = _defaultPythonSettings.UseEntryFunction;
+        EntryFunctionName = _defaultPythonSettings.EntryFunctionName;
+        SupressIo = _defaultPythonSettings.SupressIo;
     }
 
     [ReactiveCommand]
@@ -194,6 +266,4 @@ public sealed partial class SettingsViewModel : ViewModelBase
 
         TerminalFontSize = Math.Clamp(TerminalFontSize + delta, _fontSizeOptions.MinFontSize, _fontSizeOptions.MaxFontSize);
     }
-
 }
-

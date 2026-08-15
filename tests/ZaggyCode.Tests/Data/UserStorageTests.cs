@@ -1,3 +1,5 @@
+using ZaggyCode.Modules.Data.Json;
+
 namespace ZaggyCode.Tests.Data;
 
 public class UserStorageTests : IDisposable
@@ -5,7 +7,6 @@ public class UserStorageTests : IDisposable
     private readonly TestFileSystem _fileSystem;
     private readonly string _jsonPath;
     private readonly string _stubDirectoryPath;
-    private readonly ISpecialFolderProvider _stubProvider = A.Fake<ISpecialFolderProvider>();
     private readonly IOptions<DefaultUser> _userDefaultMock;
 
     public UserStorageTests()
@@ -29,29 +30,27 @@ public class UserStorageTests : IDisposable
                 TerminalFontSize = 17
             }
         });
-        A.CallTo(() => _stubProvider.GetFolder(An<Environment.SpecialFolder>.Ignored, _jsonPath)).Returns(_jsonPath);
     }
 
-    private IOptions<StorageOptions> CreateStorageOptions(int waitUserDataUpdateSeconds = 3)
+    private ObservableStorage<UserData> CreateSystemUnderTests(int waitUserDataUpdateSeconds = 3)
     {
-        var options = A.Fake<IOptions<StorageOptions>>();
-        A.CallTo(() => options.Value).Returns(new StorageOptions()
-        {
-            DataFilePath = _jsonPath,
-            WaitUserDataUpdateSeconds = waitUserDataUpdateSeconds,
-            GameCodeDataPath = _stubDirectoryPath,
-            PythonSettingsPath = string.Empty
-        });
-        return options;
+        var logger = A.Dummy<ILogger<ObservableStorage<UserData>>>();
+        var updateWaiter = new UpdateStorageWaiter(A.Dummy<ILogger<UpdateStorageWaiter>>());
+
+        return new ObservableStorage<UserData>(
+            logger,
+            _jsonPath,
+            TimeSpan.FromSeconds(waitUserDataUpdateSeconds),
+            UserDataSerializerContext.Default.UserData,
+            updateWaiter,
+            () => _userDefaultMock.Value.User);
     }
 
     [Fact]
     public async Task UserProperty_AfterFlush_UpdateUserDataForce()
     {
         //Arrange
-        var logger = A.Dummy<ILogger<UserStorage>>();
-        var options = CreateStorageOptions();
-        var systemUnderTests = new UserStorage(logger, options, _userDefaultMock, _stubProvider);
+        var systemUnderTests = CreateSystemUnderTests();
         await systemUnderTests.LoadAsync();
         var firstContent = await File.ReadAllTextAsync(_jsonPath);
 
@@ -68,14 +67,11 @@ public class UserStorageTests : IDisposable
     public async Task LoadAsync_WhenFileCorrupted_DeletesAndCreatesNewFile()
     {
         // Arrange
-        var logger = A.Dummy<ILogger<UserStorage>>();
-        var options = CreateStorageOptions();
-
         await File.WriteAllTextAsync(_jsonPath, "{ invalid: json }");
         var corruptedContent = await File.ReadAllTextAsync(_jsonPath);
         var expectedUser = _userDefaultMock.Value.User;
 
-        var systemUnderTests = new UserStorage(logger, options, _userDefaultMock, _stubProvider);
+        var systemUnderTests = CreateSystemUnderTests();
 
         // Act
         await systemUnderTests.LoadAsync();
@@ -91,10 +87,7 @@ public class UserStorageTests : IDisposable
     public async Task BeginObserve_WhenPropertyChanged_AutoSavesAfterDelay()
     {
         // Arrange
-        var logger = A.Dummy<ILogger<UserStorage>>();
-        var options = CreateStorageOptions(1);
-
-        var systemUnderTests = new UserStorage(logger, options, _userDefaultMock, _stubProvider);
+        var systemUnderTests = CreateSystemUnderTests(1);
         await systemUnderTests.LoadAsync();
 
         var firstContent = await File.ReadAllTextAsync(_jsonPath);
@@ -118,10 +111,7 @@ public class UserStorageTests : IDisposable
     public async Task LoadAsync_CalledTwice_DoesNotDuplicateObservers()
     {
         // Arrange
-        var logger = A.Dummy<ILogger<UserStorage>>();
-        var options = CreateStorageOptions();
-
-        var systemUnderTests = new UserStorage(logger, options, _userDefaultMock, _stubProvider);
+        var systemUnderTests = CreateSystemUnderTests();
         await systemUnderTests.LoadAsync();
 
         var firstContent = await File.ReadAllTextAsync(_jsonPath);
@@ -142,10 +132,7 @@ public class UserStorageTests : IDisposable
     public async Task FlushUpdatesAsync_AfterPropertyChange_WritesCorrectValuesToFile()
     {
         // Arrange
-        var logger = A.Dummy<ILogger<UserStorage>>();
-        var options = CreateStorageOptions();
-
-        var systemUnderTests = new UserStorage(logger, options, _userDefaultMock, _stubProvider);
+        var systemUnderTests = CreateSystemUnderTests();
         await systemUnderTests.LoadAsync();
 
         var originalContent = await File.ReadAllTextAsync(_jsonPath);
