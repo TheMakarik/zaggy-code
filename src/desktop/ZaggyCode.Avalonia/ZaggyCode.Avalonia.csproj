@@ -90,7 +90,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Folder Include="Assets\Map\" />
         <Folder Include="Views\Converters\" />
     </ItemGroup>
 </Project>
