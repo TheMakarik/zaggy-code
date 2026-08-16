@@ -2,7 +2,6 @@
     Background="{DynamicResource BackgroundBrush}"
     CanResize="True"
     Foreground="{DynamicResource ForegroundBrush}"
-    Icon="/Assets/avalonia-logo.ico"
     Name="ThisWindow"
     Title="Программирование с Загги"
     WindowDecorations="{Binding UseOsDecoration, Converter={converters:BoolToWindowDecorationsConverter}}"
@@ -112,11 +111,6 @@
                     Orientation="Horizontal"
                     Spacing="12"
                     VerticalAlignment="Center">
-                    <Image
-                        Height="24"
-                        IsVisible="{Binding UseOsDecoration, Converter={converters:InverseBooleanConverter}}"
-                        Source="{Binding Icon, ElementName=ThisWindow}"
-                        Width="24" />
 
                     <Menu Classes="full-menu" IsVisible="{Binding #ThisWindow.Bounds.Width, Converter={converters:WidthToVisibilityConverter}, ConverterParameter='&gt;=900'}">
                         <MenuItem Header="Уровни" Icon="{materialIcons:MaterialIconExt Kind=Games}">

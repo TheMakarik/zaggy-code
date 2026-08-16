@@ -6,13 +6,15 @@
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
         <WarningsAsErrors>true</WarningsAsErrors>
         <ImplicitUsings>enable</ImplicitUsings>
+        <ApplicationIcon>Assets/logo.ico</ApplicationIcon>
         <PreserveCompilationContext>true</PreserveCompilationContext>
 
         <AssemblyName>ZaggyCode</AssemblyName>
         <AssemblyTitle>Zaggy's Code</AssemblyTitle>
         <AssemblyDescription>Редактор кода для обучения программированию</AssemblyDescription>
         <Version>2026.0.0</Version>
-        <Company>The Zaggy's Code Project</Company>
+        <Company>Zaggy's Code Project</Company>
+        <Authors>Morozov Makar (TheMakarik)</Authors>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
@@ -25,7 +27,10 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <AvaloniaResource Include="Assets\**" />
+        <Content Include="Assets\**\*">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+        </Content>
     </ItemGroup>
 
     <ItemGroup>
@@ -56,6 +61,7 @@
         <PackageReference Include="Serilog.Settings.Configuration" Version="10.0.1" />
         <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
         <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
+        <PackageReference Include="Svg.Controls.Skia.Avalonia" Version="12.0.0.15" />
         <PackageReference Include="VirtualTerminal.Avalonia" Version="1.8.1" />
         <PackageReference Include="Xaml.Behaviors.Interactivity" Version="12.0.0.1" />
     </ItemGroup>
@@ -92,4 +98,5 @@
     <ItemGroup>
         <Folder Include="Views\Converters\" />
     </ItemGroup>
+    
 </Project>

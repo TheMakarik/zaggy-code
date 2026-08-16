@@ -106,6 +106,8 @@ public sealed class Bootstrapper
             .AddOptions<LoggingCompressOptions>()
             .AddOptions<PythonScriptsOptions>()
             .AddOptions<PythonDefaultSettingsOptions>()
+            .AddOptions<MapAssetsOptions>()
+            .AddOptions<ZaggyAssetsOptions>()
             .AddOptions<PythonValidationOptions>();
 
         var app = builder.Build();

@@ -108,11 +108,6 @@
                             Orientation="Horizontal"
                             Spacing="12"
                             VerticalAlignment="Center">
-                            <Image
-                                Height="24"
-                                IsVisible="{Binding UseSystemTitleBar, Converter={converters:InverseBooleanConverter}}"
-                                Source="{Binding Icon, ElementName=SettingsRoot}"
-                                Width="24" />
                             <TextBlock Text="Настройки" VerticalAlignment="Center" />
                         </StackPanel>
 

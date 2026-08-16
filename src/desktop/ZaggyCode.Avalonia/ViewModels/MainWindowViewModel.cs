@@ -27,10 +27,12 @@ public partial class MainWindowViewModel : ViewModelBase
     public string CodeTheme { get; private set; }
     public PopupOptions PopupOptions { get; }
     public ObservableCollection<CodeThemeItem> AvailableCodeThemes { get; } = [];
+    public IOptions<ZaggyAssetsOptions> ZaggyAssets { get; init; }
 
     public IRobotExecutor? Executor { get; set; }
     public TextReader? TerminalReader { get; set; }
     public TextWriter? TerminalWriter { get; set; }
+    public IOptions<MapAssetsOptions> MapAssets { get; set; }
 
     #endregion
 
@@ -77,6 +79,8 @@ public partial class MainWindowViewModel : ViewModelBase
     public MainWindowViewModel(
         ILogger<MainWindowViewModel> logger,
         IServiceScopeFactory factory,
+        IOptions<ZaggyAssetsOptions> zaggyAssets,
+        IOptions<MapAssetsOptions> mapAssets,
         IObservableStorage<UserData> userStorage,
         IObservableStorage<PythonSettings> pythonSettingsStorage,
         IOptions<DefaultUser> defaultUserOptions,
@@ -90,6 +94,8 @@ public partial class MainWindowViewModel : ViewModelBase
         ILogger<SettingsViewModel> settingsLogger)
     {
         _factory = factory;
+        ZaggyAssets = zaggyAssets;
+        MapAssets = mapAssets;
         _logger = logger;
         _fontSizeOptions = textFontSize;
         _userStorage = userStorage;
@@ -157,6 +163,7 @@ public partial class MainWindowViewModel : ViewModelBase
         });
     }
 
+  
     private void InitializeAvailableCodeThemes()
     {
         foreach (var property in typeof(CodeThemeDisplayNameOptions).GetProperties())
