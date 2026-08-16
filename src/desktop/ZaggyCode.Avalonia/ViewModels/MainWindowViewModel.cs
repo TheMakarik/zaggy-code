@@ -1,7 +1,3 @@
-using System.Collections.ObjectModel;
-using Material.Icons;
-using ZaggyCode.Core.Data.Model;
-
 namespace ZaggyCode.Avalonia.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase

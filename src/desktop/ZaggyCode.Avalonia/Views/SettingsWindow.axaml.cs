@@ -1,9 +1,3 @@
-using Material.Icons.Avalonia;
-using ReactiveUI;
-using TextMateSharp.Grammars;
-using ZaggyCode.Avalonia.ViewModels;
-using ZaggyCode.Avalonia.Views.Dialogs;
-
 namespace ZaggyCode.Avalonia.Views;
 
 public partial class SettingsWindow : ReactiveWindow<SettingsViewModel>

@@ -1,5 +1,3 @@
-using ZaggyCode.Core.Data.Model;
-
 namespace ZaggyCode.Avalonia;
 
 public sealed class Bootstrapper

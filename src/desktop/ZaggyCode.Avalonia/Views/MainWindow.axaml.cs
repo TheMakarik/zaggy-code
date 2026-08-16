@@ -1,6 +1,3 @@
-using Avalonia.Media.Imaging;
-using Avalonia.Svg.Skia;
-
 namespace ZaggyCode.Avalonia.Views;
 
 public partial class MainWindow : ReactiveWindow<MainWindowViewModel>

@@ -1,6 +1,3 @@
-using ZaggyCode.Avalonia.ViewModels.Messages;
-using ZaggyCode.Core.Data.Model;
-
 namespace ZaggyCode.Avalonia.ViewModels;
 
 public sealed partial class SettingsViewModel : ViewModelBase
