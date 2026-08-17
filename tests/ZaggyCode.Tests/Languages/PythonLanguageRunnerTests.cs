@@ -35,9 +35,6 @@ public class PythonLanguageRunnerTests : LanguageRunnerTests
             .AddSingleton<IConfiguration>(configuration)
             .Configure<PythonScriptsOptions>(configuration.GetSection(nameof(PythonScriptsOptions)))
             .AddSingleton<IOptions<SpeedMillisecondsOptions>>(fakeSpeedOptions)
-            .AddSingleton<IPythonScopeFactory>(provider => new PythonScopeFactory(
-                A.Dummy<ILogger<PythonScopeFactory>>(),
-                provider.GetRequiredService<IOptions<PythonScriptsOptions>>()))
             .AddSingleton<IObservableStorage<PythonSettings>>(CreatePythonSettingsStorage)
             .AddSingleton<IObservableStorage<UserData>>(CreateUserStorage)
             .AddSingleton<ILogger<PythonLanguageRunner>>(A.Dummy<ILogger<PythonLanguageRunner>>())

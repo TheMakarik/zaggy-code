@@ -1,3 +1,5 @@
+using Avalonia.Platform.Storage;
+
 namespace ZaggyCode.Avalonia.Views;
 
 public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
@@ -37,7 +39,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
                     : Material.Icons.MaterialIconKind.WindowMaximize;
             }
         };
-
+        
         Terminal.CurrentSession = _terminalSession;
 
         TextReader reader = _terminalSession.Reader;

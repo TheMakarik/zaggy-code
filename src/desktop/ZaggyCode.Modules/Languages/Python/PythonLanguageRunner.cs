@@ -1,5 +1,3 @@
-using System.Runtime.CompilerServices;
-
 namespace ZaggyCode.Modules.Languages.Python;
 
 [LanguageExtension(".py")]
@@ -8,7 +6,6 @@ public sealed class PythonLanguageRunner(
     IOptions<PythonScriptsOptions> pythonOptions,
     IObservableStorage<PythonSettings> pythonSettingsStorage,
     IOptions<SpeedMillisecondsOptions> speedOptions,
-    IPythonScopeFactory pythonScopeFactory,
     ILanguageSleepHelper sleepHelper)
     : ILanguageRunner
 {

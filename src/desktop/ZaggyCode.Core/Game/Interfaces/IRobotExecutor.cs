@@ -1,7 +1,8 @@
 namespace ZaggyCode.Core.Game.Interfaces;
 
-public interface IRobotExecutor
+public interface IRobotExecutor : IDisposable
 {
+    public EventHandler<RobotPointUpdatedEventArgs> RobotPointUpdated { get; set; }
     void MoveUp();
     void MoveRight();
     void MoveDown();

@@ -20,5 +20,6 @@ public class SvgFromContent : ContentControl
             var content = new global::Avalonia.Svg.Skia.Svg((Uri?)null!) { SvgSource = SvgSource.Load(path.Value) };
             this.Content = content;
         });
+        
     }
 }

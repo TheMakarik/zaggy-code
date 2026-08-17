@@ -1,6 +1,6 @@
-namespace ZaggyCode.Core.Game.Interfaces;
+namespace ZaggyCode.Modules.Game;
 
-public interface IGameEngine
+public sealed class GameEngine : IGameEngine
 {
     public EventHandler<DebugLineUpdatedEventArgs>? DebugLineUpdated { get; set; }
     public EventHandler<CodeErrorOccurredEventArgs>? CodeErrorOccurred { get; set; }
@@ -11,5 +11,8 @@ public interface IGameEngine
     public TextReader Input { get; set; }
     public TextWriter Output { get; set; }
     public Language Language { get; set; }
-    public Task RunCode(string code, CancellationToken token);
+    public async Task RunCode(string code, CancellationToken token)
+    {
+        throw new NotImplementedException();
+    }
 }
