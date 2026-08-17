@@ -70,7 +70,7 @@ public partial class SettingsWindow : ReactiveWindow<SettingsViewModel>
 
     private async Task HandleCloseWithUnsavedChangesAsync()
     {
-        var confirmationWindow = new ConfirmSaveChangesWindow
+        var confirmationWindow = new ConfirmSaveSettingsChangesWindow
         {
             WindowDecorations = WindowDecorations
         };

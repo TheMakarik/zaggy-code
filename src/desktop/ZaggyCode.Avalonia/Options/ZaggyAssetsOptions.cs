@@ -19,6 +19,12 @@ public sealed class ZaggyAssetsOptions
         get;
         set => field = Environment.ExpandEnvironmentVariables(value);
     }
+    
+    public required string EmotionQuestion 
+    { 
+        get;
+        set => field = Environment.ExpandEnvironmentVariables(value);
+    }
 
     public required string EmotionLove 
     { 

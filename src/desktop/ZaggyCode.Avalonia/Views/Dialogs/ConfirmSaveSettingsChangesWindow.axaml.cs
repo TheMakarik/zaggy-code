@@ -1,8 +1,8 @@
 namespace ZaggyCode.Avalonia.Views.Dialogs;
 
-public partial class ConfirmSaveChangesWindow : Window
+public partial class ConfirmSaveSettingsChangesWindow : Window
 {
-    public ConfirmSaveChangesWindow()
+    public ConfirmSaveSettingsChangesWindow()
     {
         InitializeComponent();
         CustomTitleBar.IsVisible = WindowDecorations != WindowDecorations.Full;
@@ -26,5 +26,11 @@ public partial class ConfirmSaveChangesWindow : Window
     private void CloseButton_Click(object? sender, RoutedEventArgs e)
     {
         Close(false);
+    }
+
+    private void LoadIcon(object? sender, RoutedEventArgs e)
+    {
+        var control = sender as SvgFromContent;
+        control!.Path = App.Services.GetRequiredService<IOptions<ZaggyAssetsOptions>>().Value.EmotionQuestion;
     }
 }

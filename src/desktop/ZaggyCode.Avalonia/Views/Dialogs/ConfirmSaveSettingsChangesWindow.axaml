@@ -8,8 +8,9 @@
     Title="Сохранение изменений"
     Width="420"
     WindowStartupLocation="CenterOwner"
-    x:Class="ZaggyCode.Avalonia.Views.Dialogs.ConfirmSaveChangesWindow"
+    x:Class="ZaggyCode.Avalonia.Views.Dialogs.ConfirmSaveSettingsChangesWindow"
     xmlns="https://github.com/avaloniaui"
+    xmlns:controls="clr-namespace:ZaggyCode.Avalonia.Views.Controls"
     xmlns:converters="clr-namespace:ZaggyCode.Avalonia.Views.Converters"
     xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
@@ -49,12 +50,21 @@
             Grid.Row="1"
             Margin="20"
             RowDefinitions="*,Auto">
-            <TextBlock
-                Grid.Row="0"
-                HorizontalAlignment="Center"
-                Text="Вы дейстительно хотите сохранить изменения, совершенные в настройках?"
-                TextWrapping="Wrap"
-                VerticalAlignment="Center" />
+            <Grid ColumnDefinitions="Auto, *" Grid.Row="0">
+                <controls:SvgFromContent
+                    Grid.Column="0"
+                    Height="80"
+                    Loaded="LoadIcon"
+                    Margin="8,0"
+                    Width="80" />
+                <TextBlock
+                    FontSize="15"
+                    Grid.Column="1"
+                    HorizontalAlignment="Center"
+                    Text="Вы дейстительно хотите сохранить изменения, совершенные в настройках?"
+                    TextWrapping="Wrap"
+                    VerticalAlignment="Center" />
+            </Grid>
 
             <StackPanel
                 Grid.Row="1"
