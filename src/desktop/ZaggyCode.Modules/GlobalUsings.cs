@@ -54,6 +54,7 @@ global using ZaggyCode.Modules.Data.Json;
 global using ZaggyCode.Modules.Data.Options;
 global using ZaggyCode.Modules.HostedServices.Options;
 global using ZaggyCode.Modules.Languages.Options;
+global using ZaggyCode.Modules.Languages.Validation;
 global using GameModel = ZaggyCode.Core.Game.Models.Game;
 global using Language = ZaggyCode.Core.Languages.Enums.Language;
 global using SyntaxNode = Microsoft.CodeAnalysis.SyntaxNode;

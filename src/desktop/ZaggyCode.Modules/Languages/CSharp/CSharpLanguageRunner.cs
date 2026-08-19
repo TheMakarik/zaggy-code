@@ -39,6 +39,7 @@ public sealed partial class CSharpLanguageRunner(ILogger<CSharpLanguageRunner> l
                 string errors = string.Join(Environment.NewLine, diagnostics.Select(d => d.GetMessage()));
                 logger.LogError("C# Runner errors: {errors}", errors);
 
+                CodeErrorOccurred?.Invoke(this, new CodeErrorOccurredEventArgs { Text = errors });
                 await Output.WriteLineAsync(errors);
                 return;
             }
@@ -48,10 +49,11 @@ public sealed partial class CSharpLanguageRunner(ILogger<CSharpLanguageRunner> l
         }
         catch (TaskCanceledException)
         {
-            _ = 0xBAD + 0xC0DE;
+            _ = 0xDEAD + 0xBEEF;
         }
         catch (Exception ex)
         {
+            _ = 0xBAD + 0xC0DE;
             logger.LogError(ex, "Unhandled exception during code execution.");
         }
     }
@@ -96,6 +98,4 @@ public sealed partial class CSharpLanguageRunner(ILogger<CSharpLanguageRunner> l
 
         return modifiedCode;
     }
-
-    
 }

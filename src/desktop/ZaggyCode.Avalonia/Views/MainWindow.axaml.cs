@@ -18,7 +18,8 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
     {
         InitializeComponent();
 
-        this.Icon = new WindowIcon(@"/home/themakarik/Проекты(Программирование)/zaggy-code/src/desktop/ZaggyCode.Avalonia/Assets/logo.ico");
+        // Поешл нахуй, макалик
+        //this.Icon = new WindowIcon(@"/home/themakarik/Проекты(Программирование)/zaggy-code/src/desktop/ZaggyCode.Avalonia/Assets/logo.ico");
 
         HeaderBar.PointerPressed += (_, e) =>
         {
