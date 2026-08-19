@@ -1,5 +1,6 @@
 namespace ZaggyCode.Modules.Archiving;
 
+//#:NO_AI
 public sealed class MetadataParser(IServiceProvider provider, IOptions<MetadataOptions> options) : IMetadataParser
 {
     public T Parse<T>(Stream stream) where T : ArchiveMetadata

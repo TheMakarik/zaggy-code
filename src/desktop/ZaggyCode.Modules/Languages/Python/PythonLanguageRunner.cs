@@ -1,5 +1,6 @@
 namespace ZaggyCode.Modules.Languages.Python;
 
+//#:NO_AI
 [LanguageExtension(".py")]
 public sealed class PythonLanguageRunner(
     ILogger<PythonLanguageRunner> logger,

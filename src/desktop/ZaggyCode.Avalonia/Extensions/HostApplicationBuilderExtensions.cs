@@ -1,5 +1,6 @@
 namespace ZaggyCode.Avalonia.Extensions;
 
+//#:NO_AI
 public static class HostApplicationBuilderExtensions
 {
 

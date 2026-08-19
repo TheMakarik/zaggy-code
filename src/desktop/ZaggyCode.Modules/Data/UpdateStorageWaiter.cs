@@ -1,5 +1,6 @@
 namespace ZaggyCode.Modules.Data;
 
+//#:NO_AI
 public sealed class UpdateStorageWaiter(ILogger<UpdateStorageWaiter> logger) : IUpdateStorageWaiter
 {
     private long _version;

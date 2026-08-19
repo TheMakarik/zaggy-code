@@ -1,5 +1,3 @@
-
-
 # XAML разработка
 
 ## Структура UI-папок в ZaggyCode.Avalonia

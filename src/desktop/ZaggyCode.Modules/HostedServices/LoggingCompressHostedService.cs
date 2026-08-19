@@ -1,5 +1,6 @@
 namespace ZaggyCode.Modules.HostedServices;
 
+//#:NO_AI
 public sealed class LoggingCompressHostedService(
     ILogger<LoggingCompressHostedService> logger,
     IOptions<LoggingCompressOptions> options) : BackgroundService

@@ -1,6 +1,7 @@
 namespace ZaggyCode.Modules.Data;
 
 //Нужно чтоб мокнуть получения папки в тестах 
+//#:NO_AI
 public class SpecialFolderProvider : ISpecialFolderProvider
 {
     public string GetFolder(Environment.SpecialFolder folder, string path)

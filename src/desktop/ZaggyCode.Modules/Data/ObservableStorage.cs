@@ -1,5 +1,6 @@
 namespace ZaggyCode.Modules.Data;
 
+//#:NO_AI
 public sealed class ObservableStorage<T>(
     ILogger logger,
     string filePath,

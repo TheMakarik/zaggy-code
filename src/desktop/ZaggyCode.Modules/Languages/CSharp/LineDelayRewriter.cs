@@ -1,5 +1,6 @@
 namespace ZaggyCode.Modules.Languages.CSharp;
 
+//#:NO_AI
 public class LineDelayRewriter(int delayMs) : CSharpSyntaxRewriter
 {
     private readonly int _delayMs = delayMs;

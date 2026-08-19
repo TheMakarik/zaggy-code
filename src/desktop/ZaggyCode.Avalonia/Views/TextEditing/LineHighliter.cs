@@ -1,5 +1,6 @@
 namespace ZaggyCode.Avalonia.Views.TextEditing;
 
+//#:NO_AI
 public class LineHighlighter(int lineNumber, Color color) : IBackgroundRenderer
 {
     public void Draw(TextView textView, DrawingContext drawingContext)

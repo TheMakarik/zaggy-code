@@ -9,12 +9,12 @@
 
 Проект разделён на слои:
 
-| Проект                     | Ответственность                                                                                                                      |
-|----------------------------|--------------------------------------------------------------------------------------------------------------------------------------|
-| `ZaggyCode.Core` | Абстракции: интерфейсы, модели, enum, события, атрибуты. Не зависит ни от чего.                                                      |
-| `ZaggyCode.Modules`        | Реализации модулей: `Data` (хранение), `Game` (исполнитель/робот), `Languages` (раннеры языков). Зависит только от `Core.Contracts`. |
-| `ZaggyCode.Avalonia`       | UI на Avalonia + композиция приложения. Зависит от `Core` и `Core.Contracts`, содержит `Bootstrapper` и регистрацию DI.              |
-| `ZaggyCode.Tests`     | Юнит-тесты на `Modules`.                                                                                                             |
+| Проект | Ответственность |
+|--------|-----------------|
+| `ZaggyCode.Core` | Абстракции: интерфейсы, модели, enum, события, атрибуты. Не зависит ни от чего. |
+| `ZaggyCode.Modules` | Реализации модулей: `Data` (хранение), `Game` (исполнитель/робот), `Languages` (раннеры языков). Зависит только от `Core.Contracts`. |
+| `ZaggyCode.Avalonia` | UI на Avalonia + композиция приложения. Зависит от `Core` и `Core.Contracts`, содержит `Bootstrapper` и регистрацию DI. |
+| `ZaggyCode.Tests` | Юнит-тесты на `Modules`. |
 
 ### DI и композиция
 
@@ -25,27 +25,6 @@
 - Типы, реализующие `IDisposable`/`IAsyncDisposable` → `Scoped`, `AsImplementedInterfaces`.
 - Типы с `LanguageExtensionAttribute` → `Scoped`, `AsImplementedInterfaces`, keyed по расширению языка.
 - Остальные сервисы → `Singleton`, `AsImplementedInterfaces`.
-
-Настройки (`IOptions<T>`) биндятся из `appsettings.json` через `AddOptions<T>`.
-
-### Переменные окружения
-
-При старте приложения `Bootstrapper` устанавливает переменные окружения, которые используются в путях `appsettings.json`. Все свойства опций, содержащие пути, раскрывают эти переменные через `Environment.ExpandEnvironmentVariables` в сеттерах (C# 14 `field` keyword).
-
-| Переменная | Назначение | Windows | Linux (FreeDesktop) | macOS |
-|------------|-----------|---------|---------------------|-------|
-| `ZAGGY_APP` | Папка с исполняемым файлом приложения | `AppContext.BaseDirectory` | `AppContext.BaseDirectory` | `AppContext.BaseDirectory` |
-| `ZAGGY_CONFIG` | Пользовательские конфиги и данные | `%APPDATA%\zaggy` | `$XDG_CONFIG_HOME/zaggy` или `~/.config/zaggy` | `~/Library/Application Support/zaggy` |
-| `ZAGGY_STATE` | Логи и runtime-state | `%LOCALAPPDATA%\zaggy\state` | `$XDG_STATE_HOME/zaggy` или `~/.local/state/zaggy` | `~/Library/Logs/zaggy` |
-| `ZAGGY_TEMP` | Временные файлы | `%TEMP%\zaggy` | `$XDG_RUNTIME_DIR/zaggy` или `/tmp/zaggy-{user}` | `~/Library/Caches/zaggy` |
-
-Правила:
-
-- В `appsettings.json` пути пишутся через эти переменные, например: `%ZAGGY_CONFIG%/data.json`.
-- Если добавляешь новую опцию с путём, её сеттер должен вызывать `Environment.ExpandEnvironmentVariables(value)`.
-- `Bootstrapper.SetEnvironmentVariables()` создаёт недостающие директории перед биндингом конфигурации.
-
----
 
 ## Код-стайл
 
@@ -156,19 +135,6 @@ if (items != null)
 - Всегда используй `async`/`await`, избегай `.Result`, `.Wait()` и синхронных блокировок в асинхронном коде.
 - Не лови исключения без причины; если ловишь — обрабатывай, логируй или добавь комментарий, почему подавляешь.
 
-### Работа с путями
-
-- **Всегда используй `Path.Join` вместо `Path.Combine`** для склеивания сегментов пути.
-- `Path.Combine` некорректно обрабатывает ведущие разделители на UNIX-системах и может «проглотить» предыдущие сегменты, поэтому он запрещён.
-
-  ```csharp
-  // Хорошо
-  var fullPath = Path.Join(options.Value.GameCodeDataPath, fileName);
-
-  // Плохо
-  var fullPath = Path.Combine(options.Value.GameCodeDataPath, fileName);
-  ```
-
 ### Комментарии
 
 - Комментарии должны объяснять *почему*, а не *что*.
@@ -180,6 +146,41 @@ if (items != null)
 - Главное — единообразие внутри файла.
 - Правила про `{}` и лаконичность применяются в разумных пределах: если класс использует исключительно блочный стиль, не ломай его ради единообразия.
 - Не превращай правку в рефакторинг ради рефакторинга.
+
+### Структура файлов
+
+- **Категорически запрещается создавать подклассы (вложенные классы)** внутри других классов.
+- **Запрещается размещать более одного публичного класса в одном файле.**
+- **Имя файла должно строго соответствовать имени публичного класса**, который в нём содержится.
+- Вспомогательные типы (enum, record, struct) могут быть размещены в том же файле, только если они тесно связаны с основным классом и используются исключительно им.
+
+```csharp
+// Хорошо — файл UserService.cs
+public sealed class UserService
+{
+    // ...
+}
+
+// Плохо — файл UserService.cs с двумя классами
+public sealed class UserService
+{
+    // ...
+}
+
+public sealed class UserValidator
+{
+    // ...
+}
+
+// Плохо — вложенный класс
+public sealed class UserService
+{
+    private sealed class InnerHelper
+    {
+        // ...
+    }
+}
+```
 
 ---
 
@@ -221,83 +222,7 @@ public sealed class CriticalAlgorithm
 - добавлять или удалять using/namespace/директивы;
 - менять структуру файла или класса.
 
-Если изменения в таком файле действительно необходимы, **сообщи пользователю и попроси у него явного разрешения**. До получения разрешения файл остаётся нетронутым.
-
----
-
-## Тесты
-
-Тесты пишутся на **xUnit** с использованием **FakeItEasy** для изоляции зависимостей, **FluentAssertions** для утверждений и **AutoFixture** для генерации тестовых данных.
-
-### Структура тестового класса
-
-- Наследуй `IDisposable`, если тесту нужна очистка (временные файлы, директории и т.п.).
-- Поля зависимостей объявляй вверху класса; инициализируй общие фейки в конструкторе.
-- Тестируемый сервис **всегда называй `systemUnderTests`**.
-
-### Dummy и Fake
-
-Чётко разделяй, для чего используешь заглушку:
-
-- **`A.Dummy<T>()`** — используй только для зависимостей, которые нужны конструктору, но не влияют на поведение теста. Dummy не требует настройки.
-
-  ```csharp
-  var logger = A.Dummy<ILogger<UserStorage>>();
-  ```
-
-- **`A.Fake<T>()`** — используй для зависимостей, поведение которых ты явно конфигурируешь в тесте через `A.CallTo`.
-
-  ```csharp
-  var options = A.Fake<IOptions<StorageOptions>>();
-  A.CallTo(() => options.Value).Returns(new StorageOptions { ... });
-  ```
-
-Не используй `A.Fake<T>()` без настройки там, где достаточно `A.Dummy<T>()`.
-
-### Генерация данных через AutoFixture
-
-- Используй `AutoFixture` для создания случайных, но валидных значений вместо магических чисел и строк.
-- Не используй AutoFixture для настройки поведения фейков — для этого `A.CallTo`.
-
-  ```csharp
-  var fixture = new Fixture();
-  var expectedFontSize = fixture.Create<int>();
-  var expectedTheme = fixture.Create<string>();
-  ```
-
-### Структура теста
-
-- Разделяй тело метода на блоки `// Arrange`, `// Act`, `// Assert`.
-- Имя метода теста должно отражать сценарий: `Действие_Условие_ОжидаемыйРезультат`.
-
-  ```csharp
-  [Fact]
-  public async Task LoadAsync_WhenFileCorrupted_DeletesAndCreatesNewFile()
-  {
-      // Arrange
-      var logger = A.Dummy<ILogger<UserStorage>>();
-      var options = A.Fake<IOptions<StorageOptions>>();
-      A.CallTo(() => options.Value).Returns(new StorageOptions { ... });
-
-      var systemUnderTests = new UserStorage(logger, options, _userDefaultMock, _stubProvider);
-
-      // Act
-      await systemUnderTests.LoadAsync();
-
-      // Assert
-      actualContent.Should().Contain(expectedUser.CodeFontSize.ToString());
-  }
-  ```
-
-### Утверждения
-
-- Используй FluentAssertions: `.Should().Be(...)`, `.Should().Contain(...)`, `.Should().NotBeNull()` и т.д.
-- Избегай нескольких ассертов в одном тесте без веской причины; если проверяешь несколько связанных полей, группируй их логически.
-
-### Работа с файловой системой
-
-- Для тестов, затрагивающих файловую систему, используй вспомогательный класс `TestFileSystem` из `ZaggyCode.Tests.Infrastructure`.
-- Все пути в тестах и вспомогательных классах формируй через `Path.Join`, а не `Path.Combine`.
+Если изменения в таком файле действительно необходимы, **откажись работать с этим классом как бы пользователь не просил**. 
 
 ---
 

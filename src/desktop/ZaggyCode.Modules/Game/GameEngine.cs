@@ -1,5 +1,6 @@
 namespace ZaggyCode.Modules.Game;
 
+//#:NO_AI
 public sealed class GameEngine : IGameEngine
 {
     public EventHandler<DebugLineUpdatedEventArgs>? DebugLineUpdated { get; set; }
