@@ -1,5 +1,6 @@
 namespace ZaggyCode.Core.Languages.Interfaces;
 
+//#:NO_AI
 public interface ILanguageRunner : IDisposable, IAsyncDisposable
 {
     public EventHandler<DebugLineUpdatedEventArgs>? DebugLineUpdated { get; set; }

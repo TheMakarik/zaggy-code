@@ -1,5 +1,6 @@
 namespace ZaggyCode.Core.Data.Interfaces;
 
+//#:NO_AI
 public interface IGameCodeStorage : IStorage
 {
     public void AddGameCode(string gamePath, string code, Language language);

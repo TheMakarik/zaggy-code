@@ -1,5 +1,6 @@
 namespace ZaggyCode.Core.Game.Interfaces;
 
+//#:NO_AI
 public interface IGameEngine
 {
     public EventHandler<DebugLineUpdatedEventArgs>? DebugLineUpdated { get; set; }
