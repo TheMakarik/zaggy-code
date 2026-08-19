@@ -335,12 +335,6 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
 
         BeginResizeDrag(edge, e);
     }
-
-    private void Control_OnLoaded(object? sender, RoutedEventArgs e)
-    {
-        (sender as global::Avalonia.Svg.Skia.Svg)?.SvgSource = new SvgSource(new Uri(
-            "/home/themakarik/Проекты(Программирование)/zaggy-code/src/desktop/ZaggyCode.Avalonia/Assets/logo.svg",
-            UriKind.Absolute));
-    }
+    
 }
 
