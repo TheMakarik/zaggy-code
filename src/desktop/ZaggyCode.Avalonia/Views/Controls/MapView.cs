@@ -5,8 +5,6 @@ namespace ZaggyCode.Avalonia.Views.Controls;
 // animated with Avalonia keyframe animations. Game state lives in MapRobotStateMachine.
 public sealed class MapView : Control
 {
-    private record struct CellWalls(bool Top, bool Bottom, bool Left, bool Right);
-
     private static readonly IBrush SeaBrush = new SolidColorBrush(Color.FromRgb(0x2C, 0x5F, 0x8A));
     private static readonly IBrush GrassBrush = new SolidColorBrush(Color.FromRgb(0x5F, 0xA8, 0x5A));
     private static readonly IBrush GrassDarkBrush = new SolidColorBrush(Color.FromRgb(0x55, 0x9A, 0x52));
@@ -28,14 +26,9 @@ public sealed class MapView : Control
     private CancellationTokenSource? _flashCancellation;
     private int _activeMoveAnimations;
 
-    private double _renderCol;
-    private double _renderRow;
-
-    private int _flashColumn;
-    private int _flashRow;
-
-    private int _animationTargetCol;
-    private int _animationTargetRow;
+    private RenderPosition _renderPosition;
+    private Cell _flashCell;
+    private Cell _animationTarget;
     private bool _deadPose;
 
     public Map? Map
@@ -50,6 +43,12 @@ public sealed class MapView : Control
         set => SetValue(StepDurationProperty, value);
     }
 
+    public double FixedCellSize
+    {
+        get => GetValue(FixedCellSizeProperty);
+        set => SetValue(FixedCellSizeProperty, value);
+    }
+
     public RobotEvents Events => _stateMachine.Events;
     public IRobotExecutor Executor => _stateMachine;
     public bool IsDead => _stateMachine.IsDead;
@@ -60,6 +59,9 @@ public sealed class MapView : Control
 
     public static readonly StyledProperty<TimeSpan> StepDurationProperty =
         AvaloniaProperty.Register<MapView, TimeSpan>(nameof(StepDuration), TimeSpan.FromMilliseconds(220));
+
+    public static readonly StyledProperty<double> FixedCellSizeProperty =
+        AvaloniaProperty.Register<MapView, double>(nameof(FixedCellSize), 0.0);
 
     public MapView()
     {
@@ -100,6 +102,11 @@ public sealed class MapView : Control
             _stateMachine.SetMap(newMap);
             ResetRenderPosition();
             UpdateRobotSprite();
+            InvalidateMeasure();
+            InvalidateVisual();
+        }
+        else if (change.Property == FixedCellSizeProperty)
+        {
             InvalidateMeasure();
             InvalidateVisual();
         }
@@ -152,6 +159,7 @@ public sealed class MapView : Control
     public void SetCoinCollected(int column, int row, bool collected) =>
         RunOnUiThread(() => _stateMachine.SetCollected(column, row, collected));
 
+    // Small demonstration island; replaced once the level loader exists.
     public static Map CreateSampleMap()
     {
         const int width = 8;
@@ -164,15 +172,18 @@ public sealed class MapView : Control
                 grid[x, y] = new GamePoint { X = x, Y = y };
         }
 
+        // A rock wall running between columns 3 and 4 for the middle rows.
         for (int y = 1; y <= 3; y++)
         {
             grid[3, y].WallType = WallType.Right;
             grid[4, y].WallType = WallType.Left;
         }
 
+        // A solid boulder the robot can neither enter nor pass.
         grid[6, 1].WallType = WallType.Full;
         grid[1, 4].IsSpawn = true;
 
+        // Collect every coin and reach the goal in the bottom-right corner.
         grid[1, 1].HasCoin = true;
         grid[2, 2].HasCoin = true;
         grid[5, 3].HasCoin = true;
@@ -202,70 +213,58 @@ public sealed class MapView : Control
         switch (e.Key)
         {
             case Key.Up:
+                if (_activeMoveAnimations > 0)
                 {
-                    if (_activeMoveAnimations > 0)
-                    {
-                        e.Handled = true;
-                        return;
-                    }
-
-                    Executor.MoveUp();
                     e.Handled = true;
-                    break;
+                    return;
                 }
+
+                Executor.MoveUp();
+                e.Handled = true;
+                break;
 
             case Key.Down:
+                if (_activeMoveAnimations > 0)
                 {
-                    if (_activeMoveAnimations > 0)
-                    {
-                        e.Handled = true;
-                        return;
-                    }
-
-                    Executor.MoveDown();
                     e.Handled = true;
-                    break;
+                    return;
                 }
+
+                Executor.MoveDown();
+                e.Handled = true;
+                break;
 
             case Key.Left:
+                if (_activeMoveAnimations > 0)
                 {
-                    if (_activeMoveAnimations > 0)
-                    {
-                        e.Handled = true;
-                        return;
-                    }
-
-                    Executor.MoveLeft();
                     e.Handled = true;
-                    break;
+                    return;
                 }
+
+                Executor.MoveLeft();
+                e.Handled = true;
+                break;
 
             case Key.Right:
+                if (_activeMoveAnimations > 0)
                 {
-                    if (_activeMoveAnimations > 0)
-                    {
-                        e.Handled = true;
-                        return;
-                    }
-
-                    Executor.MoveRight();
                     e.Handled = true;
-                    break;
+                    return;
                 }
+
+                Executor.MoveRight();
+                e.Handled = true;
+                break;
 
             case Key.D:
-                {
-                    Executor.FillCell();
-                    e.Handled = true;
-                    break;
-                }
+                Executor.FillCell();
+                e.Handled = true;
+                break;
 
             case Key.R:
-                {
-                    Reset();
-                    e.Handled = true;
-                    break;
-                }
+                Reset();
+                e.Handled = true;
+                break;
         }
     }
 
@@ -277,15 +276,18 @@ public sealed class MapView : Control
         if (cols == 0 || rows == 0)
             return default;
 
-        const double cell = 40;
+        double cell = FixedCellSize > 0 ? FixedCellSize : 40;
         double width = cols * cell;
         double height = rows * cell;
 
-        if (double.IsFinite(availableSize.Width) && availableSize.Width > 0)
-            width = Math.Min(width, availableSize.Width);
+        if (FixedCellSize <= 0)
+        {
+            if (double.IsFinite(availableSize.Width) && availableSize.Width > 0)
+                width = Math.Min(width, availableSize.Width);
 
-        if (double.IsFinite(availableSize.Height) && availableSize.Height > 0)
-            height = Math.Min(height, availableSize.Height);
+            if (double.IsFinite(availableSize.Height) && availableSize.Height > 0)
+                height = Math.Min(height, availableSize.Height);
+        }
 
         Size childSize = new Size(width / cols, height / rows);
         _robotImage.Measure(childSize);
@@ -310,29 +312,32 @@ public sealed class MapView : Control
         if (cols == 0 || rows == 0)
             return;
 
-        var (offsetX, offsetY, cell) = CalculateLayout(size);
-        if (cell <= 0)
+        MapLayout layout = CalculateLayout(size);
+        if (layout.CellSize <= 0)
             return;
 
+        double offsetX = layout.Offset.X;
+        double offsetY = layout.Offset.Y;
+        double cell = layout.CellSize;
         double islandW = cell * cols;
         double islandH = cell * rows;
         double rockThickness = Math.Clamp(cell * 0.16, 2, 14);
 
-        for (int rowI = 0; rowI < rows; rowI++)
+        for (int row = 0; row < rows; row++)
         {
-            for (int columnJ = 0; columnJ < cols; columnJ++)
+            for (int column = 0; column < cols; column++)
             {
-                double rowX = offsetX + columnJ * cell;
-                double rowY = offsetY + rowI * cell;
+                double rowX = offsetX + column * cell;
+                double rowY = offsetY + row * cell;
 
                 Rect rect = new Rect(rowX, rowY, cell, cell);
-                GamePoint? point = _stateMachine.GetCell(columnJ, rowI);
+                GamePoint? point = _stateMachine.GetCell(column, row);
                 CellWalls walls = WallsOf(point);
 
-                bool isOdd = ((columnJ + rowI) & 1) == 1;
+                bool isOdd = ((column + row) & 1) == 1;
                 context.DrawRectangle(isOdd ? GrassDarkBrush : GrassBrush, null, rect);
 
-                bool painted = _stateMachine.IsPainted(columnJ, rowI);
+                bool painted = _stateMachine.IsPainted(column, row);
                 if (painted || (point?.RequireDraw ?? false))
                     context.DrawRectangle(PaintedBrush, null, rect);
 
@@ -345,7 +350,7 @@ public sealed class MapView : Control
                         cell * 0.48));
                 }
 
-                bool collected = _stateMachine.IsCollected(columnJ, rowI);
+                bool collected = _stateMachine.IsCollected(column, row);
                 if (point is not null && point.HasCoin && !collected)
                 {
                     context.DrawEllipse(CoinBrush, null, new Rect(
@@ -361,7 +366,7 @@ public sealed class MapView : Control
                     continue;
                 }
 
-                if (walls.Top && rowI > 0)
+                if (walls.Top && row > 0)
                 {
                     context.DrawRectangle(RockBrush, null, new Rect(
                         rowX,
@@ -370,7 +375,7 @@ public sealed class MapView : Control
                         rockThickness));
                 }
 
-                if (walls.Bottom && rowI < rows - 1)
+                if (walls.Bottom && row < rows - 1)
                 {
                     context.DrawRectangle(RockBrush, null, new Rect(
                         rowX,
@@ -379,7 +384,7 @@ public sealed class MapView : Control
                         rockThickness));
                 }
 
-                if (walls.Left && columnJ > 0)
+                if (walls.Left && column > 0)
                 {
                     context.DrawRectangle(RockBrush, null, new Rect(
                         rowX,
@@ -388,7 +393,7 @@ public sealed class MapView : Control
                         cell));
                 }
 
-                if (walls.Right && columnJ < cols - 1)
+                if (walls.Right && column < cols - 1)
                 {
                     context.DrawRectangle(RockBrush, null, new Rect(
                         rowX + cell - rockThickness,
@@ -407,38 +412,43 @@ public sealed class MapView : Control
         if (finalSize.Width <= 0 || finalSize.Height <= 0)
             return;
 
-        var (offsetX, offsetY, cell) = CalculateLayout(finalSize);
-        if (cell <= 0)
+        MapLayout layout = CalculateLayout(finalSize);
+        if (layout.CellSize <= 0)
             return;
 
-        double x = offsetX + _renderCol * cell;
-        double y = offsetY + _renderRow * cell;
+        PixelOffset offset = layout.Offset;
+        double cell = layout.CellSize;
+
+        double x = offset.X + _renderPosition.Column * cell;
+        double y = offset.Y + _renderPosition.Row * cell;
 
         _robotImage.Arrange(new Rect(x, y, cell, cell));
 
         if (_flashOverlay.IsVisible)
         {
-            double flashX = offsetX + _flashColumn * cell;
-            double flashY = offsetY + _flashRow * cell;
+            double flashX = offset.X + _flashCell.Column * cell;
+            double flashY = offset.Y + _flashCell.Row * cell;
             _flashOverlay.Arrange(new Rect(flashX, flashY, cell, cell));
         }
     }
 
-    private (double offsetX, double offsetY, double cell) CalculateLayout(Size size)
+    private MapLayout CalculateLayout(Size size)
     {
         int cols = _stateMachine.ColumnCount;
         int rows = _stateMachine.RowCount;
         if (cols == 0 || rows == 0)
-            return (0, 0, 0);
+            return new MapLayout(new PixelOffset(0, 0), 0);
 
-        double cell = Math.Clamp(Math.Min(size.Width / cols, size.Height / rows), 6, 80);
+        double cell = FixedCellSize > 0
+            ? FixedCellSize
+            : Math.Clamp(Math.Min(size.Width / cols, size.Height / rows), 6, 80);
         double islandW = cell * cols;
         double islandH = cell * rows;
 
         double offsetX = (size.Width - islandW) / 2.0;
         double offsetY = (size.Height - islandH) / 2.0;
 
-        return (offsetX, offsetY, cell);
+        return new MapLayout(new PixelOffset(offsetX, offsetY), cell);
     }
 
     private void StartMoveAnimation(int toColumn, int toRow)
@@ -447,26 +457,26 @@ public sealed class MapView : Control
         _moveCancellation = new CancellationTokenSource();
         _activeMoveAnimations++;
 
-        var (offsetX, offsetY, cell) = CalculateLayout(Bounds.Size);
-        if (cell <= 0)
+        MapLayout layout = CalculateLayout(Bounds.Size);
+        if (layout.CellSize <= 0)
         {
-            _renderCol = toColumn;
-            _renderRow = toRow;
-            _animationTargetCol = toColumn;
-            _animationTargetRow = toRow;
+            var target = new Cell(toColumn, toRow);
+            _renderPosition = new RenderPosition(target.Column, target.Row);
+            _animationTarget = target;
             ArrangeRobot(Bounds.Size);
             return;
         }
 
-        _renderCol = _animationTargetCol;
-        _renderRow = _animationTargetRow;
-        _animationTargetCol = toColumn;
-        _animationTargetRow = toRow;
+        PixelOffset offset = layout.Offset;
+        double cell = layout.CellSize;
 
-        double fromX = offsetX + _renderCol * cell;
-        double fromY = offsetY + _renderRow * cell;
-        double toX = offsetX + toColumn * cell;
-        double toY = offsetY + toRow * cell;
+        _renderPosition = new RenderPosition(_animationTarget.Column, _animationTarget.Row);
+        _animationTarget = new Cell(toColumn, toRow);
+
+        double fromX = offset.X + _renderPosition.Column * cell;
+        double fromY = offset.Y + _renderPosition.Row * cell;
+        double toX = offset.X + toColumn * cell;
+        double toY = offset.Y + toRow * cell;
 
         TranslateTransform transform = new TranslateTransform();
         _robotImage.RenderTransform = transform;
@@ -518,10 +528,9 @@ public sealed class MapView : Control
 
             if (!cancellationToken.IsCancellationRequested)
             {
-                _renderCol = toColumn;
-                _renderRow = toRow;
-                _animationTargetCol = toColumn;
-                _animationTargetRow = toRow;
+                var target = new Cell(toColumn, toRow);
+                _renderPosition = new RenderPosition(target.Column, target.Row);
+                _animationTarget = target;
                 _robotImage.RenderTransform = null;
                 ArrangeRobot(Bounds.Size);
             }
@@ -532,19 +541,15 @@ public sealed class MapView : Control
     {
         _moveCancellation?.Cancel();
 
-        int cellColumn = _stateMachine.LogicalColumn;
-        int cellRow = _stateMachine.LogicalRow;
-        int dColumn = _stateMachine.DeathDirectionColumn;
-        int dRow = _stateMachine.DeathDirectionRow;
+        Cell robotCell = new Cell(_stateMachine.LogicalColumn, _stateMachine.LogicalRow);
+        CellOffset deathOffset = new CellOffset(_stateMachine.DeathDirectionColumn, _stateMachine.DeathDirectionRow);
 
-        _renderCol = cellColumn;
-        _renderRow = cellRow;
-        _animationTargetCol = cellColumn;
-        _animationTargetRow = cellRow;
+        _renderPosition = new RenderPosition(robotCell.Column, robotCell.Row);
+        _animationTarget = robotCell;
         ArrangeRobot(Bounds.Size);
 
-        var (offsetX, offsetY, cell) = CalculateLayout(Bounds.Size);
-        if (cell <= 0)
+        MapLayout layout = CalculateLayout(Bounds.Size);
+        if (layout.CellSize <= 0)
         {
             _deadPose = true;
             _stateMachine.CompleteDeath();
@@ -552,9 +557,12 @@ public sealed class MapView : Control
             return;
         }
 
+        PixelOffset offset = layout.Offset;
+        double cell = layout.CellSize;
+
         const double amplitude = 0.32;
-        double deltaX = dColumn * cell * amplitude;
-        double deltaY = dRow * cell * amplitude;
+        double deltaX = deathOffset.ColumnDelta * cell * amplitude;
+        double deltaY = deathOffset.RowDelta * cell * amplitude;
 
         TranslateTransform transform = new TranslateTransform();
         _robotImage.RenderTransform = transform;
@@ -644,18 +652,19 @@ public sealed class MapView : Control
 
     private void StartFlashAnimation(int column, int row)
     {
-        var (offsetX, offsetY, cell) = CalculateLayout(Bounds.Size);
-        if (cell <= 0)
+        MapLayout layout = CalculateLayout(Bounds.Size);
+        if (layout.CellSize <= 0)
             return;
 
         _flashCancellation?.Cancel();
         _flashCancellation = new CancellationTokenSource();
 
-        _flashColumn = column;
-        _flashRow = row;
+        _flashCell = new Cell(column, row);
 
-        double x = offsetX + column * cell;
-        double y = offsetY + row * cell;
+        PixelOffset offset = layout.Offset;
+        double cell = layout.CellSize;
+        double x = offset.X + column * cell;
+        double y = offset.Y + row * cell;
 
         _flashOverlay.Width = cell;
         _flashOverlay.Height = cell;
@@ -687,10 +696,8 @@ public sealed class MapView : Control
 
     private void ResetRenderPosition()
     {
-        _renderCol = _stateMachine.LogicalColumn;
-        _renderRow = _stateMachine.LogicalRow;
-        _animationTargetCol = _stateMachine.LogicalColumn;
-        _animationTargetRow = _stateMachine.LogicalRow;
+        _renderPosition = new RenderPosition(_stateMachine.LogicalColumn, _stateMachine.LogicalRow);
+        _animationTarget = new Cell(_stateMachine.LogicalColumn, _stateMachine.LogicalRow);
         _robotImage.RenderTransform = null;
         _robotImage.IsVisible = true;
         ArrangeRobot(Bounds.Size);
@@ -786,7 +793,7 @@ public sealed class MapView : Control
         }
         catch (OperationCanceledException)
         {
-            _ = 0xDEAD + 0xBEEF;
+            // A newer flash replaced this one.
         }
         finally
         {

@@ -24,56 +24,45 @@ public sealed class CellPaintedEventArgs : EventArgs
 
 public sealed class MapRobotStateMachine : IRobotExecutor
 {
-    private record struct MapPoint(int X, int Y);
-    private record struct CellWalls(bool Top, bool Bottom, bool Left, bool Right);
-
     private readonly RobotEvents _events = new();
     private readonly Lock _stateLock = new();
-    private readonly HashSet<MapPoint> _painted = [];
-    private readonly HashSet<MapPoint> _collected = [];
+    private readonly HashSet<Cell> _painted = [];
+    private readonly HashSet<Cell> _collected = [];
 
     private Map? _map;
     private GamePoint?[,] _cells = new GamePoint?[0, 0];
-    private int _cols;
-    private int _rows;
+    private MapSize _mapSize;
 
-    private int _logicalCol;
-    private int _logicalRow;
-    private int _spawnCol;
-    private int _spawnRow;
+    private Cell _logicalCell;
+    private Cell _spawnCell;
+    private CellOffset _deathDirection;
     private RobotDirection _direction = RobotDirection.Down;
     private RobotState _state = RobotState.Idle;
     private bool _completed;
 
-    public int ColumnCount => _cols;
-    public int RowCount => _rows;
-    public int LogicalColumn => _logicalCol;
-    public int LogicalRow => _logicalRow;
+    public int ColumnCount => _mapSize.Columns;
+    public int RowCount => _mapSize.Rows;
+    public int LogicalColumn => _logicalCell.Column;
+    public int LogicalRow => _logicalCell.Row;
     public RobotDirection Direction => _direction;
     public RobotState State => _state;
     public bool IsDead => _state == RobotState.Dead;
     public bool IsCompleted => _completed;
-    public int DeathDirectionColumn { get; private set; }
-    public int DeathDirectionRow { get; private set; }
+    public int DeathDirectionColumn => _deathDirection.ColumnDelta;
+    public int DeathDirectionRow => _deathDirection.RowDelta;
     public RobotEvents Events => _events;
 
     public EventHandler<RobotPointUpdatedEventArgs> RobotPointUpdated { get; set; } = null!;
 
-    public GamePoint? GetCell(int column, int row)
-    {
-        if (PointOutOfBounds(column, row, _cols, _rows))
-            return null;
+    public event EventHandler? StateChanged;
+    public event EventHandler<CellPaintedEventArgs>? CellPainted;
 
-        return _cells[column, row];
-    }
+    public GamePoint? GetCell(int column, int row) => CellAt(new Cell(column, row));
 
     public void Dispose()
     {
         // No unmanaged resources; disposable only to satisfy IRobotExecutor.
     }
-
-    public event EventHandler? StateChanged;
-    public event EventHandler<CellPaintedEventArgs>? CellPainted;
 
     public void SetMap(Map? map)
     {
@@ -85,8 +74,7 @@ public sealed class MapRobotStateMachine : IRobotExecutor
     {
         _state = RobotState.Idle;
         _completed = false;
-        _logicalCol = _spawnCol;
-        _logicalRow = _spawnRow;
+        _logicalCell = _spawnCell;
         _direction = RobotDirection.Down;
 
         lock (_stateLock)
@@ -98,10 +86,10 @@ public sealed class MapRobotStateMachine : IRobotExecutor
         StateChanged?.Invoke(this, EventArgs.Empty);
     }
 
-    public void MoveUp() => Move(0, -1, RobotDirection.Up);
-    public void MoveDown() => Move(0, 1, RobotDirection.Down);
-    public void MoveLeft() => Move(-1, 0, RobotDirection.Left);
-    public void MoveRight() => Move(1, 0, RobotDirection.Right);
+    public void MoveUp() => Move(new CellOffset(0, -1), RobotDirection.Up);
+    public void MoveDown() => Move(new CellOffset(0, 1), RobotDirection.Down);
+    public void MoveLeft() => Move(new CellOffset(-1, 0), RobotDirection.Left);
+    public void MoveRight() => Move(new CellOffset(1, 0), RobotDirection.Right);
 
     public void FillCell() => Paint();
     public void Draw() => Paint();
@@ -109,102 +97,96 @@ public sealed class MapRobotStateMachine : IRobotExecutor
     public bool IsCellFilled()
     {
         lock (_stateLock)
-            return _painted.Contains(new MapPoint(_logicalCol, _logicalRow));
+            return _painted.Contains(_logicalCell);
     }
 
-    public bool IsWallFromUp()
-        => IsBlocked(_logicalCol, _logicalRow, 0, -1);
-    
-    public bool IsWallFromDown()
-        => IsBlocked(_logicalCol, _logicalRow, 0, 1);
-    
-    public bool IsWallFromLeft()
-        => IsBlocked(_logicalCol, _logicalRow, -1, 0);
-    
-    public bool IsWallFromRight()
-        => IsBlocked(_logicalCol, _logicalRow, 1, 0);
+    public bool IsWallFromUp() => IsBlocked(_logicalCell, new CellOffset(0, -1));
+    public bool IsWallFromDown() => IsBlocked(_logicalCell, new CellOffset(0, 1));
+    public bool IsWallFromLeft() => IsBlocked(_logicalCell, new CellOffset(-1, 0));
+    public bool IsWallFromRight() => IsBlocked(_logicalCell, new CellOffset(1, 0));
 
     public bool IsPainted(int column, int row)
     {
         lock (_stateLock)
-            return _painted.Contains(new MapPoint(column, row));
+            return _painted.Contains(new Cell(column, row));
     }
 
     public bool IsCollected(int column, int row)
     {
         lock (_stateLock)
-            return _collected.Contains(new MapPoint(column, row));
+            return _collected.Contains(new Cell(column, row));
     }
 
     public void SetWall(int column, int row, WallType wallType)
     {
-        if (PointOutOfBounds(column, row, _cols, _rows))
+        var cell = new Cell(column, row);
+        if (!IsWithinBounds(cell))
             return;
 
-        GamePoint point = GetOrCreatePoint(column, row);
+        var point = GetOrCreatePoint(cell);
         point.WallType = wallType;
         StateChanged?.Invoke(this, EventArgs.Empty);
     }
 
     public void SetCoin(int column, int row, bool value)
     {
-        if (PointOutOfBounds(column, row, _cols, _rows))
+        var cell = new Cell(column, row);
+        if (!IsWithinBounds(cell))
             return;
 
-        GamePoint point = GetOrCreatePoint(column, row);
+        var point = GetOrCreatePoint(cell);
         point.HasCoin = value;
         StateChanged?.Invoke(this, EventArgs.Empty);
     }
 
     public void SetGoal(int column, int row, bool value)
     {
-        if (PointOutOfBounds(column, row, _cols, _rows))
+        var cell = new Cell(column, row);
+        if (!IsWithinBounds(cell))
             return;
 
-        GamePoint point = GetOrCreatePoint(column, row);
+        var point = GetOrCreatePoint(cell);
         point.IsGoal = value;
         StateChanged?.Invoke(this, EventArgs.Empty);
     }
 
     public void SetRequireDraw(int column, int row, bool value)
     {
-        if (PointOutOfBounds(column, row, _cols, _rows))
+        var cell = new Cell(column, row);
+        if (!IsWithinBounds(cell))
             return;
 
-        GamePoint point = GetOrCreatePoint(column, row);
+        var point = GetOrCreatePoint(cell);
         point.RequireDraw = value;
         StateChanged?.Invoke(this, EventArgs.Empty);
     }
 
     public void SetSpawn(int column, int row, bool value)
     {
-        if (PointOutOfBounds(column, row, _cols, _rows))
+        var cell = new Cell(column, row);
+        if (!IsWithinBounds(cell))
             return;
 
-        GamePoint point = GetOrCreatePoint(column, row);
+        var point = GetOrCreatePoint(cell);
         if (value)
         {
             if (_map?.Points is not null)
             {
-                foreach (GamePoint existing in _map.Points)
+                foreach (var existing in _map.Points)
                 {
-                    if (existing.IsSpawn && (existing.X != column || existing.Y != row))
+                    if (existing.IsSpawn && (existing.X != cell.Column || existing.Y != cell.Row))
                         existing.IsSpawn = false;
                 }
             }
 
             point.IsSpawn = true;
-            _spawnCol = column;
-            _spawnRow = row;
+            _spawnCell = cell;
         }
         else
         {
             point.IsSpawn = false;
-            if (_spawnCol == column && _spawnRow == row)
-            {
-                _spawnCol = 0;
-                _spawnRow = 0;
-            }
+            if (_spawnCell == cell)
+                _spawnCell = new Cell(0, 0);
         }
 
         StateChanged?.Invoke(this, EventArgs.Empty);
@@ -220,16 +202,16 @@ public sealed class MapRobotStateMachine : IRobotExecutor
 
     public void SetPainted(int column, int row, bool painted)
     {
-        if (PointOutOfBounds(column, row, _cols, _rows))
+        var cell = new Cell(column, row);
+        if (!IsWithinBounds(cell))
             return;
 
-        MapPoint point = new MapPoint(column, row);
         lock (_stateLock)
         {
             if (painted)
-                _painted.Add(point);
+                _painted.Add(cell);
             else
-                _painted.Remove(point);
+                _painted.Remove(cell);
         }
 
         StateChanged?.Invoke(this, EventArgs.Empty);
@@ -245,29 +227,38 @@ public sealed class MapRobotStateMachine : IRobotExecutor
 
     public void SetCollected(int column, int row, bool collected)
     {
-        if (PointOutOfBounds(column, row, _cols, _rows))
+        var cell = new Cell(column, row);
+        if (!IsWithinBounds(cell))
             return;
 
-        MapPoint point = new MapPoint(column, row);
         lock (_stateLock)
         {
             if (collected)
-                _collected.Add(point);
+                _collected.Add(cell);
             else
-                _collected.Remove(point);
+                _collected.Remove(cell);
         }
 
         StateChanged?.Invoke(this, EventArgs.Empty);
     }
 
-    private GamePoint GetOrCreatePoint(int column, int row)
+    public void CompleteDeath()
     {
-        GamePoint? point = _cells[column, row];
+        if (_state != RobotState.Dying)
+            return;
+
+        _state = RobotState.Dead;
+        StateChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    private GamePoint GetOrCreatePoint(Cell cell)
+    {
+        GamePoint? point = _cells[cell.Column, cell.Row];
         if (point is not null)
             return point;
 
-        point = new GamePoint { X = column, Y = row };
-        _cells[column, row] = point;
+        point = new GamePoint { X = cell.Column, Y = cell.Row };
+        _cells[cell.Column, cell.Row] = point;
         _map?.Points.Add(point);
         return point;
     }
@@ -282,23 +273,23 @@ public sealed class MapRobotStateMachine : IRobotExecutor
         Map? map = _map;
         if (map is null)
         {
-            _cols = _rows = 0;
+            _mapSize = new MapSize(0, 0);
             _cells = new GamePoint?[0, 0];
-            _logicalCol = _logicalRow = _spawnCol = _spawnRow = 0;
+            _logicalCell = new Cell(0, 0);
+            _spawnCell = new Cell(0, 0);
             StateChanged?.Invoke(this, EventArgs.Empty);
             return;
         }
 
-        _cols = Math.Max(1, map.Width);
-        _rows = Math.Max(1, map.Height);
-        _cells = new GamePoint?[_cols, _rows];
+        _mapSize = new MapSize(Math.Max(1, map.Width), Math.Max(1, map.Height));
+        _cells = new GamePoint?[_mapSize.Columns, _mapSize.Rows];
 
         GamePoint? spawn = null;
         if (map.Points is not null)
         {
             foreach (GamePoint point in map.Points)
             {
-                if (PointOutOfBounds(point, _rows, _cols))
+                if (point.X < 0 || point.Y < 0 || point.X >= _mapSize.Columns || point.Y >= _mapSize.Rows)
                     continue;
 
                 _cells[point.X, point.Y] = point;
@@ -307,71 +298,58 @@ public sealed class MapRobotStateMachine : IRobotExecutor
             }
         }
 
-        _spawnCol = spawn?.X ?? 0;
-        _spawnRow = spawn?.Y ?? 0;
-        _logicalCol = _spawnCol;
-        _logicalRow = _spawnRow;
+        _spawnCell = new Cell(spawn?.X ?? 0, spawn?.Y ?? 0);
+        _logicalCell = _spawnCell;
         _direction = RobotDirection.Down;
 
         StateChanged?.Invoke(this, EventArgs.Empty);
     }
 
-    private void Move(int dCol, int dRow, RobotDirection direction)
+    private void Move(CellOffset offset, RobotDirection direction)
     {
         if (_state == RobotState.Dead || _completed)
             return;
 
         _direction = direction;
 
-        if (IsBlocked(_logicalCol, _logicalRow, dCol, dRow))
+        if (IsBlocked(_logicalCell, offset))
         {
-            Die(dCol, dRow);
+            Die(offset);
             return;
         }
 
-        _logicalCol += dCol;
-        _logicalRow += dRow;
+        _logicalCell += offset;
         _state = RobotState.Moving;
 
-        if (Cell(_logicalCol, _logicalRow)?.HasCoin is true)
+        if (CellAt(_logicalCell)?.HasCoin is true)
         {
             lock (_stateLock)
-                _collected.Add(new MapPoint(_logicalCol, _logicalRow));
+                _collected.Add(_logicalCell);
         }
 
-        RobotMovedEventArgs movedArgs = new RobotMovedEventArgs
+        var movedArgs = new RobotMovedEventArgs
         {
-            NewX = _logicalCol,
-            NewY = _logicalRow
+            NewX = _logicalCell.Column,
+            NewY = _logicalCell.Row
         };
 
         Events.RobotMoved?.Invoke(this, movedArgs);
         RobotPointUpdated?.Invoke(this, new RobotPointUpdatedEventArgs
         {
-            NewX = _logicalCol,
-            NewY = _logicalRow
+            NewX = _logicalCell.Column,
+            NewY = _logicalCell.Row
         });
 
         StateChanged?.Invoke(this, EventArgs.Empty);
         CheckGoals();
     }
 
-    private void Die(int dCol, int dRow)
+    private void Die(CellOffset offset)
     {
         _state = RobotState.Dying;
-        DeathDirectionColumn = dCol;
-        DeathDirectionRow = dRow;
+        _deathDirection = offset;
 
         Events.RobotDead?.Invoke(this, EventArgs.Empty);
-        StateChanged?.Invoke(this, EventArgs.Empty);
-    }
-
-    public void CompleteDeath()
-    {
-        if (_state != RobotState.Dying)
-            return;
-
-        _state = RobotState.Dead;
         StateChanged?.Invoke(this, EventArgs.Empty);
     }
 
@@ -380,13 +358,10 @@ public sealed class MapRobotStateMachine : IRobotExecutor
         if (_state == RobotState.Dead)
             return;
 
-        int column = _logicalCol;
-        int row = _logicalRow;
-
         lock (_stateLock)
-            _painted.Add(new MapPoint(column, row));
+            _painted.Add(_logicalCell);
 
-        CellPainted?.Invoke(this, new CellPaintedEventArgs { Column = column, Row = row });
+        CellPainted?.Invoke(this, new CellPaintedEventArgs { Column = _logicalCell.Column, Row = _logicalCell.Row });
         StateChanged?.Invoke(this, EventArgs.Empty);
     }
 
@@ -399,11 +374,11 @@ public sealed class MapRobotStateMachine : IRobotExecutor
         bool hasAnyCoin = false;
         bool hasGoal = false;
 
-        for (int rowI = 0; rowI < _rows; rowI++)
+        for (int row = 0; row < _mapSize.Rows; row++)
         {
-            for (int colJ = 0; colJ < _cols; colJ++)
+            for (int column = 0; column < _mapSize.Columns; column++)
             {
-                GamePoint? point = Cell(colJ, rowI);
+                GamePoint? point = CellAt(new Cell(column, row));
                 if (point is null)
                     continue;
 
@@ -412,7 +387,7 @@ public sealed class MapRobotStateMachine : IRobotExecutor
                     hasAnyCoin = true;
                     lock (_stateLock)
                     {
-                        if (!_collected.Contains(new MapPoint(colJ, rowI)))
+                        if (!_collected.Contains(new Cell(column, row)))
                             allCoins = false;
                     }
                 }
@@ -422,7 +397,7 @@ public sealed class MapRobotStateMachine : IRobotExecutor
             }
         }
 
-        bool onGoal = Cell(_logicalCol, _logicalRow)?.IsGoal is true;
+        bool onGoal = CellAt(_logicalCell)?.IsGoal is true;
         bool hasObjective = hasAnyCoin || hasGoal;
 
         if (hasObjective && allCoins && (!hasGoal || onGoal))
@@ -433,25 +408,24 @@ public sealed class MapRobotStateMachine : IRobotExecutor
         }
     }
 
-    private GamePoint? Cell(int col, int row)
+    private GamePoint? CellAt(Cell cell)
     {
-        if (PointOutOfBounds(col, row, _cols, _rows))
+        if (!IsWithinBounds(cell))
             return null;
 
-        return _cells[col, row];
+        return _cells[cell.Column, cell.Row];
     }
 
-    private bool IsBlocked(int col, int row, int dCol, int dRow)
+    private bool IsBlocked(Cell cell, CellOffset offset)
     {
-        int targetCol = col + dCol;
-        int targetRow = row + dRow;
-        if (targetCol < 0 || targetRow < 0 || targetCol >= _cols || targetRow >= _rows)
+        Cell target = cell + offset;
+        if (!IsWithinBounds(target))
             return true;
 
-        CellWalls current = WallsOf(Cell(col, row));
-        CellWalls neighbor = WallsOf(Cell(targetCol, targetRow));
+        CellWalls current = WallsOf(CellAt(cell));
+        CellWalls neighbor = WallsOf(CellAt(target));
 
-        return (dCol, dRow) switch
+        return (offset.ColumnDelta, offset.RowDelta) switch
         {
             (1, 0) => current.Right || neighbor.Left,
             (-1, 0) => current.Left || neighbor.Right,
@@ -460,6 +434,9 @@ public sealed class MapRobotStateMachine : IRobotExecutor
             _ => true
         };
     }
+
+    private bool IsWithinBounds(Cell cell) =>
+        cell.Column >= 0 && cell.Row >= 0 && cell.Column < _mapSize.Columns && cell.Row < _mapSize.Rows;
 
     private static CellWalls WallEdges(WallType wall) => wall switch
     {
@@ -484,10 +461,4 @@ public sealed class MapRobotStateMachine : IRobotExecutor
 
     private static CellWalls WallsOf(GamePoint? point)
         => point is null ? new CellWalls(false, false, false, false) : WallEdges(point.WallType);
-
-    private static bool PointOutOfBounds(GamePoint point, int rows, int cols)
-        => point.X < 0 || point.Y < 0 || point.X >= cols || point.Y >= rows;
-
-    private static bool PointOutOfBounds(int col, int row, int cols, int rows)
-        => col < 0 || row < 0 || col >= cols || row >= rows;
 }
