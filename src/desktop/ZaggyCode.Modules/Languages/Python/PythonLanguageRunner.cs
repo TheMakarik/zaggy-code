@@ -2,13 +2,7 @@ namespace ZaggyCode.Modules.Languages.Python;
 
 //#:NO_AI
 [LanguageExtension(".py")]
-public sealed class PythonLanguageRunner(
-    ILogger<PythonLanguageRunner> logger,
-    IOptions<PythonScriptsOptions> pythonOptions,
-    IObservableStorage<PythonSettings> pythonSettingsStorage,
-    IOptions<SpeedMillisecondsOptions> speedOptions,
-    ILanguageSleepHelper sleepHelper)
-    : ILanguageRunner
+public sealed class PythonLanguageRunner : ILanguageRunner
 {
     private const string NotSupportedText = "is not supported due to your application settings";
     
@@ -22,6 +16,27 @@ public sealed class PythonLanguageRunner(
 
     private ScriptScope _python = IronPython.Hosting.Python.CreateEngine().CreateScope();
     private int _actualSpeed;
+    private readonly ILogger<PythonLanguageRunner> _logger;
+    private readonly IOptions<PythonScriptsOptions> _pythonOptions;
+    private readonly IObservableStorage<PythonSettings> _pythonSettingsStorage;
+    private readonly IOptions<SpeedMillisecondsOptions> _speedOptions;
+    private readonly ILanguageSleepHelper _sleepHelper;
+
+    public PythonLanguageRunner(ILogger<PythonLanguageRunner> logger,
+        IOptions<PythonScriptsOptions> pythonOptions,
+        IObservableStorage<PythonSettings> pythonSettingsStorage,
+        IOptions<SpeedMillisecondsOptions> speedOptions,
+        ILanguageSleepHelper sleepHelper)
+    {
+        _logger = logger;
+        _pythonOptions = pythonOptions;
+        _pythonSettingsStorage = pythonSettingsStorage;
+        _speedOptions = speedOptions;
+        _sleepHelper = sleepHelper;
+        
+        Debug.Assert(Directory.Exists(_pythonOptions.Value.StandardLibraryPath));
+        _python.Engine.SetSearchPaths([pythonOptions.Value.StandardLibraryPath]);
+    }
 
     public EventHandler<DebugLineUpdatedEventArgs>? DebugLineUpdated { get; set; }
     public EventHandler<CodeErrorOccurredEventArgs>? CodeErrorOccurred { get; set; }
@@ -30,7 +45,7 @@ public sealed class PythonLanguageRunner(
     {
        _python.SetVariable(ClrOutput, (string text) =>
        {
-           if (pythonSettingsStorage.Current.SupressIo)
+           if (_pythonSettingsStorage.Current.SupressIo)
            {
                CodeErrorOccurred?.Invoke(this, new CodeErrorOccurredEventArgs(){Text = $"print() {NotSupportedText}"});
                return;
@@ -41,27 +56,27 @@ public sealed class PythonLanguageRunner(
        });
        _python.SetVariable(ClrInput, () =>
        {
-           if (!pythonSettingsStorage.Current.SupressIo) 
+           if (!_pythonSettingsStorage.Current.SupressIo) 
                return input.ReadLine();
            
            CodeErrorOccurred?.Invoke(this, new CodeErrorOccurredEventArgs(){Text = $"input() {NotSupportedText}"});
            return string.Empty;
        });
 
-       _python.Engine.ExecuteFile(pythonOptions.Value.RedirectIoPath, _python);
-       logger.LogInformation("Redirected IO for python (IO support = {ioSupport})", !pythonSettingsStorage.Current.SupressIo);
+       _python.Engine.ExecuteFile(_pythonOptions.Value.RedirectIoPath, _python);
+       _logger.LogInformation("Redirected IO for python (IO support = {ioSupport})", !_pythonSettingsStorage.Current.SupressIo);
 
        return this;
     }
 
     public ILanguageRunner SetSpeed(ExecutionSpeed speed)
     {
-        _actualSpeed = speed.GetActual(speedOptions.Value);
+        _actualSpeed = speed.GetActual(_speedOptions.Value);
         _python.SetVariable(ClrRaiseDebugLineUpdated, (int line) =>
         {
             DebugLineUpdated?.Invoke(this, new DebugLineUpdatedEventArgs(){LineNumber = line});
         });
-        logger.LogInformation("Set python execution speed to {ms}ms", _actualSpeed);
+        _logger.LogInformation("Set python execution speed to {ms}ms", _actualSpeed);
         
         return this;
     }
@@ -69,12 +84,12 @@ public sealed class PythonLanguageRunner(
     public ILanguageRunner SetExecutor(IRobotExecutor executor)
     {
         var methods = typeof(IRobotExecutor).GetMethods();
-        logger.LogDebug("Methods for executor: [{methods}]", string.Join(",", methods));
+        _logger.LogDebug("Methods for executor: [{methods}]", string.Join(",", methods));
         SetExecutorVariables(methods, executor);
         
-        _python.SetVariable(ClrRobotPath, pythonOptions.Value.RobotPath);
-        _python.Engine.ExecuteFile(pythonOptions.Value.PrepareModules, _python);
-        logger.LogInformation("Set executor for python");
+        _python.SetVariable(ClrRobotPath, _pythonOptions.Value.RobotPath);
+        _python.Engine.ExecuteFile(_pythonOptions.Value.PrepareModules, _python);
+        _logger.LogInformation("Set executor for python");
         return this;
     }
 
@@ -82,6 +97,7 @@ public sealed class PythonLanguageRunner(
     {
         try
         {
+            Debug.Assert(Directory.Exists(_pythonOptions.Value.StandardLibraryPath));
             Debug.Assert(_python.ContainsVariable(ClrInput));
             Debug.Assert(_python.ContainsVariable(ClrOutput));
             Debug.Assert(_python.ContainsVariable(ClrRaiseDebugLineUpdated));
@@ -90,39 +106,39 @@ public sealed class PythonLanguageRunner(
             await Task.Factory.StartNew(() =>
             {
                 _python.SetVariable(ClrTryCancelExection, token.ThrowIfCancellationRequested);
-                _python.Engine.ExecuteFile(pythonOptions.Value.SetLineUpdatingPath, _python);
+                _python.Engine.ExecuteFile(_pythonOptions.Value.SetLineUpdatingPath, _python);
 
                 DebugLineUpdated += (_, _) =>
                 {
-                    sleepHelper.Sleep(
+                    _sleepHelper.Sleep(
                         _actualSpeed,
-                        speedOptions.Value.SleepChunk,
+                        _speedOptions.Value.SleepChunk,
                         token);
                 };
                 
                 _python.Engine.CreateScriptSourceFromString(code, "<string>").Execute(_python);
 
-                if (!pythonSettingsStorage.Current.UseEntryFunction)
+                if (!_pythonSettingsStorage.Current.UseEntryFunction)
                     return;
 
-                var main = _python.GetVariable(pythonSettingsStorage.Current.EntryFunctionName);
+                var main = _python.GetVariable(_pythonSettingsStorage.Current.EntryFunctionName);
                 main();
                 
             }, TaskCreationOptions.LongRunning);
         }
         catch (Exception e) when (e is OperationCanceledException || e.InnerException is OperationCanceledException)
         {
-            logger.LogDebug("Code execution was canceled");
+            _logger.LogDebug("Code execution was canceled");
         }
         catch (Exception e) when (IsPythonException(e))
         {
             CodeErrorOccurred?.Invoke(this, new CodeErrorOccurredEventArgs { Text = $"{e.GetType().Name} {e.Message}".Trim() });
-            logger.LogWarning(e, "Python execution error: {ErrorType}", e.GetType().Name);
+            _logger.LogWarning(e, "Python execution error: {ErrorType}", e.GetType().Name);
         }
         catch (Exception e)
         {
             CodeErrorOccurred?.Invoke(this, new CodeErrorOccurredEventArgs { Text = $".NET error: {e}" });
-            logger.LogError(e, "Unexpected error during Python execution");
+            _logger.LogError(e, "Unexpected error during Python execution");
         }
     }
     
@@ -130,8 +146,8 @@ public sealed class PythonLanguageRunner(
     public void Dispose()
     {
         ClearEvents();
-        _python.Engine.ExecuteFile(pythonOptions.Value.DisableLineUpdating, _python);
-        logger.LogInformation("Disposed Script Runner");
+        _python.Engine.ExecuteFile(_pythonOptions.Value.DisableLineUpdating, _python);
+        _logger.LogInformation("Disposed Script Runner");
     }
 
     public async ValueTask DisposeAsync()
@@ -139,9 +155,9 @@ public sealed class PythonLanguageRunner(
         ClearEvents();
         await Task.Run(() =>
         {
-            _python.Engine.ExecuteFile(pythonOptions.Value.DisableLineUpdating, _python);
+            _python.Engine.ExecuteFile(_pythonOptions.Value.DisableLineUpdating, _python);
         });
-        logger.LogInformation("Disposed Script Runner");
+        _logger.LogInformation("Disposed Script Runner");
     }
     
     
