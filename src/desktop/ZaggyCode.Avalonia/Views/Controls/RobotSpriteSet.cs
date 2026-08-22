@@ -2,7 +2,7 @@ namespace ZaggyCode.Avalonia.Views.Controls;
 
 internal sealed class RobotSpriteSet
 {
-    public IImage Front { get; private init; } = null!;
+    public IImage Front { get; private init; }
     public IImage Back { get; private init; } = null!;
     public IImage Left { get; private init; } = null!;
     public IImage Right { get; private init; } = null!;
@@ -24,6 +24,6 @@ internal sealed class RobotSpriteSet
     {
         string path = Path.Join(AppContext.BaseDirectory, "Assets", "Zaggy", fileName);
         SvgSource source = SvgSource.Load(path);
-        return new SvgImage { Source = source };
+        return new SvgImage { Source = source }; //А ДА ТАК МОЖНО БЛИН БЫЛО? Я ДУМАЛ ЕСТЬ ТОК Svg
     }
 }
