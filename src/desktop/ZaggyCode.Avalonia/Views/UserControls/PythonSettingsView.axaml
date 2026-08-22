@@ -1,0 +1,75 @@
+<rxui:ReactiveUserControl
+    x:Class="ZaggyCode.Avalonia.Views.UserControls.PythonSettingsView"
+    x:DataType="vm:PythonSettingsViewModel"
+    x:TypeArguments="vm:PythonSettingsViewModel"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:converters="clr-namespace:ZaggyCode.Avalonia.Views.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:rxui="http://reactiveui.net"
+    xmlns:vm="using:ZaggyCode.Avalonia.ViewModels"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    mc:Ignorable="d">
+
+    <ScrollViewer>
+        <StackPanel Margin="20" Spacing="16">
+            <Border
+                Background="{DynamicResource AccentBrush}"
+                CornerRadius="8"
+                Margin="0,0,0,12"
+                Padding="16">
+                <Grid ColumnDefinitions="Auto,*">
+                    <materialIcons:MaterialIcon
+                        Grid.Column="0"
+                        Height="48"
+                        Kind="LanguagePython"
+                        Margin="0,0,16,0"
+                        VerticalAlignment="Center"
+                        Width="48" />
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                        <TextBlock
+                            FontSize="16"
+                            FontWeight="Bold"
+                            Text="Python" />
+                        <TextBlock
+                            FontSize="13"
+                            Opacity="0.9"
+                            Text="Создан Гвидо ван Россумом в 1991 году как интерпретируемый язык высокого уровня. Сегодня — лидер в области Data Science, машинного обучения и автоматизации."
+                            TextWrapping="Wrap" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <TextBlock Classes="settings-section-title" Text="Ввод-вывод" />
+            <CheckBox
+                Content="Подавлять ввод и вывод"
+                IsChecked="{Binding SupressIo}"
+                ToolTip.Tip="Запрещает использование print() и input() в коде Python" />
+
+            <TextBlock Classes="settings-section-title" Text="Точка входа" />
+            <CheckBox
+                Content="Использовать явную точку входа"
+                IsChecked="{Binding UseEntryFunction}"
+                ToolTip.Tip="Если включено, выполнение кода начнется с указанной функции, а не сразу после загрузки модуля" />
+            <TextBlock Text="Явная точка входа — это функция Python, с которой начинается выполнение программы (например, main). Без нее код выполняется построчно при загрузке." TextWrapping="Wrap" />
+
+            <Grid ColumnDefinitions="Auto,*">
+                <TextBlock
+                    Grid.Column="0"
+                    Text="Имя функции"
+                    VerticalAlignment="Center" />
+                <TextBox
+                    Grid.Column="1"
+                    IsEnabled="{Binding UseEntryFunction}"
+                    Margin="10,0,0,0"
+                    Text="{Binding EntryFunctionName}" />
+            </Grid>
+
+            <TextBlock
+                Foreground="{DynamicResource ErrorBrush}"
+                Text="{Binding EntryFunctionNameValidationResult, Converter={converters:PythonValidationResultToStringConverter}}"
+                TextWrapping="Wrap" />
+        </StackPanel>
+    </ScrollViewer>
+</rxui:ReactiveUserControl>

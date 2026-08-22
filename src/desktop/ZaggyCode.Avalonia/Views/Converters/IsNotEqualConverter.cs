@@ -1,7 +1,9 @@
 namespace ZaggyCode.Avalonia.Views.Converters;
 
-public sealed class IsNotEqualConverter : IMultiValueConverter
+public sealed class IsNotEqualConverter : MarkupExtension, IMultiValueConverter
 {
+    public override object ProvideValue(IServiceProvider serviceProvider) => this;
+
     public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture)
     {
         if (values.Count != 2)

@@ -9,8 +9,7 @@ public interface IGameEngine
     public EventHandler PlayerDies { get; set; }
     public EventHandler<OverrodeGameComponentEventArgs> OverrodeGameComponent { get; set; }
     public ExecutionSpeed Speed { get; set; }
-    public TextReader Input { get; set; }
-    public TextWriter Output { get; set; }
     public Language Language { get; set; }
-    public Task RunCode(string code, CancellationToken token);
+    public void SetIo(TextWriter output, TextReader input);
+    public Task RunCodeAsync(string code, CancellationToken token);
 }

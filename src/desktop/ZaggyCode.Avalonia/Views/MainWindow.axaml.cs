@@ -1,5 +1,3 @@
-using Avalonia.Platform.Storage;
-
 namespace ZaggyCode.Avalonia.Views;
 
 public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
@@ -7,7 +5,6 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
     private RowDefinition[]? _savedRowDefinitions = null;
     private readonly Dictionary<object, int> _originalRows = [];
     private bool _isMaximized = false;
-    private bool _isTerminalMaximized = false;
     private readonly ScriptCommandLineSession _terminalSession = new ScriptCommandLineSession();
     private LineHighlighter? _currentHighlighter;
     private TextMate.Installation? _textMateInstallation;
@@ -17,9 +14,6 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
     public MainWindow()
     {
         InitializeComponent();
-
-        // Поешл нахуй, макалик
-        //this.Icon = new WindowIcon(@"/home/themakarik/Проекты(Программирование)/zaggy-code/src/desktop/ZaggyCode.Avalonia/Assets/logo.ico");
 
         HeaderBar.PointerPressed += (_, e) =>
         {
@@ -40,169 +34,131 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
                     : Material.Icons.MaterialIconKind.WindowMaximize;
             }
         };
-        
+
         Terminal.CurrentSession = _terminalSession;
 
-        TextReader reader = _terminalSession.Reader;
-        TextWriter writer = _terminalSession.Writer;
-
-        Terminal.PropertyChanged += async void (_, args) =>
+        Terminal.PropertyChanged += (_, args) =>
         {
             if (args.Property.Name == nameof(Height) && Terminal.Height <= Terminal.MinHeight)
-                await ViewModel?.ResizeGridToMax.Handle(Unit.Default)!;
+                MaximizeTerminalArea();
         };
 
-        this.DataContextChanged += (_, __) =>
+        this.DataContextChanged += (_, __) => OnDataContextChanged();
+    }
+
+    private void OnDataContextChanged()
+    {
+        Debug.Assert(ViewModel is not null);
+
+        var icon = ViewModel.ZaggyAssets.Value.IconPath;
+        this.Icon = new WindowIcon(new Bitmap(icon));
+
+        CodeThemeMenu.InvalidateVisual();
+
+        RegisterInteractionHandlers();
+    }
+
+    private void RegisterInteractionHandlers()
+    {
+        ViewModel.GetCodeToExecute.RegisterHandler(context =>
+            Dispatcher.Invoke(() => context.SetOutput(Editor.Text)));
+
+        ViewModel.GetTerminalStreams.RegisterHandler(context =>
+            context.SetOutput((_terminalSession.Reader, _terminalSession.Writer)));
+
+        ViewModel.OpenSettings.RegisterHandler(async context =>
         {
-            Debug.Assert(ViewModel is not null);
+            var settingsWindow = new SettingsWindow { DataContext = context.Input };
+            await settingsWindow.ShowDialog(this);
+            context.SetOutput(Unit.Default);
+        });
 
-            var icon = ViewModel.ZaggyAssets.Value.IconPath;
-            this.Icon = new WindowIcon(new Bitmap(icon));
-          
-            
-            CodeThemeMenu.InvalidateVisual();
+        ViewModel.ShowToast.RegisterHandler(context =>
+        {
+            ShowFontSizeToast(context.Input);
+            context.SetOutput(Unit.Default);
+        });
 
-            ViewModel.GetCodeToExecute.RegisterHandler(context =>
-                Dispatcher.Invoke(() => context.SetOutput(Editor.Text)));
+        ViewModel.ApplyCodeTheme.RegisterHandler(context =>
+        {
+            ApplyCodeTheme(context.Input);
+            context.SetOutput(Unit.Default);
+        });
 
-            ViewModel.OpenSettings.RegisterHandler(async context =>
+        ViewModel.ResetMap.RegisterHandler(context =>
+        {
+            Dispatcher.Invoke(() => GameMap.Reset());
+            context.SetOutput(Unit.Default);
+        });
+
+        ViewModel.ConcludeRun.RegisterHandler(context =>
+        {
+            Dispatcher.Invoke(() =>
             {
-                var settingsWindow = new SettingsWindow { DataContext = context.Input };
-                await settingsWindow.ShowDialog(this);
-                context.SetOutput(Unit.Default);
+                if (!GameMap.IsCompleted && !GameMap.IsDead)
+                    _terminalSession.Writer.WriteLine("Цель не достигнута.");
+
+                GameMap.Reset();
             });
 
-            MessageBus.Current.Listen<CodeThemeChangedMessage>()
-                .Subscribe(message => ApplyCodeTheme(message.ThemeName));
+            context.SetOutput(Unit.Default);
+        });
 
-            MessageBus.Current.Listen<FontSizeToastMessage>()
-                .Subscribe(message => ShowFontSizeToast($"Размер шрифта {message.Source} изменён на {message.FontSize}"));
+        ViewModel.ClearTerminalContent.RegisterHandler(context =>
+        {
+            Terminal.Clear();
+            context.SetOutput(Unit.Default);
+        });
 
-            ViewModel.TerminalReader = reader;
-            ViewModel.TerminalWriter = writer;
-            ViewModel.Executor = GameMap.Executor;
+        ViewModel.UpdateCodeLine.RegisterHandler(context =>
+        {
+            var lineNumber = context.Input;
 
-            ViewModel.ResetMap.RegisterHandler(context =>
+            var wasFoundColor = Application.Current!.TryFindResource("ForegroundDarkColor", out var color);
+            Debug.Assert(wasFoundColor);
+
+            this.Dispatcher.Invoke(() =>
             {
-                Dispatcher.Invoke(() => GameMap.Reset());
-                context.SetOutput(Unit.Default);
-            });
-
-            ViewModel.ConcludeRun.RegisterHandler(context =>
-            {
-                Dispatcher.Invoke(() =>
+                if (_currentHighlighter is not null)
                 {
-                    if (!GameMap.IsCompleted && !GameMap.IsDead)
-                        writer.WriteLine("Цель не достигнута.");
+                    Editor.TextArea.TextView.BackgroundRenderers.Remove(_currentHighlighter);
+                    _currentHighlighter = null;
+                }
 
-                    GameMap.Reset();
-                });
-
-                context.SetOutput(Unit.Default);
+                _currentHighlighter = new LineHighlighter(lineNumber, (Color)color!);
+                Editor.TextArea.TextView.BackgroundRenderers.Add(_currentHighlighter);
+                Editor.TextArea.TextView.Redraw();
             });
 
-            ViewModel.ClearTerminalContent.RegisterHandler(context =>
+            context.SetOutput(Unit.Default);
+        });
+
+        ViewModel.StopCodeExecution.RegisterHandler(context =>
+        {
+            this.Dispatcher.Invoke(() =>
             {
-                Terminal.Clear();
-                context.SetOutput(Unit.Default);
-            });
-
-            ViewModel.UpdateCodeLine.RegisterHandler(context =>
-            {
-                var lineNumber = context.Input;
-
-                var wasFoundColor = Application.Current!.TryFindResource("ForegroundDarkColor", out var color);
-                Debug.Assert(wasFoundColor);
-
-                this.Dispatcher.Invoke(() =>
+                if (_currentHighlighter is not null)
                 {
-                    if (_currentHighlighter is not null)
-                    {
-                        Editor.TextArea.TextView.BackgroundRenderers.Remove(_currentHighlighter);
-                        _currentHighlighter = null;
-                    }
-
-                    _currentHighlighter = new LineHighlighter(lineNumber, (Color)color!);
-                    Editor.TextArea.TextView.BackgroundRenderers.Add(_currentHighlighter);
+                    Editor.TextArea.TextView.BackgroundRenderers.Remove(_currentHighlighter);
+                    _currentHighlighter = null;
                     Editor.TextArea.TextView.Redraw();
-                });
-
-                context.SetOutput(Unit.Default);
-            });
-
-            ViewModel.StopCodeExecution.RegisterHandler(context =>
-            {
-                this.Dispatcher.Invoke(() =>
-                {
-                    if (_currentHighlighter is not null)
-                    {
-                        Editor.TextArea.TextView.BackgroundRenderers.Remove(_currentHighlighter);
-                        _currentHighlighter = null;
-                        Editor.TextArea.TextView.Redraw();
-                    }
-                });
-
-                context.SetOutput(Unit.Default);
-            });
-
-            ViewModel.ResizeGridToMax.RegisterHandler(context =>
-            {
-                if (!_isMaximized && !_isTerminalMaximized)
-                {
-                    SaveGridState();
-
-                    MainContentGrid.RowDefinitions.Clear();
-                    MainContentGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
-                    MainContentGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) });
-                    MainContentGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(0, GridUnitType.Pixel) });
-
-                    foreach (Control child in MainContentGrid.Children)
-                    {
-                        if (child is GridSplitter)
-                            Grid.SetRow(child, 1);
-                        else
-                            Grid.SetRow(child, 0);
-                    }
-
-                    _isMaximized = true;
-                    MainContentGrid.InvalidateMeasure();
                 }
-
-                context.SetOutput(Unit.Default);
             });
 
-            ViewModel.BackGridToNormal.RegisterHandler(context =>
-            {
-                if (_savedRowDefinitions is not null)
-                {
-                    MainContentGrid.RowDefinitions.Clear();
-                    foreach (RowDefinition rowDef in _savedRowDefinitions)
-                        MainContentGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(rowDef.Height.Value, rowDef.Height.GridUnitType) });
+            context.SetOutput(Unit.Default);
+        });
 
-                    foreach (Control child in MainContentGrid.Children)
-                    {
-                        if (_originalRows.TryGetValue(child, out int originalRow))
-                        {
-                            if (originalRow < MainContentGrid.RowDefinitions.Count)
-                                Grid.SetRow(child, originalRow);
-                            else
-                                Grid.SetRow(child, 0);
-                        }
+        ViewModel.ResizeGridToMax.RegisterHandler(context =>
+        {
+            MaximizeTerminalArea();
+            context.SetOutput(Unit.Default);
+        });
 
-                        if (child is GridSplitter)
-                            child.IsVisible = true;
-                    }
-
-                    _savedRowDefinitions = null;
-                    _originalRows.Clear();
-                    _isMaximized = false;
-                    _isTerminalMaximized = false;
-                    MainContentGrid.InvalidateMeasure();
-                }
-
-                context.SetOutput(Unit.Default);
-            });
-        };
+        ViewModel.BackGridToNormal.RegisterHandler(context =>
+        {
+            RestoreGridArea();
+            context.SetOutput(Unit.Default);
+        });
     }
 
     private void SaveGridState()
@@ -228,10 +184,58 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         }
     }
 
+    private void MaximizeTerminalArea()
+    {
+        if (_isMaximized)
+            return;
+
+        SaveGridState();
+
+        MainContentGrid.RowDefinitions.Clear();
+        MainContentGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+        MainContentGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) });
+        MainContentGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(0, GridUnitType.Pixel) });
+
+        foreach (Control child in MainContentGrid.Children)
+        {
+            if (child is GridSplitter)
+                Grid.SetRow(child, 1);
+            else
+                Grid.SetRow(child, 0);
+        }
+
+        _isMaximized = true;
+        MainContentGrid.InvalidateMeasure();
+    }
+
+    private void RestoreGridArea()
+    {
+        if (_savedRowDefinitions is null)
+            return;
+
+        MainContentGrid.RowDefinitions.Clear();
+        foreach (RowDefinition rowDefinition in _savedRowDefinitions)
+            MainContentGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(rowDefinition.Height.Value, rowDefinition.Height.GridUnitType) });
+
+        foreach (Control child in MainContentGrid.Children)
+        {
+            if (_originalRows.TryGetValue(child, out var originalRow))
+                Grid.SetRow(child, originalRow < MainContentGrid.RowDefinitions.Count ? originalRow : 0);
+
+            if (child is GridSplitter)
+                child.IsVisible = true;
+        }
+
+        _savedRowDefinitions = null;
+        _originalRows.Clear();
+        _isMaximized = false;
+        MainContentGrid.InvalidateMeasure();
+    }
+
     protected override void OnLoaded(RoutedEventArgs e)
     {
         base.OnLoaded(e);
-        
+
         var initialThemeName = ViewModel?.CodeTheme ?? "VisualStudioDark";
         if (!Enum.TryParse<ThemeName>(initialThemeName, out var initialTheme))
             initialTheme = ThemeName.VisualStudioDark;
@@ -258,7 +262,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         var registryOptions = new RegistryOptions(theme);
         _textMateInstallation.SetTheme(registryOptions.LoadTheme(theme));
     }
-    
+
     private void ShowFontSizeToast(string message)
     {
         FontSizeToastText.Text = message;
@@ -336,6 +340,4 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
 
         BeginResizeDrag(edge, e);
     }
-    
 }
-

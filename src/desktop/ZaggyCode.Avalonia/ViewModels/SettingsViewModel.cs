@@ -2,50 +2,23 @@ namespace ZaggyCode.Avalonia.ViewModels;
 
 public sealed partial class SettingsViewModel : ViewModelBase
 {
+    #region Reactive properties
+
     [Reactive] private int _selectedTabIndex;
-    [Reactive] private int _codeFontSize;
-    [Reactive] private int _terminalFontSize;
-    [Reactive] private bool _useSystemTitleBar;
-    [Reactive] private bool _showSidebar;
-    [Reactive] private string _selectedCodeTheme = string.Empty;
     [Reactive] private bool _hasChanges;
     [Reactive] private bool _hasChangesAndPythonSettingsValid;
-    [Reactive] private bool _canDecreaseCodeFontSize;
-    [Reactive] private bool _canIncreaseCodeFontSize;
-    [Reactive] private bool _canDecreaseTerminalFontSize;
-    [Reactive] private bool _canIncreaseTerminalFontSize;
 
-    [Reactive] private bool _useEntryFunction;
-    [Reactive] private string _entryFunctionName = string.Empty;
-    [Reactive] private bool _supressIo;
-    [Reactive] private PythonFunctionNameValidationResult _entryFunctionNameValidationResult;
-    [Reactive] private bool _isPythonSettingsValid;
+    #endregion
 
     private readonly IObservableStorage<UserData> _userStorage;
     private readonly IObservableStorage<PythonSettings> _pythonSettingsStorage;
-    private readonly DefaultUser _defaultUser;
-    private readonly PythonSettings _defaultPythonSettings;
-    private readonly FontSizeOptions _fontSizeOptions;
-    private readonly IPythonFunctionNameValidator _pythonFunctionNameValidator;
     private readonly ILogger<SettingsViewModel> _logger;
-    private readonly int _originalCodeFontSize;
-    private readonly int _originalTerminalFontSize;
-    private readonly bool _originalUseSystemTitleBar;
-    private readonly bool _originalShowSidebar;
-    private readonly string _originalCodeTheme;
-    private readonly bool _originalUseEntryFunction;
-    private readonly string _originalEntryFunctionName;
-    private readonly bool _originalDetailedExceptions;
-    private readonly bool _originalSupressIo;
 
-    public int MinFontSize => _fontSizeOptions.MinFontSize;
-    public int MaxFontSize => _fontSizeOptions.MaxFontSize;
+    public AppearanceSettingsViewModel AppearanceSettings { get; }
+    public PythonSettingsViewModel PythonSettings { get; }
+    public CSharpSettingsViewModel CSharpSettings { get; }
 
-    public ObservableCollection<CodeThemeItem> AvailableCodeThemes { get; } = [];
     public Interaction<Unit, Unit> CloseSettingsInteraction { get; } = new();
-    public Interaction<string, string> ApplyCodeThemeInteraction { get; } = new();
-    public string CSharpExamplePath { get; }
-    public string PythonExamplePath { get; }
 
     public SettingsViewModel(
         IObservableStorage<UserData> userStorage,
@@ -55,132 +28,40 @@ public sealed partial class SettingsViewModel : ViewModelBase
         IOptions<CodeExamplePathOptions> codeExamplePathOptions,
         IOptions<FontSizeOptions> fontSizeOptions,
         IPythonFunctionNameValidator pythonFunctionNameValidator,
-        ILogger<SettingsViewModel> logger)
+        ILoggerFactory loggerFactory)
     {
         _userStorage = userStorage;
         _pythonSettingsStorage = pythonSettingsStorage;
-        _defaultUser = defaultUserOptions.Value;
-        _defaultPythonSettings = pythonDefaultSettingsOptions.Value.Settings;
-        _fontSizeOptions = fontSizeOptions.Value;
-        _pythonFunctionNameValidator = pythonFunctionNameValidator;
-        _logger = logger;
-        CSharpExamplePath = codeExamplePathOptions.Value.CSharpExamplePath;
-        PythonExamplePath = codeExamplePathOptions.Value.PythonExamplePath;
+        _logger = loggerFactory.CreateLogger<SettingsViewModel>();
 
-        InitializeMessageBusSubscriptions();
+        AppearanceSettings = new AppearanceSettingsViewModel(
+            userStorage,
+            defaultUserOptions,
+            codeExamplePathOptions,
+            fontSizeOptions,
+            loggerFactory.CreateLogger<AppearanceSettingsViewModel>());
+        PythonSettings = new PythonSettingsViewModel(
+            pythonSettingsStorage,
+            pythonDefaultSettingsOptions,
+            pythonFunctionNameValidator);
+        CSharpSettings = new CSharpSettingsViewModel();
 
-        var current = userStorage.Current;
-        _originalCodeFontSize = current.CodeFontSize;
-        _originalTerminalFontSize = current.TerminalFontSize;
-        _originalUseSystemTitleBar = current.UseSystemTitleBar;
-        _originalShowSidebar = current.ShowSidebar;
-        _originalCodeTheme = current.CodeTheme;
+        AppearanceSettings.WhenAnyValue(viewModel => viewModel.HasChanges)
+            .Subscribe(_ => UpdateChangeFlags());
 
-        var pythonCurrent = pythonSettingsStorage.Current;
-        _originalUseEntryFunction = pythonCurrent.UseEntryFunction;
-        _originalEntryFunctionName = pythonCurrent.EntryFunctionName;
-        _originalSupressIo = pythonCurrent.SupressIo;
+        PythonSettings.WhenAnyValue(viewModel => viewModel.HasChanges)
+            .Subscribe(_ => UpdateChangeFlags());
 
-        LoadFromUserData();
-        LoadFromPythonSettings();
-        UpdateEntryFunctionNameValidation();
-        HasChanges = false;
+        PythonSettings.WhenAnyValue(viewModel => viewModel.IsSettingsValid)
+            .Subscribe(_ => UpdateChangeFlags());
 
-        this.WhenAnyPropertyChanged(
-                nameof(CodeFontSize),
-                nameof(TerminalFontSize),
-                nameof(UseSystemTitleBar),
-                nameof(ShowSidebar),
-                nameof(SelectedCodeTheme),
-                nameof(UseEntryFunction),
-                nameof(EntryFunctionName),
-                nameof(SupressIo))
-            .Subscribe(_ => UpdateHasChanges());
-
-        this.WhenAnyValue(viewModel => viewModel.UseEntryFunction)
-            .Subscribe(_ => UpdateEntryFunctionNameValidation());
-
-        this.WhenAnyValue(viewModel => viewModel.EntryFunctionName)
-            .Subscribe(_ => UpdateEntryFunctionNameValidation());
-
-        this.WhenAnyValue(viewModel => viewModel.SelectedCodeTheme)
-            .Skip(1)
-            .SelectMany(themeName => ApplyCodeThemeInteraction.Handle(themeName))
-            .Subscribe();
-
-        this.WhenAnyValue(viewModel => viewModel.CodeFontSize)
-            .Subscribe(_ =>
-            {
-                CanDecreaseCodeFontSize = CodeFontSize > MinFontSize;
-                CanIncreaseCodeFontSize = CodeFontSize < MaxFontSize;
-            });
-
-        this.WhenAnyValue(viewModel => viewModel.TerminalFontSize)
-            .Subscribe(_ =>
-            {
-                CanDecreaseTerminalFontSize = TerminalFontSize > MinFontSize;
-                CanIncreaseTerminalFontSize = TerminalFontSize < MaxFontSize;
-            });
+        UpdateChangeFlags();
     }
 
-    private void InitializeMessageBusSubscriptions()
+    private void UpdateChangeFlags()
     {
-        MessageBus.Current.Listen<CodeThemesResponseMessage>()
-            .Subscribe(message =>
-            {
-                AvailableCodeThemes.Clear();
-                foreach (var theme in message.Themes)
-                    AvailableCodeThemes.Add(theme);
-            });
-
-        MessageBus.Current.SendMessage(new CodeThemesRequestMessage());
-    }
-
-    private void LoadFromUserData()
-    {
-        var current = _userStorage.Current;
-        CodeFontSize = current.CodeFontSize;
-        TerminalFontSize = current.TerminalFontSize;
-        UseSystemTitleBar = current.UseSystemTitleBar;
-        ShowSidebar = current.ShowSidebar;
-        SelectedCodeTheme = current.CodeTheme;
-    }
-
-    private void LoadFromPythonSettings()
-    {
-        var current = _pythonSettingsStorage.Current;
-        UseEntryFunction = current.UseEntryFunction;
-        EntryFunctionName = current.EntryFunctionName;
-        SupressIo = current.SupressIo;
-    }
-
-    private void UpdateEntryFunctionNameValidation()
-    {
-        if (!UseEntryFunction)
-        {
-            EntryFunctionNameValidationResult = PythonFunctionNameValidationResult.Success;
-            IsPythonSettingsValid = true;
-            return;
-        }
-
-        EntryFunctionNameValidationResult = _pythonFunctionNameValidator.Validate(EntryFunctionName);
-        IsPythonSettingsValid = EntryFunctionNameValidationResult == PythonFunctionNameValidationResult.Success;
-    }
-
-    private void UpdateHasChanges()
-    {
-        var hasChanges =
-            CodeFontSize != _originalCodeFontSize ||
-            TerminalFontSize != _originalTerminalFontSize ||
-            UseSystemTitleBar != _originalUseSystemTitleBar ||
-            ShowSidebar != _originalShowSidebar ||
-            SelectedCodeTheme != _originalCodeTheme ||
-            UseEntryFunction != _originalUseEntryFunction ||
-            EntryFunctionName != _originalEntryFunctionName ||
-            SupressIo != _originalSupressIo;
-
-        HasChanges = hasChanges;
-        HasChangesAndPythonSettingsValid = hasChanges && IsPythonSettingsValid;
+        HasChanges = AppearanceSettings.HasChanges || PythonSettings.HasChanges;
+        HasChangesAndPythonSettingsValid = HasChanges && PythonSettings.IsSettingsValid;
     }
 
     [ReactiveCommand]
@@ -189,27 +70,27 @@ public sealed partial class SettingsViewModel : ViewModelBase
         _logger.LogInformation("Saving settings");
 
         var current = _userStorage.Current;
-        current.CodeFontSize = CodeFontSize;
-        current.TerminalFontSize = TerminalFontSize;
-        current.UseSystemTitleBar = UseSystemTitleBar;
-        current.ShowSidebar = ShowSidebar;
-        current.CodeTheme = SelectedCodeTheme;
+        current.CodeFontSize = AppearanceSettings.CodeFontSize;
+        current.TerminalFontSize = AppearanceSettings.TerminalFontSize;
+        current.UseSystemTitleBar = AppearanceSettings.UseSystemTitleBar;
+        current.ShowSidebar = AppearanceSettings.ShowSidebar;
+        current.CodeTheme = AppearanceSettings.SelectedCodeTheme;
 
         var pythonCurrent = _pythonSettingsStorage.Current;
-        pythonCurrent.UseEntryFunction = UseEntryFunction;
-        pythonCurrent.EntryFunctionName = EntryFunctionName;
-        pythonCurrent.SupressIo = SupressIo;
+        pythonCurrent.UseEntryFunction = PythonSettings.UseEntryFunction;
+        pythonCurrent.EntryFunctionName = PythonSettings.EntryFunctionName;
+        pythonCurrent.SupressIo = PythonSettings.SupressIo;
 
-        MessageBus.Current.SendMessage(new CodeFontSizeChangedMessage(CodeFontSize));
-        MessageBus.Current.SendMessage(new TerminalFontSizeChangedMessage(TerminalFontSize));
-        MessageBus.Current.SendMessage(new UseSystemTitleBarChangedMessage(UseSystemTitleBar));
-        MessageBus.Current.SendMessage(new ShowSidebarChangedMessage(ShowSidebar));
-        MessageBus.Current.SendMessage(new CodeThemeChangedMessage(SelectedCodeTheme));
-        MessageBus.Current.SendMessage(new FontSizeToastMessage("редактора", CodeFontSize));
-        MessageBus.Current.SendMessage(new FontSizeToastMessage("терминала", TerminalFontSize));
+        MessageBus.Current.SendMessage(new CodeFontSizeChangedMessage(AppearanceSettings.CodeFontSize));
+        MessageBus.Current.SendMessage(new TerminalFontSizeChangedMessage(AppearanceSettings.TerminalFontSize));
+        MessageBus.Current.SendMessage(new UseSystemTitleBarChangedMessage(AppearanceSettings.UseSystemTitleBar));
+        MessageBus.Current.SendMessage(new ShowSidebarChangedMessage(AppearanceSettings.ShowSidebar));
+        MessageBus.Current.SendMessage(new CodeThemeChangedMessage(AppearanceSettings.SelectedCodeTheme));
+        MessageBus.Current.SendMessage(new FontSizeToastMessage("редактора", AppearanceSettings.CodeFontSize));
+        MessageBus.Current.SendMessage(new FontSizeToastMessage("терминала", AppearanceSettings.TerminalFontSize));
 
-        HasChanges = false;
-       
+        AppearanceSettings.AcceptChanges();
+        PythonSettings.AcceptChanges();
     }
 
     [ReactiveCommand]
@@ -220,47 +101,9 @@ public sealed partial class SettingsViewModel : ViewModelBase
     }
 
     [ReactiveCommand]
-    private void SelectCodeTheme(string themeName)
-    {
-        SelectedCodeTheme = themeName;
-    }
-
-    [ReactiveCommand]
     private void ResetToDefaults()
     {
-        var defaultUserData = _defaultUser.User;
-        CodeFontSize = defaultUserData.CodeFontSize;
-        TerminalFontSize = defaultUserData.TerminalFontSize;
-        UseSystemTitleBar = defaultUserData.UseSystemTitleBar;
-        ShowSidebar = defaultUserData.ShowSidebar;
-        SelectedCodeTheme = defaultUserData.CodeTheme;
-
-        UseEntryFunction = _defaultPythonSettings.UseEntryFunction;
-        EntryFunctionName = _defaultPythonSettings.EntryFunctionName;
-        SupressIo = _defaultPythonSettings.SupressIo;
-    }
-
-    [ReactiveCommand]
-    private void ChangeCodeFontSize(string? deltaText)
-    {
-        if (!int.TryParse(deltaText, out var delta))
-        {
-            _logger.LogWarning("Failed to parse code font size delta: {DeltaText}", deltaText);
-            return;
-        }
-
-        CodeFontSize = Math.Clamp(CodeFontSize + delta, _fontSizeOptions.MinFontSize, _fontSizeOptions.MaxFontSize);
-    }
-
-    [ReactiveCommand]
-    private void ChangeTerminalFontSize(string? deltaText)
-    {
-        if (!int.TryParse(deltaText, out var delta))
-        {
-            _logger.LogWarning("Failed to parse terminal font size delta: {DeltaText}", deltaText);
-            return;
-        }
-
-        TerminalFontSize = Math.Clamp(TerminalFontSize + delta, _fontSizeOptions.MinFontSize, _fontSizeOptions.MaxFontSize);
+        AppearanceSettings.ResetToDefaults();
+        PythonSettings.ResetToDefaults();
     }
 }

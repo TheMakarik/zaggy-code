@@ -69,6 +69,7 @@ global using ZaggyCode.Avalonia.Views.Dialogs;
 global using ZaggyCode.Avalonia.Views.TerminalEngine;
 global using ZaggyCode.Avalonia.Views.TerminalEngine.Session;
 global using ZaggyCode.Avalonia.Views.TextEditing;
+global using ZaggyCode.Avalonia.Views.UserControls;
 global using ZaggyCode.Core.Common;
 global using ZaggyCode.Core.Common.Utils;
 global using ZaggyCode.Core.Data.Interfaces;

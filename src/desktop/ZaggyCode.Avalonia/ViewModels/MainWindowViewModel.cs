@@ -25,11 +25,6 @@ public partial class MainWindowViewModel : ViewModelBase
     public ObservableCollection<CodeThemeItem> AvailableCodeThemes { get; } = [];
     public IOptions<ZaggyAssetsOptions> ZaggyAssets { get; init; }
 
-    public IRobotExecutor? Executor { get; set; }
-    public TextReader? TerminalReader { get; set; }
-    public TextWriter? TerminalWriter { get; set; }
-    public IOptions<MapAssetsOptions> MapAssets { get; set; }
-
     #endregion
 
     #region Interaction
@@ -38,17 +33,20 @@ public partial class MainWindowViewModel : ViewModelBase
     public readonly Interaction<Unit, Unit> ClearTerminalContent = new();
     public readonly Interaction<Unit, Unit> BackGridToNormal = new();
     public readonly Interaction<Unit, string> GetCodeToExecute = new();
+    public readonly Interaction<Unit, (TextReader Input, TextWriter Output)> GetTerminalStreams = new();
     public readonly Interaction<int, Unit> UpdateCodeLine = new();
     public readonly Interaction<Unit, Unit> StopCodeExecution = new();
     public readonly Interaction<Unit, Unit> ResetMap = new();
     public readonly Interaction<Unit, Unit> ConcludeRun = new();
+    public readonly Interaction<string, Unit> ShowToast = new();
+    public readonly Interaction<string, Unit> ApplyCodeTheme = new();
     public readonly Interaction<SettingsViewModel, Unit> OpenSettings = new();
 
     #endregion
 
     #region Services
 
-    private readonly IServiceScopeFactory _factory;
+    private readonly IGameEngine _gameEngine;
     private readonly IObservableStorage<UserData> _userStorage;
     private readonly IObservableStorage<PythonSettings> _pythonSettingsStorage;
     private readonly IOptions<DefaultUser> _defaultUserOptions;
@@ -59,14 +57,8 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly IOptions<CodeThemeIconOptions> _iconOptions;
     private readonly IPythonFunctionNameValidator _pythonFunctionNameValidator;
     private readonly ILogger<MainWindowViewModel> _logger;
-    private readonly ILogger<SettingsViewModel> _settingsLogger;
+    private readonly ILoggerFactory _loggerFactory;
     private CancellationTokenSource? _cancellationTokenSource;
-
-    #endregion
-
-    #region Fields
-
-    private string _codeErrorText = "Произошла ошибка: ";
 
     #endregion
 
@@ -74,9 +66,8 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public MainWindowViewModel(
         ILogger<MainWindowViewModel> logger,
-        IServiceScopeFactory factory,
+        IGameEngine gameEngine,
         IOptions<ZaggyAssetsOptions> zaggyAssets,
-        IOptions<MapAssetsOptions> mapAssets,
         IObservableStorage<UserData> userStorage,
         IObservableStorage<PythonSettings> pythonSettingsStorage,
         IOptions<DefaultUser> defaultUserOptions,
@@ -87,11 +78,10 @@ public partial class MainWindowViewModel : ViewModelBase
         IOptions<CodeThemeDisplayNameOptions> displayNameOptions,
         IOptions<CodeThemeIconOptions> iconOptions,
         IPythonFunctionNameValidator pythonFunctionNameValidator,
-        ILogger<SettingsViewModel> settingsLogger)
+        ILoggerFactory loggerFactory)
     {
-        _factory = factory;
+        _gameEngine = gameEngine;
         ZaggyAssets = zaggyAssets;
-        MapAssets = mapAssets;
         _logger = logger;
         _fontSizeOptions = textFontSize;
         _userStorage = userStorage;
@@ -102,7 +92,7 @@ public partial class MainWindowViewModel : ViewModelBase
         _displayNameOptions = displayNameOptions;
         _iconOptions = iconOptions;
         _pythonFunctionNameValidator = pythonFunctionNameValidator;
-        _settingsLogger = settingsLogger;
+        _loggerFactory = loggerFactory;
         _executionSpeed = userStorage.Current.LastSpeed;
         _selectedLanguage = userStorage.Current.LastLanguage;
         _textEditorFontSize = userStorage.Current.CodeFontSize;
@@ -116,50 +106,29 @@ public partial class MainWindowViewModel : ViewModelBase
 
         InitializeMessageBusSubscriptions();
         InitializeAvailableCodeThemes();
+        InitializeStorageSynchronization();
 
-        this.WhenAnyPropertyChanged().Subscribe(context =>
-        {
 #pragma warning disable AsyncVoidMethod
-            this.WhenAnyValue(vm => vm.IsTerminalVisible)
-                .Where(isVisible => !isVisible)
-                .Subscribe(async void (onNext) => await ResizeGridToMax.Handle(Unit.Default));
+        // Skip(1): WhenAnyValue emits the current value on subscription, but the View
+        // registers interaction handlers only after DataContextChanged.
+        this.WhenAnyValue(vm => vm.IsTerminalVisible)
+            .Skip(1)
+            .Where(isVisible => !isVisible)
+            .Subscribe(async void (_) => await ResizeGridToMax.Handle(Unit.Default));
 
-            this.WhenAnyValue(vm => vm.IsTerminalVisible)
-                .Where(isVisible => isVisible)
-                .Subscribe(async void (onNext) => await BackGridToNormal.Handle(Unit.Default));
+        this.WhenAnyValue(vm => vm.IsTerminalVisible)
+            .Skip(1)
+            .Where(isVisible => isVisible)
+            .Subscribe(async void (_) => await BackGridToNormal.Handle(Unit.Default));
 
-            this.WhenAnyValue(vm => vm.IsTerminalExists)
-                .Where(isVisible => !isVisible)
-                .Subscribe(async void (onNext) => await ClearTerminalContent.Handle(Unit.Default));
-
-            this.WhenAnyValue(vm => vm.TextEditorFontSize)
-                .Where(size => size != _userStorage.Current.CodeFontSize)
-                .Subscribe(onNext => userStorage.Current.CodeFontSize = _textEditorFontSize);
-
-            this.WhenAnyValue(vm => vm.TerminalFontSize)
-                .Where(size => size != _userStorage.Current.TerminalFontSize)
-                .Subscribe(onNext => userStorage.Current.TerminalFontSize = _terminalFontSize);
-
-            this.WhenAnyValue(vm => vm.UseOsDecoration)
-                .Where(useOsDecoration => useOsDecoration != _userStorage.Current.UseSystemTitleBar)
-                .Subscribe(onNext => userStorage.Current.UseSystemTitleBar = _useOsDecoration);
-
-            this.WhenAnyValue(vm => vm.ShowSidebar)
-                .Where(showSidebar => showSidebar != _userStorage.Current.ShowSidebar)
-                .Subscribe(onNext => userStorage.Current.ShowSidebar = _showSidebar);
-
-            this.WhenAnyValue(vm => vm.ExecutionSpeed)
-                .Where(speed => speed != _userStorage.Current.LastSpeed)
-                .Subscribe(onNext => userStorage.Current.LastSpeed = _executionSpeed);
-
-            this.WhenAnyValue(vm => vm.SelectedLanguage)
-                .Where(language => language != _userStorage.Current.LastLanguage)
-                .Subscribe(onNext => userStorage.Current.LastLanguage = _selectedLanguage);
+        this.WhenAnyValue(vm => vm.IsTerminalExists)
+            .Skip(1)
+            .Where(isTerminalExists => !isTerminalExists)
+            .Subscribe(async void (_) => await ClearTerminalContent.Handle(Unit.Default));
 #pragma warning restore AsyncVoidMethod
-        });
     }
 
-  
+
     private void InitializeAvailableCodeThemes()
     {
         foreach (var property in typeof(CodeThemeDisplayNameOptions).GetProperties())
@@ -192,12 +161,45 @@ public partial class MainWindowViewModel : ViewModelBase
         MessageBus.Current.Listen<ShowSidebarChangedMessage>()
             .Subscribe(message => ShowSidebar = message.ShowSidebar);
 
+#pragma warning disable AsyncVoidMethod
         MessageBus.Current.Listen<CodeThemeChangedMessage>()
-            .Subscribe(message =>
+            .Subscribe(async void (message) =>
             {
                 _userStorage.Current.CodeTheme = message.ThemeName;
                 CodeTheme = message.ThemeName;
+                await ApplyCodeTheme.Handle(message.ThemeName);
             });
+
+        MessageBus.Current.Listen<FontSizeToastMessage>()
+            .Subscribe(async void (message) => await ShowToast.Handle($"Размер шрифта {message.Source} изменён на {message.FontSize}"));
+#pragma warning restore AsyncVoidMethod
+    }
+
+    private void InitializeStorageSynchronization()
+    {
+        this.WhenAnyValue(vm => vm.TextEditorFontSize)
+            .Where(size => size != _userStorage.Current.CodeFontSize)
+            .Subscribe(_ => _userStorage.Current.CodeFontSize = _textEditorFontSize);
+
+        this.WhenAnyValue(vm => vm.TerminalFontSize)
+            .Where(size => size != _userStorage.Current.TerminalFontSize)
+            .Subscribe(_ => _userStorage.Current.TerminalFontSize = _terminalFontSize);
+
+        this.WhenAnyValue(vm => vm.UseOsDecoration)
+            .Where(useOsDecoration => useOsDecoration != _userStorage.Current.UseSystemTitleBar)
+            .Subscribe(_ => _userStorage.Current.UseSystemTitleBar = _useOsDecoration);
+
+        this.WhenAnyValue(vm => vm.ShowSidebar)
+            .Where(showSidebar => showSidebar != _userStorage.Current.ShowSidebar)
+            .Subscribe(_ => _userStorage.Current.ShowSidebar = _showSidebar);
+
+        this.WhenAnyValue(vm => vm.ExecutionSpeed)
+            .Where(speed => speed != _userStorage.Current.LastSpeed)
+            .Subscribe(_ => _userStorage.Current.LastSpeed = _executionSpeed);
+
+        this.WhenAnyValue(vm => vm.SelectedLanguage)
+            .Where(language => language != _userStorage.Current.LastLanguage)
+            .Subscribe(_ => _userStorage.Current.LastLanguage = _selectedLanguage);
     }
 
     #endregion
@@ -220,23 +222,23 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     [ReactiveCommand]
-    private void IncrementEditorFontSize()
+    private async Task IncrementEditorFontSize()
     {
         if (TextEditorFontSize >= _fontSizeOptions.Value.MaxFontSize)
             return;
 
         TextEditorFontSize += 1;
-        MessageBus.Current.SendMessage(new FontSizeToastMessage("редактора", TextEditorFontSize));
+        await ShowEditorFontSizeToast();
     }
 
     [ReactiveCommand]
-    private void DecrementEditorFontSize()
+    private async Task DecrementEditorFontSize()
     {
         if (TextEditorFontSize <= _fontSizeOptions.Value.MinFontSize)
             return;
 
         TextEditorFontSize -= 1;
-        MessageBus.Current.SendMessage(new FontSizeToastMessage("редактора", TextEditorFontSize));
+        await ShowEditorFontSizeToast();
     }
 
     [ReactiveCommand]
@@ -247,37 +249,37 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     [ReactiveCommand]
-    private void UpdateFontSize(int fontSize)
+    private async Task UpdateFontSize(int fontSize)
     {
         TextEditorFontSize = fontSize;
-        MessageBus.Current.SendMessage(new FontSizeToastMessage("редактора", fontSize));
+        await ShowEditorFontSizeToast();
     }
 
     [ReactiveCommand]
-    private void IncrementTerminalFontSize()
+    private async Task IncrementTerminalFontSize()
     {
         if (TerminalFontSize >= _fontSizeOptions.Value.MaxFontSize)
             return;
 
         TerminalFontSize += 1;
-        MessageBus.Current.SendMessage(new FontSizeToastMessage("терминала", TerminalFontSize));
+        await ShowTerminalFontSizeToast();
     }
 
     [ReactiveCommand]
-    private void DecrementTerminalFontSize()
+    private async Task DecrementTerminalFontSize()
     {
         if (TerminalFontSize <= _fontSizeOptions.Value.MinFontSize)
             return;
 
         TerminalFontSize -= 1;
-        MessageBus.Current.SendMessage(new FontSizeToastMessage("терминала", TerminalFontSize));
+        await ShowTerminalFontSizeToast();
     }
 
     [ReactiveCommand]
-    private void UpdateTerminalFontSize(int fontSize)
+    private async Task UpdateTerminalFontSize(int fontSize)
     {
         TerminalFontSize = fontSize;
-        MessageBus.Current.SendMessage(new FontSizeToastMessage("терминала", fontSize));
+        await ShowTerminalFontSizeToast();
     }
 
     [ReactiveCommand]
@@ -323,13 +325,19 @@ public partial class MainWindowViewModel : ViewModelBase
             _codeExamplePathOptions,
             _fontSizeOptions,
             _pythonFunctionNameValidator,
-            _settingsLogger);
+            _loggerFactory);
         await OpenSettings.Handle(settingsViewModel);
     }
 
     #endregion
 
     #region Private methods
+
+    private async Task ShowEditorFontSizeToast()
+        => await ShowToast.Handle($"Размер шрифта редактора изменён на {TextEditorFontSize}");
+
+    private async Task ShowTerminalFontSizeToast()
+        => await ShowToast.Handle($"Размер шрифта терминала изменён на {TerminalFontSize}");
 
     private async Task PrepareExecution()
     {
@@ -357,27 +365,28 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             _logger.LogDebug("Code execution was requested");
             var code = await GetCodeToExecute.Handle(Unit.Default);
+            var (input, output) = await GetTerminalStreams.Handle(Unit.Default);
 
 #if DEBUG
             SelectedLanguage = Language.Python;
 #endif
-            await using var scope = _factory.CreateAsyncScope();
-            var runner = scope.ServiceProvider.GetRequiredKeyedService<ILanguageRunner>(SelectedLanguage.GetLanguageExtension());
+            _gameEngine.Language = SelectedLanguage;
+            _gameEngine.Speed = ExecutionSpeed;
+            _gameEngine.SetIo(output, input);
 
-            Debug.Assert(TerminalReader is not null);
-            Debug.Assert(TerminalWriter is not null);
-            Debug.Assert(Executor is not null);
+            _gameEngine.DebugLineUpdated += OnDebugLineUpdated;
+            _gameEngine.CodeErrorOccurred += OnCodeErrorOccurred;
 
-            runner.DebugLineUpdated += OnDebugLineUpdated;
-            runner.CodeErrorOccurred += OnCodeErrorOccurred;
-
-            Debug.Assert(_cancellationTokenSource is not null);
-
-            await runner
-                .RedirectIo(TerminalReader, TerminalWriter)
-                .SetExecutor(Executor)
-                .SetSpeed(ExecutionSpeed)
-                .Execute(code, _cancellationTokenSource.Token);
+            try
+            {
+                Debug.Assert(_cancellationTokenSource is not null);
+                await _gameEngine.RunCodeAsync(code, _cancellationTokenSource.Token);
+            }
+            finally
+            {
+                _gameEngine.DebugLineUpdated -= OnDebugLineUpdated;
+                _gameEngine.CodeErrorOccurred -= OnCodeErrorOccurred;
+            }
 
             await ConcludeRun.Handle(Unit.Default);
         }
@@ -406,12 +415,9 @@ public partial class MainWindowViewModel : ViewModelBase
         await UpdateCodeLine.Handle(args.LineNumber);
     }
 
-    private async void OnCodeErrorOccurred(object? sender, CodeErrorOccurredEventArgs args)
+    private void OnCodeErrorOccurred(object? sender, CodeErrorOccurredEventArgs args)
     {
-        if (TerminalWriter is null)
-            _logger.LogError("Has no access to terminal writer");
-        else
-            await TerminalWriter.WriteLineAsync($"{_codeErrorText} {args.Text} ");
+        _logger.LogWarning("Code error: {Text}", args.Text);
     }
 
     #endregion

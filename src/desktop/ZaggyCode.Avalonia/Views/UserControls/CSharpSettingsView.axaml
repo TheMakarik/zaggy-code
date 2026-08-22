@@ -1,0 +1,52 @@
+<rxui:ReactiveUserControl
+    x:Class="ZaggyCode.Avalonia.Views.UserControls.CSharpSettingsView"
+    x:DataType="vm:CSharpSettingsViewModel"
+    x:TypeArguments="vm:CSharpSettingsViewModel"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:rxui="http://reactiveui.net"
+    xmlns:vm="using:ZaggyCode.Avalonia.ViewModels"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    mc:Ignorable="d">
+
+    <ScrollViewer>
+        <StackPanel Margin="20" Spacing="16">
+            <Border
+                Background="{DynamicResource AccentBrush}"
+                CornerRadius="8"
+                Margin="0,0,0,12"
+                Padding="16">
+                <Grid ColumnDefinitions="Auto,*">
+                    <materialIcons:MaterialIcon
+                        Grid.Column="0"
+                        Height="48"
+                        Kind="LanguageCsharp"
+                        Margin="0,0,16,0"
+                        VerticalAlignment="Center"
+                        Width="48" />
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                        <TextBlock
+                            FontSize="16"
+                            FontWeight="Bold"
+                            Text="C#" />
+                        <TextBlock
+                            FontSize="13"
+                            Opacity="0.9"
+                            Text="Разработан Microsoft в 2000 году как объектно-ориентированный язык для платформы .NET. Сегодня активно используется для создания веб-приложений, игр на Unity и корпоративного ПО."
+                            TextWrapping="Wrap" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <TextBlock
+                FontSize="16"
+                Foreground="{DynamicResource SystemControlDisabledTextBrush}"
+                HorizontalAlignment="Center"
+                Margin="0,40,0,0"
+                Text="Настройки C# пока недоступны"
+                VerticalAlignment="Center" />
+        </StackPanel>
+    </ScrollViewer>
+</rxui:ReactiveUserControl>
