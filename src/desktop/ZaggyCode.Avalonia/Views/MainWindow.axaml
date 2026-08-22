@@ -30,11 +30,6 @@
         <vm:MainWindowViewModel />
     </Design.DataContext>
 
-    <rxui:ReactiveWindow.Resources>
-        <converters:IsNotEqualConverter x:Key="IsNotEqualConverter" />
-        <converters:BooleanToDynamicTextConverter x:Key="BooleanToDynamicTextConverter" />
-    </rxui:ReactiveWindow.Resources>
-
     <!--  Line numbers serve as left padding; keep a small gap when they are hidden  -->
     <rxui:ReactiveWindow.Styles>
         <Style Selector="avaloniaEdit|TextEditor[ShowLineNumbers=False]">
@@ -441,7 +436,7 @@
                                                         Content="{Binding .}"
                                                         Margin="5,0">
                                                         <Button.IsEnabled>
-                                                            <MultiBinding Converter="{StaticResource IsNotEqualConverter}">
+                                                            <MultiBinding Converter="{converters:IsNotEqualConverter}">
                                                                 <Binding Path="." />
                                                                 <Binding ElementName="ThisWindow" Path="DataContext.ExecutionSpeed" />
                                                             </MultiBinding>

@@ -39,6 +39,7 @@ public sealed class GameEngine(ILogger<GameEngine> logger, IServiceScopeFactory 
         Debug.Assert(_backgroundLoadingCancellationSource is not null);
         _ioRedirectingTask = Task.Run(() =>
         {       
+            logger.LogInformation("Begin background IO loading");
             Debug.Assert(_languageRunner is not null);
             Debug.Assert(_backgroundLoadingCancellationSource is not null);
             _languageRunner.RedirectIo(input, output);
@@ -52,13 +53,5 @@ public sealed class GameEngine(ILogger<GameEngine> logger, IServiceScopeFactory 
             .Cast<Task>();
         await Task.WhenAll(notNullTasks);
     }
-
-
-    private void StartIoRedirecting()
-    {
-        _ioRedirectingTask = Task.Run(() =>
-        {
-
-        });
-    }
+    
 }

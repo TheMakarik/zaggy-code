@@ -1,7 +1,9 @@
 namespace ZaggyCode.Avalonia.Views.Converters;
 
-public sealed class BooleanToDynamicTextConverter : IMultiValueConverter
+public sealed class BooleanToDynamicTextConverter : MarkupExtension, IMultiValueConverter
 {
+    public override object ProvideValue(IServiceProvider serviceProvider) => this;
+
     public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture)
     {
         Debug.Assert(values.Count == 3, "BooleanToDynamicTextConverter expects exactly 3 values: bool, trueText, falseText.");
