@@ -44,26 +44,24 @@ public sealed class PythonLanguageRunner : ILanguageRunner
         engine.SetSearchPaths([_pythonOptions.Value.StandardLibraryPath]);
     }
 
-    public ILanguageRunner RedirectIo(TextReader input, TextWriter output)
+    public void RedirectIo(TextReader input, TextWriter output)
     {
         _python.SetVariable(ClrOutput, CreateOutputHandler(output));
         _python.SetVariable(ClrInput, CreateInputHandler(input));
         _python.Engine.ExecuteFile(_pythonOptions.Value.RedirectIoPath, _python);
         
         _logger.LogInformation("Redirected IO for python (IO support = {ioSupport})", !_pythonSettingsStorage.Current.SupressIo);
-        return this;
     }
 
-    public ILanguageRunner SetSpeed(ExecutionSpeed speed)
+    public void SetSpeed(ExecutionSpeed speed)
     {
         _actualSpeed = speed.GetActual(_speedOptions.Value);
         _python.SetVariable(ClrRaiseDebugLineUpdated, CreateDebugLineUpdater());
         
         _logger.LogInformation("Set python execution speed to {ms}ms", _actualSpeed);
-        return this;
     }
 
-    public ILanguageRunner SetExecutor(IRobotExecutor executor)
+    public void SetExecutor(IRobotExecutor executor)
     {
         var methods = typeof(IRobotExecutor).GetMethods();
         _logger.LogDebug("Methods for executor: [{methods}]", string.Join(",", methods));
@@ -73,7 +71,6 @@ public sealed class PythonLanguageRunner : ILanguageRunner
         _python.Engine.ExecuteFile(_pythonOptions.Value.PrepareModules, _python);
         
         _logger.LogInformation("Set executor for python");
-        return this;
     }
 
     public async Task Execute(string code, CancellationToken token)

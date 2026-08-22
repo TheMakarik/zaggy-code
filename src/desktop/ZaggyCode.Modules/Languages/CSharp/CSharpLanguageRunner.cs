@@ -58,23 +58,21 @@ public sealed partial class CSharpLanguageRunner(ILogger<CSharpLanguageRunner> l
         }
     }
 
-    public ILanguageRunner RedirectIo(TextReader input, TextWriter output)
+    public void RedirectIo(TextReader input, TextWriter output)
     {
         Input = input;
         Output = output;
-        return this;
     }
 
-    public ILanguageRunner SetSpeed(ExecutionSpeed speed)
+    public void SetSpeed(ExecutionSpeed speed)
     {
         ExecSpeed = speed;
-        return this;
     }
 
-    public ILanguageRunner SetExecutor(IRobotExecutor executor)
+    public void SetExecutor(IRobotExecutor executor)
     {
         Executor = executor;
-        return this;
+     
     }
 
     public async ValueTask DisposeAsync()

@@ -263,7 +263,9 @@ public abstract class LanguageRunnerTests : IDisposable
     {
         var input = A.Fake<TextReader>();
         var output = A.Fake<TextWriter>();
-        SystemUnderTests.RedirectIo(input, output).SetExecutor(executor).SetSpeed(ExecutionSpeed.X10);
+        SystemUnderTests.RedirectIo(input, output);
+        SystemUnderTests.SetExecutor(executor);
+        SystemUnderTests.SetSpeed(ExecutionSpeed.X10);
         return (input, output);
     }
 

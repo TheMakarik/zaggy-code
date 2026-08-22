@@ -138,7 +138,8 @@ public sealed class TarBZip2ArchiveReader(
         {
             await archive.WriteToDirectoryAsync(
                 tempDirectory.FullName,
-                new ExtractionOptions { ExtractFullPath = true, Overwrite = true });
+                new ExtractionOptions { ExtractFullPath = true, Overwrite = true },
+                innerProgress);
         }
 
         return tempDirectory;
