@@ -23,10 +23,8 @@ public sealed class PythonFunctionNameValidatorTests : IDisposable
         {
             PrepareModules = string.Empty,
             RedirectIoPath = string.Empty,
-            SetLineUpdatingPath = string.Empty,
             RobotPath = string.Empty,
-            StandardLibraryPath = _fileSystem.RootPath,
-            DisableLineUpdating = string.Empty
+            StandardLibraryPath = _fileSystem.RootPath
         });
         
         CreateFakeStdLibFile("os.py", "def path():\n    pass\n");

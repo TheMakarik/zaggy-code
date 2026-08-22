@@ -1,17 +1,20 @@
 namespace ZaggyCode.Modules.Languages.Python;
 
-//#:NO_AI
 [LanguageExtension(".py")]
 public sealed class PythonLanguageRunner : ILanguageRunner
 {
     private const string NotSupportedText = "is not supported due to your application settings";
-    
+
+    // Источник пользовательского кода задаётся в Execute через CreateScriptSourceFromString(code, UserCodeFileName);
+    // фреймыIronPython importlib тоже имеют co_filename "<string>", поэтому фильтруем ещё и по co_name.
+    private const string UserCodeFileName = "<string>";
+    private const string ModuleName = "<module>";
+    private const string LineUpdateTraceEventName = "line";
+
     private const string ClrOutput = "clr_output";
     private const string ClrInput = "clr_input";
-    private const string ClrRaiseDebugLineUpdated = "clr_raise_debug_line_updated";
     private const string ClrRobotPath = "robot_path";
     private const string ClrRobotExecutorPrefix = "clr_RobotExecutor_";
-    private const string ClrTryCancelExection = "clr_try_cancel_execution";
 
     private readonly ScriptScope _python;
     private int _actualSpeed;
@@ -36,40 +39,48 @@ public sealed class PythonLanguageRunner : ILanguageRunner
         _pythonSettingsStorage = pythonSettingsStorage;
         _speedOptions = speedOptions;
         _sleepHelper = sleepHelper;
-        
+
         var engine = IronPython.Hosting.Python.CreateEngine();
         _python = engine.CreateScope();
-        
+
         Debug.Assert(Directory.Exists(_pythonOptions.Value.StandardLibraryPath));
         engine.SetSearchPaths([_pythonOptions.Value.StandardLibraryPath]);
     }
 
-    public void RedirectIo(TextReader input, TextWriter output)
+    public void RedirectIo(TextReader input, TextWriter output, CancellationToken token)
     {
+        token.ThrowIfCancellationRequested();
+        _python.Engine.SetTrace(CreateCancellationTrace(token));
+
         _python.SetVariable(ClrOutput, CreateOutputHandler(output));
         _python.SetVariable(ClrInput, CreateInputHandler(input));
         _python.Engine.ExecuteFile(_pythonOptions.Value.RedirectIoPath, _python);
-        
+
         _logger.LogInformation("Redirected IO for python (IO support = {ioSupport})", !_pythonSettingsStorage.Current.SupressIo);
     }
 
-    public void SetSpeed(ExecutionSpeed speed)
+    public void SetSpeed(ExecutionSpeed speed, CancellationToken token)
     {
+        token.ThrowIfCancellationRequested();
+        _python.Engine.SetTrace(CreateCancellationTrace(token));
+
         _actualSpeed = speed.GetActual(_speedOptions.Value);
-        _python.SetVariable(ClrRaiseDebugLineUpdated, CreateDebugLineUpdater());
-        
+
         _logger.LogInformation("Set python execution speed to {ms}ms", _actualSpeed);
     }
 
-    public void SetExecutor(IRobotExecutor executor)
+    public void SetExecutor(IRobotExecutor executor, CancellationToken token)
     {
+        token.ThrowIfCancellationRequested();
+        _python.Engine.SetTrace(CreateCancellationTrace(token));
+
         var methods = typeof(IRobotExecutor).GetMethods();
         _logger.LogDebug("Methods for executor: [{methods}]", string.Join(",", methods));
-        
+
         SetExecutorVariables(methods, executor);
         _python.SetVariable(ClrRobotPath, _pythonOptions.Value.RobotPath);
         _python.Engine.ExecuteFile(_pythonOptions.Value.PrepareModules, _python);
-        
+
         _logger.LogInformation("Set executor for python");
     }
 
@@ -78,23 +89,28 @@ public sealed class PythonLanguageRunner : ILanguageRunner
         try
         {
             ValidatePythonEnvironment();
-            
+
             await Task.Factory.StartNew(() =>
             {
-                _python.SetVariable(ClrTryCancelExection, token.ThrowIfCancellationRequested);
-                _python.Engine.ExecuteFile(_pythonOptions.Value.SetLineUpdatingPath, _python);
+                _python.Engine.SetTrace(CreateUserCodeTrace(token));
 
-                DebugLineUpdated += (_, _) => _sleepHelper.Sleep(
-                    _actualSpeed,
-                    _speedOptions.Value.SleepChunk,
-                    token);
-                
-                _python.Engine.CreateScriptSourceFromString(code, "<string>").Execute(_python);
+                void OnDebugLineUpdated(object? sender, DebugLineUpdatedEventArgs args) =>
+                    _sleepHelper.Sleep(_actualSpeed, _speedOptions.Value.SleepChunk, token);
 
-                if (_pythonSettingsStorage.Current.UseEntryFunction)
+                DebugLineUpdated += OnDebugLineUpdated;
+                try
                 {
+                    _python.Engine.CreateScriptSourceFromString(code, UserCodeFileName).Execute(_python);
+
+                    if (!_pythonSettingsStorage.Current.UseEntryFunction)
+                        return;
+
                     var main = _python.GetVariable(_pythonSettingsStorage.Current.EntryFunctionName);
                     main();
+                }
+                finally
+                {
+                    DebugLineUpdated -= OnDebugLineUpdated;
                 }
             }, TaskCreationOptions.LongRunning);
         }
@@ -117,15 +133,17 @@ public sealed class PythonLanguageRunner : ILanguageRunner
     public void Dispose()
     {
         ClearEvents();
-        _python.Engine.ExecuteFile(_pythonOptions.Value.DisableLineUpdating, _python);
+        _python.Engine.SetTrace(null);
         _logger.LogInformation("Disposed Script Runner");
     }
 
-    public async ValueTask DisposeAsync()
+    public ValueTask DisposeAsync()
     {
         ClearEvents();
-        await Task.Run(() => _python.Engine.ExecuteFile(_pythonOptions.Value.DisableLineUpdating, _python));
+        _python.Engine.SetTrace(null);
         _logger.LogInformation("Disposed Script Runner");
+
+        return ValueTask.CompletedTask;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -156,6 +174,35 @@ public sealed class PythonLanguageRunner : ILanguageRunner
         }
     }
 
+    private TracebackDelegate CreateUserCodeTrace(CancellationToken token)
+    {
+        TracebackDelegate OnUserCodeLine(TraceBackFrame frame, string traceEvent, object payload)
+        {
+            token.ThrowIfCancellationRequested();
+
+            if (traceEvent == LineUpdateTraceEventName && frame.f_code.co_filename == UserCodeFileName && frame.f_code.co_name == ModuleName)
+                DebugLineUpdated?.Invoke(this, new DebugLineUpdatedEventArgs { LineNumber = Convert.ToInt32(frame.f_lineno) });
+
+            return OnUserCodeLine;
+        }
+
+        return OnUserCodeLine;
+    }
+
+    // Трейс для фоновых скриптов настройки: на каждой строке только проверяет токен,
+    // чтобы отменённый сетап прерывался посреди ExecuteFile, но не поднимал DebugLineUpdated.
+    private TracebackDelegate CreateCancellationTrace(CancellationToken token)
+    {
+        TracebackDelegate OnSetupLine(TraceBackFrame frame, string traceEvent, object payload)
+        {
+            token.ThrowIfCancellationRequested();
+
+            return OnSetupLine;
+        }
+
+        return OnSetupLine;
+    }
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private Action<string> CreateOutputHandler(TextWriter output)
     {
@@ -166,7 +213,7 @@ public sealed class PythonLanguageRunner : ILanguageRunner
                 CodeErrorOccurred?.Invoke(this, new CodeErrorOccurredEventArgs { Text = $"print() {NotSupportedText}" });
                 return;
             }
-            
+
             output.WriteLine(text);
         };
     }
@@ -181,15 +228,9 @@ public sealed class PythonLanguageRunner : ILanguageRunner
                 CodeErrorOccurred?.Invoke(this, new CodeErrorOccurredEventArgs { Text = $"input() {NotSupportedText}" });
                 return string.Empty;
             }
-            
+
             return input.ReadLine();
         };
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private Action<int> CreateDebugLineUpdater()
-    {
-        return line => DebugLineUpdated?.Invoke(this, new DebugLineUpdatedEventArgs { LineNumber = line });
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -198,7 +239,6 @@ public sealed class PythonLanguageRunner : ILanguageRunner
         Debug.Assert(Directory.Exists(_pythonOptions.Value.StandardLibraryPath));
         Debug.Assert(_python.ContainsVariable(ClrInput));
         Debug.Assert(_python.ContainsVariable(ClrOutput));
-        Debug.Assert(_python.ContainsVariable(ClrRaiseDebugLineUpdated));
         Debug.Assert(_python.ContainsVariable(ClrRobotPath));
     }
 }

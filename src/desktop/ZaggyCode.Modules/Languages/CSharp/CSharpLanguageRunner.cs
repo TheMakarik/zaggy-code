@@ -1,5 +1,6 @@
 namespace ZaggyCode.Modules.Languages.CSharp;
 
+/*
 //#:NO_AI
 [LanguageExtension(".cs"), LanguagePrettyName("C#")]
 public sealed partial class CSharpLanguageRunner(ILogger<CSharpLanguageRunner> logger, IOptions<SpeedMillisecondsOptions> millisecondsOptions) : ILanguageRunner
@@ -97,4 +98,5 @@ public sealed partial class CSharpLanguageRunner(ILogger<CSharpLanguageRunner> l
         return modifiedCode;
     }
 }
+*/
 

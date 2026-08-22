@@ -14,24 +14,12 @@ public class PythonScriptsOptions
         set => field = Environment.ExpandEnvironmentVariables(value);
     }
 
-    public required string SetLineUpdatingPath
-    {
-        get => field;
-        set => field = Environment.ExpandEnvironmentVariables(value);
-    }
-
     public required string RobotPath
     {
         get => field;
         set => field = Environment.ExpandEnvironmentVariables(value);
     }
-    
-    public required string DisableLineUpdating
-    {
-        get => field;
-        set => field = Environment.ExpandEnvironmentVariables(value);
-    }
-    
+
     public required string StandardLibraryPath
     {
         get => field;
