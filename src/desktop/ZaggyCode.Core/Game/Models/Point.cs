@@ -27,6 +27,14 @@ public class Point : INotifyPropertyChanged
     [XmlAttribute("goal")]
     [DefaultValue(false)]
     public bool IsGoal { get; set => SetField(ref field, value); }
+    
+    [XmlAttribute("custom-background-hex")]
+    [DefaultValue(null)]
+    public string? CustomBackgroundHex { get; set => SetField(ref field, value); }
+    
+    [XmlAttribute("custom-border-hex")]
+    [DefaultValue(null)]
+    public string? CustomBorderHex { get; set => SetField(ref field, value); }
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
