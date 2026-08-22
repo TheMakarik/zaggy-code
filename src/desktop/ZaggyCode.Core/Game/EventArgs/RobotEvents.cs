@@ -1,4 +1,4 @@
-namespace ZaggyCode.Core.Game.Events;
+namespace ZaggyCode.Core.Game.EventArgs;
 
 public sealed class RobotEvents
 {

@@ -1,21 +1,24 @@
 <Window
     Background="{DynamicResource BackgroundBrush}"
+    BorderBrush="{DynamicResource ForegroundBrush}"
+    BorderThickness="1"
     CanResize="False"
     Foreground="{DynamicResource ForegroundBrush}"
-    Height="180"
+    Height="240"
+    MaxWidth="440"
     ShowInTaskbar="False"
-    SizeToContent="Height"
+    SizeToContent="Width"
     Title="Сохранение изменений"
-    Width="420"
     WindowStartupLocation="CenterOwner"
     x:Class="ZaggyCode.Avalonia.Views.Dialogs.ConfirmSaveSettingsChangesWindow"
+    x:DataType="vm:ConfirmSaveSettingsChangesViewModel"
     xmlns="https://github.com/avaloniaui"
     xmlns:controls="clr-namespace:ZaggyCode.Avalonia.Views.Controls"
-    xmlns:converters="clr-namespace:ZaggyCode.Avalonia.Views.Converters"
     xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+    xmlns:vm="using:ZaggyCode.Avalonia.ViewModels"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <Grid RowDefinitions="Auto,*,Auto">
+    <Grid RowDefinitions="Auto,*">
         <Border
             Classes="header-bar"
             Grid.Row="0"
@@ -24,6 +27,7 @@
             <Grid ColumnDefinitions="*,Auto">
                 <TextBlock
                     Grid.Column="0"
+                    FontWeight="SemiBold"
                     Text="Сохранение изменений"
                     VerticalAlignment="Center" />
                 <StackPanel
@@ -48,22 +52,32 @@
 
         <Grid
             Grid.Row="1"
-            Margin="20"
+            Margin="24,16,24,20"
             RowDefinitions="*,Auto">
-            <Grid ColumnDefinitions="Auto, *" Grid.Row="0">
+            <Grid
+                ColumnDefinitions="Auto,*"
+                Grid.Row="0">
                 <controls:SvgFromContent
                     Grid.Column="0"
-                    Height="80"
-                    Loaded="LoadIcon"
-                    Margin="8,0"
-                    Width="80" />
-                <TextBlock
-                    FontSize="15"
+                    Height="96"
+                    Loaded="LoadZaggyIcon"
+                    Margin="0,0,20,0"
+                    VerticalAlignment="Center"
+                    Width="96" />
+                <StackPanel
                     Grid.Column="1"
-                    HorizontalAlignment="Center"
-                    Text="Вы дейстительно хотите сохранить изменения, совершенные в настройках?"
-                    TextWrapping="Wrap"
-                    VerticalAlignment="Center" />
+                    Spacing="8"
+                    VerticalAlignment="Center">
+                    <TextBlock
+                        FontSize="16"
+                        FontWeight="SemiBold"
+                        Text="Сохранить изменения?" />
+                    <TextBlock
+                        LineHeight="20"
+                        Opacity="0.85"
+                        Text="Настройки были изменены. Если не сохранить их, изменения потеряются после закрытия окна."
+                        TextWrapping="Wrap" />
+                </StackPanel>
             </Grid>
 
             <StackPanel
@@ -72,13 +86,13 @@
                 Orientation="Horizontal"
                 Spacing="10">
                 <Button
-                    Click="YesButton_Click"
-                    Content="Да"
-                    IsDefault="True" />
-                <Button
-                    Click="NoButton_Click"
+                    Command="{Binding DeclineCommand}"
                     Content="Нет"
                     IsCancel="True" />
+                <Button
+                    Command="{Binding ConfirmCommand}"
+                    Content="Да, сохранить"
+                    IsDefault="True" />
             </StackPanel>
         </Grid>
     </Grid>

@@ -113,8 +113,6 @@ public partial class MainWindowViewModel : ViewModelBase
         InitializeStorageSynchronization();
 
 #pragma warning disable AsyncVoidMethod
-        // Skip(1): WhenAnyValue emits the current value on subscription, but the View
-        // registers interaction handlers only after DataContextChanged.
         this.WhenAnyValue(vm => vm.IsTerminalVisible)
             .Skip(1)
             .Where(isVisible => !isVisible)

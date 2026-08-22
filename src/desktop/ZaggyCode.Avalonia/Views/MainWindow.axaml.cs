@@ -73,6 +73,16 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
             context.SetOutput(Unit.Default);
         });
 
+        ViewModel.NotImplementedOccurred.RegisterHandler(async context =>
+        {
+            var notImplementedWindow = new NotImplementedWindow
+            {
+                WindowDecorations = ViewModel.UseOsDecoration ? WindowDecorations.Full : WindowDecorations.BorderOnly
+            };
+            await notImplementedWindow.ShowDialog(this);
+            context.SetOutput(Unit.Default);
+        });
+
         ViewModel.ShowToast.RegisterHandler(context =>
         {
             ShowFontSizeToast(context.Input);

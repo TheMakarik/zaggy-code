@@ -17,7 +17,7 @@ public abstract class LanguageRunnerTests : IDisposable
         var (input, output) = ConfigureRunner(executor);
 
         // Act
-        await SystemUnderTests.Execute(GetCode("MoveUp"), CancellationToken.None);
+        await SystemUnderTests.ExecuteAsync(GetCode("MoveUp"), CancellationToken.None);
 
         // Assert
         A.CallTo(() => executor.MoveUp()).MustHaveHappened();
@@ -31,7 +31,7 @@ public abstract class LanguageRunnerTests : IDisposable
         var (input, output) = ConfigureRunner(executor);
 
         // Act
-        await SystemUnderTests.Execute(GetCode("MoveRight"), CancellationToken.None);
+        await SystemUnderTests.ExecuteAsync(GetCode("MoveRight"), CancellationToken.None);
 
         // Assert
         A.CallTo(() => executor.MoveRight()).MustHaveHappened();
@@ -45,7 +45,7 @@ public abstract class LanguageRunnerTests : IDisposable
         var (input, output) = ConfigureRunner(executor);
 
         // Act
-        await SystemUnderTests.Execute(GetCode("MoveDown"), CancellationToken.None);
+        await SystemUnderTests.ExecuteAsync(GetCode("MoveDown"), CancellationToken.None);
 
         // Assert
         A.CallTo(() => executor.MoveDown()).MustHaveHappened();
@@ -59,7 +59,7 @@ public abstract class LanguageRunnerTests : IDisposable
         var (input, output) = ConfigureRunner(executor);
 
         // Act
-        await SystemUnderTests.Execute(GetCode("MoveLeft"), CancellationToken.None);
+        await SystemUnderTests.ExecuteAsync(GetCode("MoveLeft"), CancellationToken.None);
 
         // Assert
         A.CallTo(() => executor.MoveLeft()).MustHaveHappened();
@@ -73,7 +73,7 @@ public abstract class LanguageRunnerTests : IDisposable
         var (input, output) = ConfigureRunner(executor);
 
         // Act
-        await SystemUnderTests.Execute(GetCode("FillCell"), CancellationToken.None);
+        await SystemUnderTests.ExecuteAsync(GetCode("FillCell"), CancellationToken.None);
 
         // Assert
         A.CallTo(() => executor.FillCell()).MustHaveHappened();
@@ -88,7 +88,7 @@ public abstract class LanguageRunnerTests : IDisposable
         var (input, output) = ConfigureRunner(executor);
 
         // Act
-        await SystemUnderTests.Execute(GetCode("IsCellFilled"), CancellationToken.None);
+        await SystemUnderTests.ExecuteAsync(GetCode("IsCellFilled"), CancellationToken.None);
 
         // Assert
         A.CallTo(() => executor.IsCellFilled()).MustHaveHappened();
@@ -103,7 +103,7 @@ public abstract class LanguageRunnerTests : IDisposable
         var (input, output) = ConfigureRunner(executor);
 
         // Act
-        await SystemUnderTests.Execute(GetCode("IsWallFromUp"), CancellationToken.None);
+        await SystemUnderTests.ExecuteAsync(GetCode("IsWallFromUp"), CancellationToken.None);
 
         // Assert
         A.CallTo(() => executor.IsWallFromUp()).MustHaveHappened();
@@ -118,7 +118,7 @@ public abstract class LanguageRunnerTests : IDisposable
         var (input, output) = ConfigureRunner(executor);
 
         // Act
-        await SystemUnderTests.Execute(GetCode("IsWallFromDown"), CancellationToken.None);
+        await SystemUnderTests.ExecuteAsync(GetCode("IsWallFromDown"), CancellationToken.None);
 
         // Assert
         A.CallTo(() => executor.IsWallFromDown()).MustHaveHappened();
@@ -133,7 +133,7 @@ public abstract class LanguageRunnerTests : IDisposable
         var (input, output) = ConfigureRunner(executor);
 
         // Act
-        await SystemUnderTests.Execute(GetCode("IsWallFromLeft"), CancellationToken.None);
+        await SystemUnderTests.ExecuteAsync(GetCode("IsWallFromLeft"), CancellationToken.None);
 
         // Assert
         A.CallTo(() => executor.IsWallFromLeft()).MustHaveHappened();
@@ -148,7 +148,7 @@ public abstract class LanguageRunnerTests : IDisposable
         var (input, output) = ConfigureRunner(executor);
 
         // Act
-        await SystemUnderTests.Execute(GetCode("IsWallFromRight"), CancellationToken.None);
+        await SystemUnderTests.ExecuteAsync(GetCode("IsWallFromRight"), CancellationToken.None);
 
         // Assert
         A.CallTo(() => executor.IsWallFromRight()).MustHaveHappened();
@@ -162,7 +162,7 @@ public abstract class LanguageRunnerTests : IDisposable
         var (input, output) = ConfigureRunner(executor);
 
         // Act
-        await SystemUnderTests.Execute(GetCode("WriteOutput"), CancellationToken.None);
+        await SystemUnderTests.ExecuteAsync(GetCode("WriteOutput"), CancellationToken.None);
 
         // Assert
         A.CallTo(output).MustHaveHappened();
@@ -178,7 +178,7 @@ public abstract class LanguageRunnerTests : IDisposable
         A.CallTo(input).WithReturnType<string>().Returns(expectedInput);
 
         // Act
-        await SystemUnderTests.Execute(GetCode("ReadInput"), CancellationToken.None);
+        await SystemUnderTests.ExecuteAsync(GetCode("ReadInput"), CancellationToken.None);
 
         // Assert
         A.CallTo(input).MustHaveHappened();
@@ -194,7 +194,7 @@ public abstract class LanguageRunnerTests : IDisposable
         SystemUnderTests.DebugLineUpdated += (sender, args) => wasCalled = true;
 
         // Act
-        await SystemUnderTests.Execute(GetCode("DebugLineUpdated"), CancellationToken.None);
+        await SystemUnderTests.ExecuteAsync(GetCode("DebugLineUpdated"), CancellationToken.None);
 
         // Assert 
         wasCalled.Should().BeTrue();
@@ -210,7 +210,7 @@ public abstract class LanguageRunnerTests : IDisposable
         SystemUnderTests.CodeErrorOccurred += (sender, args) => capturedArgs = args;
 
         // Act
-        await SystemUnderTests.Execute(GetCode("CodeErrorOccurred"), CancellationToken.None);
+        await SystemUnderTests.ExecuteAsync(GetCode("CodeErrorOccurred"), CancellationToken.None);
 
         // Assert
         capturedArgs.Should().NotBeNull();
@@ -233,7 +233,7 @@ public abstract class LanguageRunnerTests : IDisposable
         };
 
         // Act
-        await SystemUnderTests.Execute(GetCode("MultipleLines"), cancellationTokenSource.Token);
+        await SystemUnderTests.ExecuteAsync(GetCode("MultipleLines"), cancellationTokenSource.Token);
 
         // Assert
         eventRaised.Should().BeTrue();
@@ -251,7 +251,7 @@ public abstract class LanguageRunnerTests : IDisposable
 
         // Act
         var stopwatch = Stopwatch.StartNew();
-        await SystemUnderTests.Execute(GetCode("MultipleLines"), CancellationToken.None);
+        await SystemUnderTests.ExecuteAsync(GetCode("MultipleLines"), CancellationToken.None);
         stopwatch.Stop();
 
         // Assert

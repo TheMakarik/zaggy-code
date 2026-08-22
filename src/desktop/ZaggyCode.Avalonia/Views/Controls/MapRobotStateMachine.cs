@@ -53,6 +53,8 @@ public sealed class MapRobotStateMachine : IRobotExecutor
     public RobotEvents Events => _events;
 
     public EventHandler<RobotPointUpdatedEventArgs> RobotPointUpdated { get; set; } = null!;
+    public EventHandler<RobotDeadEventArgs>? RobotDied { get; set; }
+    public EventHandler<DrawPointEventArgs>? DrawPoint { get; set; }
 
     public event EventHandler? StateChanged;
     public event EventHandler<CellPaintedEventArgs>? CellPainted;

@@ -13,7 +13,6 @@ global using ZaggyCode.Core.Archiving.Model;
 global using ZaggyCode.Core.Data.Model;
 global using ZaggyCode.Core.Game.Enums;
 global using ZaggyCode.Core.Game.EventArgs;
-global using ZaggyCode.Core.Game.Events;
 global using ZaggyCode.Core.Game.Interfaces;
 global using ZaggyCode.Core.Game.Models;
 global using ZaggyCode.Core.Languages.Attributes;

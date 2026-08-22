@@ -9,5 +9,5 @@ public interface ILanguageRunner : IDisposable, IAsyncDisposable
     public void RedirectIo(TextReader input, TextWriter output, CancellationToken token);
     public void SetSpeed(ExecutionSpeed speed, CancellationToken token);
     public void SetExecutor(IRobotExecutor executor, CancellationToken token);
-    public Task Execute(string code, CancellationToken token);
+    public Task ExecuteAsync(string code, CancellationToken token);
 }

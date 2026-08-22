@@ -1,33 +1,32 @@
 namespace ZaggyCode.Modules.Game;
 
 //#:NO_AI
-public sealed class GameEngine : IGameEngine
+public sealed class GameEngine(ILogger<GameEngine> logger, IServiceScopeFactory scopeFactory, IRobotExecutorFactory robotExecutorFactory) : IGameEngine
 {
     private Task? _ioRedirectingTask;
     private Task? _loadModulesTask;
-    private Task? _enableLineUpdatingTask;
+    private Task? _setSpeedTask;
     private CancellationTokenSource? _backgroundLoadingCancellationSource;
-    private IServiceScope? _languageScope;
-    private Lock _lock = new Lock();
-    private ILanguageRunner _languageRunner;
-    private readonly ILogger<GameEngine> _logger;
-    private readonly IServiceScopeFactory _factory;
+    private IServiceScope? _dependecyInjectionScope;
+    private readonly Lock _lock = new Lock();
+    private ILanguageRunner? _languageRunner;
 
-    public GameEngine(ILogger<GameEngine> logger, IServiceScopeFactory factory)
-    {
-        _logger = logger;
-        _factory = factory;
-
-        StartLoadingModulesBackground();
-    }
-    
     public EventHandler<DebugLineUpdatedEventArgs>? DebugLineUpdated { get; set; }
     public EventHandler<CodeErrorOccurredEventArgs>? CodeErrorOccurred { get; set; }
-    public EventHandler<RobotPointUpdatedEventArgs> RobotPointUpdated { get; set; }
-    public EventHandler PlayerDies { get; set; }
-    public EventHandler<OverrodeGameComponentEventArgs> OverrodeGameComponent { get; set; }
-    public ExecutionSpeed Speed { get; set; }
+    public EventHandler<RobotPointUpdatedEventArgs>? RobotPointUpdated { get; set; }
+    public EventHandler? PlayerDies { get; set; }
+    public EventHandler<OverrodeGameComponentEventArgs>? OverrodeGameComponent { get; set; }
 
+    public ExecutionSpeed Speed
+    {
+        get;
+        set
+        {
+            StartSetSpeedTask();
+            field = value;
+        }
+    }
+    
     public Language Language
     {
         get;
@@ -43,7 +42,7 @@ public sealed class GameEngine : IGameEngine
         Debug.Assert(_backgroundLoadingCancellationSource is not null);
         _ioRedirectingTask = HandleBackgroundTaskErrors(Task.Run(() =>
         {
-            _logger.LogInformation("Begin background IO loading");
+            logger.LogInformation("Begin background IO loading");
             Debug.Assert(_languageRunner is not null);
             Debug.Assert(_backgroundLoadingCancellationSource is not null);
             _languageRunner.RedirectIo(input, output, _backgroundLoadingCancellationSource.Token);
@@ -53,7 +52,7 @@ public sealed class GameEngine : IGameEngine
     
     public async Task RunCodeAsync(string code, CancellationToken token)
     {
-        var taskToWait = ((IEnumerable<Task?>)[_ioRedirectingTask, _loadModulesTask, _enableLineUpdatingTask])
+        var taskToWait = ((IEnumerable<Task?>)[_ioRedirectingTask, _loadModulesTask, _setSpeedTask])
             .Where(task => task is not null)
             .Where(task => !task!.IsCompleted)
             .Cast<Task>()
@@ -63,9 +62,10 @@ public sealed class GameEngine : IGameEngine
         if (taskToWait.Any())
             await Task.WhenAll(taskToWait);
         else 
-            _logger.LogDebug("No background task to wait");
+            logger.LogDebug("No background task to wait");
 
-        await _languageRunner.Execute(code, token);
+        await _languageRunner!.ExecuteAsync(code, token);
+        ReloadLanguageRunner(Language);
     }
     
     private void StartLoadingModulesBackground()
@@ -73,7 +73,7 @@ public sealed class GameEngine : IGameEngine
         Debug.Assert(_backgroundLoadingCancellationSource is not null);
         _loadModulesTask = HandleBackgroundTaskErrors(Task.Run(() =>
         {
-            _logger.LogInformation("Start background");
+            logger.LogInformation("Start background loading modules");
         }), "Loading modules");
     }
     
@@ -82,11 +82,11 @@ public sealed class GameEngine : IGameEngine
         return runTask.ContinueWith(task =>
         {
             if (task.IsCanceled)
-                _logger.LogDebug("{name} background was cancelled", taskNameForLogging);
+                logger.LogDebug("{name} background was cancelled", taskNameForLogging);
             else if (task.IsCompletedSuccessfully)
-                _logger.LogDebug("{name} background was successfully", taskNameForLogging);
+                logger.LogDebug("{name} background was successfully", taskNameForLogging);
             else if (task.Exception is not null)
-                _logger.LogDebug("{name} background stopped with exception", taskNameForLogging);
+                logger.LogDebug("{name} background stopped with exception", taskNameForLogging);
         });
     }
     
@@ -95,10 +95,23 @@ public sealed class GameEngine : IGameEngine
         using var @lock = _lock.EnterScope();
         _backgroundLoadingCancellationSource?.Cancel();
         _backgroundLoadingCancellationSource = new CancellationTokenSource();
-        _languageScope?.Dispose();
-        _languageScope = _factory.CreateScope();
-        _languageRunner = _languageScope.ServiceProvider.GetRequiredKeyedService<ILanguageRunner>(language);
-        _logger.LogInformation("Loaded runner for {language}", language);
+        _dependecyInjectionScope?.Dispose();
+        _dependecyInjectionScope = scopeFactory.CreateScope();
+        _languageRunner = _dependecyInjectionScope
+            .ServiceProvider
+            .GetRequiredKeyedService<ILanguageRunner>(language);
+        
+        logger.LogInformation("Loaded runner for {language}", language);
+        StartLoadingModulesBackground();
+    }
+    
+    private void StartSetSpeedTask()
+    {
+        Debug.Assert(_backgroundLoadingCancellationSource is not null);
+        _setSpeedTask = HandleBackgroundTaskErrors(Task.Run(() =>
+        {
+            _languageRunner!.SetSpeed(Speed, _backgroundLoadingCancellationSource.Token);
+        }), "Set speed");
     }
     
 }

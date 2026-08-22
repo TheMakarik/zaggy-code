@@ -2,6 +2,7 @@ namespace ZaggyCode.Avalonia.Views;
 
 public partial class SettingsWindow : ReactiveWindow<SettingsViewModel>
 {
+    private bool _closeConfirmed;
     public SettingsWindow()
     {
         InitializeComponent();
@@ -49,7 +50,7 @@ public partial class SettingsWindow : ReactiveWindow<SettingsViewModel>
     {
         base.OnClosing(eventArgs);
 
-        if (eventArgs.IsProgrammatic || ViewModel is null || !ViewModel.HasChanges)
+        if (_closeConfirmed || eventArgs.IsProgrammatic || ViewModel is null || !ViewModel.HasChanges)
             return;
 
         eventArgs.Cancel = true;
@@ -61,20 +62,16 @@ public partial class SettingsWindow : ReactiveWindow<SettingsViewModel>
     {
         var confirmationWindow = new ConfirmSaveSettingsChangesWindow
         {
-            WindowDecorations = WindowDecorations
+            WindowDecorations = WindowDecorations,
+            DataContext = new ConfirmSaveSettingsChangesViewModel()
         };
         var result = await confirmationWindow.ShowDialog<bool?>(this);
 
-        if (result != true)
-        {
-            Close();
-            return;
-        }
+        if (result == true && ViewModel is not null)
+            ViewModel.SaveSettingsCommand.Execute(Unit.Default).Subscribe();
 
-        if (ViewModel is null)
-            return;
-
-        ViewModel.SaveSettingsCommand.Execute(Unit.Default).Subscribe();
+        _closeConfirmed = true;
+        Close();
     }
 
     private void ResizeHandle_PointerPressed(object? sender, PointerPressedEventArgs e)

@@ -84,7 +84,7 @@ public sealed class PythonLanguageRunner : ILanguageRunner
         _logger.LogInformation("Set executor for python");
     }
 
-    public async Task Execute(string code, CancellationToken token)
+    public async Task ExecuteAsync(string code, CancellationToken token)
     {
         try
         {

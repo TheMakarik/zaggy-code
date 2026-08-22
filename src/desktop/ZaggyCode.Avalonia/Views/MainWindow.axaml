@@ -118,7 +118,7 @@
                         <MenuItem Header="Уровни" Icon="{materialIcons:MaterialIconExt Kind=Games}">
                             <MenuItem Header="Открыть уровень из файловой системы" Icon="{materialIcons:MaterialIconExt Kind=Games}" />
                             <MenuItem Header="Создать уровень" Icon="{materialIcons:MaterialIconExt Kind=Create}" />
-                            <MenuItem Header="Загрузить уровень из репозитория" Icon="{materialIcons:MaterialIconExt Kind=Download}" />
+                            <MenuItem Command="{Binding ThrowNotImplementedCommand}" Header="Загрузить уровень из репозитория" Icon="{materialIcons:MaterialIconExt Kind=Download}" />
                             <MenuItem
                                 Header="Скорость"
                                 Icon="{materialIcons:MaterialIconExt Kind=Speedometer}"
@@ -198,7 +198,7 @@
                                 Command="{Binding OpenSettingsCommand}"
                                 Header="Настройки"
                                 Icon="{materialIcons:MaterialIconExt Kind=Settings}" />
-                            <MenuItem Header="Управление горячими клавишами" Icon="{materialIcons:MaterialIconExt Kind=KeyboardSettings}" />
+                            <MenuItem Command="{Binding ThrowNotImplementedCommand}" Header="Управление горячими клавишами" Icon="{materialIcons:MaterialIconExt Kind=KeyboardSettings}" />
                             <MenuItem
                                 Command="{Binding DataContext.ChangeTerminalVisibilityCommand, ElementName=ThisWindow}"
                                 Header="Терминал"
@@ -231,7 +231,7 @@
                             <MenuItem Header="Уровни" Icon="{materialIcons:MaterialIconExt Kind=Games}">
                                 <MenuItem Header="Открыть уровень из файловой системы" Icon="{materialIcons:MaterialIconExt Kind=Games}" />
                                 <MenuItem Header="Создать уровень" Icon="{materialIcons:MaterialIconExt Kind=Create}" />
-                                <MenuItem Header="Загрузить уровень из репозитория" Icon="{materialIcons:MaterialIconExt Kind=Download}" />
+                                <MenuItem Command="{Binding ThrowNotImplementedCommand}" Header="Загрузить уровень из репозитория" Icon="{materialIcons:MaterialIconExt Kind=Download}" />
                                 <MenuItem
                                     Header="Скорость"
                                     Icon="{materialIcons:MaterialIconExt Kind=Speedometer}"
@@ -317,7 +317,7 @@
                                     Command="{Binding OpenSettingsCommand}"
                                     Header="Настройки"
                                     Icon="{materialIcons:MaterialIconExt Kind=Settings}" />
-                                <MenuItem Header="Управление горячими клавишами" Icon="{materialIcons:MaterialIconExt Kind=KeyboardSettings}" />
+                                <MenuItem Command="{Binding ThrowNotImplementedCommand}" Header="Управление горячими клавишами" Icon="{materialIcons:MaterialIconExt Kind=KeyboardSettings}" />
                                 <MenuItem
                                     Command="{Binding DataContext.ChangeTerminalVisibilityCommand, ElementName=ThisWindow}"
                                     Header="Терминал"
@@ -403,6 +403,7 @@
                             ToolTip.Tip="Открыть загруженные уровни" />
                         <Button
                             Classes="icon-button"
+                            Command="{Binding ThrowNotImplementedCommand}"
                             Content="{materialIcons:MaterialIconExt Kind=Download}"
                             ToolTip.Tip="Установить уровень из интернета" />
                         <Button

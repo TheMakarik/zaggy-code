@@ -5,17 +5,20 @@ public partial class ConfirmSaveSettingsChangesWindow : Window
     public ConfirmSaveSettingsChangesWindow()
     {
         InitializeComponent();
+
         CustomTitleBar.IsVisible = WindowDecorations != WindowDecorations.Full;
-    }
 
-    private void YesButton_Click(object sender, RoutedEventArgs e)
-    {
-        Close(true);
-    }
+        DataContextChanged += (_, _) =>
+        {
+            if (DataContext is not ConfirmSaveSettingsChangesViewModel viewModel)
+                return;
 
-    private void NoButton_Click(object sender, RoutedEventArgs e)
-    {
-        Close(false);
+            viewModel.CloseInteraction.RegisterHandler(context =>
+            {
+                Close(context.Input);
+                context.SetOutput(Unit.Default);
+            });
+        };
     }
 
     private void MinimizeButton_Click(object? sender, RoutedEventArgs e)
@@ -28,9 +31,11 @@ public partial class ConfirmSaveSettingsChangesWindow : Window
         Close(false);
     }
 
-    private void LoadIcon(object? sender, RoutedEventArgs e)
+    private void LoadZaggyIcon(object? sender, RoutedEventArgs e)
     {
-        var control = sender as SvgFromContent;
-        control!.Path = App.Services.GetRequiredService<IOptions<ZaggyAssetsOptions>>().Value.EmotionQuestion;
+        if (sender is not SvgFromContent control)
+            return;
+
+        control.Path = App.Services.GetRequiredService<IOptions<ZaggyAssetsOptions>>().Value.EmotionQuestion;
     }
 }

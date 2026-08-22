@@ -69,7 +69,7 @@ public class PythonLanguageRunnerTests : LanguageRunnerTests
         var (input, output) = ConfigureRunner(executor);
 
         // Act
-        await SystemUnderTests.Execute(UseEntryFunctionEnabledCode, CancellationToken.None);
+        await SystemUnderTests.ExecuteAsync(UseEntryFunctionEnabledCode, CancellationToken.None);
 
         // Assert
         A.CallTo(() => executor.MoveUp()).MustHaveHappened();
@@ -91,7 +91,7 @@ public class PythonLanguageRunnerTests : LanguageRunnerTests
         var (input, output) = ConfigureRunner(executor);
 
         // Act
-        await SystemUnderTests.Execute(UseEntryFunctionDisabledCode, CancellationToken.None);
+        await SystemUnderTests.ExecuteAsync(UseEntryFunctionDisabledCode, CancellationToken.None);
 
         // Assert
         A.CallTo(() => executor.MoveUp()).MustNotHaveHappened();
@@ -115,7 +115,7 @@ public class PythonLanguageRunnerTests : LanguageRunnerTests
         SystemUnderTests.CodeErrorOccurred += (_, args) => capturedArgs = args;
 
         // Act
-        await SystemUnderTests.Execute(SuppressIoPrintCode, CancellationToken.None);
+        await SystemUnderTests.ExecuteAsync(SuppressIoPrintCode, CancellationToken.None);
 
         // Assert
         capturedArgs.Should().NotBeNull();
@@ -140,7 +140,7 @@ public class PythonLanguageRunnerTests : LanguageRunnerTests
         SystemUnderTests.CodeErrorOccurred += (_, args) => capturedArgs = args;
 
         // Act
-        await SystemUnderTests.Execute(SuppressIoInputCode, CancellationToken.None);
+        await SystemUnderTests.ExecuteAsync(SuppressIoInputCode, CancellationToken.None);
 
         // Assert
         capturedArgs.Should().NotBeNull();
