@@ -35,6 +35,13 @@
         <converters:BooleanToDynamicTextConverter x:Key="BooleanToDynamicTextConverter" />
     </rxui:ReactiveWindow.Resources>
 
+    <!--  Line numbers serve as left padding; keep a small gap when they are hidden  -->
+    <rxui:ReactiveWindow.Styles>
+        <Style Selector="avaloniaEdit|TextEditor[ShowLineNumbers=False]">
+            <Setter Property="Padding" Value="3,0,0,0" />
+        </Style>
+    </rxui:ReactiveWindow.Styles>
+
     <Grid
         Classes="main-background"
         ColumnDefinitions="6,*,6"
@@ -489,7 +496,7 @@
                                 Foreground="{DynamicResource EditorForegroundBrush}"
                                 LineNumbersForeground="{DynamicResource EditorLineNumberBrush}"
                                 Name="Editor"
-                                ShowLineNumbers="True">
+                                ShowLineNumbers="{Binding ShowCodeLineNumbers}">
                                 <Interaction.Behaviors>
                                     <behaviors:TextEditorZoomBehavior
                                         MaxFontSize="{Binding MaxFontSize, Mode=OneTime}"

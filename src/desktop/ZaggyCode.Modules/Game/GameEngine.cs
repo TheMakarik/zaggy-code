@@ -36,11 +36,13 @@ public sealed class GameEngine(ILogger<GameEngine> logger, IServiceScopeFactory 
 
     public void SetIo(TextWriter output, TextReader input)
     {
+        Debug.Assert(_backgroundLoadingCancellationSource is not null);
         _ioRedirectingTask = Task.Run(() =>
         {       
             Debug.Assert(_languageRunner is not null);
+            Debug.Assert(_backgroundLoadingCancellationSource is not null);
             _languageRunner.RedirectIo(input, output);
-        });
+        }, _backgroundLoadingCancellationSource.Token);
     }
 
     public async Task RunCodeAsync(string code, CancellationToken token)

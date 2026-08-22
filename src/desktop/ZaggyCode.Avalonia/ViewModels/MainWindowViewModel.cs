@@ -9,6 +9,8 @@ public partial class MainWindowViewModel : ViewModelBase
     [Reactive] private bool _isRunning = false;
     [Reactive] private bool _useOsDecoration = false;
     [Reactive] private bool _showSidebar = true;
+    [Reactive] private bool _enableCodeHighlighting = true;
+    [Reactive] private bool _showCodeLineNumbers = true;
     [Reactive] private ExecutionSpeed _executionSpeed;
     [Reactive] private Language _selectedLanguage;
     [Reactive] private int _textEditorFontSize;
@@ -99,6 +101,8 @@ public partial class MainWindowViewModel : ViewModelBase
         _terminalFontSize = userStorage.Current.TerminalFontSize;
         _useOsDecoration = userStorage.Current.UseSystemTitleBar;
         _showSidebar = userStorage.Current.ShowSidebar;
+        _enableCodeHighlighting = userStorage.Current.EnableCodeHighlighting;
+        _showCodeLineNumbers = userStorage.Current.ShowCodeLineNumbers;
         CodeTheme = userStorage.Current.CodeTheme;
         PopupOptions = popupOptions.Value;
         MaxFontSize = _fontSizeOptions.Value.MaxFontSize;
@@ -161,6 +165,12 @@ public partial class MainWindowViewModel : ViewModelBase
         MessageBus.Current.Listen<ShowSidebarChangedMessage>()
             .Subscribe(message => ShowSidebar = message.ShowSidebar);
 
+        MessageBus.Current.Listen<EnableCodeHighlightingChangedMessage>()
+            .Subscribe(message => EnableCodeHighlighting = message.EnableCodeHighlighting);
+
+        MessageBus.Current.Listen<ShowCodeLineNumbersChangedMessage>()
+            .Subscribe(message => ShowCodeLineNumbers = message.ShowCodeLineNumbers);
+
 #pragma warning disable AsyncVoidMethod
         MessageBus.Current.Listen<CodeThemeChangedMessage>()
             .Subscribe(async void (message) =>
@@ -192,6 +202,14 @@ public partial class MainWindowViewModel : ViewModelBase
         this.WhenAnyValue(vm => vm.ShowSidebar)
             .Where(showSidebar => showSidebar != _userStorage.Current.ShowSidebar)
             .Subscribe(_ => _userStorage.Current.ShowSidebar = _showSidebar);
+
+        this.WhenAnyValue(vm => vm.EnableCodeHighlighting)
+            .Where(enable => enable != _userStorage.Current.EnableCodeHighlighting)
+            .Subscribe(_ => _userStorage.Current.EnableCodeHighlighting = _enableCodeHighlighting);
+
+        this.WhenAnyValue(vm => vm.ShowCodeLineNumbers)
+            .Where(showLineNumbers => showLineNumbers != _userStorage.Current.ShowCodeLineNumbers)
+            .Subscribe(_ => _userStorage.Current.ShowCodeLineNumbers = _showCodeLineNumbers);
 
         this.WhenAnyValue(vm => vm.ExecutionSpeed)
             .Where(speed => speed != _userStorage.Current.LastSpeed)

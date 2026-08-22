@@ -14,8 +14,42 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     mc:Ignorable="d">
 
+    <!--  Line numbers serve as left padding; keep a small gap when they are hidden  -->
+    <rxui:ReactiveUserControl.Styles>
+        <Style Selector="avaloniaEdit|TextEditor[ShowLineNumbers=False]">
+            <Setter Property="Padding" Value="3,0,0,0" />
+        </Style>
+    </rxui:ReactiveUserControl.Styles>
+
     <ScrollViewer>
         <StackPanel Margin="20" Spacing="20">
+            <Border
+                Background="{DynamicResource AccentBrush}"
+                CornerRadius="8"
+                Margin="0,0,0,12"
+                Padding="16">
+                <Grid ColumnDefinitions="Auto,*">
+                    <materialIcons:MaterialIcon
+                        Grid.Column="0"
+                        Height="48"
+                        Kind="Eye"
+                        Margin="0,0,16,0"
+                        VerticalAlignment="Center"
+                        Width="48" />
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                        <TextBlock
+                            FontSize="16"
+                            FontWeight="Bold"
+                            Text="Вид" />
+                        <TextBlock
+                            FontSize="13"
+                            Opacity="0.9"
+                            Text="Настройки внешнего вида приложения: шрифты редактора и терминала, оформление окна и подсветка синтаксиса кода."
+                            TextWrapping="Wrap" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
             <TextBlock Classes="settings-section-title" Text="Шрифты" />
 
             <Grid ColumnDefinitions="*,Auto">
@@ -85,9 +119,20 @@
             <CheckBox Content="Использовать системную рамку окна" IsChecked="{Binding UseSystemTitleBar}" />
             <CheckBox Content="Показывать боковую панель" IsChecked="{Binding ShowSidebar}" />
 
+            <TextBlock Classes="settings-section-title" Text="Редактор" />
+
+            <CheckBox
+                Content="Подсветка синтаксиса"
+                IsChecked="{Binding EnableCodeHighlighting}"
+                ToolTip.Tip="Отключите, чтобы редактор кода отображался без цветовой подсветки" />
+            <CheckBox
+                Content="Показывать номера строк"
+                IsChecked="{Binding ShowCodeLineNumbers}"
+                ToolTip.Tip="Отображение нумерации строк в редакторе кода" />
+
             <TextBlock Classes="settings-section-title" Text="Тема подсветки синтаксиса" />
 
-            <ItemsControl ItemsSource="{Binding AvailableCodeThemes}">
+            <ItemsControl IsEnabled="{Binding EnableCodeHighlighting}" ItemsSource="{Binding AvailableCodeThemes}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <WrapPanel />
@@ -134,7 +179,7 @@
                     LineNumbersForeground="{DynamicResource EditorLineNumberBrush}"
                     Margin="0,0,4,0"
                     Name="CSharpExampleEditor"
-                    ShowLineNumbers="True" />
+                    ShowLineNumbers="{Binding ShowCodeLineNumbers}" />
                 <avaloniaEdit:TextEditor
                     Background="{DynamicResource EditorBackgroundBrush}"
                     FontSize="14"
@@ -144,7 +189,7 @@
                     LineNumbersForeground="{DynamicResource EditorLineNumberBrush}"
                     Margin="4,0,0,0"
                     Name="PythonExampleEditor"
-                    ShowLineNumbers="True" />
+                    ShowLineNumbers="{Binding ShowCodeLineNumbers}" />
             </Grid>
         </StackPanel>
     </ScrollViewer>

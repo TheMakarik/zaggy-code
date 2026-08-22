@@ -75,6 +75,8 @@ public sealed partial class SettingsViewModel : ViewModelBase
         current.UseSystemTitleBar = AppearanceSettings.UseSystemTitleBar;
         current.ShowSidebar = AppearanceSettings.ShowSidebar;
         current.CodeTheme = AppearanceSettings.SelectedCodeTheme;
+        current.EnableCodeHighlighting = AppearanceSettings.EnableCodeHighlighting;
+        current.ShowCodeLineNumbers = AppearanceSettings.ShowCodeLineNumbers;
 
         var pythonCurrent = _pythonSettingsStorage.Current;
         pythonCurrent.UseEntryFunction = PythonSettings.UseEntryFunction;
@@ -86,6 +88,8 @@ public sealed partial class SettingsViewModel : ViewModelBase
         MessageBus.Current.SendMessage(new UseSystemTitleBarChangedMessage(AppearanceSettings.UseSystemTitleBar));
         MessageBus.Current.SendMessage(new ShowSidebarChangedMessage(AppearanceSettings.ShowSidebar));
         MessageBus.Current.SendMessage(new CodeThemeChangedMessage(AppearanceSettings.SelectedCodeTheme));
+        MessageBus.Current.SendMessage(new EnableCodeHighlightingChangedMessage(AppearanceSettings.EnableCodeHighlighting));
+        MessageBus.Current.SendMessage(new ShowCodeLineNumbersChangedMessage(AppearanceSettings.ShowCodeLineNumbers));
         MessageBus.Current.SendMessage(new FontSizeToastMessage("редактора", AppearanceSettings.CodeFontSize));
         MessageBus.Current.SendMessage(new FontSizeToastMessage("терминала", AppearanceSettings.TerminalFontSize));
 

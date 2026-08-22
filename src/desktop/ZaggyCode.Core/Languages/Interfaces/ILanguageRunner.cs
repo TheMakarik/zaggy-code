@@ -8,6 +8,6 @@ public interface ILanguageRunner : IDisposable, IAsyncDisposable
 
     public ILanguageRunner RedirectIo(TextReader input, TextWriter output);
     public ILanguageRunner SetSpeed(ExecutionSpeed speed);
-    public ILanguageRunner SetExecutor(Game.Interfaces.IRobotExecutor executor);
+    public ILanguageRunner SetExecutor(IRobotExecutor executor);
     public Task Execute(string code, CancellationToken token);
 }

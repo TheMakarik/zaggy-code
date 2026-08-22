@@ -20,12 +20,33 @@ public partial class AppearanceSettingsView : ReactiveUserControl<AppearanceSett
                 context.SetOutput(context.Input);
             });
 
-            InitializeExampleEditors();
+            LoadExampleCode(CSharpExampleEditor, ViewModel.CSharpExamplePath);
+            LoadExampleCode(PythonExampleEditor, ViewModel.PythonExamplePath);
+
+            ViewModel.WhenAnyValue(vm => vm.EnableCodeHighlighting)
+                .Subscribe(ApplyCodeHighlighting);
         };
     }
 
-    private void InitializeExampleEditors()
+    private void ApplyCodeHighlighting(bool isEnabled)
     {
+        if (isEnabled)
+        {
+            InstallExampleEditorsHighlighting();
+            return;
+        }
+
+        _csharpTextMateInstallation?.Dispose();
+        _csharpTextMateInstallation = null;
+        _pythonTextMateInstallation?.Dispose();
+        _pythonTextMateInstallation = null;
+    }
+
+    private void InstallExampleEditorsHighlighting()
+    {
+        if (_csharpTextMateInstallation is not null)
+            return;
+
         if (!Enum.TryParse<ThemeName>(ViewModel!.SelectedCodeTheme, out var themeName))
             themeName = ThemeName.VisualStudioDark;
 
@@ -38,9 +59,6 @@ public partial class AppearanceSettingsView : ReactiveUserControl<AppearanceSett
         _pythonTextMateInstallation = PythonExampleEditor.InstallTextMate(registryOptions);
         _pythonTextMateInstallation.SetGrammar(
             registryOptions.GetScopeByLanguageId(registryOptions.GetLanguageByExtension(".py").Id));
-
-        LoadExampleCode(CSharpExampleEditor, ViewModel.CSharpExamplePath);
-        LoadExampleCode(PythonExampleEditor, ViewModel.PythonExamplePath);
     }
 
     private static void LoadExampleCode(TextEditor editor, string filePath)

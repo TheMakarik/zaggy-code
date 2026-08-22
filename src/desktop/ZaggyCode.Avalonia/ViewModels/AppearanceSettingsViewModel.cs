@@ -9,6 +9,8 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
     [Reactive] private bool _useSystemTitleBar;
     [Reactive] private bool _showSidebar;
     [Reactive] private string _selectedCodeTheme = string.Empty;
+    [Reactive] private bool _enableCodeHighlighting;
+    [Reactive] private bool _showCodeLineNumbers;
     [Reactive] private bool _hasChanges;
     [Reactive] private bool _canDecreaseCodeFontSize;
     [Reactive] private bool _canIncreaseCodeFontSize;
@@ -25,6 +27,8 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
     private bool _originalUseSystemTitleBar;
     private bool _originalShowSidebar;
     private string _originalCodeTheme = string.Empty;
+    private bool _originalEnableCodeHighlighting;
+    private bool _originalShowCodeLineNumbers;
 
     public int MinFontSize => _fontSizeOptions.MinFontSize;
     public int MaxFontSize => _fontSizeOptions.MaxFontSize;
@@ -53,6 +57,8 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
         _originalUseSystemTitleBar = current.UseSystemTitleBar;
         _originalShowSidebar = current.ShowSidebar;
         _originalCodeTheme = current.CodeTheme;
+        _originalEnableCodeHighlighting = current.EnableCodeHighlighting;
+        _originalShowCodeLineNumbers = current.ShowCodeLineNumbers;
 
         LoadFromUserData(current);
         HasChanges = false;
@@ -64,7 +70,9 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
                 nameof(TerminalFontSize),
                 nameof(UseSystemTitleBar),
                 nameof(ShowSidebar),
-                nameof(SelectedCodeTheme))
+                nameof(SelectedCodeTheme),
+                nameof(EnableCodeHighlighting),
+                nameof(ShowCodeLineNumbers))
             .Subscribe(_ => UpdateHasChanges());
 
         this.WhenAnyValue(viewModel => viewModel.SelectedCodeTheme)
@@ -94,6 +102,8 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
         UseSystemTitleBar = _defaultUserData.UseSystemTitleBar;
         ShowSidebar = _defaultUserData.ShowSidebar;
         SelectedCodeTheme = _defaultUserData.CodeTheme;
+        EnableCodeHighlighting = _defaultUserData.EnableCodeHighlighting;
+        ShowCodeLineNumbers = _defaultUserData.ShowCodeLineNumbers;
     }
 
     public void AcceptChanges()
@@ -103,6 +113,8 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
         _originalUseSystemTitleBar = UseSystemTitleBar;
         _originalShowSidebar = ShowSidebar;
         _originalCodeTheme = SelectedCodeTheme;
+        _originalEnableCodeHighlighting = EnableCodeHighlighting;
+        _originalShowCodeLineNumbers = ShowCodeLineNumbers;
         HasChanges = false;
     }
 
@@ -113,6 +125,8 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
         UseSystemTitleBar = userData.UseSystemTitleBar;
         ShowSidebar = userData.ShowSidebar;
         SelectedCodeTheme = userData.CodeTheme;
+        EnableCodeHighlighting = userData.EnableCodeHighlighting;
+        ShowCodeLineNumbers = userData.ShowCodeLineNumbers;
     }
 
     private void UpdateHasChanges()
@@ -122,7 +136,9 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
             TerminalFontSize != _originalTerminalFontSize ||
             UseSystemTitleBar != _originalUseSystemTitleBar ||
             ShowSidebar != _originalShowSidebar ||
-            SelectedCodeTheme != _originalCodeTheme;
+            SelectedCodeTheme != _originalCodeTheme ||
+            EnableCodeHighlighting != _originalEnableCodeHighlighting ||
+            ShowCodeLineNumbers != _originalShowCodeLineNumbers;
     }
 
     private void InitializeMessageBusSubscriptions()

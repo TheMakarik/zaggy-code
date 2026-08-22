@@ -236,19 +236,40 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
     {
         base.OnLoaded(e);
 
-        var initialThemeName = ViewModel?.CodeTheme ?? "VisualStudioDark";
-        if (!Enum.TryParse<ThemeName>(initialThemeName, out var initialTheme))
-            initialTheme = ThemeName.VisualStudioDark;
-
-        var registryOptions = new RegistryOptions(initialTheme);
-        _textMateInstallation = Editor.InstallTextMate(registryOptions);
-        _textMateInstallation.SetGrammar(registryOptions.GetScopeByLanguageId(registryOptions.GetLanguageByExtension(Language.Python.GetLanguageExtension()).Id));
-        ApplyCodeTheme(initialThemeName);
+        ViewModel?.WhenAnyValue(vm => vm.EnableCodeHighlighting)
+            .Subscribe(ApplyCodeHighlighting);
 
         GameMap.Map = MapView.CreateSampleMap();
 
         GameMap.Events.LevelCompleted += (_, _) => _terminalSession.Writer.WriteLine("Уровень пройден!");
         GameMap.Events.RobotDead += (_, _) => _terminalSession.Writer.WriteLine("Загги врезался и погиб.");
+    }
+
+    private void ApplyCodeHighlighting(bool isEnabled)
+    {
+        if (isEnabled)
+        {
+            InstallCodeHighlighting();
+            return;
+        }
+
+        _textMateInstallation?.Dispose();
+        _textMateInstallation = null;
+    }
+
+    private void InstallCodeHighlighting()
+    {
+        if (_textMateInstallation is not null)
+            return;
+
+        var themeName = ViewModel?.CodeTheme ?? "VisualStudioDark";
+        if (!Enum.TryParse<ThemeName>(themeName, out var theme))
+            theme = ThemeName.VisualStudioDark;
+
+        var registryOptions = new RegistryOptions(theme);
+        _textMateInstallation = Editor.InstallTextMate(registryOptions);
+        _textMateInstallation.SetGrammar(registryOptions.GetScopeByLanguageId(registryOptions.GetLanguageByExtension(Language.Python.GetLanguageExtension()).Id));
+        _textMateInstallation.SetTheme(registryOptions.LoadTheme(theme));
     }
 
     private void ApplyCodeTheme(string themeName)
