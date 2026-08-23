@@ -61,12 +61,7 @@ public sealed class RobotExecutor : IRobotExecutor
     {
         return HasWallInDirection(1, 0, HasWallOnRight, HasWallOnLeft);
     }
-
-    public void Dispose()
-    {
-        //Чтобы удовлетворить Sctutor 
-    }
-
+    
     // Границы карты задаются Width/Height, а не набором точек: точек за пределами может быть больше.
     private void Move(int deltaX, int deltaY, Func<WallType, bool> exitWall, Func<WallType, bool> enterWall)
     {

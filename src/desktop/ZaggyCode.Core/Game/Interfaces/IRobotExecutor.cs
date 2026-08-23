@@ -1,7 +1,7 @@
 namespace ZaggyCode.Core.Game.Interfaces;
 
 //#:NO_AI
-public interface IRobotExecutor : IDisposable
+public interface IRobotExecutor
 {
     public EventHandler<RobotPointUpdatedEventArgs>? RobotPointUpdated { get; set; }
     public EventHandler<RobotDeadEventArgs>? RobotDied { get; set; }
