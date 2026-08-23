@@ -2,8 +2,14 @@ namespace ZaggyCode.Avalonia.Options;
 
 public sealed class ZaggyAssetsOptions
 {
-    public required string IconPath 
-    { 
+    public required string IconPath
+    {
+        get;
+        set => field = Environment.ExpandEnvironmentVariables(value);
+    }
+
+    public required string LogoPath
+    {
         get;
         set => field = Environment.ExpandEnvironmentVariables(value);
     }

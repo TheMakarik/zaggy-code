@@ -38,7 +38,7 @@ public sealed class Bootstrapper
 
             .AddClasses(c => c.WithAttribute<LanguageExtensionAttribute>())
             .AsImplementedInterfaces()
-            .WithServiceKey(type => type.GetCustomAttribute<LanguageExtensionAttribute>()!.Extension)
+            .WithServiceKey(type => GetLanguageKey(type.GetCustomAttribute<LanguageExtensionAttribute>()!.Extension))
             .WithScopedLifetime()
 
             .AddClasses(c => c.Where(t =>
@@ -131,6 +131,13 @@ public sealed class Bootstrapper
 
 
         return app;
+    }
+
+    // Ключ регистрации должен совпадать с ключом резолва в GameEngine — там раннеры
+    // запрашиваются по enum Language, а не по строке расширения.
+    private static Language GetLanguageKey(string extension)
+    {
+        return Enum.GetValues<Language>().First(language => language.GetLanguageExtension() == extension);
     }
 
     private static void SetEnvironmentVariables()

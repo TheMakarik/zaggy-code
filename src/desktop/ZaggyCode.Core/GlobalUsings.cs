@@ -9,6 +9,7 @@ global using System.Text;
 global using System.Xml;
 global using System.Xml.Serialization;
 global using Microsoft.Scripting.Hosting;
+global using ZaggyCode.Core.Archiving.Interfaces;
 global using ZaggyCode.Core.Archiving.Model;
 global using ZaggyCode.Core.Data.Model;
 global using ZaggyCode.Core.Game.Enums;

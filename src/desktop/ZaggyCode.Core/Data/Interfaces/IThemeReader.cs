@@ -1,7 +1,5 @@
 namespace ZaggyCode.Core.Data.Interfaces;
 
-public interface IThemeReader
+public interface IThemeReader : IArchiveReader
 {
-    public IAsyncEnumerable<ThemeMetadata> EnumerateMetadata();
-    public void SetTheme(string themeName);
 }

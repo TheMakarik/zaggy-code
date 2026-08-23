@@ -10,4 +10,13 @@ public static class LanguageExtensions
             .GetCustomAttribute<LanguageExtensionAttribute>()!.
             Extension!;
     }
+
+    public static string GetPrettyName(this Language language)
+    {
+        return language
+            .GetType()
+            .GetField(language.ToString())!
+            .GetCustomAttribute<LanguagePrettyNameAttribute>()?.Name
+            ?? language.ToString();
+    }
 }

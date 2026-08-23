@@ -327,7 +327,10 @@
                             </MenuItem>
 
                             <MenuItem Header="Справка" Icon="{materialIcons:MaterialIconExt Kind=HelpBox}">
-                                <MenuItem Header="О приложении" Icon="{materialIcons:MaterialIconExt Kind=About}" />
+                                <MenuItem
+                                    Command="{Binding OpenAboutCommand}"
+                                    Header="О приложении"
+                                    Icon="{materialIcons:MaterialIconExt Kind=About}" />
                                 <MenuItem Header="Руководство по программированию" Icon="{materialIcons:MaterialIconExt Kind=Code}">
                                     <MenuItem Header="C# (Си Шарп)" Icon="{materialIcons:MaterialIconExt Kind=LanguageCsharp}" />
                                 </MenuItem>
@@ -337,11 +340,14 @@
 
                     <ComboBox
                         Classes="language-selector"
-                        ItemsSource="{Binding Source={x:Type enums:Language}, Converter={converters:EnumValuesConverter}}"
-                        SelectedItem="{Binding SelectedLanguage}">
+                        ItemsSource="{Binding AvailableLanguages}"
+                        SelectedItem="{Binding SelectedLanguageItem}">
                         <ComboBox.ItemTemplate>
-                            <DataTemplate x:DataType="enums:Language">
-                                <TextBlock Text="{Binding .}" />
+                            <DataTemplate x:DataType="records:LanguageItem">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <materialIcons:MaterialIcon Kind="{Binding IconKind}" />
+                                    <TextBlock Text="{Binding Name}" />
+                                </StackPanel>
                             </DataTemplate>
                         </ComboBox.ItemTemplate>
                     </ComboBox>

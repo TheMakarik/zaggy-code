@@ -7,6 +7,7 @@ public partial class ConfirmSaveSettingsChangesWindow : Window
         InitializeComponent();
 
         CustomTitleBar.IsVisible = WindowDecorations != WindowDecorations.Full;
+        CustomTitleBar.CloseRequested += (_, _) => Close(false);
 
         DataContextChanged += (_, _) =>
         {
@@ -19,16 +20,6 @@ public partial class ConfirmSaveSettingsChangesWindow : Window
                 context.SetOutput(Unit.Default);
             });
         };
-    }
-
-    private void MinimizeButton_Click(object? sender, RoutedEventArgs e)
-    {
-        WindowState = WindowState.Minimized;
-    }
-
-    private void CloseButton_Click(object? sender, RoutedEventArgs e)
-    {
-        Close(false);
     }
 
     private void LoadZaggyIcon(object? sender, RoutedEventArgs e)

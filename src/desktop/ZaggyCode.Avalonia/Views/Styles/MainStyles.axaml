@@ -610,9 +610,9 @@
         <Setter Property="Cursor" Value="SizeWestEast" />
     </Style>
 
-    <!--  Prominent splitter between terminal and upper grid  -->
+    <!--  Invisible splitter between terminal and upper grid; hover hint kept for discoverability  -->
     <Style Selector="GridSplitter.horizontal">
-        <Setter Property="Background" Value="{DynamicResource SurfaceHoverBrush}" />
+        <Setter Property="Background" Value="Transparent" />
         <Setter Property="Height" Value="8" />
         <Setter Property="Cursor" Value="SizeNorthSouth" />
     </Style>
@@ -683,7 +683,7 @@
 
     <Style Selector="Button.settings-footer-button.primary">
         <Setter Property="Background" Value="{DynamicResource PrimaryBrush}" />
-        <Setter Property="Foreground" Value="{DynamicResource BackgroundBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}" />
         <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBrush}" />
     </Style>
 

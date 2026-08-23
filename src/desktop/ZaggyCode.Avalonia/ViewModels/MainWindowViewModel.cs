@@ -13,6 +13,8 @@ public partial class MainWindowViewModel : ViewModelBase
     [Reactive] private bool _showCodeLineNumbers = true;
     [Reactive] private ExecutionSpeed _executionSpeed;
     [Reactive] private Language _selectedLanguage;
+    [Reactive] private LanguageItem? _selectedLanguageItem;
+    [Reactive] private Game _currentGame;
     [Reactive] private int _textEditorFontSize;
     [Reactive] private int _terminalFontSize;
 
@@ -25,6 +27,7 @@ public partial class MainWindowViewModel : ViewModelBase
     public string CodeTheme { get; private set; }
     public PopupOptions PopupOptions { get; }
     public ObservableCollection<CodeThemeItem> AvailableCodeThemes { get; } = [];
+    public ObservableCollection<LanguageItem> AvailableLanguages { get; } = [];
     public IOptions<ZaggyAssetsOptions> ZaggyAssets { get; init; }
 
     #endregion
@@ -36,6 +39,7 @@ public partial class MainWindowViewModel : ViewModelBase
     public readonly Interaction<Unit, Unit> BackGridToNormal = new();
     public readonly Interaction<Unit, string> GetCodeToExecute = new();
     public readonly Interaction<Unit, (TextReader Input, TextWriter Output)> GetTerminalStreams = new();
+    public readonly Interaction<Unit, Map?> GetGameMap = new();
     public readonly Interaction<int, Unit> UpdateCodeLine = new();
     public readonly Interaction<Unit, Unit> StopCodeExecution = new();
     public readonly Interaction<Unit, Unit> ResetMap = new();
@@ -43,6 +47,7 @@ public partial class MainWindowViewModel : ViewModelBase
     public readonly Interaction<string, Unit> ShowToast = new();
     public readonly Interaction<string, Unit> ApplyCodeTheme = new();
     public readonly Interaction<SettingsViewModel, Unit> OpenSettings = new();
+    public readonly Interaction<Unit, Unit> OpenAbout = new();
 
     #endregion
 
@@ -60,6 +65,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly IPythonFunctionNameValidator _pythonFunctionNameValidator;
     private readonly ILogger<MainWindowViewModel> _logger;
     private readonly ILoggerFactory _loggerFactory;
+    private readonly object _executionLock = new();
     private CancellationTokenSource? _cancellationTokenSource;
 
     #endregion
@@ -110,7 +116,10 @@ public partial class MainWindowViewModel : ViewModelBase
 
         InitializeMessageBusSubscriptions();
         InitializeAvailableCodeThemes();
+        InitializeAvailableLanguages();
+        InitializeLanguageSelection();
         InitializeStorageSynchronization();
+        InitializeGameEngine();
 
 #pragma warning disable AsyncVoidMethod
         this.WhenAnyValue(vm => vm.IsTerminalVisible)
@@ -144,6 +153,32 @@ public partial class MainWindowViewModel : ViewModelBase
 
             AvailableCodeThemes.Add(new CodeThemeItem(themeName, displayName, iconKind));
         }
+    }
+
+    private void InitializeAvailableLanguages()
+    {
+        foreach (var language in Enum.GetValues<Language>())
+            AvailableLanguages.Add(new LanguageItem(language, language.GetPrettyName(), GetLanguageIcon(language)));
+    }
+
+    private static MaterialIconKind GetLanguageIcon(Language language) => language switch
+    {
+        Language.CSharp => MaterialIconKind.LanguageCsharp,
+        Language.Python => MaterialIconKind.LanguagePython,
+        _ => MaterialIconKind.Code
+    };
+
+    // SelectedLanguage — источник истины, SelectedLanguageItem отражает его в ComboBox
+    // и передаёт выбор пользователя обратно. Фильтр по неравенству разрывает цикл подписок.
+    private void InitializeLanguageSelection()
+    {
+        this.WhenAnyValue(vm => vm.SelectedLanguage)
+            .Subscribe(language => SelectedLanguageItem =
+                AvailableLanguages.FirstOrDefault(item => item.Value == language));
+
+        this.WhenAnyValue(vm => vm.SelectedLanguageItem)
+            .Where(item => item is not null && item.Value != SelectedLanguage)
+            .Subscribe(item => SelectedLanguage = item!.Value);
     }
 
     private void InitializeMessageBusSubscriptions()
@@ -216,6 +251,81 @@ public partial class MainWindowViewModel : ViewModelBase
         this.WhenAnyValue(vm => vm.SelectedLanguage)
             .Where(language => language != _userStorage.Current.LastLanguage)
             .Subscribe(_ => _userStorage.Current.LastLanguage = _selectedLanguage);
+    }
+
+    // Подписки живут столько же, сколько VM и движок (оба синглтоны).
+    // Skip(1) пропускает мгновенную эмиссию текущего значения — стартовый прогрев делает InitializeGameEngineAsync.
+    private void InitializeGameEngine()
+    {
+        _gameEngine.DebugLineUpdated += OnDebugLineUpdated;
+        _gameEngine.CodeErrorOccurred += OnCodeErrorOccurred;
+
+        // Для языка может ещё не существовать раннера (например C#), тогда резолв в движке
+        // бросит исключение — глотаем и логируем, чтобы оно не всплыло в биндинг ComboBox.
+        this.WhenAnyValue(vm => vm.SelectedLanguage)
+            .Skip(1)
+            .Subscribe(language =>
+            {
+                if (!IsRunning)
+                    SwitchEngineLanguage(language);
+            });
+
+        this.WhenAnyValue(vm => vm.ExecutionSpeed)
+            .Skip(1)
+            .Subscribe(speed =>
+            {
+                if (!IsRunning)
+                    SetEngineSpeed(speed);
+            });
+    }
+
+    private void SwitchEngineLanguage(Language language)
+    {
+        try
+        {
+            _gameEngine.Language = language;
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Failed to switch game engine language to {Language}", language);
+        }
+    }
+
+    private void SetEngineSpeed(ExecutionSpeed speed)
+    {
+        try
+        {
+            _gameEngine.Speed = speed;
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Failed to set game engine speed to {Speed}", speed);
+        }
+    }
+
+    // Прогрев движка сразу после загрузки окна: раннер, скорость, карта и IO готовятся
+    // в фоне заранее, чтобы запуск кода не ждал их создания.
+    public async Task InitializeGameEngineAsync()
+    {
+        try
+        {
+            await Task.Run(() =>
+            {
+                _gameEngine.Language = SelectedLanguage;
+                _gameEngine.Speed = ExecutionSpeed;
+            });
+
+            var map = await GetGameMap.Handle(Unit.Default);
+            if (map is not null)
+                _gameEngine.CurrentMap = map;
+
+            var (input, output) = await GetTerminalStreams.Handle(Unit.Default);
+            _gameEngine.SetIo(output, input);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Game engine warm-up failed");
+        }
     }
 
     #endregion
@@ -331,6 +441,10 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     [ReactiveCommand]
+    private async Task OpenAboutAsync()
+        => await OpenAbout.Handle(Unit.Default);
+
+    [ReactiveCommand]
     private async Task OpenSettingsAsync()
     {
         var settingsViewModel = new SettingsViewModel(
@@ -357,7 +471,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private async Task PrepareExecution()
     {
-        lock (this)
+        lock (_executionLock)
         {
             if (_isRunning)
             {
@@ -382,27 +496,22 @@ public partial class MainWindowViewModel : ViewModelBase
             _logger.LogDebug("Code execution was requested");
             var code = await GetCodeToExecute.Handle(Unit.Default);
             var (input, output) = await GetTerminalStreams.Handle(Unit.Default);
+            var map = await GetGameMap.Handle(Unit.Default);
 
 #if DEBUG
             SelectedLanguage = Language.Python;
 #endif
+            // GameEngine пересоздаёт раннер после каждого запуска, поэтому язык, скорость,
+            // IO и карту надо выставлять заново перед каждым RunCodeAsync.
             _gameEngine.Language = SelectedLanguage;
             _gameEngine.Speed = ExecutionSpeed;
             _gameEngine.SetIo(output, input);
 
-            _gameEngine.DebugLineUpdated += OnDebugLineUpdated;
-            _gameEngine.CodeErrorOccurred += OnCodeErrorOccurred;
+            if (map is not null)
+                _gameEngine.CurrentMap = map;
 
-            try
-            {
-                Debug.Assert(_cancellationTokenSource is not null);
-                await _gameEngine.RunCodeAsync(code, _cancellationTokenSource.Token);
-            }
-            finally
-            {
-                _gameEngine.DebugLineUpdated -= OnDebugLineUpdated;
-                _gameEngine.CodeErrorOccurred -= OnCodeErrorOccurred;
-            }
+            Debug.Assert(_cancellationTokenSource is not null);
+            await _gameEngine.RunCodeAsync(code, _cancellationTokenSource.Token);
 
             await ConcludeRun.Handle(Unit.Default);
         }
@@ -414,7 +523,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private async Task FinalizeExecution()
     {
-        lock (this)
+        lock (_executionLock)
         {
             _isRunning = false;
             _cancellationTokenSource?.Dispose();

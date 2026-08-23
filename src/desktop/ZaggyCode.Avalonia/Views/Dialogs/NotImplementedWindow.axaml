@@ -16,37 +16,10 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <Grid RowDefinitions="Auto,*">
-        <Border
-            Classes="header-bar"
+        <controls:DialogTitleBar
             Grid.Row="0"
             Name="CustomTitleBar"
-            Padding="12,8">
-            <Grid ColumnDefinitions="*,Auto">
-                <TextBlock
-                    Grid.Column="0"
-                    FontWeight="SemiBold"
-                    PointerPressed="TitleBar_PointerPressed"
-                    Text="Функция временно недоступна"
-                    VerticalAlignment="Center" />
-                <StackPanel
-                    Grid.Column="1"
-                    Orientation="Horizontal"
-                    Spacing="4">
-                    <Button
-                        Classes="icon-button window-control"
-                        Click="MinimizeButton_Click"
-                        ToolTip.Tip="Свернуть">
-                        <materialIcons:MaterialIcon Kind="WindowMinimize" />
-                    </Button>
-                    <Button
-                        Classes="icon-button window-control close"
-                        Click="CloseButton_Click"
-                        ToolTip.Tip="Закрыть">
-                        <materialIcons:MaterialIcon Kind="WindowClose" />
-                    </Button>
-                </StackPanel>
-            </Grid>
-        </Border>
+            Title="Функция временно недоступна" />
 
         <Grid Grid.Row="1" Margin="24,16,24,20" RowDefinitions="*,Auto">
         <Grid ColumnDefinitions="Auto,*" Grid.Row="0">

@@ -19,36 +19,10 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <Grid RowDefinitions="Auto,*">
-        <Border
-            Classes="header-bar"
+        <controls:DialogTitleBar
             Grid.Row="0"
             Name="CustomTitleBar"
-            Padding="12,8">
-            <Grid ColumnDefinitions="*,Auto">
-                <TextBlock
-                    Grid.Column="0"
-                    FontWeight="SemiBold"
-                    Text="Сохранение изменений"
-                    VerticalAlignment="Center" />
-                <StackPanel
-                    Grid.Column="1"
-                    Orientation="Horizontal"
-                    Spacing="4">
-                    <Button
-                        Classes="icon-button window-control"
-                        Click="MinimizeButton_Click"
-                        ToolTip.Tip="Свернуть">
-                        <materialIcons:MaterialIcon Kind="WindowMinimize" />
-                    </Button>
-                    <Button
-                        Classes="icon-button window-control close"
-                        Click="CloseButton_Click"
-                        ToolTip.Tip="Закрыть">
-                        <materialIcons:MaterialIcon Kind="WindowClose" />
-                    </Button>
-                </StackPanel>
-            </Grid>
-        </Border>
+            Title="Сохранение изменений" />
 
         <Grid
             Grid.Row="1"

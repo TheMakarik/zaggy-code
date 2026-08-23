@@ -66,10 +66,23 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         ViewModel.GetTerminalStreams.RegisterHandler(context =>
             context.SetOutput((_terminalSession.Reader, _terminalSession.Writer)));
 
+        ViewModel.GetGameMap.RegisterHandler(context =>
+            Dispatcher.Invoke(() => context.SetOutput(GameMap.Map)));
+
         ViewModel.OpenSettings.RegisterHandler(async context =>
         {
             var settingsWindow = new SettingsWindow { DataContext = context.Input };
             await settingsWindow.ShowDialog(this);
+            context.SetOutput(Unit.Default);
+        });
+
+        ViewModel.OpenAbout.RegisterHandler(async context =>
+        {
+            var aboutWindow = new AboutWindow
+            {
+                WindowDecorations = ViewModel.UseOsDecoration ? WindowDecorations.Full : WindowDecorations.BorderOnly
+            };
+            await aboutWindow.ShowDialog(this);
             context.SetOutput(Unit.Default);
         });
 
@@ -250,6 +263,10 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
             .Subscribe(ApplyCodeHighlighting);
 
         GameMap.Map = MapView.CreateSampleMap();
+
+        // Прогрев движка стартует после появления карты: фоновая загрузка
+        // раннера, модулей и IO начинается без нажатия «Запустить».
+        _ = ViewModel.InitializeGameEngineAsync();
 
         GameMap.Events.LevelCompleted += (_, _) => _terminalSession.Writer.WriteLine("Уровень пройден!");
         GameMap.Events.RobotDead += (_, _) => _terminalSession.Writer.WriteLine("Загги врезался и погиб.");
