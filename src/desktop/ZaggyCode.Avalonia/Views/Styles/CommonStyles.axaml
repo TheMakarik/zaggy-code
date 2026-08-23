@@ -1,0 +1,71 @@
+<Styles
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Styles.Resources>
+        <ResourceDictionary>
+            <CornerRadius x:Key="CardCornerRadius">10</CornerRadius>
+            <CornerRadius x:Key="SmallCornerRadius">8</CornerRadius>
+            <CornerRadius x:Key="ButtonCornerRadius">8</CornerRadius>
+            <Thickness x:Key="CardPadding">12</Thickness>
+        </ResourceDictionary>
+    </Styles.Resources>
+
+    <!--  Window base  -->
+    <Style Selector="Window">
+        <Setter Property="Background" Value="{DynamicResource BackgroundBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}" />
+    </Style>
+
+    <!--  Panels and general backgrounds  -->
+    <Style Selector="Grid.main-background">
+        <Setter Property="Background" Value="{DynamicResource BackgroundBrush}" />
+    </Style>
+
+    <Style Selector="Grid.sidebar">
+        <Setter Property="Background" Value="{DynamicResource SidebarBackgroundBrush}" />
+    </Style>
+
+    <!--  Generic text  -->
+    <Style Selector="TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}" />
+    </Style>
+
+    <Style Selector="TextBlock.muted">
+        <Setter Property="Foreground" Value="{DynamicResource ForegroundMutedBrush}" />
+    </Style>
+
+    <Style Selector="Label">
+        <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}" />
+    </Style>
+
+    <!--  Cards / surfaces  -->
+    <Style Selector="Border.card">
+        <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{DynamicResource CardCornerRadius}" />
+    </Style>
+
+    <Style Selector="Border.header-bar">
+        <Setter Property="Background" Value="{DynamicResource BackgroundSecondaryBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+        <Setter Property="BorderThickness" Value="0,0,0,1" />
+    </Style>
+
+    <Style Selector="Border.terminal-header">
+        <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+        <Setter Property="BorderThickness" Value="0,0,0,1" />
+        <Setter Property="CornerRadius" Value="10,10,0,0" />
+    </Style>
+
+    <!--  ToolTip  -->
+    <Style Selector="ToolTip">
+        <Setter Property="Background" Value="{DynamicResource SurfaceLightBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{DynamicResource SmallCornerRadius}" />
+    </Style>
+</Styles>
