@@ -4,7 +4,7 @@
     BorderThickness="1"
     CanResize="False"
     Foreground="{DynamicResource ForegroundBrush}"
-    Height="700"
+    Height="595"
     ShowInTaskbar="False"
     Title="О приложении"
     Width="330"

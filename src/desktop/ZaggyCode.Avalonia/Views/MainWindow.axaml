@@ -208,7 +208,10 @@
                         </MenuItem>
 
                         <MenuItem Header="Справка" Icon="{materialIcons:MaterialIconExt Kind=HelpBox}">
-                            <MenuItem Header="О приложении" Icon="{materialIcons:MaterialIconExt Kind=About}" />
+                            <MenuItem
+                                Command="{Binding OpenAboutCommand}"
+                                Header="О приложении"
+                                Icon="{materialIcons:MaterialIconExt Kind=About}" />
                             <MenuItem Header="Руководство по программированию" Icon="{materialIcons:MaterialIconExt Kind=Code}">
                                 <MenuItem Header="C# (Си Шарп)" Icon="{materialIcons:MaterialIconExt Kind=LanguageCsharp}" />
                             </MenuItem>
@@ -464,6 +467,7 @@
                         Spacing="6">
                         <Button
                             Classes="icon-button"
+                            Command="{Binding OpenAboutCommand}"
                             Content="{materialIcons:MaterialIconExt Kind=HelpBox}"
                             ToolTip.Tip="Справка по приложению" />
                         <Button

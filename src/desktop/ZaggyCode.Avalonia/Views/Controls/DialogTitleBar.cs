@@ -72,8 +72,12 @@ public sealed class DialogTitleBar : Border
 
         PointerPressed += (_, e) =>
         {
-            if (TopLevel.GetTopLevel(this) is Window window && e.GetCurrentPoint(window).Properties.IsLeftButtonPressed)
-                window.BeginMoveDrag(e);
+            if (TopLevel.GetTopLevel(this) is not Window window || !e.GetCurrentPoint(window).Properties.IsLeftButtonPressed)
+                return;
+
+            window.BeginMoveDrag(e);
+            // Помечаем обработанным, чтобы окно не запускало перетаскивание второй раз.
+            e.Handled = true;
         };
     }
 

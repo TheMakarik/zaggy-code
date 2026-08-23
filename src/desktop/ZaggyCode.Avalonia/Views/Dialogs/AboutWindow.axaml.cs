@@ -10,13 +10,28 @@ public partial class AboutWindow : Window
     {
         InitializeComponent();
 
-        CustomTitleBar.IsVisible = WindowDecorations != WindowDecorations.Full;
+        // WindowDecorations из object initializer применяется после конструктора,
+        // поэтому следим за изменением, а не проверяем разово.
+        this.GetObservable(Window.WindowDecorationsProperty)
+            .Subscribe(decorations => CustomTitleBar.IsVisible = decorations != WindowDecorations.Full);
+
+        // Перетаскивание за любую область окна: клики по кнопкам не доходят сюда,
+        // потому что Button помечает PointerPressed как обработанный.
+        PointerPressed += (_, e) =>
+        {
+            if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
+                BeginMoveDrag(e);
+        };
 
         AppNameText.Text = EntryAssembly.GetCustomAttribute<AssemblyTitleAttribute>()?.Title
             ?? EntryAssembly.GetName().Name;
 
-        VersionText.Text = $"Версия: {EntryAssembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
-            ?? EntryAssembly.GetName().Version?.ToString()}";
+        // InformationalVersion содержит хеш коммита после '+' — берём только версию из csproj.
+        var informationalVersion = EntryAssembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+        var version = informationalVersion?.Split('+').First()
+            ?? EntryAssembly.GetName().Version?.ToString();
+
+        VersionText.Text = $"Версия: {version}";
 
         DescriptionText.Text = EntryAssembly.GetCustomAttribute<AssemblyDescriptionAttribute>()?.Description;
         DevelopersText.Text = EntryAssembly.GetCustomAttribute<AssemblyCompanyAttribute>()?.Company;
