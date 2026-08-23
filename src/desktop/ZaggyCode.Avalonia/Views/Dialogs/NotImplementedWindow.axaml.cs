@@ -5,14 +5,10 @@ public partial class NotImplementedWindow : Window
     public NotImplementedWindow()
     {
         InitializeComponent();
-
-        // WindowDecorations из object initializer применяется после конструктора,
-        // поэтому следим за изменением, а не проверяем разово.
+        
         this.GetObservable(Window.WindowDecorationsProperty)
             .Subscribe(decorations => CustomTitleBar.IsVisible = decorations != WindowDecorations.Full);
-
-        // Перетаскивание за любую область окна: клики по кнопкам не доходят сюда,
-        // потому что Button помечает PointerPressed как обработанный.
+        
         PointerPressed += (_, e) =>
         {
             if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
