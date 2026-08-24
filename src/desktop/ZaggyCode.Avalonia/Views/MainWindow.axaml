@@ -30,7 +30,11 @@
         <vm:MainWindowViewModel />
     </Design.DataContext>
 
-    <!--  Line numbers serve as left padding; keep a small gap when they are hidden  -->
+    <rxui:ReactiveWindow.KeyBindings>
+        <KeyBinding Command="{Binding RunSelectedCodeCommand}" Gesture="Ctrl+Alt+R" />
+    </rxui:ReactiveWindow.KeyBindings>
+
+    <!--  Номера строк служат левым отступом; оставляем небольшой зазор, когда они скрыты  -->
     <rxui:ReactiveWindow.Styles>
         <Style Selector="avaloniaEdit|TextEditor[ShowLineNumbers=False]">
             <Setter Property="Padding" Value="3,0,0,0" />
@@ -100,7 +104,7 @@
             PointerPressed="ResizeHandle_PointerPressed"
             Tag="BottomRight" />
 
-        <!--  Header  -->
+        <!--  Шапка  -->
         <Border
             Classes="header-bar"
             Grid.Column="1"
@@ -138,16 +142,38 @@
 
                         <MenuItem Header="Файл" Icon="{materialIcons:MaterialIconExt Kind=File}">
                             <MenuItem Header="Сохранить" Icon="{materialIcons:MaterialIconExt Kind=ContentSave}" />
-                            <MenuItem Header="Копировать выделенное" Icon="{materialIcons:MaterialIconExt Kind=ContentCopy}" />
-                            <MenuItem Header="Вставить" Icon="{materialIcons:MaterialIconExt Kind=ContentPaste}" />
-                            <MenuItem Header="Удалить выделенное" Icon="{materialIcons:MaterialIconExt Kind=TrashCan}" />
-                            <MenuItem Header="Вырезать выделенное" Icon="{materialIcons:MaterialIconExt Kind=ContentCut}" />
+                            <MenuItem
+                                Click="EditorCut_Click"
+                                Header="Вырезать выделенное"
+                                Icon="{materialIcons:MaterialIconExt Kind=ContentCut}"
+                                InputGesture="Ctrl+X" />
+                            <MenuItem
+                                Click="EditorCopy_Click"
+                                Header="Копировать выделенное"
+                                Icon="{materialIcons:MaterialIconExt Kind=ContentCopy}"
+                                InputGesture="Ctrl+C" />
+                            <MenuItem
+                                Click="EditorPaste_Click"
+                                Header="Вставить"
+                                Icon="{materialIcons:MaterialIconExt Kind=ContentPaste}"
+                                InputGesture="Ctrl+V" />
+                            <MenuItem
+                                Click="EditorDeleteSelection_Click"
+                                Header="Удалить выделенное"
+                                Icon="{materialIcons:MaterialIconExt Kind=TrashCan}"
+                                Name="DeleteSelectionMenuItem" />
+                            <MenuItem
+                                Command="{Binding RunSelectedCodeCommand}"
+                                Header="Запустить выделенное"
+                                Icon="{materialIcons:MaterialIconExt Kind=PlayArrow}"
+                                InputGesture="Ctrl+Alt+R" />
                         </MenuItem>
 
                         <MenuItem Header="Вид" Icon="{materialIcons:MaterialIconExt Kind=Eye}">
                             <MenuItem
                                 Header="Тема подсветки синтаксиса"
                                 Icon="{materialIcons:MaterialIconExt Kind=CodeBlockBraces}"
+                                IsEnabled="{Binding EnableCodeHighlighting}"
                                 ItemsSource="{Binding AvailableCodeThemes}"
                                 Name="CodeThemeMenu">
                                 <MenuItem.ItemContainerTheme>
@@ -158,6 +184,19 @@
                                         <Setter Property="Header" Value="{Binding DisplayName, Mode=OneWay}" />
                                         <Setter Property="Command" Value="{Binding DataContext.SelectCodeThemeCommand, ElementName=ThisWindow}" />
                                         <Setter Property="CommandParameter" Value="{Binding ThemeName}" />
+                                        <Setter Property="Icon">
+                                            <Setter.Value>
+                                                <DataTemplate x:DataType="records:CodeThemeItem">
+                                                    <materialIcons:MaterialIcon Kind="{Binding IconKind}" />
+                                                </DataTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                        <Setter Property="IsEnabled">
+                                            <MultiBinding Converter="{converters:IsNotEqualConverter}">
+                                                <Binding Path="ThemeName" />
+                                                <Binding Path="DataContext.CodeTheme" ElementName="ThisWindow" />
+                                            </MultiBinding>
+                                        </Setter>
                                     </ControlTheme>
                                 </MenuItem.ItemContainerTheme>
                             </MenuItem>
@@ -173,24 +212,18 @@
                                 Icon="{materialIcons:MaterialIconExt Kind=WindowMaximize}"
                                 IsChecked="{Binding DataContext.UseOsDecoration, ElementName=ThisWindow}"
                                 Theme="{StaticResource ZaggyToggleMenuItem}" />
-                            <MenuItem Header="Текст" Icon="{materialIcons:MaterialIconExt Kind=FontSize}">
-                                <MenuItem
-                                    Command="{Binding IncrementEditorFontSizeCommand}"
-                                    Header="Увеличить размер текста редактора"
-                                    Icon="{materialIcons:MaterialIconExt Kind=FormatFontSizeIncrease}" />
-                                <MenuItem
-                                    Command="{Binding DecrementEditorFontSizeCommand}"
-                                    Header="Уменьшить размер текста редактора"
-                                    Icon="{materialIcons:MaterialIconExt Kind=FormatFontSizeDecrease}" />
-                                <MenuItem
-                                    Command="{Binding IncrementTerminalFontSizeCommand}"
-                                    Header="Увеличить размер текста терминала"
-                                    Icon="{materialIcons:MaterialIconExt Kind=FormatFontSizeIncrease}" />
-                                <MenuItem
-                                    Command="{Binding DecrementTerminalFontSizeCommand}"
-                                    Header="Уменьшить размер текста терминала"
-                                    Icon="{materialIcons:MaterialIconExt Kind=FormatFontSizeDecrease}" />
-                            </MenuItem>
+                            <MenuItem
+                                Command="{Binding DataContext.ToggleShowCodeLineNumbersCommand, ElementName=ThisWindow}"
+                                Header="Нумерация строк"
+                                Icon="{materialIcons:MaterialIconExt Kind=FormatListNumbered}"
+                                IsChecked="{Binding DataContext.ShowCodeLineNumbers, ElementName=ThisWindow}"
+                                Theme="{StaticResource ZaggyToggleMenuItem}" />
+                            <MenuItem
+                                Command="{Binding DataContext.ToggleEnableCodeHighlightingCommand, ElementName=ThisWindow}"
+                                Header="Подсветка синтаксиса"
+                                Icon="{materialIcons:MaterialIconExt Kind=FormatColorHighlight}"
+                                IsChecked="{Binding DataContext.EnableCodeHighlighting, ElementName=ThisWindow}"
+                                Theme="{StaticResource ZaggyToggleMenuItem}" />
                         </MenuItem>
 
                         <MenuItem Header="Сервис" Icon="{materialIcons:MaterialIconExt Kind=Settings}">
@@ -254,16 +287,38 @@
 
                             <MenuItem Header="Файл" Icon="{materialIcons:MaterialIconExt Kind=File}">
                                 <MenuItem Header="Сохранить" Icon="{materialIcons:MaterialIconExt Kind=ContentSave}" />
-                                <MenuItem Header="Копировать выделенное" Icon="{materialIcons:MaterialIconExt Kind=ContentCopy}" />
-                                <MenuItem Header="Вставить" Icon="{materialIcons:MaterialIconExt Kind=ContentPaste}" />
-                                <MenuItem Header="Удалить выделенное" Icon="{materialIcons:MaterialIconExt Kind=TrashCan}" />
-                                <MenuItem Header="Вырезать выделенное" Icon="{materialIcons:MaterialIconExt Kind=ContentCut}" />
+                                <MenuItem
+                                    Click="EditorCut_Click"
+                                    Header="Вырезать выделенное"
+                                    Icon="{materialIcons:MaterialIconExt Kind=ContentCut}"
+                                    InputGesture="Ctrl+X" />
+                                <MenuItem
+                                    Click="EditorCopy_Click"
+                                    Header="Копировать выделенное"
+                                    Icon="{materialIcons:MaterialIconExt Kind=ContentCopy}"
+                                    InputGesture="Ctrl+C" />
+                                <MenuItem
+                                    Click="EditorPaste_Click"
+                                    Header="Вставить"
+                                    Icon="{materialIcons:MaterialIconExt Kind=ContentPaste}"
+                                    InputGesture="Ctrl+V" />
+                                <MenuItem
+                                    Click="EditorDeleteSelection_Click"
+                                    Header="Удалить выделенное"
+                                    Icon="{materialIcons:MaterialIconExt Kind=TrashCan}"
+                                    Name="CompactDeleteSelectionMenuItem" />
+                                <MenuItem
+                                    Command="{Binding RunSelectedCodeCommand}"
+                                    Header="Запустить выделенное"
+                                    Icon="{materialIcons:MaterialIconExt Kind=PlayArrow}"
+                                    InputGesture="Ctrl+Alt+R" />
                             </MenuItem>
 
                             <MenuItem Header="Вид" Icon="{materialIcons:MaterialIconExt Kind=Eye}">
                                 <MenuItem
                                     Header="Тема подсветки синтаксиса"
                                     Icon="{materialIcons:MaterialIconExt Kind=CodeBlockBraces}"
+                                    IsEnabled="{Binding EnableCodeHighlighting}"
                                     ItemsSource="{Binding AvailableCodeThemes}">
                                     <MenuItem.ItemContainerTheme>
                                         <ControlTheme
@@ -280,6 +335,12 @@
                                                     </DataTemplate>
                                                 </Setter.Value>
                                             </Setter>
+                                            <Setter Property="IsEnabled">
+                                                <MultiBinding Converter="{converters:IsNotEqualConverter}">
+                                                    <Binding Path="ThemeName" />
+                                                    <Binding Path="DataContext.CodeTheme" ElementName="ThisWindow" />
+                                                </MultiBinding>
+                                            </Setter>
                                         </ControlTheme>
                                     </MenuItem.ItemContainerTheme>
                                 </MenuItem>
@@ -294,6 +355,18 @@
                                     Header="Использовать системную рамку окна"
                                     Icon="{materialIcons:MaterialIconExt Kind=WindowMaximize}"
                                     IsChecked="{Binding DataContext.UseOsDecoration, ElementName=ThisWindow}"
+                                    Theme="{StaticResource ZaggyToggleMenuItem}" />
+                                <MenuItem
+                                    Command="{Binding DataContext.ToggleShowCodeLineNumbersCommand, ElementName=ThisWindow}"
+                                    Header="Нумерация строк"
+                                    Icon="{materialIcons:MaterialIconExt Kind=FormatListNumbered}"
+                                    IsChecked="{Binding DataContext.ShowCodeLineNumbers, ElementName=ThisWindow}"
+                                    Theme="{StaticResource ZaggyToggleMenuItem}" />
+                                <MenuItem
+                                    Command="{Binding DataContext.ToggleEnableCodeHighlightingCommand, ElementName=ThisWindow}"
+                                    Header="Подсветка синтаксиса"
+                                    Icon="{materialIcons:MaterialIconExt Kind=FormatColorHighlight}"
+                                    IsChecked="{Binding DataContext.EnableCodeHighlighting, ElementName=ThisWindow}"
                                     Theme="{StaticResource ZaggyToggleMenuItem}" />
                                 <MenuItem Header="Текст" Icon="{materialIcons:MaterialIconExt Kind=FontSize}">
                                     <MenuItem
@@ -384,13 +457,13 @@
             </Grid>
         </Border>
 
-        <!--  Main workspace  -->
+        <!--  Рабочая область  -->
         <Grid
             Classes="main-background"
             ColumnDefinitions="Auto,*"
             Grid.Column="1"
             Grid.Row="2">
-            <!--  Left sidebar  -->
+            <!--  Левая боковая панель  -->
             <Border
                 Classes="sidebar"
                 IsVisible="{Binding ShowSidebar}"
@@ -484,7 +557,7 @@
                 </Grid>
             </Border>
 
-            <!--  Content  -->
+            <!--  Содержимое  -->
             <Grid
                 Grid.Column="1"
                 Name="MainContentGrid"
@@ -510,6 +583,36 @@
                                         UpdateFontSizeCommand="{Binding UpdateFontSizeCommand}"
                                         ZoomStep="1" />
                                 </Interaction.Behaviors>
+                                <avaloniaEdit:TextEditor.ContextMenu>
+                                    <ContextMenu>
+                                        <MenuItem
+                                            Click="EditorCut_Click"
+                                            Header="Вырезать"
+                                            Icon="{materialIcons:MaterialIconExt Kind=ContentCut}"
+                                            InputGesture="Ctrl+X" />
+                                        <MenuItem
+                                            Click="EditorCopy_Click"
+                                            Header="Копировать"
+                                            Icon="{materialIcons:MaterialIconExt Kind=ContentCopy}"
+                                            InputGesture="Ctrl+C" />
+                                        <MenuItem
+                                            Click="EditorPaste_Click"
+                                            Header="Вставить"
+                                            Icon="{materialIcons:MaterialIconExt Kind=ContentPaste}"
+                                            InputGesture="Ctrl+V" />
+                                        <Separator />
+                                        <MenuItem
+                                            Command="{Binding RunSelectedCodeCommand}"
+                                            Header="Запустить выделенное"
+                                            Icon="{materialIcons:MaterialIconExt Kind=PlayArrow}"
+                                            InputGesture="Ctrl+Alt+R" />
+                                        <MenuItem
+                                            Click="EditorDeleteSelection_Click"
+                                            Header="Удалить выделенное"
+                                            Icon="{materialIcons:MaterialIconExt Kind=TrashCan}"
+                                            Name="EditorDeleteContextMenuItem" />
+                                    </ContextMenu>
+                                </avaloniaEdit:TextEditor.ContextMenu>
                             </avaloniaEdit:TextEditor>
                         </Border>
 

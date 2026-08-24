@@ -14,8 +14,6 @@ public sealed class DialogTitleBar : Border
         set => SetValue(TitleProperty, value);
     }
 
-    // Подписчик может перехватить закрытие (например Close(false) для диалога подтверждения),
-    // иначе панель просто закрывает окно.
     public event EventHandler? CloseRequested;
 
     private readonly TextBlock _titleText;
@@ -76,7 +74,6 @@ public sealed class DialogTitleBar : Border
                 return;
 
             window.BeginMoveDrag(e);
-            // Помечаем обработанным, чтобы окно не запускало перетаскивание второй раз.
             e.Handled = true;
         };
     }

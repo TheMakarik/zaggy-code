@@ -3,7 +3,7 @@
     xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <!--  Icon buttons (sidebar / header)  -->
+    <!--  Кнопки с иконками (боковая панель и шапка)  -->
     <Style Selector="Button.icon-button">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}" />
@@ -30,7 +30,7 @@
         <Setter Property="Height" Value="24" />
     </Style>
 
-    <!--  Run button  -->
+    <!--  Кнопка запуска  -->
     <Style Selector="Button.run-button">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Foreground" Value="{DynamicResource SuccessBrush}" />
@@ -53,7 +53,7 @@
         <Setter Property="Height" Value="22" />
     </Style>
 
-    <!--  Window control buttons (terminal header)  -->
+    <!--  Кнопки управления окном (шапка терминала)  -->
     <Style Selector="Button.window-control">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Foreground" Value="{DynamicResource ForegroundMutedBrush}" />
@@ -73,7 +73,7 @@
         <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}" />
     </Style>
 
-    <!--  Execution speed button  -->
+    <!--  Кнопка скорости выполнения  -->
     <Style Selector="Button.speed-button">
         <Setter Property="Background" Value="{DynamicResource SurfaceHoverBrush}" />
         <Setter Property="Foreground" Value="{DynamicResource PrimaryLightBrush}" />

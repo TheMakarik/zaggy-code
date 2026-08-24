@@ -11,13 +11,13 @@
         </ResourceDictionary>
     </Styles.Resources>
 
-    <!--  Window base  -->
+    <!--  Базовое окно  -->
     <Style Selector="Window">
         <Setter Property="Background" Value="{DynamicResource BackgroundBrush}" />
         <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}" />
     </Style>
 
-    <!--  Panels and general backgrounds  -->
+    <!--  Панели и общие фоны  -->
     <Style Selector="Grid.main-background">
         <Setter Property="Background" Value="{DynamicResource BackgroundBrush}" />
     </Style>
@@ -26,7 +26,7 @@
         <Setter Property="Background" Value="{DynamicResource SidebarBackgroundBrush}" />
     </Style>
 
-    <!--  Generic text  -->
+    <!--  Обычный текст  -->
     <Style Selector="TextBlock">
         <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}" />
     </Style>
@@ -39,7 +39,7 @@
         <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}" />
     </Style>
 
-    <!--  Cards / surfaces  -->
+    <!--  Карточки и поверхности  -->
     <Style Selector="Border.card">
         <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
         <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
@@ -60,7 +60,7 @@
         <Setter Property="CornerRadius" Value="10,10,0,0" />
     </Style>
 
-    <!--  ToolTip  -->
+    <!--  Подсказки  -->
     <Style Selector="ToolTip">
         <Setter Property="Background" Value="{DynamicResource SurfaceLightBrush}" />
         <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}" />

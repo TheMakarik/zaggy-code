@@ -38,6 +38,7 @@ public partial class MainWindowViewModel : ViewModelBase
     public readonly Interaction<Unit, Unit> ClearTerminalContent = new();
     public readonly Interaction<Unit, Unit> BackGridToNormal = new();
     public readonly Interaction<Unit, string> GetCodeToExecute = new();
+    public readonly Interaction<Unit, string> GetSelectedCode = new();
     public readonly Interaction<Unit, (TextReader Input, TextWriter Output)> GetTerminalStreams = new();
     public readonly Interaction<Unit, Map?> GetGameMap = new();
     public readonly Interaction<int, Unit> UpdateCodeLine = new();
@@ -168,8 +169,6 @@ public partial class MainWindowViewModel : ViewModelBase
         _ => MaterialIconKind.Code
     };
 
-    // SelectedLanguage — источник истины, SelectedLanguageItem отражает его в ComboBox
-    // и передаёт выбор пользователя обратно. Фильтр по неравенству разрывает цикл подписок.
     private void InitializeLanguageSelection()
     {
         this.WhenAnyValue(vm => vm.SelectedLanguage)
@@ -253,15 +252,11 @@ public partial class MainWindowViewModel : ViewModelBase
             .Subscribe(_ => _userStorage.Current.LastLanguage = _selectedLanguage);
     }
 
-    // Подписки живут столько же, сколько VM и движок (оба синглтоны).
-    // Skip(1) пропускает мгновенную эмиссию текущего значения — стартовый прогрев делает InitializeGameEngineAsync.
     private void InitializeGameEngine()
     {
         _gameEngine.DebugLineUpdated += OnDebugLineUpdated;
         _gameEngine.CodeErrorOccurred += OnCodeErrorOccurred;
 
-        // Для языка может ещё не существовать раннера (например C#), тогда резолв в движке
-        // бросит исключение — глотаем и логируем, чтобы оно не всплыло в биндинг ComboBox.
         this.WhenAnyValue(vm => vm.SelectedLanguage)
             .Skip(1)
             .Subscribe(language =>
@@ -303,8 +298,6 @@ public partial class MainWindowViewModel : ViewModelBase
         }
     }
 
-    // Прогрев движка сразу после загрузки окна: раннер, скорость, карта и IO готовятся
-    // в фоне заранее, чтобы запуск кода не ждал их создания.
     public async Task InitializeGameEngineAsync()
     {
         try
@@ -346,6 +339,26 @@ public partial class MainWindowViewModel : ViewModelBase
         await RunCode();
         await FinalizeExecution();
     }
+
+    [ReactiveCommand]
+    private async Task RunSelectedCode()
+    {
+        var code = await GetSelectedCode.Handle(Unit.Default);
+        if (string.IsNullOrWhiteSpace(code))
+            return;
+
+        await PrepareExecution();
+        await RunCode(code);
+        await FinalizeExecution();
+    }
+
+    [ReactiveCommand]
+    private void ToggleShowCodeLineNumbers()
+        => ShowCodeLineNumbers = !ShowCodeLineNumbers;
+
+    [ReactiveCommand]
+    private void ToggleEnableCodeHighlighting()
+        => EnableCodeHighlighting = !EnableCodeHighlighting;
 
     [ReactiveCommand]
     private async Task IncrementEditorFontSize()
@@ -489,20 +502,18 @@ public partial class MainWindowViewModel : ViewModelBase
         await StopCodeExecution.Handle(Unit.Default);
     }
 
-    private async Task RunCode()
+    private async Task RunCode(string? codeOverride = null)
     {
         try
         {
             _logger.LogDebug("Code execution was requested");
-            var code = await GetCodeToExecute.Handle(Unit.Default);
+            var code = codeOverride ?? await GetCodeToExecute.Handle(Unit.Default);
             var (input, output) = await GetTerminalStreams.Handle(Unit.Default);
             var map = await GetGameMap.Handle(Unit.Default);
 
 #if DEBUG
             SelectedLanguage = Language.Python;
 #endif
-            // GameEngine пересоздаёт раннер после каждого запуска, поэтому язык, скорость,
-            // IO и карту надо выставлять заново перед каждым RunCodeAsync.
             _gameEngine.Language = SelectedLanguage;
             _gameEngine.Speed = ExecutionSpeed;
             _gameEngine.SetIo(output, input);

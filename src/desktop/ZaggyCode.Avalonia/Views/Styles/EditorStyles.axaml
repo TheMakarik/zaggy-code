@@ -3,7 +3,7 @@
     xmlns:avaloniaEdit="https://github.com/avaloniaui/avaloniaedit"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <!--  AvaloniaEdit  -->
+    <!--  Редактор кода AvaloniaEdit  -->
     <Style Selector="avaloniaEdit|TextEditor">
         <Setter Property="Background" Value="{DynamicResource EditorBackgroundBrush}" />
         <Setter Property="Foreground" Value="{DynamicResource EditorForegroundBrush}" />
@@ -15,20 +15,20 @@
         <Setter Property="Background" Value="{DynamicResource EditorBackgroundBrush}" />
     </Style>
 
-    <!--  Grid splitters  -->
+    <!--  Разделители грида  -->
     <Style Selector="GridSplitter">
         <Setter Property="Background" Value="{DynamicResource SurfaceHoverBrush}" />
         <Setter Property="HorizontalAlignment" Value="Stretch" />
     </Style>
 
-    <!--  Invisible splitter between editor and game/preview  -->
+    <!--  Невидимый разделитель между редактором и картой  -->
     <Style Selector="GridSplitter.subtle">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Width" Value="4" />
         <Setter Property="Cursor" Value="SizeWestEast" />
     </Style>
 
-    <!--  Invisible splitter between terminal and upper grid; hover hint kept for discoverability  -->
+    <!--  Невидимый разделитель между терминалом и верхней областью; подсветка при наведении оставлена для поиска  -->
     <Style Selector="GridSplitter.horizontal">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Height" Value="8" />

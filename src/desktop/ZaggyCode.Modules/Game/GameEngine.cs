@@ -77,7 +77,7 @@ public sealed class GameEngine(ILogger<GameEngine> logger, IServiceScopeFactory 
         await EnsureLanguageRunner().ExecuteAsync(code, token);
         ReloadEngine();
     }
-    
+
     private async Task TrackBackground(Task task, string name)
     {
         try

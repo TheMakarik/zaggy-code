@@ -23,7 +23,7 @@
                 </Setter>
             </ControlTheme>
 
-            <!--  Nested MenuItem (submenu items)  -->
+            <!--  Вложенный MenuItem (элементы подменю)  -->
             <ControlTheme TargetType="MenuItem" x:Key="{x:Type MenuItem}">
                 <Setter Property="Background" Value="Transparent" />
                 <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}" />
@@ -147,7 +147,7 @@
                 </Style>
             </ControlTheme>
 
-            <!--  Top-level MenuItem (menu bar items)  -->
+            <!--  Пункт верхнего уровня строки меню  -->
             <ControlTheme TargetType="MenuItem" x:Key="ZaggyTopLevelMenuItem">
                 <Setter Property="Background" Value="Transparent" />
                 <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}" />
@@ -233,7 +233,7 @@
                 </Style>
             </ControlTheme>
 
-            <!--  Toggle menu item (check box + icon + header)  -->
+            <!--  Пункт-переключатель (чекбокс, иконка и заголовок)  -->
             <ControlTheme
                 BasedOn="{StaticResource {x:Type MenuItem}}"
                 TargetType="MenuItem"
@@ -324,7 +324,7 @@
                 </Setter>
             </ControlTheme>
 
-            <!--  Menu  -->
+            <!--  Меню  -->
             <ControlTheme TargetType="Menu" x:Key="{x:Type Menu}">
                 <Setter Property="Background" Value="Transparent" />
                 <Setter Property="Padding" Value="0" />
@@ -350,7 +350,7 @@
         </ResourceDictionary>
     </Styles.Resources>
 
-    <!--  Full integrated menu bar  -->
+    <!--  Полная встроенная строка меню  -->
     <Style Selector="Menu.full-menu">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="VerticalAlignment" Value="Center" />
@@ -363,7 +363,7 @@
         <Setter Property="CornerRadius" Value="{DynamicResource ButtonCornerRadius}" />
     </Style>
 
-    <!--  Compact hamburger menu  -->
+    <!--  Компактное меню-гамбургер  -->
     <Style Selector="Menu.compact-menu">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="VerticalAlignment" Value="Center" />

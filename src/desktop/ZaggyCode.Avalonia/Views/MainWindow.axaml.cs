@@ -37,6 +37,11 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
 
         Terminal.CurrentSession = _terminalSession;
 
+        var backspaceGesture = new KeyGesture(Key.Back);
+        DeleteSelectionMenuItem.InputGesture = backspaceGesture;
+        CompactDeleteSelectionMenuItem.InputGesture = backspaceGesture;
+        EditorDeleteContextMenuItem.InputGesture = backspaceGesture;
+
         Terminal.PropertyChanged += (_, args) =>
         {
             if (args.Property.Name == nameof(Height) && Terminal.Height <= Terminal.MinHeight)
@@ -62,6 +67,9 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
     {
         ViewModel.GetCodeToExecute.RegisterHandler(context =>
             Dispatcher.Invoke(() => context.SetOutput(Editor.Text)));
+
+        ViewModel.GetSelectedCode.RegisterHandler(context =>
+            context.SetOutput(Editor.SelectedText));
 
         ViewModel.GetTerminalStreams.RegisterHandler(context =>
             context.SetOutput((_terminalSession.Reader, _terminalSession.Writer)));
@@ -184,6 +192,14 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         });
     }
 
+    private void EditorCut_Click(object? sender, RoutedEventArgs e) => Editor.Cut();
+
+    private void EditorCopy_Click(object? sender, RoutedEventArgs e) => Editor.Copy();
+
+    private void EditorPaste_Click(object? sender, RoutedEventArgs e) => Editor.Paste();
+
+    private void EditorDeleteSelection_Click(object? sender, RoutedEventArgs e) => Editor.SelectedText = string.Empty;
+
     private void SaveGridState()
     {
         _originalRows.Clear();
@@ -264,8 +280,6 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
 
         GameMap.Map = MapView.CreateSampleMap();
 
-        // Прогрев движка стартует после появления карты: фоновая загрузка
-        // раннера, модулей и IO начинается без нажатия «Запустить».
         _ = ViewModel.InitializeGameEngineAsync();
 
         GameMap.Events.LevelCompleted += (_, _) => _terminalSession.Writer.WriteLine("Уровень пройден!");

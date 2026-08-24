@@ -4,15 +4,21 @@
     BorderThickness="1"
     CanResize="False"
     Foreground="{DynamicResource ForegroundBrush}"
-    Height="595"
+    Height="506"
     ShowInTaskbar="False"
     Title="О приложении"
     Width="330"
     WindowStartupLocation="CenterOwner"
     x:Class="ZaggyCode.Avalonia.Views.Dialogs.AboutWindow"
+    x:DataType="vm:AboutViewModel"
     xmlns="https://github.com/avaloniaui"
     xmlns:controls="clr-namespace:ZaggyCode.Avalonia.Views.Controls"
+    xmlns:vm="using:ZaggyCode.Avalonia.ViewModels"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Design.DataContext>
+        <vm:AboutViewModel />
+    </Design.DataContext>
 
     <Grid RowDefinitions="Auto,*">
         <controls:DialogTitleBar
@@ -29,21 +35,21 @@
             <controls:SvgFromContent
                 Height="120"
                 HorizontalAlignment="Center"
-                Loaded="LoadLogo"
                 Margin="0,0,0,16"
+                Path="{Binding LogoPath}"
                 Width="120" />
 
             <TextBlock
                 FontSize="24"
                 FontWeight="Bold"
                 HorizontalAlignment="Center"
-                Name="AppNameText" />
+                Text="{Binding AppName}" />
 
             <TextBlock
                 FontSize="13"
                 HorizontalAlignment="Center"
-                Name="VersionText"
-                Opacity="0.7" />
+                Opacity="0.7"
+                Text="{Binding Version}" />
 
             <Separator Margin="24,14,24,14" />
 
@@ -52,7 +58,7 @@
                 HorizontalAlignment="Center"
                 LineHeight="20"
                 MaxWidth="270"
-                Name="DescriptionText"
+                Text="{Binding Description}"
                 TextAlignment="Center"
                 TextWrapping="Wrap" />
 
@@ -66,7 +72,7 @@
                     FontSize="14"
                     FontWeight="SemiBold"
                     HorizontalAlignment="Center"
-                    Name="DevelopersText"
+                    Text="{Binding Developers}"
                     TextAlignment="Center" />
             </StackPanel>
         </StackPanel>
