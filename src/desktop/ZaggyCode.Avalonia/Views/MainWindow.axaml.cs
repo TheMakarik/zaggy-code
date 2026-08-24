@@ -74,10 +74,8 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         ViewModel.GetTerminalStreams.RegisterHandler(context =>
             context.SetOutput((_terminalSession.Reader, _terminalSession.Writer)));
 
-        /*
         ViewModel.GetGameMap.RegisterHandler(context =>
-            Dispatcher.Invoke(() => context.SetOutput(GameMapView.Map)));
-        */
+            Dispatcher.Invoke(() => context.SetOutput(GameMap.Map)));
 
         ViewModel.OpenSettings.RegisterHandler(async context =>
         {
@@ -120,7 +118,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
 
         ViewModel.ResetMap.RegisterHandler(context =>
         {
-            Dispatcher.Invoke(() => GameMapView.Reset());
+            Dispatcher.Invoke(() => GameMap.Reset());
             context.SetOutput(Unit.Default);
         });
 
@@ -128,10 +126,10 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         {
             Dispatcher.Invoke(() =>
             {
-                if (!GameMapView.IsCompleted && !GameMapView.IsDead)
+                if (!GameMap.IsCompleted && !GameMap.IsDead)
                     _terminalSession.Writer.WriteLine("Цель не достигнута.");
 
-                GameMapView.Reset();
+                GameMap.Reset();
             });
 
             context.SetOutput(Unit.Default);
@@ -280,10 +278,12 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         ViewModel?.WhenAnyValue(vm => vm.EnableCodeHighlighting)
             .Subscribe(ApplyCodeHighlighting);
 
+        GameMap.Map = MapView.CreateSampleMap();
+
         _ = ViewModel.InitializeGameEngineAsync();
 
-        GameMapView.Events.LevelCompleted += (_, _) => _terminalSession.Writer.WriteLine("Уровень пройден!");
-        GameMapView.Events.RobotDead += (_, _) => _terminalSession.Writer.WriteLine("Загги врезался и погиб.");
+        GameMap.Events.LevelCompleted += (_, _) => _terminalSession.Writer.WriteLine("Уровень пройден!");
+        GameMap.Events.RobotDead += (_, _) => _terminalSession.Writer.WriteLine("Загги врезался и погиб.");
     }
 
     private void ApplyCodeHighlighting(bool isEnabled)

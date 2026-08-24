@@ -1,4 +1,8 @@
-﻿namespace ZaggyCode.Avalonia;
+﻿#if DEBUG
+using Declarative.Avalonia.AgentTools;
+#endif
+
+namespace ZaggyCode.Avalonia;
 
 sealed class Program
 {
@@ -14,7 +18,12 @@ sealed class Program
         => AppBuilder.Configure<App>()
             .UsePlatformDetect()
 #if DEBUG
+            // Официальный DevTools MCP (avdt mcp) требует подписку Avalonia Plus:
+            // на Community-тарифе сервер стартует, но любой вызов инструментов отвечает
+            // "Your current subscription tier does not include access to this tool".
+            // Поэтому для агентов используется бесплатный UseAgentInspector (loopback MCP на 127.0.0.1:5599).
             .WithDeveloperTools()
+            .UseAgentInspector()
 #endif
             .WithInterFont()
             .LogToTrace()

@@ -29,6 +29,7 @@ public partial class App : Application
         {
             var host = await new Bootstrapper().LoadApplicationAsync();
 
+            mainWindow.Show();
             loading.Close();
 
             mainWindow.DataContext = host.Services.GetRequiredService<MainWindowViewModel>();
@@ -36,6 +37,7 @@ public partial class App : Application
         }
         catch (Exception ex)
         {
+            mainWindow.Show();
             loading.Close();
             System.Diagnostics.Debug.WriteLine($"Error while loading: {ex}");
             Log.Logger.Error(ex, "Error while loading application");
