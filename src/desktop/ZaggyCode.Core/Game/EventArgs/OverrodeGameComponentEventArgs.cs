@@ -2,7 +2,7 @@ namespace ZaggyCode.Core.Game.EventArgs;
 
 public class OverrodeGameComponentEventArgs : System.EventArgs
 {
-    public required IReadOnlyCollection<Point> PointsToUpdate { get; set; } = [];
+    public required IReadOnlyCollection<RobotGamePoint> PointsToUpdate { get; set; } = [];
     public string? NewName { get; set; }
     public string? NewDescription { get; set; }
     

@@ -54,7 +54,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
     #region Services
 
-    private readonly IGameEngine _gameEngine;
+    private readonly IRobotGameEngine _robotGameEngine;
     private readonly IObservableStorage<UserData> _userStorage;
     private readonly IObservableStorage<PythonSettings> _pythonSettingsStorage;
     private readonly IOptions<DefaultUser> _defaultUserOptions;
@@ -75,7 +75,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public MainWindowViewModel(
         ILogger<MainWindowViewModel> logger,
-        IGameEngine gameEngine,
+        IRobotGameEngine robotGameEngine,
         IOptions<ZaggyAssetsOptions> zaggyAssets,
         IObservableStorage<UserData> userStorage,
         IObservableStorage<PythonSettings> pythonSettingsStorage,
@@ -89,7 +89,7 @@ public partial class MainWindowViewModel : ViewModelBase
         IPythonFunctionNameValidator pythonFunctionNameValidator,
         ILoggerFactory loggerFactory)
     {
-        _gameEngine = gameEngine;
+        _robotGameEngine = robotGameEngine;
         ZaggyAssets = zaggyAssets;
         _logger = logger;
         _fontSizeOptions = textFontSize;
@@ -254,8 +254,8 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private void InitializeGameEngine()
     {
-        _gameEngine.DebugLineUpdated += OnDebugLineUpdated;
-        _gameEngine.CodeErrorOccurred += OnCodeErrorOccurred;
+        _robotGameEngine.DebugLineUpdated += OnDebugLineUpdated;
+        _robotGameEngine.CodeErrorOccurred += OnCodeErrorOccurred;
 
         this.WhenAnyValue(vm => vm.SelectedLanguage)
             .Skip(1)
@@ -278,7 +278,7 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         try
         {
-            _gameEngine.Language = language;
+            _robotGameEngine.Language = language;
         }
         catch (Exception e)
         {
@@ -290,7 +290,7 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         try
         {
-            _gameEngine.Speed = speed;
+            _robotGameEngine.Speed = speed;
         }
         catch (Exception e)
         {
@@ -304,16 +304,16 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             await Task.Run(() =>
             {
-                _gameEngine.Language = SelectedLanguage;
-                _gameEngine.Speed = ExecutionSpeed;
+                _robotGameEngine.Language = SelectedLanguage;
+                _robotGameEngine.Speed = ExecutionSpeed;
             });
 
             var map = await GetGameMap.Handle(Unit.Default);
             if (map is not null)
-                _gameEngine.CurrentMap = map;
+                _robotGameEngine.CurrentMap = map;
 
             var (input, output) = await GetTerminalStreams.Handle(Unit.Default);
-            _gameEngine.SetIo(output, input);
+            _robotGameEngine.SetIo(output, input);
         }
         catch (Exception e)
         {
@@ -514,15 +514,15 @@ public partial class MainWindowViewModel : ViewModelBase
 #if DEBUG
             SelectedLanguage = Language.Python;
 #endif
-            _gameEngine.Language = SelectedLanguage;
-            _gameEngine.Speed = ExecutionSpeed;
-            _gameEngine.SetIo(output, input);
+            _robotGameEngine.Language = SelectedLanguage;
+            _robotGameEngine.Speed = ExecutionSpeed;
+            _robotGameEngine.SetIo(output, input);
 
             if (map is not null)
-                _gameEngine.CurrentMap = map;
+                _robotGameEngine.CurrentMap = map;
 
             Debug.Assert(_cancellationTokenSource is not null);
-            await _gameEngine.RunCodeAsync(code, _cancellationTokenSource.Token);
+            await _robotGameEngine.RunCodeAsync(code, _cancellationTokenSource.Token);
 
             await ConcludeRun.Handle(Unit.Default);
         }

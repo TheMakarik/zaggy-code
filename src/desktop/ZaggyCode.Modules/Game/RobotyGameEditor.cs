@@ -1,6 +1,6 @@
 namespace ZaggyCode.Modules.Game;
 
-public sealed class GameEditor : IGameEditor
+public sealed class RobotyGameEditor : IRobotyGameEditor
 {
     private FileStream _stream;
     public GameModel OpenEditable(string path)

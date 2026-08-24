@@ -1,7 +1,7 @@
 namespace ZaggyCode.Core.Game.Models;
 
-[XmlRoot("point")]
-public class Point : INotifyPropertyChanged
+[XmlRoot("game-point")]
+public class RobotGamePoint : INotifyPropertyChanged
 {
     [XmlAttribute("x")]
     public int X { get; set => SetField(ref field, value); }
@@ -28,13 +28,25 @@ public class Point : INotifyPropertyChanged
     [DefaultValue(false)]
     public bool IsGoal { get; set => SetField(ref field, value); }
     
-    [XmlAttribute("custom-background-hex")]
+    [XmlAttribute("customization-props:background-hex")]
     [DefaultValue(null)]
     public string? CustomBackgroundHex { get; set => SetField(ref field, value); }
     
-    [XmlAttribute("custom-border-hex")]
+    [XmlAttribute("customization-props:border-hex")]
     [DefaultValue(null)]
     public string? CustomBorderHex { get; set => SetField(ref field, value); }
+    
+    [XmlAttribute("customization-props:wall-on-point-hex")]
+    [DefaultValue(null)]
+    public string? CustomWallOnPointHex { get; set => SetField(ref field, value); }
+    
+    [XmlAttribute("customization-props:drew-point-hex")]
+    [DefaultValue(null)]
+    public string? CustomDrewPointHex { get; set => SetField(ref field, value); }
+    
+    [XmlAttribute("customization-props:wall-opacity")]
+    [DefaultValue(null)]
+    public int? CustomWallOpacity { get; set => SetField(ref field, value); }
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -51,8 +63,8 @@ public class Point : INotifyPropertyChanged
         return true;
     }
 
-    public static explicit operator System.Drawing.Point(Point point)
+    public static explicit operator System.Drawing.Point(RobotGamePoint robotGamePoint)
     {
-        return new System.Drawing.Point(point.X, point.Y);
+        return new System.Drawing.Point(robotGamePoint.X, robotGamePoint.Y);
     }
 }

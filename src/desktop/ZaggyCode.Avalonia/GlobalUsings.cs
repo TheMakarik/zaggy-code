@@ -89,7 +89,7 @@ global using ZaggyCode.Modules.HostedServices;
 global using ZaggyCode.Modules.HostedServices.Options;
 global using ZaggyCode.Modules.Languages.Options;
 global using ZaggyCode.Modules.Languages.Validation;
-global using GamePoint = ZaggyCode.Core.Game.Models.Point;
+global using GamePoint = ZaggyCode.Core.Game.Models.RobotGamePoint;
 global using Language = ZaggyCode.Core.Languages.Enums.Language;
 global using Point = Avalonia.Point;
 global using RobotMovedEventArgs = ZaggyCode.Core.Game.EventArgs.RobotMovedEventArgs;

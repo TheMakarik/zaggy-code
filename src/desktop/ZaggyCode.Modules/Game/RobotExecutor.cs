@@ -4,14 +4,14 @@ namespace ZaggyCode.Modules.Game;
 public sealed class RobotExecutor : IRobotExecutor
 {
     private readonly Map _map;
-    private Point _robotPoint;
+    private RobotGamePoint _robotRobotGamePoint;
 
     public RobotExecutor(Map map)
     {
         _map = map;
-        _robotPoint = map.Points.First(point => point.IsSpawn);
+        _robotRobotGamePoint = map.Points.First(point => point.IsSpawn);
         
-        Debug.Assert(_robotPoint is { X: >= 1, Y: >= 1 });
+        Debug.Assert(_robotRobotGamePoint is { X: >= 1, Y: >= 1 });
     }
 
     public EventHandler<RobotPointUpdatedEventArgs>? RobotPointUpdated { get; set; }
@@ -28,18 +28,18 @@ public sealed class RobotExecutor : IRobotExecutor
 
     public void FillCell()
     {
-        if (_robotPoint.RequireDraw)
+        if (_robotRobotGamePoint.RequireDraw)
         {
-            DrawPoint?.Invoke(this, new DrawPointEventArgs { PointToDraw = _robotPoint });
+            DrawPoint?.Invoke(this, new DrawPointEventArgs { RobotGamePointToDraw = _robotRobotGamePoint });
             return;
         }
 
-        RobotDied?.Invoke(this, new RobotDeadEventArgs { DiesType = RobotDiesType.DrawUnrequiredCell });
+        RobotDied?.Invoke(this, new RobotDeadEventArgs { DeadType = RobotDeadType.DrawUnrequiredCell });
     }
 
     public bool IsCellFilled()
     {
-        return _robotPoint.RequireDraw;
+        return _robotRobotGamePoint.RequireDraw;
     }
 
     public bool IsWallFromUp()
@@ -65,38 +65,38 @@ public sealed class RobotExecutor : IRobotExecutor
     // Границы карты задаются Width/Height, а не набором точек: точек за пределами может быть больше.
     private void Move(int deltaX, int deltaY, Func<WallType, bool> exitWall, Func<WallType, bool> enterWall)
     {
-        var targetX = _robotPoint.X + deltaX;
-        var targetY = _robotPoint.Y + deltaY;
+        var targetX = _robotRobotGamePoint.X + deltaX;
+        var targetY = _robotRobotGamePoint.Y + deltaY;
 
         if (IsBeyondMap(targetX, targetY))
         {
-            RaiseRobotDied(RobotDiesType.EndOfTheMap);
+            RaiseRobotDied(RobotDeadType.EndOfTheMap);
             return;
         }
 
         var target = FindPoint(targetX, targetY);
         if (target is null)
         {
-            RaiseRobotDied(RobotDiesType.EndOfTheMap);
+            RaiseRobotDied(RobotDeadType.EndOfTheMap);
             return;
         }
 
         Debug.Assert(target.X >= 1 && target.Y >= 1);
 
-        if (exitWall(_robotPoint.WallType) || enterWall(target.WallType) || target.WallType == WallType.Full)
+        if (exitWall(_robotRobotGamePoint.WallType) || enterWall(target.WallType) || target.WallType == WallType.Full)
         {
-            RaiseRobotDied(RobotDiesType.Wall);
+            RaiseRobotDied(RobotDeadType.Wall);
             return;
         }
 
-        _robotPoint = target;
+        _robotRobotGamePoint = target;
         RobotPointUpdated?.Invoke(this, new RobotPointUpdatedEventArgs { NewX = target.X, NewY = target.Y });
     }
 
     private bool HasWallInDirection(int deltaX, int deltaY, Func<WallType, bool> exitWall, Func<WallType, bool> enterWall)
     {
-        var targetX = _robotPoint.X + deltaX;
-        var targetY = _robotPoint.Y + deltaY;
+        var targetX = _robotRobotGamePoint.X + deltaX;
+        var targetY = _robotRobotGamePoint.Y + deltaY;
 
         if (IsBeyondMap(targetX, targetY))
             return true;
@@ -105,12 +105,12 @@ public sealed class RobotExecutor : IRobotExecutor
         if (target is null)
             return true;
 
-        return exitWall(_robotPoint.WallType) || enterWall(target.WallType) || target.WallType == WallType.Full;
+        return exitWall(_robotRobotGamePoint.WallType) || enterWall(target.WallType) || target.WallType == WallType.Full;
     }
 
-    private void RaiseRobotDied(RobotDiesType diesType)
+    private void RaiseRobotDied(RobotDeadType deadType)
     {
-        RobotDied?.Invoke(this, new RobotDeadEventArgs { DiesType = diesType });
+        RobotDied?.Invoke(this, new RobotDeadEventArgs { DeadType = deadType });
     }
 
     private bool IsBeyondMap(int x, int y)
@@ -118,7 +118,7 @@ public sealed class RobotExecutor : IRobotExecutor
         return x < 1 || y < 1 || x > _map.Width || y > _map.Height;
     }
 
-    private Point? FindPoint(int x, int y)
+    private RobotGamePoint? FindPoint(int x, int y)
     {
         return _map.Points.FirstOrDefault(point => point.X == x && point.Y == y);
     }

@@ -61,7 +61,7 @@ public class RobotExecutorTests
 
         // Assert
         deadArgs.Should().NotBeNull();
-        deadArgs!.DiesType.Should().Be(RobotDiesType.Wall);
+        deadArgs!.DeadType.Should().Be(RobotDeadType.Wall);
         updatedArgs.Should().BeNull();
     }
 
@@ -80,7 +80,7 @@ public class RobotExecutorTests
 
         // Assert
         deadArgs.Should().NotBeNull();
-        deadArgs!.DiesType.Should().Be(RobotDiesType.Wall);
+        deadArgs!.DeadType.Should().Be(RobotDeadType.Wall);
     }
 
     [Fact]
@@ -98,7 +98,7 @@ public class RobotExecutorTests
 
         // Assert
         deadArgs.Should().NotBeNull();
-        deadArgs!.DiesType.Should().Be(RobotDiesType.Wall);
+        deadArgs!.DeadType.Should().Be(RobotDeadType.Wall);
     }
 
     [Fact]
@@ -115,7 +115,7 @@ public class RobotExecutorTests
 
         // Assert
         deadArgs.Should().NotBeNull();
-        deadArgs!.DiesType.Should().Be(RobotDiesType.EndOfTheMap);
+        deadArgs!.DeadType.Should().Be(RobotDeadType.EndOfTheMap);
     }
 
     [Fact]
@@ -123,7 +123,7 @@ public class RobotExecutorTests
     {
         // Arrange
         var map = CreateDefaultMap(spawnX: 3);
-        map.Points.Add(new Point { X = 4, Y = 2 });
+        map.Points.Add(new RobotGamePoint { X = 4, Y = 2 });
         var systemUnderTests = new RobotExecutor(map);
         RobotDeadEventArgs? deadArgs = null;
         systemUnderTests.RobotDied += (_, args) => deadArgs = args;
@@ -133,7 +133,7 @@ public class RobotExecutorTests
 
         // Assert
         deadArgs.Should().NotBeNull();
-        deadArgs!.DiesType.Should().Be(RobotDiesType.EndOfTheMap);
+        deadArgs!.DeadType.Should().Be(RobotDeadType.EndOfTheMap);
     }
 
     [Fact]
@@ -150,7 +150,7 @@ public class RobotExecutorTests
 
         // Assert
         deadArgs.Should().NotBeNull();
-        deadArgs!.DiesType.Should().Be(RobotDiesType.EndOfTheMap);
+        deadArgs!.DeadType.Should().Be(RobotDeadType.EndOfTheMap);
     }
 
     [Fact]
@@ -167,7 +167,7 @@ public class RobotExecutorTests
 
         // Assert
         deadArgs.Should().NotBeNull();
-        deadArgs!.DiesType.Should().Be(RobotDiesType.EndOfTheMap);
+        deadArgs!.DeadType.Should().Be(RobotDeadType.EndOfTheMap);
     }
 
     [Fact]
@@ -185,7 +185,7 @@ public class RobotExecutorTests
 
         // Assert
         deadArgs.Should().NotBeNull();
-        deadArgs!.DiesType.Should().Be(RobotDiesType.EndOfTheMap);
+        deadArgs!.DeadType.Should().Be(RobotDeadType.EndOfTheMap);
     }
 
     [Fact]
@@ -280,7 +280,7 @@ public class RobotExecutorTests
 
         // Assert
         drawArgs.Should().NotBeNull();
-        drawArgs!.PointToDraw.Should().BeSameAs(GetPoint(map, 2, 2));
+        drawArgs!.RobotGamePointToDraw.Should().BeSameAs(GetPoint(map, 2, 2));
         deadArgs.Should().BeNull();
     }
 
@@ -301,7 +301,7 @@ public class RobotExecutorTests
         // Assert
         drawArgs.Should().BeNull();
         deadArgs.Should().NotBeNull();
-        deadArgs!.DiesType.Should().Be(RobotDiesType.DrawUnrequiredCell);
+        deadArgs!.DeadType.Should().Be(RobotDeadType.DrawUnrequiredCell);
     }
 
     [Fact]
@@ -329,12 +329,12 @@ public class RobotExecutorTests
 
     private static Map CreateDefaultMap(int spawnX = 2, int spawnY = 2, int width = 3, int height = 3)
     {
-        ObservableCollection<Point> points = [];
+        ObservableCollection<RobotGamePoint> points = [];
         for (var y = 1; y <= height; y++)
         {
             for (var x = 1; x <= width; x++)
             {
-                points.Add(new Point
+                points.Add(new RobotGamePoint
                 {
                     X = x,
                     Y = y,
@@ -346,7 +346,7 @@ public class RobotExecutorTests
         return new Map { Width = width, Height = height, Points = points };
     }
 
-    private static Point GetPoint(Map map, int x, int y)
+    private static RobotGamePoint GetPoint(Map map, int x, int y)
     {
         return map.Points.First(point => point.X == x && point.Y == y);
     }

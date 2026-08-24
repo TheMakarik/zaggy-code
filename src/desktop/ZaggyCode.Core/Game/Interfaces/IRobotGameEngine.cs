@@ -1,7 +1,7 @@
 namespace ZaggyCode.Core.Game.Interfaces;
 
 //#:NO_AI
-public interface IGameEngine
+public interface IRobotGameEngine
 {
     public EventHandler<DebugLineUpdatedEventArgs>? DebugLineUpdated { get; set; }
     public EventHandler<CodeErrorOccurredEventArgs>? CodeErrorOccurred { get; set; }

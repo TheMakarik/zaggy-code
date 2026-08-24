@@ -1,6 +1,6 @@
 namespace ZaggyCode.Modules.Game;
 
-public sealed class GameEngine(ILogger<GameEngine> logger, IServiceScopeFactory scopeFactory, IRobotExecutorFactory robotExecutorFactory) : IGameEngine
+public sealed class RobotGameEngine(ILogger<RobotGameEngine> logger, IServiceScopeFactory scopeFactory, IRobotExecutorFactory robotExecutorFactory) : IRobotGameEngine
 {
     private readonly Lock _lock = new();
     private IServiceScope? _dependencyInjectionScope;

@@ -1,6 +1,6 @@
 namespace ZaggyCode.Core.Game.Enums;
 
-public enum RobotDiesType
+public enum RobotDeadType
 {
     Wall,
     EndOfTheMap,

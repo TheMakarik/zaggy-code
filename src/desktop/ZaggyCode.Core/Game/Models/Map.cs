@@ -5,12 +5,12 @@ public sealed class Map : INotifyPropertyChanged, INotifyCollectionChanged
 {
     [XmlArray("points-collection")]
     [XmlArrayItem("point")]
-    public required ObservableCollection<Point> Points
+    public required ObservableCollection<RobotGamePoint> Points
     {
         get;
         set
         {
-            ObservableCollection<Point> oldCollection = field;
+            ObservableCollection<RobotGamePoint> oldCollection = field;
             if (!SetField(ref field, value))
                 return;
 
