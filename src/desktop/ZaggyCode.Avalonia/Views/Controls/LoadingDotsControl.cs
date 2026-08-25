@@ -1,4 +1,4 @@
-namespace ZaggyCode.Avalonia.Views.UserControls;
+namespace ZaggyCode.Avalonia.Views.Controls;
 
 public sealed class LoadingDotsControl : UserControl
 {
