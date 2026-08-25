@@ -103,9 +103,6 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         ViewModel.GetTerminalStreams.RegisterHandler(context =>
             context.SetOutput((_terminalProxy!.Input, _terminalProxy!.Output)));
 
-        ViewModel.GetGameMap.RegisterHandler(context =>
-            Dispatcher.Invoke(() => context.SetOutput(GameMap.Map)));
-
         ViewModel.OpenSettings.RegisterHandler(async context =>
         {
             var settingsWindow = new SettingsWindow { DataContext = context.Input };
@@ -147,7 +144,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
 
         ViewModel.ResetMap.RegisterHandler(context =>
         {
-            Dispatcher.Invoke(() => GameMap.Reset());
+            Dispatcher.Invoke(() => GameMapView.Reset());
             context.SetOutput(Unit.Default);
         });
 
@@ -155,10 +152,10 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         {
             Dispatcher.Invoke(() =>
             {
-                if (!GameMap.IsCompleted && !GameMap.IsDead)
+                if (!GameMapView.IsCompleted && !GameMapView.IsDead)
                     _terminalSession.Writer.WriteLine("Цель не достигнута.");
 
-                GameMap.Reset();
+                GameMapView.Reset();
             });
 
             context.SetOutput(Unit.Default);
@@ -283,12 +280,10 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         ViewModel?.WhenAnyValue(vm => vm.EnableCodeHighlighting)
             .Subscribe(ApplyCodeHighlighting);
 
-        GameMap.Map = MapView.CreateSampleMap();
-
         _ = ViewModel.InitializeGameEngineAsync();
 
-        GameMap.Events.LevelCompleted += (_, _) => _terminalSession.Writer.WriteLine("Уровень пройден!");
-        GameMap.Events.RobotDead += (_, _) => _terminalSession.Writer.WriteLine("Загги врезался и погиб.");
+        GameMapView.Events.LevelCompleted += (_, _) => _terminalSession.Writer.WriteLine("Уровень пройден!");
+        GameMapView.Events.RobotDead += (_, _) => _terminalSession.Writer.WriteLine("Загги врезался и погиб.");
     }
 
     private void ApplyCodeHighlighting(bool isEnabled)
