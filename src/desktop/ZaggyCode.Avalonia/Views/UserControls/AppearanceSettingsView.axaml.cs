@@ -1,3 +1,5 @@
+using Avalonia.VisualTree;
+
 namespace ZaggyCode.Avalonia.Views.UserControls;
 
 public partial class AppearanceSettingsView : ReactiveUserControl<AppearanceSettingsViewModel>
@@ -77,5 +79,17 @@ public partial class AppearanceSettingsView : ReactiveUserControl<AppearanceSett
         var registryOptions = new RegistryOptions(theme);
         _csharpTextMateInstallation?.SetTheme(registryOptions.LoadTheme(theme));
         _pythonTextMateInstallation?.SetTheme(registryOptions.LoadTheme(theme));
+    }
+
+    private void OnThemeCardPointerEntered(object? sender, PointerEventArgs e)
+    {
+        if (sender is Button button && button.GetVisualDescendants().OfType<Popup>().FirstOrDefault() is { } popup)
+            popup.IsOpen = true;
+    }
+
+    private void OnThemeCardPointerExited(object? sender, PointerEventArgs e)
+    {
+        if (sender is Button button && button.GetVisualDescendants().OfType<Popup>().FirstOrDefault() is { } popup)
+            popup.IsOpen = false;
     }
 }

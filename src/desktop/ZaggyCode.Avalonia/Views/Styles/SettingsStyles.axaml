@@ -53,17 +53,6 @@
         <Setter Property="Foreground" Value="{DynamicResource PrimaryLightBrush}" />
     </Style>
 
-    <Style Selector="Button.settings-footer-button.primary">
-        <Setter Property="Background" Value="{DynamicResource PrimaryBrush}" />
-        <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}" />
-        <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBrush}" />
-    </Style>
-
-    <Style Selector="Button.settings-footer-button.primary:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-        <Setter Property="Background" Value="{DynamicResource PrimaryLightBrush}" />
-        <Setter Property="Foreground" Value="{DynamicResource BackgroundBrush}" />
-    </Style>
-
     <Style Selector="Button.settings-font-button">
         <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
         <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}" />

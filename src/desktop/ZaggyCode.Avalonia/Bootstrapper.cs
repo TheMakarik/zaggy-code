@@ -106,7 +106,27 @@ public sealed class Bootstrapper
             .AddOptions<PythonDefaultSettingsOptions>()
             .AddOptions<MapAssetsOptions>()
             .AddOptions<ZaggyAssetsOptions>()
-            .AddOptions<PythonValidationOptions>();
+            .AddOptions<PythonValidationOptions>()
+            .AddOptions<ThemeOptions>()
+            .AddOptions<LoadingOptions>();
+
+        
+        builder.Services.AddSingleton<IArchiveCompressor, TarBZip2ArchiveCompressor>();
+        builder.Services.AddSingleton<IThemeCatalog>(provider =>
+        {
+            var loggerFactory = provider.GetRequiredService<ILoggerFactory>();
+            var archiveReader = new TarBZip2ArchiveReader(
+                loggerFactory.CreateLogger<TarBZip2ArchiveReader>(),
+                new MetadataParser(provider.GetRequiredService<IOptions<MetadataOptions>>()),
+                provider.GetRequiredService<IOptions<TempOptions>>());
+
+            return new ThemeCatalog(
+                loggerFactory.CreateLogger<ThemeCatalog>(),
+                archiveReader,
+                provider.GetRequiredService<IOptions<ThemeOptions>>(),
+                provider.GetRequiredService<ITempFolderProvider>(),
+                provider.GetRequiredService<XmlSerializer<Theme>>());
+        });
 
         var app = builder.Build();
 
@@ -140,6 +160,25 @@ public sealed class Bootstrapper
         return Enum.GetValues<Language>().First(language => language.GetLanguageExtension() == extension);
     }
 
+    private static string GetDataDirectory()
+    {
+        if (OperatingSystem.IsWindows())
+            return Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "zaggy", "data");
+
+        if (OperatingSystem.IsMacOS())
+            return Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Library", "Application Support", "zaggy", "data");
+
+        string? dataHome = Environment.GetEnvironmentVariable("XDG_DATA_HOME");
+        if (!string.IsNullOrEmpty(dataHome))
+            return Path.Join(dataHome, "zaggy");
+
+        return Path.Join(
+            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+            ".local",
+            "share",
+            "zaggy");
+    }
+
     private static void SetEnvironmentVariables()
     {
         var appDirectory = AppContext.BaseDirectory;
@@ -152,6 +191,10 @@ public sealed class Bootstrapper
         var configDirectory = GetConfigDirectory();
         Directory.CreateDirectory(configDirectory);
         Environment.SetEnvironmentVariable("ZAGGY_CONFIG", configDirectory);
+
+        var dataDirectory = GetDataDirectory();
+        Directory.CreateDirectory(dataDirectory);
+        Environment.SetEnvironmentVariable("ZAGGY_DATA", dataDirectory);
 
         var stateDirectory = GetStateDirectory();
         Directory.CreateDirectory(stateDirectory);

@@ -1,8 +1,10 @@
+using System.Text.Json;
+
 namespace ZaggyCode.Tests.Archiving;
 
 public class TarBZip2ArchiveReaderTests : IDisposable
 {
-    private const string MetadataFileName = "metadata.xml";
+    private const string MetadataFileName = "meta.json";
     private const string ArchiveExtension = ".tar.bz2";
 
     private readonly Fixture _fixture = new();
@@ -12,7 +14,7 @@ public class TarBZip2ArchiveReaderTests : IDisposable
     public TarBZip2ArchiveReaderTests()
     {
         var logger = A.Dummy<ILogger<TarBZip2ArchiveReader>>();
-        var metadataParser = new MetadataParser(CreateServiceProvider(), CreateMetadataOptions());
+        var metadataParser = new MetadataParser(CreateMetadataOptions());
         var tempOptions = CreateTempOptions();
         _systemUnderTests = new TarBZip2ArchiveReader(logger, metadataParser, tempOptions);
     }
@@ -139,14 +141,7 @@ public class TarBZip2ArchiveReaderTests : IDisposable
     {
         _fileSystem.Dispose();
     }
-
-    private static IServiceProvider CreateServiceProvider()
-    {
-        var services = new ServiceCollection();
-        services.AddSingleton(typeof(XmlSerializer<>), typeof(XmlSerializer<>));
-        return services.BuildServiceProvider();
-    }
-
+    
     private static IOptions<MetadataOptions> CreateMetadataOptions()
     {
         var options = A.Fake<IOptions<MetadataOptions>>();
@@ -157,7 +152,12 @@ public class TarBZip2ArchiveReaderTests : IDisposable
     private IOptions<TempOptions> CreateTempOptions()
     {
         var options = A.Fake<IOptions<TempOptions>>();
-        A.CallTo(() => options.Value).Returns(new TempOptions { TempDirectoryPath = _fileSystem.CreateDirectory() });
+        A.CallTo(() => options.Value).Returns(new TempOptions
+        {
+            TempDirectoryPath = _fileSystem.CreateDirectory(),
+            TempToCompress = _fileSystem.CreateDirectory(),
+            TempFromCompress = _fileSystem.CreateDirectory()
+        });
         return options;
     }
 
@@ -174,10 +174,9 @@ public class TarBZip2ArchiveReaderTests : IDisposable
             CreatedAtVersion = new Version(1, 0)
         };
 
-        using var metadataStream = new MemoryStream();
-        new XmlSerializer<ArchiveMetadata>().Serialize(metadataStream, metadata);
+        var metadataBytes = JsonSerializer.SerializeToUtf8Bytes(metadata);
 
-        CreateArchive(directory, fileName, [(MetadataFileName, metadataStream.ToArray())]);
+        CreateArchive(directory, fileName, [(MetadataFileName, metadataBytes)]);
     }
 
     private static string CreateArchive(string directory, string fileName, IReadOnlyList<(string EntryName, string Content)> entries)

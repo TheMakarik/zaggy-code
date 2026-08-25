@@ -37,6 +37,9 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
 
         Terminal.CurrentSession = _terminalSession;
 
+        MessageBus.Current.Listen<AppThemeChangedMessage>()
+            .Subscribe(message => Dispatcher.UIThread.Post(() => _ = ApplyAppThemeAsync(message.ThemeName)));
+
         var backspaceGesture = new KeyGesture(Key.Back);
         DeleteSelectionMenuItem.InputGesture = backspaceGesture;
         CompactDeleteSelectionMenuItem.InputGesture = backspaceGesture;
@@ -61,6 +64,21 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         CodeThemeMenu.InvalidateVisual();
 
         RegisterInteractionHandlers();
+    }
+
+    private async Task ApplyAppThemeAsync(string themeName)
+    {
+        if (App.Services.GetRequiredService<IThemeApplier>() is not { } applier)
+            return;
+
+        try
+        {
+            await applier.ApplyThemeAsync(themeName);
+        }
+        catch (Exception e)
+        {
+            Log.Logger.Error(e, "Failed to apply app theme {Theme}", themeName);
+        }
     }
 
     private void RegisterInteractionHandlers()

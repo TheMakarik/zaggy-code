@@ -9,6 +9,8 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
     [Reactive] private bool _useSystemTitleBar;
     [Reactive] private bool _showSidebar;
     [Reactive] private string _selectedCodeTheme = string.Empty;
+    [Reactive] private string _selectedAppTheme = string.Empty;
+    [Reactive] private bool _isLoadingThemes = true;
     [Reactive] private bool _enableCodeHighlighting;
     [Reactive] private bool _showCodeLineNumbers;
     [Reactive] private bool _hasChanges;
@@ -21,6 +23,7 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
 
     private readonly FontSizeOptions _fontSizeOptions;
     private readonly UserData _defaultUserData;
+    private readonly IObservableStorage<UserData> _userStorage;
     private readonly ILogger<AppearanceSettingsViewModel> _logger;
     private int _originalCodeFontSize;
     private int _originalTerminalFontSize;
@@ -32,8 +35,10 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
 
     public int MinFontSize => _fontSizeOptions.MinFontSize;
     public int MaxFontSize => _fontSizeOptions.MaxFontSize;
+    public int LoadingDotsMaxCount { get; }
 
     public ObservableCollection<CodeThemeItem> AvailableCodeThemes { get; } = [];
+    public ObservableCollection<ThemeMetadataItem> AvailableAppThemes { get; } = [];
     public Interaction<string, string> ApplyCodeThemeInteraction { get; } = new();
     public string CSharpExamplePath { get; }
     public string PythonExamplePath { get; }
@@ -43,11 +48,15 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
         IOptions<DefaultUser> defaultUserOptions,
         IOptions<CodeExamplePathOptions> codeExamplePathOptions,
         IOptions<FontSizeOptions> fontSizeOptions,
+        IOptions<LoadingOptions> loadingOptions,
+        IThemeCatalog themeCatalog,
         ILogger<AppearanceSettingsViewModel> logger)
     {
         _fontSizeOptions = fontSizeOptions.Value;
         _defaultUserData = defaultUserOptions.Value.User;
+        _userStorage = userStorage;
         _logger = logger;
+        LoadingDotsMaxCount = loadingOptions.Value.LoadingDotsMaxCount;
         CSharpExamplePath = codeExamplePathOptions.Value.CSharpExamplePath;
         PythonExamplePath = codeExamplePathOptions.Value.PythonExamplePath;
 
@@ -59,6 +68,10 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
         _originalCodeTheme = current.CodeTheme;
         _originalEnableCodeHighlighting = current.EnableCodeHighlighting;
         _originalShowCodeLineNumbers = current.ShowCodeLineNumbers;
+
+#pragma warning disable AsyncVoidMethod
+        _ = InitializeAvailableAppThemesAsync(themeCatalog);
+#pragma warning restore AsyncVoidMethod
 
         LoadFromUserData(current);
         HasChanges = false;
@@ -104,6 +117,8 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
         SelectedCodeTheme = _defaultUserData.CodeTheme;
         EnableCodeHighlighting = _defaultUserData.EnableCodeHighlighting;
         ShowCodeLineNumbers = _defaultUserData.ShowCodeLineNumbers;
+
+        ApplyAppThemeSelection(_defaultUserData.CurrentTheme);
     }
 
     public void AcceptChanges()
@@ -158,6 +173,46 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
     private void SelectCodeTheme(string themeName)
     {
         SelectedCodeTheme = themeName;
+    }
+
+    // Тема приложения применяется и сохраняется сразу при клике: она не участвует
+    // в HasChanges-цикле настроек, чтобы нельзя было «отменить» применённый вид.
+    [ReactiveCommand]
+    private void SelectAppTheme(string themeName)
+        => ApplyAppThemeSelection(themeName);
+
+    private void ApplyAppThemeSelection(string themeName)
+    {
+        if (SelectedAppTheme == themeName)
+            return;
+
+        SelectedAppTheme = themeName;
+        _userStorage.Current.CurrentTheme = themeName;
+        MessageBus.Current.SendMessage(new AppThemeChangedMessage(themeName));
+    }
+
+    private async Task InitializeAvailableAppThemesAsync(IThemeCatalog themeCatalog)
+    {
+        try
+        {
+            // Чтение архивов — синхронный файловый IO внутри async-обёртки,
+            // поэтому уводим в пул потоков, чтобы окно настроек не подвисало.
+            var themes = await Task.Run(async () => await themeCatalog.GetAvailableThemesAsync());
+
+            foreach (var metadata in themes)
+                AvailableAppThemes.Add(ThemeMetadataItem.From(metadata));
+
+            var saved = _userStorage.Current.CurrentTheme;
+            SelectedAppTheme = AvailableAppThemes.Any(theme => theme.Name == saved) ? saved : string.Empty;
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Failed to load application themes");
+        }
+        finally
+        {
+            IsLoadingThemes = false;
+        }
     }
 
     [ReactiveCommand]

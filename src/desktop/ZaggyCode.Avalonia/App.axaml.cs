@@ -34,6 +34,8 @@ public partial class App : Application
 
             mainWindow.DataContext = host.Services.GetRequiredService<MainWindowViewModel>();
             Services = host.Services;
+
+            _ = ApplyStartupThemeAsync(host.Services);
         }
         catch (Exception ex)
         {
@@ -41,6 +43,18 @@ public partial class App : Application
             loading.Close();
             System.Diagnostics.Debug.WriteLine($"Error while loading: {ex}");
             Log.Logger.Error(ex, "Error while loading application");
+        }
+    }
+
+    private static async Task ApplyStartupThemeAsync(IServiceProvider services)
+    {
+        try
+        {
+            await services.GetRequiredService<IThemeApplier>().ApplySavedThemeAsync();
+        }
+        catch (Exception e)
+        {
+            Log.Logger.Error(e, "Failed to apply startup theme");
         }
     }
 }

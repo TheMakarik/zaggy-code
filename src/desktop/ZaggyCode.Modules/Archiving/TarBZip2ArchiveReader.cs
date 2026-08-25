@@ -40,6 +40,19 @@ public sealed class TarBZip2ArchiveReader(
         logger.LogInformation("Enumerated {c} metadata files", metadataFilesCount);
     }
 
+    public async Task<T?> ReadMetadataAsync<T>(string archivePath) where T : ArchiveMetadata
+    {
+        await using var archive = await OpenArchive(archivePath);
+        if (archive is null)
+            return null;
+
+        var tarEntries = archive.EntriesAsync
+            .Where(entry => entry is { Key: not null, IsDirectory: false })
+            .Select(entry => entry.Key!);
+
+        return await ParseMetadataAsync<T>(tarEntries, archive, archivePath);
+    }
+
     private async Task<T?> ParseMetadataAsync<T>(IAsyncEnumerable<string> tarEntries,
         IWritableAsyncArchive<TarWriterOptions> archive, string file) where T : ArchiveMetadata
     {
@@ -145,9 +158,11 @@ public sealed class TarBZip2ArchiveReader(
         return tempDirectory;
     }
 
+    // Распакованные архивы складываются в from-compress: там живут папки,
+    // из которых потребители читают содержимое и которые можно переиспользовать.
     private DirectoryInfo CreateTempDirectory()
     {
-        var tempPath = Path.Join(tempOptions.Value.TempDirectoryPath, Guid.NewGuid().ToString("N"));
+        var tempPath = Path.Join(tempOptions.Value.TempFromCompress, Guid.NewGuid().ToString("N"));
         return Directory.CreateDirectory(tempPath);
     }
 }

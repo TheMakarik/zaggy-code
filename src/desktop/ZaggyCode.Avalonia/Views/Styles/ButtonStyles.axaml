@@ -53,6 +53,23 @@
         <Setter Property="Height" Value="22" />
     </Style>
 
+    <!--  Акцентная кнопка действия (сохранение настроек и т.п.)  -->
+    <Style Selector="Button.primary-action">
+        <Setter Property="Background" Value="{DynamicResource PrimaryBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource BackgroundBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBrush}" />
+        <Setter Property="CornerRadius" Value="{DynamicResource ButtonCornerRadius}" />
+    </Style>
+
+    <Style Selector="Button.primary-action:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource PrimaryLightBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource BackgroundBrush}" />
+    </Style>
+
+    <Style Selector="Button.primary-action:pressed /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource PrimaryDarkBrush}" />
+    </Style>
+
     <!--  Кнопки управления окном (шапка терминала)  -->
     <Style Selector="Button.window-control">
         <Setter Property="Background" Value="Transparent" />

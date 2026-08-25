@@ -24,6 +24,7 @@ public class UserStorageTests : IDisposable
                 ShowCodeLineNumbers = true,
                 CodeFontSize = 14,
                 CodeTheme = "Light",
+                CurrentTheme = "Primus",
                 LastLanguage = Language.CSharp,
                 LastGamePath = null,
                 LastSpeed = ExecutionSpeed.X2,

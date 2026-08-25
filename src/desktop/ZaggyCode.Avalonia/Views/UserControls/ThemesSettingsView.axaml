@@ -1,0 +1,145 @@
+<rxui:ReactiveUserControl
+    x:Class="ZaggyCode.Avalonia.Views.UserControls.ThemesSettingsView"
+    x:DataType="vm:AppearanceSettingsViewModel"
+    x:TypeArguments="vm:AppearanceSettingsViewModel"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:converters="clr-namespace:ZaggyCode.Avalonia.Views.Converters"
+    xmlns:controls="clr-namespace:ZaggyCode.Avalonia.Views.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:records="clr-namespace:ZaggyCode.Avalonia.ViewModels.Records"
+    xmlns:rxui="http://reactiveui.net"
+    xmlns:userControls="clr-namespace:ZaggyCode.Avalonia.Views.UserControls"
+    xmlns:vm="using:ZaggyCode.Avalonia.ViewModels"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    mc:Ignorable="d">
+
+    <ScrollViewer>
+        <StackPanel Margin="20" Spacing="16">
+
+            <TextBlock
+                FontSize="13"
+                Foreground="{DynamicResource ForegroundMutedBrush}"
+                Opacity="0.85"
+                Text="Клик по теме применяет её сразу ко всему приложению и сохраняет выбор."
+                TextWrapping="Wrap" />
+
+            <StackPanel
+                HorizontalAlignment="Center"
+                IsVisible="{Binding IsLoadingThemes}"
+                Orientation="Horizontal"
+                Spacing="8">
+                <userControls:LoadingDotsControl MaxDotCount="{Binding LoadingDotsMaxCount}" />
+            </StackPanel>
+
+            <ItemsControl IsVisible="{Binding IsLoadingThemes, Converter={converters:InverseBooleanConverter}}" ItemsSource="{Binding AvailableAppThemes}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="records:ThemeMetadataItem">
+                        <Button
+                            Classes="app-theme-button"
+                            Command="{Binding $parent[ItemsControl].((vm:AppearanceSettingsViewModel)DataContext).SelectAppThemeCommand}"
+                            CommandParameter="{Binding Name}"
+                            CornerRadius="12"
+                            Margin="3,10"
+                            Padding="0"
+                            PointerEntered="OnThemeCardPointerEntered"
+                            PointerExited="OnThemeCardPointerExited">
+                            <Button.IsEnabled>
+                                <MultiBinding Converter="{converters:IsNotEqualConverter}">
+                                    <Binding Path="Name" />
+                                    <Binding Path="$parent[ItemsControl].((vm:AppearanceSettingsViewModel)DataContext).SelectedAppTheme" />
+                                </MultiBinding>
+                            </Button.IsEnabled>
+                            <Panel>
+                                <!--  Подложка выбранной темы: держит hover-фон без наведения  -->
+                                <Border
+                                    Background="{DynamicResource SurfaceHoverBrush}"
+                                    BorderBrush="{DynamicResource PrimaryLightBrush}"
+                                    BorderThickness="2"
+                                    CornerRadius="12"
+                                    IsHitTestVisible="False">
+                                    <Border.IsVisible>
+                                        <MultiBinding Converter="{converters:IsEqualConverter}">
+                                            <Binding Path="Name" />
+                                            <Binding Path="$parent[ItemsControl].((vm:AppearanceSettingsViewModel)DataContext).SelectedAppTheme" />
+                                        </MultiBinding>
+                                    </Border.IsVisible>
+                                </Border>
+
+                                <Border Padding="14" CornerRadius="12">
+                                    <StackPanel Spacing="8">
+                                        <controls:ThemeSchemePreview
+                                            ContentForegroundBrush="{Binding Foreground}"
+                                            EditorBrush="{Binding EditorBackground}"
+                                            Height="90"
+                                            OutlineBrush="{Binding Border}"
+                                            SidebarBrush="{Binding Sidebar}"
+                                            TerminalBrush="{Binding TerminalBackground}"
+                                            TitleBarBrush="{Binding Primary}"
+                                            Width="150"
+                                            WindowBackgroundBrush="{Binding Background}" />
+                                        <TextBlock
+                                            FontWeight="SemiBold"
+                                            HorizontalAlignment="Center"
+                                            Text="{Binding Name}" />
+                                    </StackPanel>
+                                </Border>
+
+                                <materialIcons:MaterialIcon
+                                    Foreground="{DynamicResource PrimaryLightBrush}"
+                                    HorizontalAlignment="Right"
+                                    Kind="Check"
+                                    VerticalAlignment="Top">
+                                    <materialIcons:MaterialIcon.IsVisible>
+                                        <MultiBinding Converter="{converters:IsEqualConverter}">
+                                            <Binding Path="Name" />
+                                            <Binding Path="$parent[ItemsControl].((vm:AppearanceSettingsViewModel)DataContext).SelectedAppTheme" />
+                                        </MultiBinding>
+                                    </materialIcons:MaterialIcon.IsVisible>
+                                </materialIcons:MaterialIcon>
+
+                                <Popup
+                                    HorizontalOffset="20"
+                                    IsLightDismissEnabled="False"
+                                    Placement="Top">
+                                    <Border
+                                        Background="{DynamicResource SurfaceBrush}"
+                                        BorderBrush="{DynamicResource BorderBrush}"
+                                        BorderThickness="1"
+                                        BoxShadow="0 4 16 0 #22000000"
+                                        CornerRadius="8"
+                                        Padding="12"
+                                        Width="240">
+                                        <StackPanel Spacing="4">
+                                            <TextBlock FontSize="14" FontWeight="Bold" Text="{Binding Name}" />
+                                            <TextBlock
+                                                FontSize="12"
+                                                Foreground="{DynamicResource ForegroundMutedColor}"
+                                                Text="{Binding Author, StringFormat='Автор: {0}'}" />
+                                            <TextBlock
+                                                FontSize="12"
+                                                Foreground="{DynamicResource ForegroundMutedColor}"
+                                                Text="{Binding Version, StringFormat='Версия: {0}'}" />
+                                            <TextBlock
+                                                FontSize="12"
+                                                LineHeight="17"
+                                                Margin="0,4,0,0"
+                                                Text="{Binding Description}"
+                                                TextWrapping="Wrap" />
+                                        </StackPanel>
+                                    </Border>
+                                </Popup>
+                            </Panel>
+                        </Button>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+    </ScrollViewer>
+</rxui:ReactiveUserControl>

@@ -180,6 +180,7 @@ public class PythonLanguageRunnerTests : LanguageRunnerTests
             ShowCodeLineNumbers = true,
             CodeFontSize = 14,
             CodeTheme = "Light",
+            CurrentTheme = "Primus",
             LastLanguage = Language.Python,
             LastGamePath = null,
             LastSpeed = ExecutionSpeed.X1,

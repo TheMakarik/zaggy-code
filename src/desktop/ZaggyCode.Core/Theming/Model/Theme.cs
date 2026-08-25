@@ -1,84 +1,93 @@
-namespace ZaggyCode.Core.Data.Model;
+namespace ZaggyCode.Core.Theming.Model;
 using System.Xml.Serialization;
 
 [XmlRoot("theme")]
 public sealed class Theme
 {
-    [XmlElement("background:color")]
+    [XmlElement("background")]
     public required string BackgroundColor { get; set; }
 
-    [XmlElement("background:secondary-color")]
+    [XmlElement("background-secondary")]
     public required string BackgroundSecondaryColor { get; set; }
 
-    [XmlElement("surface:color")]
+    [XmlElement("surface")]
     public required string SurfaceColor { get; set; }
 
-    [XmlElement("surface:light-color")]
+    [XmlElement("surface-light")]
     public required string SurfaceLightColor { get; set; }
 
-    [XmlElement("surface:hover-color")]
+    [XmlElement("surface-hover")]
     public required string SurfaceHoverColor { get; set; }
 
-    [XmlElement("primary:color")]
+    [XmlElement("primary")]
     public required string PrimaryColor { get; set; }
 
-    [XmlElement("primary:light-color")]
+    [XmlElement("primary-light")]
     public required string PrimaryLightColor { get; set; }
 
-    [XmlElement("primary:dark-color")]
+    [XmlElement("primary-dark")]
     public required string PrimaryDarkColor { get; set; }
 
-    [XmlElement("foreground:color")]
+    [XmlElement("foreground")]
     public required string ForegroundColor { get; set; }
 
-    [XmlElement("foreground:muted-color")]
+    [XmlElement("foreground-muted")]
     public required string ForegroundMutedColor { get; set; }
 
-    [XmlElement("foreground:dark-color")]
+    [XmlElement("foreground-dark")]
     public required string ForegroundDarkColor { get; set; }
 
-    [XmlElement("border:color")]
+    [XmlElement("border")]
     public required string BorderColor { get; set; }
 
-    [XmlElement("border:light-color")]
+    [XmlElement("border-light")]
     public required string BorderLightColor { get; set; }
 
-    [XmlElement("success:color")]
+    [XmlElement("success")]
     public required string SuccessColor { get; set; }
 
-    [XmlElement("success:dark-color")]
+    [XmlElement("success-dark")]
     public required string SuccessDarkColor { get; set; }
 
-    [XmlElement("error:color")]
+    [XmlElement("error")]
     public required string ErrorColor { get; set; }
 
-    [XmlElement("warning:color")]
+    [XmlElement("warning")]
     public required string WarningColor { get; set; }
 
-    [XmlElement("editor:background-color")]
+    [XmlElement("editor-background")]
     public required string EditorBackgroundColor { get; set; }
 
-    [XmlElement("editor:foreground-color")]
+    [XmlElement("editor-foreground")]
     public required string EditorForegroundColor { get; set; }
 
-    [XmlElement("editor:line-number-color")]
+    [XmlElement("editor-line-number")]
     public required string EditorLineNumberColor { get; set; }
 
-    [XmlElement("terminal:background-color")]
+    [XmlElement("terminal-background")]
     public required string TerminalBackgroundColor { get; set; }
 
-    [XmlElement("terminal:foreground-color")]
+    [XmlElement("terminal-foreground")]
     public required string TerminalForegroundColor { get; set; }
 
-    [XmlElement("sidebar:background-color")]
+    [XmlElement("sidebar-background")]
     public required string SidebarBackgroundColor { get; set; }
 
-    [XmlElement("system:accent-color")]
+    [XmlElement("accent")]
     public required string SystemAccentColor { get; set; }
 
-    [XmlElement("system:accent-color-light1")]
+    [XmlElement("accent-light1")]
     public required string SystemAccentColorLight1 { get; set; }
 
-    [XmlElement("system:accent-color-dark1")]
+    [XmlElement("accent-dark1")]
     public required string SystemAccentColorDark1 { get; set; }
+
+    [XmlElement("map-wall")]
+    public required string MapWallColor { get; set; }
+
+    [XmlElement("map-point-border")]
+    public required string MapPointBorderColor { get; set; }
+
+    [XmlElement("map-point-background")]
+    public required string MapPointBackgroundColor { get; set; }
 }

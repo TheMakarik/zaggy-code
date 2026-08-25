@@ -31,39 +31,43 @@
 
     <Color x:Key="SidebarBackgroundColor">#242424</Color>
 
-    <Color x:Key="SystemAccentColor">#8A9A7A</Color>
-    <Color x:Key="SystemAccentColorLight1">#A8BC9A</Color>
-    <Color x:Key="SystemAccentColorDark1">#6A7A5A</Color>
+    <Color x:Key="MapWallColor">#8A8F96</Color>
+    <Color x:Key="MapPointBorderColor">#F0F0F0</Color>
+    <Color x:Key="MapPointBackgroundColor">#383838</Color>
 
-    <SolidColorBrush Color="{StaticResource BackgroundColor}" x:Key="BackgroundBrush" />
-    <SolidColorBrush Color="{StaticResource BackgroundSecondaryColor}" x:Key="BackgroundSecondaryBrush" />
-    <SolidColorBrush Color="{StaticResource SurfaceColor}" x:Key="SurfaceBrush" />
-    <SolidColorBrush Color="{StaticResource SurfaceLightColor}" x:Key="SurfaceLightBrush" />
-    <SolidColorBrush Color="{StaticResource SurfaceHoverColor}" x:Key="SurfaceHoverBrush" />
+    <SolidColorBrush Color="{DynamicResource BackgroundColor}" x:Key="BackgroundBrush" />
+    <SolidColorBrush Color="{DynamicResource BackgroundSecondaryColor}" x:Key="BackgroundSecondaryBrush" />
+    <SolidColorBrush Color="{DynamicResource SurfaceColor}" x:Key="SurfaceBrush" />
+    <SolidColorBrush Color="{DynamicResource SurfaceLightColor}" x:Key="SurfaceLightBrush" />
+    <SolidColorBrush Color="{DynamicResource SurfaceHoverColor}" x:Key="SurfaceHoverBrush" />
 
-    <SolidColorBrush Color="{StaticResource PrimaryColor}" x:Key="PrimaryBrush" />
-    <SolidColorBrush Color="{StaticResource PrimaryLightColor}" x:Key="PrimaryLightBrush" />
-    <SolidColorBrush Color="{StaticResource PrimaryDarkColor}" x:Key="PrimaryDarkBrush" />
+    <SolidColorBrush Color="{DynamicResource PrimaryColor}" x:Key="PrimaryBrush" />
+    <SolidColorBrush Color="{DynamicResource PrimaryLightColor}" x:Key="PrimaryLightBrush" />
+    <SolidColorBrush Color="{DynamicResource PrimaryDarkColor}" x:Key="PrimaryDarkBrush" />
 
-    <SolidColorBrush Color="{StaticResource ForegroundColor}" x:Key="ForegroundBrush" />
-    <SolidColorBrush Color="{StaticResource ForegroundMutedColor}" x:Key="ForegroundMutedBrush" />
-    <SolidColorBrush Color="{StaticResource ForegroundDarkColor}" x:Key="ForegroundDarkBrush" />
+    <SolidColorBrush Color="{DynamicResource ForegroundColor}" x:Key="ForegroundBrush" />
+    <SolidColorBrush Color="{DynamicResource ForegroundMutedColor}" x:Key="ForegroundMutedBrush" />
+    <SolidColorBrush Color="{DynamicResource ForegroundDarkColor}" x:Key="ForegroundDarkBrush" />
 
-    <SolidColorBrush Color="{StaticResource BorderColor}" x:Key="BorderBrush" />
-    <SolidColorBrush Color="{StaticResource BorderLightColor}" x:Key="BorderLightBrush" />
+    <SolidColorBrush Color="{DynamicResource BorderColor}" x:Key="BorderBrush" />
+    <SolidColorBrush Color="{DynamicResource BorderLightColor}" x:Key="BorderLightBrush" />
 
-    <SolidColorBrush Color="{StaticResource SuccessColor}" x:Key="SuccessBrush" />
-    <SolidColorBrush Color="{StaticResource SuccessDarkColor}" x:Key="SuccessDarkBrush" />
-    <SolidColorBrush Color="{StaticResource ErrorColor}" x:Key="ErrorBrush" />
-    <SolidColorBrush Color="{StaticResource WarningColor}" x:Key="WarningBrush" />
+    <SolidColorBrush Color="{DynamicResource SuccessColor}" x:Key="SuccessBrush" />
+    <SolidColorBrush Color="{DynamicResource SuccessDarkColor}" x:Key="SuccessDarkBrush" />
+    <SolidColorBrush Color="{DynamicResource ErrorColor}" x:Key="ErrorBrush" />
+    <SolidColorBrush Color="{DynamicResource WarningColor}" x:Key="WarningBrush" />
 
-    <SolidColorBrush Color="{StaticResource EditorBackgroundColor}" x:Key="EditorBackgroundBrush" />
-    <SolidColorBrush Color="{StaticResource EditorForegroundColor}" x:Key="EditorForegroundBrush" />
-    <SolidColorBrush Color="{StaticResource EditorLineNumberColor}" x:Key="EditorLineNumberBrush" />
+    <SolidColorBrush Color="{DynamicResource EditorBackgroundColor}" x:Key="EditorBackgroundBrush" />
+    <SolidColorBrush Color="{DynamicResource EditorForegroundColor}" x:Key="EditorForegroundBrush" />
+    <SolidColorBrush Color="{DynamicResource EditorLineNumberColor}" x:Key="EditorLineNumberBrush" />
 
-    <SolidColorBrush Color="{StaticResource TerminalBackgroundColor}" x:Key="TerminalBackgroundBrush" />
-    <SolidColorBrush Color="{StaticResource TerminalForegroundColor}" x:Key="TerminalForegroundBrush" />
+    <SolidColorBrush Color="{DynamicResource TerminalBackgroundColor}" x:Key="TerminalBackgroundBrush" />
+    <SolidColorBrush Color="{DynamicResource TerminalForegroundColor}" x:Key="TerminalForegroundBrush" />
 
-    <SolidColorBrush Color="{StaticResource SidebarBackgroundColor}" x:Key="SidebarBackgroundBrush" />
+    <SolidColorBrush Color="{DynamicResource SidebarBackgroundColor}" x:Key="SidebarBackgroundBrush" />
+
+    <SolidColorBrush Color="{DynamicResource MapWallColor}" x:Key="MapWallBrush" />
+    <SolidColorBrush Color="{DynamicResource MapPointBorderColor}" x:Key="MapPointBorderBrush" />
+    <SolidColorBrush Color="{DynamicResource MapPointBackgroundColor}" x:Key="MapPointBackgroundBrush" />
 
 </ResourceDictionary>

@@ -1,0 +1,61 @@
+<Window
+    Background="{DynamicResource BackgroundBrush}"
+    BorderBrush="{DynamicResource ForegroundBrush}"
+    BorderThickness="1"
+    CanResize="False"
+    Foreground="{DynamicResource ForegroundBrush}"
+    Height="240"
+    MaxWidth="500"
+    ShowInTaskbar="False"
+    SizeToContent="Width"
+    Title="Тема не найдена"
+    WindowStartupLocation="CenterOwner"
+    x:Class="ZaggyCode.Avalonia.Views.Dialogs.ThemeNotFoundWindow"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:controls="clr-namespace:ZaggyCode.Avalonia.Views.Controls"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Grid RowDefinitions="Auto,*,Auto">
+        <controls:DialogTitleBar
+            Grid.Row="0"
+            Name="CustomTitleBar"
+            Title="Тема не найдена" />
+
+        <Grid
+            ColumnDefinitions="Auto,*"
+            Grid.Row="1"
+            Margin="24,16,24,8">
+            <controls:SvgFromContent
+                Grid.Column="0"
+                Height="96"
+                Loaded="LoadZaggyIcon"
+                Margin="0,0,20,0"
+                VerticalAlignment="Center"
+                Width="96" />
+
+            <StackPanel
+                Grid.Column="1"
+                Spacing="8"
+                VerticalAlignment="Center">
+                <TextBlock
+                    FontSize="16"
+                    FontWeight="SemiBold"
+                    Text="Тема оформления не найдена" />
+                <TextBlock
+                    LineHeight="20"
+                    Name="MessageText"
+                    Opacity="0.85"
+                    TextWrapping="Wrap" />
+            </StackPanel>
+        </Grid>
+
+        <Button
+            Click="OnOkClick"
+            Content="Ок"
+            Grid.Row="2"
+            HorizontalAlignment="Right"
+            IsDefault="True"
+            Margin="0,0,24,20"
+            MinWidth="90" />
+    </Grid>
+</Window>

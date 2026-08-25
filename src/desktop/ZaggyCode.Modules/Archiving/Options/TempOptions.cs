@@ -7,4 +7,16 @@ public class TempOptions
         get => field;
         set => field = Environment.ExpandEnvironmentVariables(value);
     }
+
+    public required string TempToCompress
+    {
+        get => field;
+        set => field = Environment.ExpandEnvironmentVariables(value);
+    }
+
+    public required string TempFromCompress
+    {
+        get => field;
+        set => field = Environment.ExpandEnvironmentVariables(value);
+    }
 }

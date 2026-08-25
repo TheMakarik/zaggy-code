@@ -8,6 +8,7 @@ public sealed class UserData : INotifyPropertyChanged
     public bool ShowSidebar { get; set => SetField(ref field, value); }
     public int CodeFontSize { get; set => SetField(ref field, value); }
     public required string CodeTheme { get; set => SetField(ref field, value); }
+    public required string CurrentTheme { get; set => SetField(ref field, value); }
     public required Language LastLanguage { get; set => SetField(ref field, value); }
     public required string? LastGamePath { get; set => SetField(ref field, value); }
     public required ExecutionSpeed LastSpeed { get; set => SetField(ref field, value); }

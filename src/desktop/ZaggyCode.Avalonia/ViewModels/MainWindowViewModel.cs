@@ -58,6 +58,8 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly IRobotGameEngine _robotGameEngine;
     private readonly IObservableStorage<UserData> _userStorage;
     private readonly IObservableStorage<PythonSettings> _pythonSettingsStorage;
+    private readonly IThemeCatalog _themeCatalog;
+    private readonly IOptions<LoadingOptions> _loadingOptions;
     private readonly IOptions<DefaultUser> _defaultUserOptions;
     private readonly IOptions<PythonDefaultSettingsOptions> _pythonDefaultSettingsOptions;
     private readonly IOptions<CodeExamplePathOptions> _codeExamplePathOptions;
@@ -80,6 +82,8 @@ public partial class MainWindowViewModel : ViewModelBase
         IOptions<ZaggyAssetsOptions> zaggyAssets,
         IObservableStorage<UserData> userStorage,
         IObservableStorage<PythonSettings> pythonSettingsStorage,
+        IThemeCatalog themeCatalog,
+        IOptions<LoadingOptions> loadingOptions,
         IOptions<DefaultUser> defaultUserOptions,
         IOptions<PythonDefaultSettingsOptions> pythonDefaultSettingsOptions,
         IOptions<CodeExamplePathOptions> codeExamplePathOptions,
@@ -96,6 +100,8 @@ public partial class MainWindowViewModel : ViewModelBase
         _fontSizeOptions = textFontSize;
         _userStorage = userStorage;
         _pythonSettingsStorage = pythonSettingsStorage;
+        _themeCatalog = themeCatalog;
+        _loadingOptions = loadingOptions;
         _defaultUserOptions = defaultUserOptions;
         _pythonDefaultSettingsOptions = pythonDefaultSettingsOptions;
         _codeExamplePathOptions = codeExamplePathOptions;
@@ -515,6 +521,8 @@ public partial class MainWindowViewModel : ViewModelBase
             _pythonDefaultSettingsOptions,
             _codeExamplePathOptions,
             _fontSizeOptions,
+            _loadingOptions,
+            _themeCatalog,
             _pythonFunctionNameValidator,
             _loggerFactory);
         await OpenSettings.Handle(settingsViewModel);
