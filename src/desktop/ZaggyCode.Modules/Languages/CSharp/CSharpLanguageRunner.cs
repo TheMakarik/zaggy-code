@@ -1,9 +1,13 @@
+using System.CodeDom.Compiler;
+using System.Reflection.PortableExecutable;
+
 namespace ZaggyCode.Modules.Languages.CSharp;
 
-/*
 //#:NO_AI
 [LanguageExtension(".cs"), LanguagePrettyName("C#")]
-public sealed partial class CSharpLanguageRunner(ILogger<CSharpLanguageRunner> logger, IOptions<SpeedMillisecondsOptions> millisecondsOptions) : ILanguageRunner
+public sealed partial class CSharpLanguageRunner(
+    ILogger<CSharpLanguageRunner> logger,
+    IOptions<SpeedMillisecondsOptions> millisecondsOptions) : ILanguageRunner
 {
     private const string InitialCode = "Console.SetIn(Input);\r\nConsole.SetOut(Output);\r\n";
 
@@ -20,7 +24,7 @@ public sealed partial class CSharpLanguageRunner(ILogger<CSharpLanguageRunner> l
 
     public EventHandler<CodeErrorOccurredEventArgs>? CodeErrorOccurred { get; set; }
 
-    public async Task Execute(string code, CancellationToken token)
+    public async Task ExecuteAsync(string code, CancellationToken token)
     {
         try
         {
@@ -59,33 +63,6 @@ public sealed partial class CSharpLanguageRunner(ILogger<CSharpLanguageRunner> l
         }
     }
 
-    public void RedirectIo(TextReader input, TextWriter output)
-    {
-        Input = input;
-        Output = output;
-    }
-
-    public void SetSpeed(ExecutionSpeed speed)
-    {
-        ExecSpeed = speed;
-    }
-
-    public void SetExecutor(IRobotExecutor executor)
-    {
-        Executor = executor;
-     
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        // TODO release managed resources here
-    }
-
-    public void Dispose()
-    {
-        // TODO release managed resources here
-    }
-
     private static string ApplySleep(string code, int delayMs)
     {
         SyntaxTree tree = CSharpSyntaxTree.ParseText(code);
@@ -97,6 +74,33 @@ public sealed partial class CSharpLanguageRunner(ILogger<CSharpLanguageRunner> l
 
         return modifiedCode;
     }
-}
-*/
 
+    public void RedirectIo(TextReader input, TextWriter output, CancellationToken token)
+    {
+        token.ThrowIfCancellationRequested();
+        Input = input;
+        Output = output;
+    }
+
+    public void SetSpeed(ExecutionSpeed speed, CancellationToken token)
+    {
+        token.ThrowIfCancellationRequested();
+        ExecSpeed = speed;
+    }
+
+    public void SetExecutor(IRobotExecutor executor, CancellationToken token)
+    {
+        token.ThrowIfCancellationRequested();
+        Executor = executor;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        // TODO release managed resources here
+    }
+
+    public void Dispose()
+    {
+        // TODO release managed resources here
+    }
+}

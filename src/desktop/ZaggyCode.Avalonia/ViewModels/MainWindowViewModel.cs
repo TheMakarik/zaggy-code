@@ -15,6 +15,7 @@ public partial class MainWindowViewModel : ViewModelBase
     [Reactive] private Language _selectedLanguage;
     [Reactive] private LanguageItem? _selectedLanguageItem;
     [Reactive] private Game _currentGame;
+    [Reactive] private Map _currentMap;
     [Reactive] private int _textEditorFontSize;
     [Reactive] private int _terminalFontSize;
 
@@ -40,7 +41,7 @@ public partial class MainWindowViewModel : ViewModelBase
     public readonly Interaction<Unit, string> GetCodeToExecute = new();
     public readonly Interaction<Unit, string> GetSelectedCode = new();
     public readonly Interaction<Unit, (TextReader Input, TextWriter Output)> GetTerminalStreams = new();
-    public readonly Interaction<Unit, Map?> GetGameMap = new();
+    //public readonly Interaction<Unit, Map?> GetGameMap = new();
     public readonly Interaction<int, Unit> UpdateCodeLine = new();
     public readonly Interaction<Unit, Unit> StopCodeExecution = new();
     public readonly Interaction<Unit, Unit> ResetMap = new();
@@ -114,6 +115,7 @@ public partial class MainWindowViewModel : ViewModelBase
         PopupOptions = popupOptions.Value;
         MaxFontSize = _fontSizeOptions.Value.MaxFontSize;
         MinFontSize = _fontSizeOptions.Value.MinFontSize;
+        CurrentMap = CreateSampleMap();
 
         InitializeMessageBusSubscriptions();
         InitializeAvailableCodeThemes();
@@ -140,6 +142,50 @@ public partial class MainWindowViewModel : ViewModelBase
 #pragma warning restore AsyncVoidMethod
     }
 
+    // Small demonstration island; replaced once the level loader exists.
+    public static Map CreateSampleMap()
+    {
+        const int width = 8;
+        const int height = 6;
+
+        GamePoint[,] grid = new GamePoint[width, height];
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+                grid[x, y] = new GamePoint { X = x, Y = y };
+        }
+
+        // A rock wall running between columns 3 and 4 for the middle rows.
+        for (int y = 1; y <= 3; y++)
+        {
+            grid[3, y].WallType = WallType.Right;
+            grid[4, y].WallType = WallType.Left;
+        }
+
+        // A solid boulder the robot can neither enter nor pass.
+        grid[6, 1].WallType = WallType.Full;
+        grid[1, 4].IsSpawn = true;
+
+        // Collect every coin and reach the goal in the bottom-right corner.
+        grid[1, 1].HasCoin = true;
+        grid[2, 2].HasCoin = true;
+        grid[5, 3].HasCoin = true;
+        grid[7, 5].IsGoal = true;
+
+        ObservableCollection<GamePoint> points = [];
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+                points.Add(grid[x, y]);
+        }
+
+        return new Map
+        {
+            Width = width,
+            Height = height,
+            Points = points
+        };
+    }
 
     private void InitializeAvailableCodeThemes()
     {
@@ -308,7 +354,9 @@ public partial class MainWindowViewModel : ViewModelBase
                 _robotGameEngine.Speed = ExecutionSpeed;
             });
 
-            var map = await GetGameMap.Handle(Unit.Default);
+            //var map = await GetGameMap.Handle(Unit.Default);
+            var map = CurrentMap;
+
             if (map is not null)
                 _robotGameEngine.CurrentMap = map;
 
@@ -509,7 +557,8 @@ public partial class MainWindowViewModel : ViewModelBase
             _logger.LogDebug("Code execution was requested");
             var code = codeOverride ?? await GetCodeToExecute.Handle(Unit.Default);
             var (input, output) = await GetTerminalStreams.Handle(Unit.Default);
-            var map = await GetGameMap.Handle(Unit.Default);
+            //var map = await GetGameMap.Handle(Unit.Default);
+            var map = CurrentMap;
 
 #if DEBUG
             SelectedLanguage = Language.Python;

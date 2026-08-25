@@ -622,7 +622,11 @@
                             Classes="card"
                             Grid.Column="2"
                             Margin="6,12,12,12">
-                            <controls:MapView Margin="8" x:Name="GameMap" />
+							<controls:MapView
+								x:Name="GameMapView"
+								Margin="8"
+								MarginUnits="1,1,1,1"
+								Map="{Binding CurrentMap}"/>
                         </Border>
                     </Grid>
                 </Grid>

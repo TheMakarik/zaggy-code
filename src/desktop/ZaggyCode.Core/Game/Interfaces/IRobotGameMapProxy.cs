@@ -25,6 +25,7 @@ public interface IRobotGameMapProxy
     //Ведь он и так уже будет определен
     public void MoveRobot(int newX, int newY, Direction direction);
 
+    
     //Закрашивает точку
     public void FillPoint(int x, int y);
 }

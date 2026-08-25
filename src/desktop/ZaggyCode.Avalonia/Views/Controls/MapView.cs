@@ -49,6 +49,12 @@ public sealed class MapView : Control
         set => SetValue(FixedCellSizeProperty, value);
     }
 
+    public Thickness MarginUnits
+    {
+        get => GetValue(MarginUnitsProperty);
+        set => SetValue(MarginUnitsProperty, value);
+    }
+
     public RobotEvents Events => _stateMachine.Events;
     public IRobotExecutor Executor => _stateMachine;
     public bool IsDead => _stateMachine.IsDead;
@@ -62,6 +68,9 @@ public sealed class MapView : Control
 
     public static readonly StyledProperty<double> FixedCellSizeProperty =
         AvaloniaProperty.Register<MapView, double>(nameof(FixedCellSize), 0.0);
+
+    public static readonly StyledProperty<Thickness> MarginUnitsProperty =
+        AvaloniaProperty.Register<MapView, Thickness>(nameof(MarginUnits), new Thickness(0));
 
     public MapView()
     {
@@ -105,7 +114,8 @@ public sealed class MapView : Control
             InvalidateMeasure();
             InvalidateVisual();
         }
-        else if (change.Property == FixedCellSizeProperty)
+        else if (change.Property == FixedCellSizeProperty
+            || change.Property == MarginUnitsProperty)
         {
             InvalidateMeasure();
             InvalidateVisual();
@@ -159,51 +169,6 @@ public sealed class MapView : Control
     public void SetCoinCollected(int column, int row, bool collected) =>
         RunOnUiThread(() => _stateMachine.SetCollected(column, row, collected));
 
-    // Small demonstration island; replaced once the level loader exists.
-    public static Map CreateSampleMap()
-    {
-        const int width = 8;
-        const int height = 6;
-
-        GamePoint[,] grid = new GamePoint[width, height];
-        for (int y = 0; y < height; y++)
-        {
-            for (int x = 0; x < width; x++)
-                grid[x, y] = new GamePoint { X = x, Y = y };
-        }
-
-        // A rock wall running between columns 3 and 4 for the middle rows.
-        for (int y = 1; y <= 3; y++)
-        {
-            grid[3, y].WallType = WallType.Right;
-            grid[4, y].WallType = WallType.Left;
-        }
-
-        // A solid boulder the robot can neither enter nor pass.
-        grid[6, 1].WallType = WallType.Full;
-        grid[1, 4].IsSpawn = true;
-
-        // Collect every coin and reach the goal in the bottom-right corner.
-        grid[1, 1].HasCoin = true;
-        grid[2, 2].HasCoin = true;
-        grid[5, 3].HasCoin = true;
-        grid[7, 5].IsGoal = true;
-
-        ObservableCollection<GamePoint> points = [];
-        for (int y = 0; y < height; y++)
-        {
-            for (int x = 0; x < width; x++)
-                points.Add(grid[x, y]);
-        }
-
-        return new Map
-        {
-            Width = width,
-            Height = height,
-            Points = points
-        };
-    }
-
     protected override void OnKeyDown(KeyEventArgs e)
     {
         base.OnKeyDown(e);
@@ -213,58 +178,70 @@ public sealed class MapView : Control
         switch (e.Key)
         {
             case Key.Up:
-                if (_activeMoveAnimations > 0)
                 {
-                    e.Handled = true;
-                    return;
-                }
+                    if (_activeMoveAnimations > 0)
+                    {
+                        e.Handled = true;
+                        return;
+                    }
 
-                Executor.MoveUp();
-                e.Handled = true;
-                break;
+                    Executor.MoveUp();
+                    e.Handled = true;
+                    break;
+                }
 
             case Key.Down:
-                if (_activeMoveAnimations > 0)
                 {
-                    e.Handled = true;
-                    return;
-                }
+                    if (_activeMoveAnimations > 0)
+                    {
+                        e.Handled = true;
+                        return;
+                    }
 
-                Executor.MoveDown();
-                e.Handled = true;
-                break;
+                    Executor.MoveDown();
+                    e.Handled = true;
+                    break;
+                }
 
             case Key.Left:
-                if (_activeMoveAnimations > 0)
                 {
-                    e.Handled = true;
-                    return;
-                }
+                    if (_activeMoveAnimations > 0)
+                    {
+                        e.Handled = true;
+                        return;
+                    }
 
-                Executor.MoveLeft();
-                e.Handled = true;
-                break;
+                    Executor.MoveLeft();
+                    e.Handled = true;
+                    break;
+                }
 
             case Key.Right:
-                if (_activeMoveAnimations > 0)
                 {
+                    if (_activeMoveAnimations > 0)
+                    {
+                        e.Handled = true;
+                        return;
+                    }
+
+                    Executor.MoveRight();
                     e.Handled = true;
-                    return;
+                    break;
                 }
 
-                Executor.MoveRight();
-                e.Handled = true;
-                break;
-
             case Key.D:
-                Executor.FillCell();
-                e.Handled = true;
-                break;
+                {
+                    Executor.FillCell();
+                    e.Handled = true;
+                    break;
+                }
 
             case Key.R:
-                Reset();
-                e.Handled = true;
-                break;
+                {
+                    Reset();
+                    e.Handled = true;
+                    break;
+                }
         }
     }
 
@@ -276,24 +253,30 @@ public sealed class MapView : Control
         if (cols == 0 || rows == 0)
             return default;
 
-        double cell = FixedCellSize > 0 ? FixedCellSize : 40;
-        double width = cols * cell;
-        double height = rows * cell;
+        double totalCols = cols + MarginUnits.Left + MarginUnits.Right;
+        double totalRows = rows + MarginUnits.Top + MarginUnits.Bottom;
 
-        if (FixedCellSize <= 0)
+        double cell;
+        if (FixedCellSize > 0)
         {
-            if (double.IsFinite(availableSize.Width) && availableSize.Width > 0)
-                width = Math.Min(width, availableSize.Width);
-
-            if (double.IsFinite(availableSize.Height) && availableSize.Height > 0)
-                height = Math.Min(height, availableSize.Height);
+            cell = FixedCellSize;
+        }
+        else
+        {
+            double widthPerCell = double.IsFinite(availableSize.Width) && availableSize.Width > 0
+                ? availableSize.Width / totalCols : 40;
+            
+            double heightPerCell = double.IsFinite(availableSize.Height) && availableSize.Height > 0
+                ? availableSize.Height / totalRows : 40;
+            
+            cell = Math.Clamp(Math.Min(widthPerCell, heightPerCell), 6, 80);
         }
 
-        Size childSize = new Size(width / cols, height / rows);
+        Size childSize = new Size(cell, cell);
         _robotImage.Measure(childSize);
         _flashOverlay.Measure(childSize);
 
-        return new Size(width, height);
+        return new Size(totalCols * cell, totalRows * cell);
     }
 
     protected override Size ArrangeOverride(Size finalSize)
@@ -439,14 +422,20 @@ public sealed class MapView : Control
         if (cols == 0 || rows == 0)
             return new MapLayout(new PixelOffset(0, 0), 0);
 
+        double totalCols = cols + MarginUnits.Left + MarginUnits.Right;
+        double totalRows = rows + MarginUnits.Top + MarginUnits.Bottom;
+
         double cell = FixedCellSize > 0
             ? FixedCellSize
-            : Math.Clamp(Math.Min(size.Width / cols, size.Height / rows), 6, 80);
+            : Math.Clamp(Math.Min(size.Width / totalCols, size.Height / totalRows), 6, 80);
+
         double islandW = cell * cols;
         double islandH = cell * rows;
+        double contentW = cell * totalCols;
+        double contentH = cell * totalRows;
 
-        double offsetX = (size.Width - islandW) / 2.0;
-        double offsetY = (size.Height - islandH) / 2.0;
+        double offsetX = (size.Width - contentW) / 2.0 + cell * MarginUnits.Left;
+        double offsetY = (size.Height - contentH) / 2.0 + cell * MarginUnits.Top;
 
         return new MapLayout(new PixelOffset(offsetX, offsetY), cell);
     }
