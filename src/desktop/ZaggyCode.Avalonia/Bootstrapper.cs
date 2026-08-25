@@ -128,6 +128,13 @@ public sealed class Bootstrapper
                 provider.GetRequiredService<XmlSerializer<Theme>>());
         });
 
+        // Прокси создаются до готовности контролов главного окна, поэтому инстансы
+        // заполняются через Attach после инициализации MainWindow.
+        builder.Services.AddSingleton<RobotGameEditorProxy>();
+        builder.Services.AddSingleton<IRobotGameEditorProxy>(provider => provider.GetRequiredService<RobotGameEditorProxy>());
+        builder.Services.AddSingleton<RobotGameTerminalProxy>();
+        builder.Services.AddSingleton<IRobotGameTerminalProxy>(provider => provider.GetRequiredService<RobotGameTerminalProxy>());
+
         var app = builder.Build();
 
         _ = app.RunAsync();

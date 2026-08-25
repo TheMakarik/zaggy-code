@@ -32,8 +32,10 @@ public partial class App : Application
             mainWindow.Show();
             loading.Close();
 
-            mainWindow.DataContext = host.Services.GetRequiredService<MainWindowViewModel>();
+            // Services должен быть готов до назначения DataContext:
+            // MainWindow при этом сразу прокидывает контролы в игровые прокси.
             Services = host.Services;
+            mainWindow.DataContext = host.Services.GetRequiredService<MainWindowViewModel>();
 
             _ = ApplyStartupThemeAsync(host.Services);
         }

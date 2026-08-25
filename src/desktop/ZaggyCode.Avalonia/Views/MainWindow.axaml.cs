@@ -6,7 +6,8 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
     private readonly Dictionary<object, int> _originalRows = [];
     private bool _isMaximized = false;
     private readonly ScriptCommandLineSession _terminalSession = new ScriptCommandLineSession();
-    private LineHighlighter? _currentHighlighter;
+    private RobotGameEditorProxy? _editorProxy;
+    private RobotGameTerminalProxy? _terminalProxy;
     private TextMate.Installation? _textMateInstallation;
     private DispatcherTimer? _fontSizeToastTimer;
     private DispatcherTimer? _fontSizeToastFadeOutTimer;
@@ -63,7 +64,17 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
 
         CodeThemeMenu.InvalidateVisual();
 
+        AttachGameProxies();
         RegisterInteractionHandlers();
+    }
+
+    private void AttachGameProxies()
+    {
+        _editorProxy = App.Services.GetRequiredService<RobotGameEditorProxy>();
+        _editorProxy.Attach(Editor);
+
+        _terminalProxy = App.Services.GetRequiredService<RobotGameTerminalProxy>();
+        _terminalProxy.Attach(_terminalSession);
     }
 
     private async Task ApplyAppThemeAsync(string themeName)
@@ -90,7 +101,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
             context.SetOutput(Editor.SelectedText));
 
         ViewModel.GetTerminalStreams.RegisterHandler(context =>
-            context.SetOutput((_terminalSession.Reader, _terminalSession.Writer)));
+            context.SetOutput((_terminalProxy!.Input, _terminalProxy!.Output)));
 
         ViewModel.GetGameMap.RegisterHandler(context =>
             Dispatcher.Invoke(() => context.SetOutput(GameMap.Map)));
@@ -161,39 +172,15 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
 
         ViewModel.UpdateCodeLine.RegisterHandler(context =>
         {
-            var lineNumber = context.Input;
-
-            var wasFoundColor = Application.Current!.TryFindResource("ForegroundDarkColor", out var color);
-            Debug.Assert(wasFoundColor);
-
-            this.Dispatcher.Invoke(() =>
-            {
-                if (_currentHighlighter is not null)
-                {
-                    Editor.TextArea.TextView.BackgroundRenderers.Remove(_currentHighlighter);
-                    _currentHighlighter = null;
-                }
-
-                _currentHighlighter = new LineHighlighter(lineNumber, (Color)color!);
-                Editor.TextArea.TextView.BackgroundRenderers.Add(_currentHighlighter);
-                Editor.TextArea.TextView.Redraw();
-            });
-
+            Debug.Assert(_editorProxy is not null);
+            _editorProxy!.SetCurrentExecutionLine(context.Input);
             context.SetOutput(Unit.Default);
         });
 
         ViewModel.StopCodeExecution.RegisterHandler(context =>
         {
-            this.Dispatcher.Invoke(() =>
-            {
-                if (_currentHighlighter is not null)
-                {
-                    Editor.TextArea.TextView.BackgroundRenderers.Remove(_currentHighlighter);
-                    _currentHighlighter = null;
-                    Editor.TextArea.TextView.Redraw();
-                }
-            });
-
+            Debug.Assert(_editorProxy is not null);
+            _editorProxy!.SetCurrentExecutionLine(0);
             context.SetOutput(Unit.Default);
         });
 
