@@ -174,7 +174,7 @@ public sealed class MapView : Control
         base.OnKeyDown(e);
         if (e.Handled)
             return;
-
+#if DEBUG
         switch (e.Key)
         {
             case Key.Up:
@@ -243,6 +243,7 @@ public sealed class MapView : Control
                     break;
                 }
         }
+#endif
     }
 
     protected override Size MeasureOverride(Size availableSize)
