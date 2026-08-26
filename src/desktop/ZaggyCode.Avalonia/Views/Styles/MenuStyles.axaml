@@ -350,6 +350,14 @@
         </ResourceDictionary>
     </Styles.Resources>
 
+    <!--  Попапы меню FluentTheme рисует дефолтным чёрным — перекрываем темой приложения  -->
+    <Style Selector="MenuFlyoutPresenter">
+        <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}" />
+    </Style>
+
+
     <!--  Полная встроенная строка меню  -->
     <Style Selector="Menu.full-menu">
         <Setter Property="Background" Value="Transparent" />

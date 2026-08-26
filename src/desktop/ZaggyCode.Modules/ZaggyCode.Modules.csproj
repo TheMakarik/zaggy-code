@@ -34,7 +34,7 @@
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
         <None Remove="Languages\Python\Documentation\1.Введение_в_язык\1.Знакомство_с_языком_Python.md" />
-        <Content Include="Languages\Python\Documentation\1.Введение_в_язык\1.Знакомство_с_языком_Python.md">
+        <Content Include="Languages\Python\Documentation\1.Введение\1.Знакомство_С_Языком_Python.md">
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
     </ItemGroup>

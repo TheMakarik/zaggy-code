@@ -70,4 +70,21 @@
     <SolidColorBrush Color="{DynamicResource MapPointBorderColor}" x:Key="MapPointBorderBrush" />
     <SolidColorBrush Color="{DynamicResource MapPointBackgroundColor}" x:Key="MapPointBackgroundBrush" />
 
+    <!--  Переопределение дефолтов FluentTheme для выпадающих списков и всплывающих меню,
+          иначе они игнорируют тему приложения (чёрный фон попапов, серое выделение)  -->
+    <SolidColorBrush Color="{DynamicResource SurfaceColor}" x:Key="MenuFlyoutPresenterBackground" />
+    <SolidColorBrush Color="{DynamicResource BorderColor}" x:Key="MenuFlyoutPresenterBorderBrush" />
+
+    <SolidColorBrush Color="{DynamicResource SurfaceColor}" x:Key="FlyoutPresenterBackground" />
+    <SolidColorBrush Color="{DynamicResource BorderColor}" x:Key="FlyoutPresenterBorderBrush" />
+
+    <SolidColorBrush Color="{DynamicResource SurfaceColor}" x:Key="ComboBoxDropDownBackground" />
+    <SolidColorBrush Color="{DynamicResource BorderColor}" x:Key="ComboBoxDropDownBorderBrush" />
+
+    <SolidColorBrush Color="{DynamicResource SurfaceHoverColor}" x:Key="ComboBoxItemBackgroundPointerOver" />
+    <SolidColorBrush Color="{DynamicResource PrimaryDarkColor}" x:Key="ComboBoxItemBackgroundSelected" />
+    <SolidColorBrush Color="{DynamicResource PrimaryLightColor}" x:Key="ComboBoxItemBackgroundSelectedPointerOver" />
+    <SolidColorBrush Color="{DynamicResource PrimaryDarkColor}" x:Key="ComboBoxItemBackgroundSelectedPressed" />
+    <SolidColorBrush Color="{DynamicResource ForegroundColor}" x:Key="ComboBoxItemForegroundSelected" />
+
 </ResourceDictionary>
