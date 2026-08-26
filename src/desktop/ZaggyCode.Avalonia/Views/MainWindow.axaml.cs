@@ -150,14 +150,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
 
         ViewModel.ConcludeRun.RegisterHandler(context =>
         {
-            Dispatcher.Invoke(() =>
-            {
-                if (!GameMapView.IsCompleted && !GameMapView.IsDead)
-                    _terminalSession.Writer.WriteLine("Цель не достигнута.");
-
-                GameMapView.Reset();
-            });
-
+            Dispatcher.Invoke(() => GameMapView.Reset());
             context.SetOutput(Unit.Default);
         });
 
@@ -281,9 +274,6 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
             .Subscribe(ApplyCodeHighlighting);
 
         _ = ViewModel.InitializeGameEngineAsync();
-
-        GameMapView.Events.LevelCompleted += (_, _) => _terminalSession.Writer.WriteLine("Уровень пройден!");
-        GameMapView.Events.RobotDead += (_, _) => _terminalSession.Writer.WriteLine("Загги врезался и погиб.");
     }
 
     private void ApplyCodeHighlighting(bool isEnabled)

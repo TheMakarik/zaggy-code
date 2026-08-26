@@ -1,3 +1,7 @@
+using ZaggyCode.Avalonia.Views.Records;
+using ZaggyCode.Avalonia.Views.StateMachines;
+using ZaggyCode.Core.Game.Enums;
+
 namespace ZaggyCode.Avalonia.Views.Controls;
 
 // Game field rendered as an island: cells are grass, walls/obstacles are rocks,
@@ -12,24 +16,30 @@ public sealed class MapView : Control
     private static readonly IBrush PaintedBrush = new SolidColorBrush(Color.FromArgb(115, 0xE0, 0xA9, 0x3B));
     private static readonly IBrush CoinBrush = new SolidColorBrush(Color.FromRgb(0xF2, 0xC1, 0x4E));
     private static readonly IBrush FlashBrush = new SolidColorBrush(Color.FromArgb(200, 0xFF, 0xFF, 0xFF));
+    private static readonly IBrush DeathFlashBrush = new SolidColorBrush(Color.FromArgb(180, 0xD4, 0x2C, 0x2C));
 
     private static readonly IPen GrassLinePen = new Pen(new SolidColorBrush(Color.FromRgb(0x4E, 0x8C, 0x4A)), 1);
     private static readonly IPen RockEdgePen = new Pen(new SolidColorBrush(Color.FromRgb(0x6F, 0x74, 0x7C)), 1);
     private static readonly IPen GoalPen = new Pen(new SolidColorBrush(Color.FromRgb(0xF0, 0xF0, 0xF0)), 2);
 
     private readonly MapRobotStateMachine _stateMachine;
+    private readonly RobotGameMapProxy _proxy;
+
     private readonly Image _robotImage;
     private readonly Rectangle _flashOverlay;
+    private readonly Rectangle _deathOverlay;
     private readonly RobotSpriteSet _sprites;
 
     private CancellationTokenSource? _moveCancellation;
     private CancellationTokenSource? _flashCancellation;
+    private CancellationTokenSource? _deathCancellation;
     private int _activeMoveAnimations;
 
     private RenderPosition _renderPosition;
     private Cell _flashCell;
+    private Cell _deathCell;
     private Cell _animationTarget;
-    private bool _deadPose;
+    private bool _isDead;
 
     public Map? Map
     {
@@ -55,11 +65,6 @@ public sealed class MapView : Control
         set => SetValue(MarginUnitsProperty, value);
     }
 
-    public RobotEvents Events => _stateMachine.Events;
-    public IRobotExecutor Executor => _stateMachine;
-    public bool IsDead => _stateMachine.IsDead;
-    public bool IsCompleted => _stateMachine.IsCompleted;
-
     public static readonly StyledProperty<Map?> MapProperty =
         AvaloniaProperty.Register<MapView, Map?>(nameof(Map));
 
@@ -77,12 +82,10 @@ public sealed class MapView : Control
         Focusable = true;
 
         _sprites = RobotSpriteSet.Load();
-
         _stateMachine = new MapRobotStateMachine();
+        _proxy = new RobotGameMapProxy(this, _stateMachine);
+
         _stateMachine.StateChanged += OnStateChanged;
-        _stateMachine.Events.RobotMoved += OnRobotMoved;
-        _stateMachine.Events.RobotDead += OnRobotDead;
-        _stateMachine.CellPainted += OnCellPainted;
 
         _robotImage = new Image
         {
@@ -97,8 +100,16 @@ public sealed class MapView : Control
             IsVisible = false
         };
 
+        _deathOverlay = new Rectangle
+        {
+            Fill = DeathFlashBrush,
+            IsVisible = false,
+            Opacity = 0
+        };
+
         VisualChildren.Add(_robotImage);
         VisualChildren.Add(_flashOverlay);
+        VisualChildren.Add(_deathOverlay);
     }
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
@@ -132,8 +143,9 @@ public sealed class MapView : Control
 
         _moveCancellation?.Cancel();
         _flashCancellation?.Cancel();
-        _deadPose = false;
+        _deathCancellation?.Cancel();
 
+        _isDead = false;
         _stateMachine.Reset();
         ResetRenderPosition();
         UpdateRobotSprite();
@@ -169,79 +181,64 @@ public sealed class MapView : Control
     public void SetCoinCollected(int column, int row, bool collected) =>
         RunOnUiThread(() => _stateMachine.SetCollected(column, row, collected));
 
+    // Small demonstration island; replaced once the level loader exists.
+    public static Map CreateSampleMap()
+    {
+        const int width = 8;
+        const int height = 6;
+
+        GamePoint[,] grid = new GamePoint[width, height];
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+                grid[x, y] = new GamePoint { X = x, Y = y };
+        }
+
+        // A rock wall running between columns 3 and 4 for the middle rows.
+        for (int y = 1; y <= 3; y++)
+        {
+            grid[3, y].WallType = WallType.Right;
+            grid[4, y].WallType = WallType.Left;
+        }
+
+        // A solid boulder the robot can neither enter nor pass.
+        grid[6, 1].WallType = WallType.Full;
+        grid[1, 4].IsSpawn = true;
+
+        // Collect every coin and reach the goal in the bottom-right corner.
+        grid[1, 1].HasCoin = true;
+        grid[2, 2].HasCoin = true;
+        grid[5, 3].HasCoin = true;
+        grid[7, 5].IsGoal = true;
+
+        ObservableCollection<GamePoint> points = [];
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+                points.Add(grid[x, y]);
+        }
+
+        return new Map
+        {
+            Width = width,
+            Height = height,
+            Points = points
+        };
+    }
+
     protected override void OnKeyDown(KeyEventArgs e)
     {
         base.OnKeyDown(e);
         if (e.Handled)
             return;
+
 #if DEBUG
         switch (e.Key)
         {
-            case Key.Up:
-                {
-                    if (_activeMoveAnimations > 0)
-                    {
-                        e.Handled = true;
-                        return;
-                    }
-
-                    Executor.MoveUp();
-                    e.Handled = true;
-                    break;
-                }
-
-            case Key.Down:
-                {
-                    if (_activeMoveAnimations > 0)
-                    {
-                        e.Handled = true;
-                        return;
-                    }
-
-                    Executor.MoveDown();
-                    e.Handled = true;
-                    break;
-                }
-
-            case Key.Left:
-                {
-                    if (_activeMoveAnimations > 0)
-                    {
-                        e.Handled = true;
-                        return;
-                    }
-
-                    Executor.MoveLeft();
-                    e.Handled = true;
-                    break;
-                }
-
-            case Key.Right:
-                {
-                    if (_activeMoveAnimations > 0)
-                    {
-                        e.Handled = true;
-                        return;
-                    }
-
-                    Executor.MoveRight();
-                    e.Handled = true;
-                    break;
-                }
-
-            case Key.D:
-                {
-                    Executor.FillCell();
-                    e.Handled = true;
-                    break;
-                }
-
             case Key.R:
-                {
-                    Reset();
-                    e.Handled = true;
-                    break;
-                }
+                Reset();
+                e.Handled = true;
+                break;
         }
 #endif
     }
@@ -265,11 +262,13 @@ public sealed class MapView : Control
         else
         {
             double widthPerCell = double.IsFinite(availableSize.Width) && availableSize.Width > 0
-                ? availableSize.Width / totalCols : 40;
-            
+                ? availableSize.Width / totalCols
+                : 40;
+
             double heightPerCell = double.IsFinite(availableSize.Height) && availableSize.Height > 0
-                ? availableSize.Height / totalRows : 40;
-            
+                ? availableSize.Height / totalRows
+                : 40;
+
             cell = Math.Clamp(Math.Min(widthPerCell, heightPerCell), 6, 80);
         }
 
@@ -414,6 +413,13 @@ public sealed class MapView : Control
             double flashY = offset.Y + _flashCell.Row * cell;
             _flashOverlay.Arrange(new Rect(flashX, flashY, cell, cell));
         }
+
+        if (_deathOverlay.IsVisible)
+        {
+            double deathX = offset.X + _deathCell.Column * cell;
+            double deathY = offset.Y + _deathCell.Row * cell;
+            _deathOverlay.Arrange(new Rect(deathX, deathY, cell, cell));
+        }
     }
 
     private MapLayout CalculateLayout(Size size)
@@ -439,6 +445,116 @@ public sealed class MapView : Control
         double offsetY = (size.Height - contentH) / 2.0 + cell * MarginUnits.Top;
 
         return new MapLayout(new PixelOffset(offsetX, offsetY), cell);
+    }
+
+    public void MoveRobotTo(int column, int row) =>
+        StartMoveAnimation(column, row);
+
+    public void SetRobotDirection(Direction direction) =>
+        RunOnUiThread(() => _stateMachine.SetDirection(direction));
+
+    public void PlayDeathAnimation(Direction? attemptedDirection)
+    {
+        if (!Dispatcher.UIThread.CheckAccess())
+        {
+            Dispatcher.UIThread.Post(() => PlayDeathAnimation(attemptedDirection));
+            return;
+        }
+
+        _moveCancellation?.Cancel();
+        _deathCancellation?.Cancel();
+        _deathCancellation = new CancellationTokenSource();
+
+        _isDead = true;
+        _robotImage.Source = _sprites.Dead;
+        _robotImage.IsVisible = true;
+
+        MapLayout layout = CalculateLayout(Bounds.Size);
+        if (layout.CellSize <= 0)
+            return;
+
+        PixelOffset offset = layout.Offset;
+        double cell = layout.CellSize;
+
+        _deathCell = new Cell(_stateMachine.LogicalColumn, _stateMachine.LogicalRow);
+        double x = offset.X + _deathCell.Column * cell;
+        double y = offset.Y + _deathCell.Row * cell;
+
+        _deathOverlay.Width = cell;
+        _deathOverlay.Height = cell;
+        _deathOverlay.Opacity = 0;
+        _deathOverlay.IsVisible = true;
+        _deathOverlay.Arrange(new Rect(x, y, cell, cell));
+
+        Animation overlayAnimation = new Animation
+        {
+            Duration = TimeSpan.FromMilliseconds(400),
+            FillMode = FillMode.Forward,
+            Children =
+            {
+                new KeyFrame { Cue = new Cue(0.0), Setters = { new Setter(OpacityProperty, 0.0) } },
+                new KeyFrame { Cue = new Cue(0.25), Setters = { new Setter(OpacityProperty, 0.75) } },
+                new KeyFrame { Cue = new Cue(0.5), Setters = { new Setter(OpacityProperty, 0.35) } },
+                new KeyFrame { Cue = new Cue(0.75), Setters = { new Setter(OpacityProperty, 0.6) } },
+                new KeyFrame { Cue = new Cue(1.0), Setters = { new Setter(OpacityProperty, 0.0) } }
+            }
+        };
+
+        Animation? bumpAnimation = null;
+        if (attemptedDirection is not null)
+        {
+            CellOffset bumpOffset = attemptedDirection.Value switch
+            {
+                Direction.Up => new CellOffset(0, -1),
+                Direction.Down => new CellOffset(0, 1),
+                Direction.Left => new CellOffset(-1, 0),
+                Direction.Right => new CellOffset(1, 0),
+                _ => new CellOffset(0, 0)
+            };
+
+            double bumpX = bumpOffset.ColumnDelta * cell * 0.35;
+            double bumpY = bumpOffset.RowDelta * cell * 0.35;
+
+            _robotImage.RenderTransform = new TranslateTransform();
+
+            bumpAnimation = new Animation
+            {
+                Duration = TimeSpan.FromMilliseconds(300),
+                FillMode = FillMode.Forward,
+                Children =
+                {
+                    new KeyFrame
+                    {
+                        Cue = new Cue(0.0),
+                        Setters =
+                        {
+                            new Setter(TranslateTransform.XProperty, 0.0),
+                            new Setter(TranslateTransform.YProperty, 0.0)
+                        }
+                    },
+                    new KeyFrame
+                    {
+                        Cue = new Cue(0.35),
+                        Setters =
+                        {
+                            new Setter(TranslateTransform.XProperty, bumpX),
+                            new Setter(TranslateTransform.YProperty, bumpY)
+                        }
+                    },
+                    new KeyFrame
+                    {
+                        Cue = new Cue(1.0),
+                        Setters =
+                        {
+                            new Setter(TranslateTransform.XProperty, 0.0),
+                            new Setter(TranslateTransform.YProperty, 0.0)
+                        }
+                    }
+                }
+            };
+        }
+
+        _ = RunDeathAnimationAsync(overlayAnimation, bumpAnimation, _deathCancellation.Token);
     }
 
     private void StartMoveAnimation(int toColumn, int toRow)
@@ -527,120 +643,7 @@ public sealed class MapView : Control
         }
     }
 
-    private void StartDeathAnimation()
-    {
-        _moveCancellation?.Cancel();
-
-        Cell robotCell = new Cell(_stateMachine.LogicalColumn, _stateMachine.LogicalRow);
-        CellOffset deathOffset = new CellOffset(_stateMachine.DeathDirectionColumn, _stateMachine.DeathDirectionRow);
-
-        _renderPosition = new RenderPosition(robotCell.Column, robotCell.Row);
-        _animationTarget = robotCell;
-        ArrangeRobot(Bounds.Size);
-
-        MapLayout layout = CalculateLayout(Bounds.Size);
-        if (layout.CellSize <= 0)
-        {
-            _deadPose = true;
-            _stateMachine.CompleteDeath();
-            UpdateRobotSprite();
-            return;
-        }
-
-        PixelOffset offset = layout.Offset;
-        double cell = layout.CellSize;
-
-        const double amplitude = 0.32;
-        double deltaX = deathOffset.ColumnDelta * cell * amplitude;
-        double deltaY = deathOffset.RowDelta * cell * amplitude;
-
-        TranslateTransform transform = new TranslateTransform();
-        _robotImage.RenderTransform = transform;
-
-        TimeSpan deathDuration = TimeSpan.FromMilliseconds(StepDuration.TotalMilliseconds * 1.3);
-        TimeSpan lungeDuration = TimeSpan.FromMilliseconds(deathDuration.TotalMilliseconds * 0.4);
-        TimeSpan recoilDuration = TimeSpan.FromMilliseconds(deathDuration.TotalMilliseconds * 0.6);
-
-        Animation lunge = new Animation
-        {
-            Duration = lungeDuration,
-            Easing = new CubicEaseOut(),
-            FillMode = FillMode.Forward,
-            Children =
-            {
-                new KeyFrame
-                {
-                    Cue = new Cue(0.0),
-                    Setters =
-                    {
-                        new Setter(TranslateTransform.XProperty, 0.0),
-                        new Setter(TranslateTransform.YProperty, 0.0)
-                    }
-                },
-                new KeyFrame
-                {
-                    Cue = new Cue(1.0),
-                    Setters =
-                    {
-                        new Setter(TranslateTransform.XProperty, deltaX),
-                        new Setter(TranslateTransform.YProperty, deltaY)
-                    }
-                }
-            }
-        };
-
-        Animation recoil = new Animation
-        {
-            Duration = recoilDuration,
-            Easing = new CubicEaseIn(),
-            FillMode = FillMode.Forward,
-            Children =
-            {
-                new KeyFrame
-                {
-                    Cue = new Cue(0.0),
-                    Setters =
-                    {
-                        new Setter(TranslateTransform.XProperty, deltaX),
-                        new Setter(TranslateTransform.YProperty, deltaY)
-                    }
-                },
-                new KeyFrame
-                {
-                    Cue = new Cue(1.0),
-                    Setters =
-                    {
-                        new Setter(TranslateTransform.XProperty, 0.0),
-                        new Setter(TranslateTransform.YProperty, 0.0)
-                    }
-                }
-            }
-        };
-
-        _ = RunDeathAnimationAsync(lunge, recoil);
-    }
-
-    private async Task RunDeathAnimationAsync(Animation lunge, Animation recoil)
-    {
-        try
-        {
-            await lunge.RunAsync(_robotImage, CancellationToken.None);
-            await recoil.RunAsync(_robotImage, CancellationToken.None);
-        }
-        catch (OperationCanceledException)
-        {
-            // Ignore; death animation is not cancellable.
-        }
-        finally
-        {
-            _robotImage.RenderTransform = null;
-            _deadPose = true;
-            _stateMachine.CompleteDeath();
-            UpdateRobotSprite();
-        }
-    }
-
-    private void StartFlashAnimation(int column, int row)
+    public void FlashCell(int column, int row)
     {
         MapLayout layout = CalculateLayout(Bounds.Size);
         if (layout.CellSize <= 0)
@@ -705,53 +708,17 @@ public sealed class MapView : Control
         InvalidateVisual();
     }
 
-    private void OnRobotMoved(object? sender, RobotMovedEventArgs e)
-    {
-        if (!Dispatcher.UIThread.CheckAccess())
-        {
-            Dispatcher.UIThread.Post(() => OnRobotMoved(sender, e));
-            return;
-        }
-
-        StartMoveAnimation(e.NewX, e.NewY);
-    }
-
-    private void OnRobotDead(object? sender, EventArgs e)
-    {
-        if (!Dispatcher.UIThread.CheckAccess())
-        {
-            Dispatcher.UIThread.Post(() => OnRobotDead(sender, e));
-            return;
-        }
-
-        StartDeathAnimation();
-    }
-
-    private void OnCellPainted(object? sender, CellPaintedEventArgs e)
-    {
-        if (!Dispatcher.UIThread.CheckAccess())
-        {
-            Dispatcher.UIThread.Post(() => OnCellPainted(sender, e));
-            return;
-        }
-
-        StartFlashAnimation(e.Column, e.Row);
-    }
-
     private void UpdateRobotSprite()
     {
-        if (_deadPose)
-        {
-            _robotImage.Source = _sprites.Dead;
+        if (_isDead)
             return;
-        }
 
         _robotImage.Source = _stateMachine.Direction switch
         {
-            RobotDirection.Up => _sprites.Back,
-            RobotDirection.Down => _sprites.Front,
-            RobotDirection.Left => _sprites.Left,
-            RobotDirection.Right => _sprites.Right,
+            Direction.Up => _sprites.Back,
+            Direction.Down => _sprites.Front,
+            Direction.Left => _sprites.Left,
+            Direction.Right => _sprites.Right,
             _ => _sprites.Front
         };
 
@@ -789,6 +756,32 @@ public sealed class MapView : Control
         {
             if (!cancellationToken.IsCancellationRequested)
                 _flashOverlay.IsVisible = false;
+        }
+    }
+
+    private async Task RunDeathAnimationAsync(Animation overlayAnimation, Animation? bumpAnimation, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var tasks = new List<Task>();
+            tasks.Add(overlayAnimation.RunAsync(_deathOverlay, cancellationToken));
+
+            if (bumpAnimation is not null)
+                tasks.Add(bumpAnimation.RunAsync(_robotImage, cancellationToken));
+
+            await Task.WhenAll(tasks);
+        }
+        catch (OperationCanceledException)
+        {
+            // A newer death animation or reset replaced this one.
+        }
+        finally
+        {
+            if (!cancellationToken.IsCancellationRequested)
+            {
+                _deathOverlay.IsVisible = false;
+                _robotImage.RenderTransform = null;
+            }
         }
     }
 
