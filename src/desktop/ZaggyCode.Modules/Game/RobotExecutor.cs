@@ -1,6 +1,5 @@
 namespace ZaggyCode.Modules.Game;
 
-//#:NO_AI
 public sealed class RobotExecutor : IRobotExecutor
 {
     private readonly Map _map;
@@ -11,20 +10,20 @@ public sealed class RobotExecutor : IRobotExecutor
         _map = map;
         _robotRobotGamePoint = map.Points.First(point => point.IsSpawn);
         
-        Debug.Assert(_robotRobotGamePoint is { X: >= 1, Y: >= 1 });
+        Debug.Assert(_robotRobotGamePoint is { X: >= 0, Y: >= 0 });
     }
 
     public EventHandler<RobotPointUpdatedEventArgs>? RobotPointUpdated { get; set; }
     public EventHandler<RobotDeadEventArgs>? RobotDied { get; set; }
     public EventHandler<DrawPointEventArgs>? DrawPoint { get; set; }
 
-    public void MoveUp() => Move(0, -1, HasWallOnTop, HasWallOnBottom);
+    public void MoveUp() => Move(0, -1);
 
-    public void MoveRight() => Move(1, 0, HasWallOnRight, HasWallOnLeft);
+    public void MoveRight() => Move(1, 0);
 
-    public void MoveDown() => Move(0, 1, HasWallOnBottom, HasWallOnTop);
+    public void MoveDown() => Move(0, 1);
 
-    public void MoveLeft() => Move(-1, 0, HasWallOnLeft, HasWallOnRight);
+    public void MoveLeft() => Move(-1, 0);
 
     public void FillCell()
     {
@@ -44,26 +43,25 @@ public sealed class RobotExecutor : IRobotExecutor
 
     public bool IsWallFromUp()
     {
-        return HasWallInDirection(0, -1, HasWallOnTop, HasWallOnBottom);
+        return HasWallInDirection(0, -1);
     }
 
     public bool IsWallFromDown()
     {
-        return HasWallInDirection(0, 1, HasWallOnBottom, HasWallOnTop);
+        return HasWallInDirection(0, 1);
     }
 
     public bool IsWallFromLeft()
     {
-        return HasWallInDirection(-1, 0, HasWallOnLeft, HasWallOnRight);
+        return HasWallInDirection(-1, 0);
     }
 
     public bool IsWallFromRight()
     {
-        return HasWallInDirection(1, 0, HasWallOnRight, HasWallOnLeft);
+        return HasWallInDirection(1, 0);
     }
     
-    // Границы карты задаются Width/Height, а не набором точек: точек за пределами может быть больше.
-    private void Move(int deltaX, int deltaY, Func<WallType, bool> exitWall, Func<WallType, bool> enterWall)
+    private void Move(int deltaX, int deltaY)
     {
         var targetX = _robotRobotGamePoint.X + deltaX;
         var targetY = _robotRobotGamePoint.Y + deltaY;
@@ -81,9 +79,9 @@ public sealed class RobotExecutor : IRobotExecutor
             return;
         }
 
-        Debug.Assert(target.X >= 1 && target.Y >= 1);
+        Debug.Assert(target.X >= 0 && target.Y >= 0);
 
-        if (exitWall(_robotRobotGamePoint.WallType) || enterWall(target.WallType) || target.WallType == WallType.Full)
+        if (HasWallBetween(_robotRobotGamePoint, target))
         {
             RaiseRobotDied(RobotDeadType.Wall);
             return;
@@ -93,7 +91,7 @@ public sealed class RobotExecutor : IRobotExecutor
         RobotPointUpdated?.Invoke(this, new RobotPointUpdatedEventArgs { NewX = target.X, NewY = target.Y });
     }
 
-    private bool HasWallInDirection(int deltaX, int deltaY, Func<WallType, bool> exitWall, Func<WallType, bool> enterWall)
+    private bool HasWallInDirection(int deltaX, int deltaY)
     {
         var targetX = _robotRobotGamePoint.X + deltaX;
         var targetY = _robotRobotGamePoint.Y + deltaY;
@@ -105,7 +103,23 @@ public sealed class RobotExecutor : IRobotExecutor
         if (target is null)
             return true;
 
-        return exitWall(_robotRobotGamePoint.WallType) || enterWall(target.WallType) || target.WallType == WallType.Full;
+        return HasWallBetween(_robotRobotGamePoint, target);
+    }
+
+    private bool HasWallBetween(RobotGamePoint current, RobotGamePoint target)
+    {
+        if (target.WallType == WallType.Full)
+            return true;
+
+        int dx = target.X - current.X;
+        int dy = target.Y - current.Y;
+
+        if (dx == 1) return HasWallOnRight(current.WallType) || HasWallOnLeft(target.WallType);
+        if (dx == -1) return HasWallOnLeft(current.WallType) || HasWallOnRight(target.WallType);
+        if (dy == 1) return HasWallOnBottom(current.WallType) || HasWallOnTop(target.WallType);
+        if (dy == -1) return HasWallOnTop(current.WallType) || HasWallOnBottom(target.WallType);
+
+        return false;
     }
 
     private void RaiseRobotDied(RobotDeadType deadType)
@@ -115,7 +129,7 @@ public sealed class RobotExecutor : IRobotExecutor
 
     private bool IsBeyondMap(int x, int y)
     {
-        return x < 1 || y < 1 || x > _map.Width || y > _map.Height;
+        return x < 0 || y < 0 || x >= _map.Width || y >= _map.Height;
     }
 
     private RobotGamePoint? FindPoint(int x, int y)
