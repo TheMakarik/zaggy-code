@@ -1,6 +1,7 @@
 using ZaggyCode.Avalonia.Views.Records;
+using ZaggyCode.Avalonia.Views.StateMachines;
 
-namespace ZaggyCode.Avalonia.Views.StateMachines;
+namespace ZaggyCode.Avalonia.ProxyImplementation;
 
 internal sealed class RobotGameMapProxy(MapView mapView, MapRobotStateMachine stateMachine) : IRobotGameMapProxy
 {
