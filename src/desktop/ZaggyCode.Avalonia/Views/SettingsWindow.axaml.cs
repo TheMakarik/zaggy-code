@@ -1,3 +1,5 @@
+using RxVoid = ReactiveUI.Primitives.RxVoid;
+
 namespace ZaggyCode.Avalonia.Views;
 
 public partial class SettingsWindow : ReactiveWindow<SettingsViewModel>
@@ -68,7 +70,7 @@ public partial class SettingsWindow : ReactiveWindow<SettingsViewModel>
         var result = await confirmationWindow.ShowDialog<bool?>(this);
 
         if (result == true && ViewModel is not null)
-            ViewModel.SaveSettingsCommand.Execute(Unit.Default).Subscribe();
+            ViewModel.SaveSettingsCommand.Execute(new RxVoid()).Subscribe();
 
         _closeConfirmed = true;
         Close();

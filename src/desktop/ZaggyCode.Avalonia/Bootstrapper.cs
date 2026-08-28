@@ -80,21 +80,6 @@ public sealed class Bootstrapper
 
         
         builder.Services.AddSingleton<IArchiveCompressor, TarBZip2ArchiveCompressor>();
-        builder.Services.AddSingleton<IThemeCatalog>(provider =>
-        {
-            var loggerFactory = provider.GetRequiredService<ILoggerFactory>();
-            var archiveReader = new TarBZip2ArchiveReader(
-                loggerFactory.CreateLogger<TarBZip2ArchiveReader>(),
-                new MetadataParser(provider.GetRequiredService<IOptions<MetadataOptions>>()),
-                provider.GetRequiredService<IOptions<TempOptions>>());
-
-            return new ThemeCatalog(
-                loggerFactory.CreateLogger<ThemeCatalog>(),
-                archiveReader,
-                provider.GetRequiredService<IOptions<ThemeOptions>>(),
-                provider.GetRequiredService<ITempFolderProvider>(),
-                provider.GetRequiredService<XmlSerializer<Theme>>());
-        });
 
         // Прокси создаются до готовности контролов главного окна, поэтому инстансы
         // заполняются через Attach после инициализации MainWindow.
