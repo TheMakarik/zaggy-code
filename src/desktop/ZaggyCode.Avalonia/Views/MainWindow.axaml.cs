@@ -75,6 +75,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
 
         _terminalProxy = App.Services.GetRequiredService<RobotGameTerminalProxy>();
         _terminalProxy.Attach(_terminalSession);
+        
     }
 
     private async Task ApplyAppThemeAsync(string themeName)
