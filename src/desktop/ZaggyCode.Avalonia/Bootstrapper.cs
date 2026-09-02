@@ -36,22 +36,23 @@ public sealed class Bootstrapper
             .AsImplementedInterfaces()
             .WithScopedLifetime()
 
-            .AddClasses(c => c.WithAttribute<LanguageExtensionAttribute>())
+            .AddClasses(c => c.WithAttribute<LanguageAttribute>())
             .AsImplementedInterfaces()
-            .WithServiceKey(type => GetLanguageKey(type.GetCustomAttribute<LanguageExtensionAttribute>()!.Extension))
+            .WithServiceKey(type => type.GetCustomAttribute<LanguageAttribute>()!.Language)
             .WithScopedLifetime()
 
             .AddClasses(c => c.Where(t =>
                 !t.IsAssignableTo(typeof(IDisposable)) &&
                 !t.IsAssignableTo(typeof(IAsyncDisposable)) &&
                 !t.IsAssignableTo(typeof(ViewModelBase)) &&
-                !t.IsDefined(typeof(LanguageExtensionAttribute), false)))
+                !t.IsDefined(typeof(LanguageAttribute), false)))
             .AsImplementedInterfaces()
             .WithSingletonLifetime()
         );
 
         builder.Services
             .AddPythonSettingsStorage()
+            .AddCSharpSettingsStorage()
             .AddUserDataStorage();
 
         builder.Logging
@@ -72,6 +73,7 @@ public sealed class Bootstrapper
             .AddOptions<LoggingCompressOptions>()
             .AddOptions<PythonScriptsOptions>()
             .AddOptions<PythonDefaultSettingsOptions>()
+            .AddOptions<CSharpDefaultSettingsOptions>()
             .AddOptions<MapAssetsOptions>()
             .AddOptions<ZaggyAssetsOptions>()
             .AddOptions<PythonValidationOptions>()

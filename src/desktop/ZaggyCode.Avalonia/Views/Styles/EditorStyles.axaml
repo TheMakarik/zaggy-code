@@ -28,7 +28,6 @@
         <Setter Property="Cursor" Value="SizeWestEast" />
     </Style>
 
-    <!--  Невидимый разделитель между терминалом и верхней областью; подсветка при наведении оставлена для поиска  -->
     <Style Selector="GridSplitter.horizontal">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Height" Value="8" />
@@ -36,6 +35,6 @@
     </Style>
 
     <Style Selector="GridSplitter.horizontal:pointerover">
-        <Setter Property="Background" Value="{DynamicResource PrimaryBrush}" />
+        <Setter Property="Background" Value="Transparent" />
     </Style>
 </Styles>

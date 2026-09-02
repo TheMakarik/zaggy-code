@@ -2,10 +2,10 @@ namespace ZaggyCode.Core.Languages.Enums;
 
 public enum Language
 {
-    [LanguageExtension(".cs")]
     [LanguagePrettyName("C#")]
+    [LanguageExtension(".cs")]
     CSharp,
-
+    
     [LanguageExtension(".py")]
     Python
 }

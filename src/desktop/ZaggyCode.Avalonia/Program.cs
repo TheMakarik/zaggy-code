@@ -16,7 +16,7 @@ sealed class Program
     // Avalonia configuration, don't remove; also used by visual designer.
     public static AppBuilder BuildAvaloniaApp()
     {
-         return AppBuilder.Configure<App>()
+        return AppBuilder.Configure<App>()
             .UsePlatformDetect()
 #if DEBUG
             // Официальный DevTools MCP (avdt mcp) требует подписку Avalonia Plus:

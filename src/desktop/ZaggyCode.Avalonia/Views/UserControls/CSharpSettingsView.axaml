@@ -7,45 +7,57 @@
     xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:rxui="http://reactiveui.net"
+    xmlns:userControls="clr-namespace:ZaggyCode.Avalonia.Views.UserControls"
     xmlns:vm="using:ZaggyCode.Avalonia.ViewModels"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     mc:Ignorable="d">
 
     <ScrollViewer>
         <StackPanel Margin="20" Spacing="16">
-            <Border
-                CornerRadius="8"
-                Margin="0,0,0,12"
-                Padding="16">
-                <Grid ColumnDefinitions="Auto,*">
-                    <materialIcons:MaterialIcon
-                        Grid.Column="0"
-                        Height="48"
-                        Kind="LanguageCsharp"
-                        Margin="0,0,16,0"
-                        VerticalAlignment="Center"
-                        Width="48" />
-                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                        <TextBlock
-                            FontSize="16"
-                            FontWeight="Bold"
-                            Text="C#" />
-                        <TextBlock
-                            FontSize="13"
-                            Opacity="0.9"
-                            Text="Разработан Microsoft в 2000 году как объектно-ориентированный язык для платформы .NET. Сегодня активно используется для создания веб-приложений, игр на Unity и корпоративного ПО."
-                            TextWrapping="Wrap" />
-                    </StackPanel>
-                </Grid>
-            </Border>
+            <userControls:SettingsSectionHeader
+                Description="Настройки языка C# применяются при сохранении изменений."
+                IconKind="LanguageCsharp"
+                Title="C#" />
 
             <TextBlock
-                FontSize="16"
-                Foreground="{DynamicResource SystemControlDisabledTextBrush}"
-                HorizontalAlignment="Center"
-                Margin="0,40,0,0"
-                Text="Настройки C# пока недоступны"
-                VerticalAlignment="Center" />
+                FontSize="13"
+                Foreground="{DynamicResource ForegroundMutedBrush}"
+                Opacity="0.85"
+                Text="Эти параметры влияют на то, как компилируется и выполняется код, который пишет ученик."
+                TextWrapping="Wrap" />
+
+            <TextBlock Classes="settings-section-title" Text="Операторы верхнего уровня" />
+            <CheckBox
+                Content="Использовать операторы верхнего уровня"
+                IsChecked="{Binding UseTopLevelStatements}"
+                ToolTip.Tip="Код в начале файла выполняется без объявления класса и метода Main" />
+            <TextBlock
+                FontSize="13"
+                Foreground="{DynamicResource ForegroundMutedBrush}"
+                Text="Код пишется сразу в начале файла и выполняется сверху вниз, как в скриптовом языке. Метод Main и класс генерируются автоматически."
+                TextWrapping="Wrap" />
+
+            <TextBlock Classes="settings-section-title" Text="Неявные using" />
+            <CheckBox
+                Content="Использовать неявные using"
+                IsChecked="{Binding EnableImplicitUsings}"
+                ToolTip.Tip="Автоматически подключает стандартные пространства имён, как ImplicitUsings в .csproj" />
+            <TextBlock
+                FontSize="13"
+                Foreground="{DynamicResource ForegroundMutedBrush}"
+                Text="Автоматически подключает стандартные пространства имён, как при включённом ImplicitUsings в .csproj: System, System.Collections.Generic, System.IO, System.Linq, System.Net.Http, System.Threading, System.Threading.Tasks."
+                TextWrapping="Wrap" />
+
+            <TextBlock Classes="settings-section-title" Text="Ввод-вывод" />
+            <CheckBox
+                Content="Заблокировать ввод-вывод"
+                IsChecked="{Binding BlockIo}"
+                ToolTip.Tip="Запрещает чтение и запись в стандартные потоки" />
+            <TextBlock
+                FontSize="13"
+                Foreground="{DynamicResource ForegroundMutedBrush}"
+                Text="Запрещает чтение и запись в стандартные потоки ввода-вывода, например Console.ReadLine и Console.Write."
+                TextWrapping="Wrap" />
         </StackPanel>
     </ScrollViewer>
 </rxui:ReactiveUserControl>

@@ -65,4 +65,12 @@ public static class ServiceCollectionExtensions
             provider => provider.GetRequiredService<IOptions<PythonDefaultSettingsOptions>>().Value.Settings,
             Modules.Data.Json.PythonSettingsSerializerContext.Default.PythonSettings);
     }
+
+    public static IServiceCollection AddCSharpSettingsStorage(this IServiceCollection services)
+    {
+        return services.AddObservableStorage<CSharpSettings>(
+            options => options.CSharpSettingsPath,
+            provider => provider.GetRequiredService<IOptions<CSharpDefaultSettingsOptions>>().Value.Settings,
+            Modules.Data.Json.CSharpSettingsSerializerContext.Default.CSharpSettings);
+    }
 }

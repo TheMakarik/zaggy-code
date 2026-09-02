@@ -58,10 +58,12 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly IRobotGameEngine _robotGameEngine;
     private readonly IObservableStorage<UserData> _userStorage;
     private readonly IObservableStorage<PythonSettings> _pythonSettingsStorage;
+    private readonly IObservableStorage<CSharpSettings> _csharpSettingsStorage;
     private readonly IThemeCatalog _themeCatalog;
     private readonly IOptions<LoadingOptions> _loadingOptions;
     private readonly IOptions<DefaultUser> _defaultUserOptions;
     private readonly IOptions<PythonDefaultSettingsOptions> _pythonDefaultSettingsOptions;
+    private readonly IOptions<CSharpDefaultSettingsOptions> _csharpDefaultSettingsOptions;
     private readonly IOptions<CodeExamplePathOptions> _codeExamplePathOptions;
     private readonly IOptions<FontSizeOptions> _fontSizeOptions;
     private readonly IOptions<CodeThemeDisplayNameOptions> _displayNameOptions;
@@ -82,6 +84,8 @@ public partial class MainWindowViewModel : ViewModelBase
         IOptions<ZaggyAssetsOptions> zaggyAssets,
         IObservableStorage<UserData> userStorage,
         IObservableStorage<PythonSettings> pythonSettingsStorage,
+        IObservableStorage<CSharpSettings> csharpSettingsStorage,
+        IOptions<CSharpDefaultSettingsOptions> csharpDefaultSettingsOptions,
         IThemeCatalog themeCatalog,
         IOptions<LoadingOptions> loadingOptions,
         IOptions<DefaultUser> defaultUserOptions,
@@ -100,10 +104,12 @@ public partial class MainWindowViewModel : ViewModelBase
         _fontSizeOptions = textFontSize;
         _userStorage = userStorage;
         _pythonSettingsStorage = pythonSettingsStorage;
+        _csharpSettingsStorage = csharpSettingsStorage;
         _themeCatalog = themeCatalog;
         _loadingOptions = loadingOptions;
         _defaultUserOptions = defaultUserOptions;
         _pythonDefaultSettingsOptions = pythonDefaultSettingsOptions;
+        _csharpDefaultSettingsOptions = csharpDefaultSettingsOptions;
         _codeExamplePathOptions = codeExamplePathOptions;
         _displayNameOptions = displayNameOptions;
         _iconOptions = iconOptions;
@@ -306,9 +312,6 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private void InitializeGameEngine()
     {
-        _robotGameEngine.DebugLineUpdated += OnDebugLineUpdated;
-        _robotGameEngine.CodeErrorOccurred += OnCodeErrorOccurred;
-
         this.WhenAnyValue(vm => vm.SelectedLanguage)
             .Skip(1)
             .Subscribe(language =>
@@ -517,8 +520,10 @@ public partial class MainWindowViewModel : ViewModelBase
         var settingsViewModel = new SettingsViewModel(
             _userStorage,
             _pythonSettingsStorage,
+            _csharpSettingsStorage,
             _defaultUserOptions,
             _pythonDefaultSettingsOptions,
+            _csharpDefaultSettingsOptions,
             _codeExamplePathOptions,
             _fontSizeOptions,
             _loadingOptions,

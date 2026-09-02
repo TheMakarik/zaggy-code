@@ -25,4 +25,10 @@ public sealed class StorageOptions
         get => field;
         set => field = Environment.ExpandEnvironmentVariables(value);
     }
+
+    public required string CSharpSettingsPath
+    {
+        get => field;
+        set => field = Environment.ExpandEnvironmentVariables(value);
+    }
 }

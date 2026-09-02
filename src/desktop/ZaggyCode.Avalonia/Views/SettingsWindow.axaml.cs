@@ -71,6 +71,8 @@ public partial class SettingsWindow : ReactiveWindow<SettingsViewModel>
 
         if (result == true && ViewModel is not null)
             ViewModel.SaveSettingsCommand.Execute(new RxVoid()).Subscribe();
+        else
+            ViewModel?.RevertAppearanceChanges();
 
         _closeConfirmed = true;
         Close();

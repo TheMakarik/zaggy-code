@@ -30,6 +30,7 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
     private bool _originalUseSystemTitleBar;
     private bool _originalShowSidebar;
     private string _originalCodeTheme = string.Empty;
+    private string _originalSelectedAppTheme = string.Empty;
     private bool _originalEnableCodeHighlighting;
     private bool _originalShowCodeLineNumbers;
 
@@ -66,6 +67,7 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
         _originalUseSystemTitleBar = current.UseSystemTitleBar;
         _originalShowSidebar = current.ShowSidebar;
         _originalCodeTheme = current.CodeTheme;
+        _originalSelectedAppTheme = current.CurrentTheme;
         _originalEnableCodeHighlighting = current.EnableCodeHighlighting;
         _originalShowCodeLineNumbers = current.ShowCodeLineNumbers;
 
@@ -84,6 +86,7 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
                 nameof(UseSystemTitleBar),
                 nameof(ShowSidebar),
                 nameof(SelectedCodeTheme),
+                nameof(SelectedAppTheme),
                 nameof(EnableCodeHighlighting),
                 nameof(ShowCodeLineNumbers))
             .Subscribe(_ => UpdateHasChanges());
@@ -128,6 +131,7 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
         _originalUseSystemTitleBar = UseSystemTitleBar;
         _originalShowSidebar = ShowSidebar;
         _originalCodeTheme = SelectedCodeTheme;
+        _originalSelectedAppTheme = SelectedAppTheme;
         _originalEnableCodeHighlighting = EnableCodeHighlighting;
         _originalShowCodeLineNumbers = ShowCodeLineNumbers;
         HasChanges = false;
@@ -152,6 +156,7 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
             UseSystemTitleBar != _originalUseSystemTitleBar ||
             ShowSidebar != _originalShowSidebar ||
             SelectedCodeTheme != _originalCodeTheme ||
+            SelectedAppTheme != _originalSelectedAppTheme ||
             EnableCodeHighlighting != _originalEnableCodeHighlighting ||
             ShowCodeLineNumbers != _originalShowCodeLineNumbers;
     }
@@ -175,8 +180,6 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
         SelectedCodeTheme = themeName;
     }
 
-    // Тема приложения применяется и сохраняется сразу при клике: она не участвует
-    // в HasChanges-цикле настроек, чтобы нельзя было «отменить» применённый вид.
     [ReactiveCommand]
     private void SelectAppTheme(string themeName)
         => ApplyAppThemeSelection(themeName);
@@ -187,8 +190,13 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
             return;
 
         SelectedAppTheme = themeName;
-        _userStorage.Current.CurrentTheme = themeName;
         MessageBus.Current.SendMessage(new AppThemeChangedMessage(themeName));
+    }
+
+    public void RevertChanges()
+    {
+        MessageBus.Current.SendMessage(new AppThemeChangedMessage(_originalSelectedAppTheme));
+        SelectedAppTheme = _originalSelectedAppTheme;
     }
 
     private async Task InitializeAvailableAppThemesAsync(IThemeCatalog themeCatalog)

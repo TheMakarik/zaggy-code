@@ -1,0 +1,34 @@
+<UserControl
+    x:Class="ZaggyCode.Avalonia.Views.UserControls.SettingsSectionHeader"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Border
+        CornerRadius="8"
+        Margin="0,0,0,12"
+        Padding="16">
+        <Grid ColumnDefinitions="Auto,*">
+            <materialIcons:MaterialIcon
+                x:Name="IconControl"
+                Grid.Column="0"
+                Height="48"
+                Margin="0,0,16,0"
+                VerticalAlignment="Center"
+                Width="48" />
+            <StackPanel
+                Grid.Column="1"
+                VerticalAlignment="Center">
+                <TextBlock
+                    x:Name="TitleText"
+                    FontSize="16"
+                    FontWeight="Bold" />
+                <TextBlock
+                    x:Name="DescriptionText"
+                    FontSize="13"
+                    Opacity="0.9"
+                    TextWrapping="Wrap" />
+            </StackPanel>
+        </Grid>
+    </Border>
+</UserControl>

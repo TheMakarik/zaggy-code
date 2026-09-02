@@ -1,12 +1,12 @@
 namespace ZaggyCode.Modules.Languages.Python;
 
-[LanguageExtension(".py")]
+[Language(Language.Python)]
 public sealed class PythonLanguageRunner : ILanguageRunner
 {
     private const string NotSupportedText = "is not supported due to your application settings";
 
     // Источник пользовательского кода задаётся в Execute через CreateScriptSourceFromString(code, UserCodeFileName);
-    // фреймыIronPython importlib тоже имеют co_filename "<string>", поэтому фильтруем ещё и по co_name.
+    // фреймы IronPython importlib тоже имеют co_filename "<string>", поэтому фильтруем ещё и по co_name.
     private const string UserCodeFileName = "<string>";
     private const string ModuleName = "<module>";
     private const string LineUpdateTraceEventName = "line";

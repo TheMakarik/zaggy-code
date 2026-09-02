@@ -4,7 +4,7 @@ using System.Reflection.PortableExecutable;
 namespace ZaggyCode.Modules.Languages.CSharp;
 
 //#:NO_AI
-[LanguageExtension(".cs"), LanguagePrettyName("C#")]
+[Language(Language.CSharp), LanguagePrettyName("C#")]
 public sealed partial class CSharpLanguageRunner(
     ILogger<CSharpLanguageRunner> logger,
     IOptions<SpeedMillisecondsOptions> millisecondsOptions) : ILanguageRunner

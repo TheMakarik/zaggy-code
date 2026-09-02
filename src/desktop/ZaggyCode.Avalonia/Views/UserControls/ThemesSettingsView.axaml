@@ -18,11 +18,16 @@
     <ScrollViewer>
         <StackPanel Margin="20" Spacing="16">
 
+            <userControls:SettingsSectionHeader
+                Description="Оформление приложения: цвет фона, поверхностей, рамок и подсветки. Выбор темы применяется и сохраняется при нажатии «Сохранить»."
+                IconKind="Palette"
+                Title="Темы" />
+
             <TextBlock
                 FontSize="13"
                 Foreground="{DynamicResource ForegroundMutedBrush}"
                 Opacity="0.85"
-                Text="Клик по теме применяет её сразу ко всему приложению и сохраняет выбор."
+                Text="Клик по теме только предварительно выбирает её. Если отменить изменения, приложение вернётся к изначальной теме."
                 TextWrapping="Wrap" />
 
             <StackPanel
