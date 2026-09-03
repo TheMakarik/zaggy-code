@@ -210,7 +210,7 @@ public sealed class MapRobotStateMachine
 
     private GamePoint GetOrCreatePoint(Cell cell)
     {
-        GamePoint? point = _cells[cell.Column, cell.Row];
+        var point = _cells[cell.Column, cell.Row];
         if (point is not null)
             return point;
 
@@ -225,7 +225,7 @@ public sealed class MapRobotStateMachine
         _collected.Clear();
         _painted.Clear();
 
-        Map? map = _map;
+        var map = _map;
         if (map is null)
         {
             _mapSize = new MapSize(0, 0);
@@ -243,7 +243,7 @@ public sealed class MapRobotStateMachine
         GamePoint? spawn = null;
         if (map.Points is not null)
         {
-            foreach (GamePoint point in map.Points)
+            foreach (var point in map.Points)
             {
                 if (point.X < 0 || point.Y < 0 || point.X >= _mapSize.Columns || point.Y >= _mapSize.Rows)
                     continue;

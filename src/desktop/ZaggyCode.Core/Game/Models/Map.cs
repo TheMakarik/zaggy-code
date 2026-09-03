@@ -10,7 +10,7 @@ public sealed class Map : INotifyPropertyChanged, INotifyCollectionChanged
         get;
         set
         {
-            ObservableCollection<RobotGamePoint> oldCollection = field;
+            var oldCollection = field;
             if (!SetField(ref field, value))
                 return;
 

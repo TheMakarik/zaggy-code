@@ -111,8 +111,8 @@ public sealed class RobotExecutor : IRobotExecutor
         if (target.WallType == WallType.Full)
             return true;
 
-        int dx = target.X - current.X;
-        int dy = target.Y - current.Y;
+        var dx = target.X - current.X;
+        var dy = target.Y - current.Y;
 
         if (dx == 1) return HasWallOnRight(current.WallType) || HasWallOnLeft(target.WallType);
         if (dx == -1) return HasWallOnLeft(current.WallType) || HasWallOnRight(target.WallType);

@@ -27,15 +27,15 @@ public class InMemoryTerminalEngineSession : InMemoryTerminalSession
 
     public override void Write(ReadOnlySpan<byte> data)
     {
-        string inputStr = InputEncoding.GetString(data);
+        var inputStr = InputEncoding.GetString(data);
 
-        foreach (char c in inputStr)
+        foreach (var c in inputStr)
         {
             if (c == '\r' || c == '\n')
             {
                 FeedOutput("\r\n");
 
-                string input = _currentInputBuffer.ToString();
+                var input = _currentInputBuffer.ToString();
                 _currentInputBuffer.Clear();
 
                 if (_readLineTcs != null)
@@ -45,7 +45,7 @@ public class InMemoryTerminalEngineSession : InMemoryTerminalSession
                     continue;
                 }
 
-                string command = input.Trim();
+                var command = input.Trim();
                 if (string.IsNullOrEmpty(command))
                 {
                     PrintPrompt();
@@ -77,8 +77,8 @@ public class InMemoryTerminalEngineSession : InMemoryTerminalSession
 
     private async Task ExecuteCommandAsync(string rawCommand)
     {
-        string[] parts = rawCommand.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        string cmd = parts[0].ToLower();
+        var parts = rawCommand.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        var cmd = parts[0].ToLower();
 
         switch (cmd)
         {
@@ -97,7 +97,7 @@ public class InMemoryTerminalEngineSession : InMemoryTerminalSession
                 {
                     if (parts.Length > 1)
                     {
-                        string text = string.Join(' ', parts[1..]);
+                        var text = string.Join(' ', parts[1..]);
                         FeedOutput(text + "\r\n");
                         break;
                     }
@@ -109,7 +109,7 @@ public class InMemoryTerminalEngineSession : InMemoryTerminalSession
             case "read":
                 {
                     FeedOutput("Enter your name: ");
-                    string name = await ReadLineAsync();
+                    var name = await ReadLineAsync();
                     FeedOutput($"\x1b[33mHello, {name}!\x1b[0m\r\n");
                     break;
                 }

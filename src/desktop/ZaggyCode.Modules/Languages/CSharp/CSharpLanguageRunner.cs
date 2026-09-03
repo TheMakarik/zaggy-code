@@ -32,16 +32,16 @@ public sealed partial class CSharpLanguageRunner(
             Debug.Assert(Input is not null);
             Debug.Assert(Executor is not null);
             
-            using CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromMinutes(2));
+            using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(2));
 
             Script script = CSharpScript
                 .Create(InitialCode, scriptOptions, typeof(CSharpLanguageRunnerScriptGlobals))
                 .ContinueWith(ApplySleep(code, ExecSpeed.GetActual(millisecondsOptions.Value)));
 
-            ImmutableArray<Diagnostic> diagnostics = script.Compile(cts.Token);
+            var diagnostics = script.Compile(cts.Token);
             if (diagnostics.Any())
             {
-                string errors = string.Join(Environment.NewLine, diagnostics.Select(d => d.GetMessage()));
+                var errors = string.Join(Environment.NewLine, diagnostics.Select(d => d.GetMessage()));
                 logger.LogError("C# Runner errors: {errors}", errors);
 
                 CodeErrorOccurred?.Invoke(this, new CodeErrorOccurredEventArgs { Text = errors });
@@ -49,8 +49,8 @@ public sealed partial class CSharpLanguageRunner(
                 return;
             }
 
-            CSharpLanguageRunnerScriptGlobals globals = new CSharpLanguageRunnerScriptGlobals(Executor, Output, Input);
-            ScriptState state = await script.RunAsync(globals, cts.Token);
+            var globals = new CSharpLanguageRunnerScriptGlobals(Executor, Output, Input);
+            var state = await script.RunAsync(globals, cts.Token);
         }
         catch (TaskCanceledException)
         {
@@ -65,12 +65,12 @@ public sealed partial class CSharpLanguageRunner(
 
     private static string ApplySleep(string code, int delayMs)
     {
-        SyntaxTree tree = CSharpSyntaxTree.ParseText(code);
-        SyntaxNode root = tree.GetRoot();
+        var tree = CSharpSyntaxTree.ParseText(code);
+        var root = tree.GetRoot();
 
-        LineDelayRewriter rewriter = new LineDelayRewriter(delayMs);
-        SyntaxNode modifiedRoot = rewriter.Visit(root);
-        string modifiedCode = modifiedRoot.ToFullString();
+        var rewriter = new LineDelayRewriter(delayMs);
+        var modifiedRoot = rewriter.Visit(root);
+        var modifiedCode = modifiedRoot.ToFullString();
 
         return modifiedCode;
     }

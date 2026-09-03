@@ -22,8 +22,8 @@ internal sealed class RobotSpriteSet
 
     private static IImage LoadSvg(string fileName)
     {
-        string path = Path.Join(AppContext.BaseDirectory, "Assets", "Zaggy", fileName);
-        SvgSource source = SvgSource.Load(path);
+        var path = Path.Join(AppContext.BaseDirectory, "Assets", "Zaggy", fileName);
+        var source = SvgSource.Load(path);
         return new SvgImage { Source = source }; //А ДА ТАК МОЖНО БЛИН БЫЛО? Я ДУМАЛ ЕСТЬ ТОК Svg
     }
 }

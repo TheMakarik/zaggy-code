@@ -140,7 +140,7 @@ public class RobotExecutorTests
     public void MoveLeft_WhenAtLeftMapEdge_RaisesRobotDiedWithEndOfTheMap()
     {
         // Arrange
-        var map = CreateDefaultMap(spawnX: 1);
+        var map = CreateDefaultMap(spawnX: 0);
         var systemUnderTests = new RobotExecutor(map);
         RobotDeadEventArgs? deadArgs = null;
         systemUnderTests.RobotDied += (_, args) => deadArgs = args;
@@ -157,7 +157,7 @@ public class RobotExecutorTests
     public void MoveUp_WhenAtTopMapEdge_RaisesRobotDiedWithEndOfTheMap()
     {
         // Arrange
-        var map = CreateDefaultMap(spawnY: 1);
+        var map = CreateDefaultMap(spawnY: 0);
         var systemUnderTests = new RobotExecutor(map);
         RobotDeadEventArgs? deadArgs = null;
         systemUnderTests.RobotDied += (_, args) => deadArgs = args;
@@ -242,7 +242,7 @@ public class RobotExecutorTests
     public void IsWallFromUp_WhenAtTopMapEdge_ReturnsTrue()
     {
         // Arrange
-        var map = CreateDefaultMap(spawnY: 1);
+        var map = CreateDefaultMap(spawnY: 0);
         var systemUnderTests = new RobotExecutor(map);
 
         // Act & Assert
@@ -327,12 +327,12 @@ public class RobotExecutorTests
         systemUnderTests.IsCellFilled().Should().BeFalse();
     }
 
-    private static Map CreateDefaultMap(int spawnX = 2, int spawnY = 2, int width = 3, int height = 3)
+    private static Map CreateDefaultMap(int spawnX = 2, int spawnY = 2, int width = 4, int height = 4)
     {
         ObservableCollection<RobotGamePoint> points = [];
-        for (var y = 1; y <= height; y++)
+        for (var y = 0; y < height; y++)
         {
-            for (var x = 1; x <= width; x++)
+            for (var x = 0; x < width; x++)
             {
                 points.Add(new RobotGamePoint
                 {

@@ -201,7 +201,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         _originalRows.Clear();
 
         _savedRowDefinitions = new RowDefinition[MainContentGrid.RowDefinitions.Count];
-        for (int i = 0; i < MainContentGrid.RowDefinitions.Count; i++)
+        for (var i = 0; i < MainContentGrid.RowDefinitions.Count; i++)
         {
             _savedRowDefinitions[i] = new RowDefinition
             {
@@ -212,7 +212,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
             };
         }
 
-        foreach (Control child in MainContentGrid.Children)
+        foreach (var child in MainContentGrid.Children)
         {
             var currentRow = Grid.GetRow(child);
             _originalRows[child] = currentRow;
@@ -231,7 +231,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         MainContentGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) });
         MainContentGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(0, GridUnitType.Pixel) });
 
-        foreach (Control child in MainContentGrid.Children)
+        foreach (var child in MainContentGrid.Children)
         {
             if (child is GridSplitter)
                 Grid.SetRow(child, 1);
@@ -249,10 +249,10 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
             return;
 
         MainContentGrid.RowDefinitions.Clear();
-        foreach (RowDefinition rowDefinition in _savedRowDefinitions)
+        foreach (var rowDefinition in _savedRowDefinitions)
             MainContentGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(rowDefinition.Height.Value, rowDefinition.Height.GridUnitType) });
 
-        foreach (Control child in MainContentGrid.Children)
+        foreach (var child in MainContentGrid.Children)
         {
             if (_originalRows.TryGetValue(child, out var originalRow))
                 Grid.SetRow(child, originalRow < MainContentGrid.RowDefinitions.Count ? originalRow : 0);

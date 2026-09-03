@@ -87,7 +87,7 @@ public class InMemoryTerminalSession : ITerminalSession
         if (data.IsEmpty)
             return;
 
-        foreach (byte b in data)
+        foreach (var b in data)
         {
             _outputQueue.Enqueue(b);
         }
@@ -107,12 +107,12 @@ public class InMemoryTerminalSession : ITerminalSession
         if (string.IsNullOrEmpty(text))
             return;
 
-        int byteCount = OutputEncoding.GetByteCount(text);
-        byte[] rented = ArrayPool<byte>.Shared.Rent(byteCount);
+        var byteCount = OutputEncoding.GetByteCount(text);
+        var rented = ArrayPool<byte>.Shared.Rent(byteCount);
 
         try
         {
-            int written = OutputEncoding.GetBytes(text, rented);
+            var written = OutputEncoding.GetBytes(text, rented);
             FeedOutput(rented.AsSpan(0, written));
         }
         finally
@@ -127,8 +127,8 @@ public class InMemoryTerminalSession : ITerminalSession
         if (buffer.IsEmpty || _outputQueue.IsEmpty)
             return 0;
 
-        int bytesRead = 0;
-        while (bytesRead < buffer.Length && _outputQueue.TryDequeue(out byte b))
+        var bytesRead = 0;
+        while (bytesRead < buffer.Length && _outputQueue.TryDequeue(out var b))
         {
             buffer[bytesRead] = b;
             bytesRead++;
@@ -140,12 +140,12 @@ public class InMemoryTerminalSession : ITerminalSession
     public virtual byte[] ReadAll()
     {
         ThrowIfDisposed();
-        int count = _outputQueue.Count;
+        var count = _outputQueue.Count;
         if (count == 0)
             return Array.Empty<byte>();
 
-        byte[] result = new byte[count];
-        int actualRead = Read(result);
+        var result = new byte[count];
+        var actualRead = Read(result);
 
         if (actualRead < count)
             Array.Resize(ref result, actualRead);

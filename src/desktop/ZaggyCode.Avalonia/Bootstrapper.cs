@@ -130,7 +130,7 @@ public sealed class Bootstrapper
         if (OperatingSystem.IsMacOS())
             return Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Library", "Application Support", "zaggy", "data");
 
-        string? dataHome = Environment.GetEnvironmentVariable("XDG_DATA_HOME");
+        var dataHome = Environment.GetEnvironmentVariable("XDG_DATA_HOME");
         if (!string.IsNullOrEmpty(dataHome))
             return Path.Join(dataHome, "zaggy");
 
@@ -171,7 +171,7 @@ public sealed class Bootstrapper
         if (OperatingSystem.IsMacOS())
             return Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Library", "Caches", "zaggy");
 
-        string? runtimeDir = Environment.GetEnvironmentVariable("XDG_RUNTIME_DIR");
+        var runtimeDir = Environment.GetEnvironmentVariable("XDG_RUNTIME_DIR");
         if (!string.IsNullOrEmpty(runtimeDir))
             return Path.Join(runtimeDir, "zaggy");
 
@@ -186,7 +186,7 @@ public sealed class Bootstrapper
         if (OperatingSystem.IsMacOS())
             return Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Library", "Application Support", "zaggy");
 
-        string? configHome = Environment.GetEnvironmentVariable("XDG_CONFIG_HOME");
+        var configHome = Environment.GetEnvironmentVariable("XDG_CONFIG_HOME");
         if (!string.IsNullOrEmpty(configHome))
             return Path.Join(configHome, "zaggy");
 
@@ -204,7 +204,7 @@ public sealed class Bootstrapper
         if (OperatingSystem.IsMacOS())
             return Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Library", "Logs", "zaggy");
 
-        string? stateHome = Environment.GetEnvironmentVariable("XDG_STATE_HOME");
+        var stateHome = Environment.GetEnvironmentVariable("XDG_STATE_HOME");
         if (!string.IsNullOrEmpty(stateHome))
             return Path.Join(stateHome, "zaggy");
 

@@ -21,7 +21,7 @@ internal sealed class RobotGameMapProxy(MapView mapView, MapRobotStateMachine st
     {
         RunOnUiThread(() =>
         {
-            CellOffset offset = direction switch
+            var offset = direction switch
             {
                 Direction.Up => new CellOffset(0, -1),
                 Direction.Down => new CellOffset(0, 1),

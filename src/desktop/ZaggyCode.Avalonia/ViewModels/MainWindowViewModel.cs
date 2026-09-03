@@ -160,15 +160,15 @@ public partial class MainWindowViewModel : ViewModelBase
         const int width = 8;
         const int height = 6;
 
-        GamePoint[,] grid = new GamePoint[width, height];
-        for (int y = 0; y < height; y++)
+        var grid = new GamePoint[width, height];
+        for (var y = 0; y < height; y++)
         {
-            for (int x = 0; x < width; x++)
+            for (var x = 0; x < width; x++)
                 grid[x, y] = new GamePoint { X = x, Y = y };
         }
 
         // A rock wall running between columns 3 and 4 for the middle rows.
-        for (int y = 1; y <= 3; y++)
+        for (var y = 1; y <= 3; y++)
         {
             grid[3, y].WallType = WallType.Right;
             grid[4, y].WallType = WallType.Left;
@@ -185,9 +185,9 @@ public partial class MainWindowViewModel : ViewModelBase
         grid[7, 5].IsGoal = true;
 
         ObservableCollection<GamePoint> points = [];
-        for (int y = 0; y < height; y++)
+        for (var y = 0; y < height; y++)
         {
-            for (int x = 0; x < width; x++)
+            for (var x = 0; x < width; x++)
                 points.Add(grid[x, y]);
         }
 
