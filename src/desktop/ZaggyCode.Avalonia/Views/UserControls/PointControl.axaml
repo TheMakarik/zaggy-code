@@ -1,0 +1,14 @@
+<UserControl
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d"
+    x:Class="ZaggyCode.Avalonia.Views.UserControls.PointControl"
+    x:DataType="game:RobotGamePoint"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:converters="clr-namespace:ZaggyCode.Avalonia.Views.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:game="clr-namespace:ZaggyCode.Core.Game.Models;assembly=ZaggyCode.Core"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Border BorderBrush="{Binding CustomBorderHex, Converter={converters:HexStringToBrushConverter}}" Name="CoreBorder" />
+</UserControl>

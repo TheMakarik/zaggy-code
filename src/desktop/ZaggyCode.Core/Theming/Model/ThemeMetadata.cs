@@ -30,4 +30,7 @@ public sealed class ThemeMetadata : ArchiveMetadata
 
     [JsonIgnore]
     public bool IsSystemTheme { get; set; }
+
+    [JsonIgnore]
+    public string? Path { get; set; }
 }

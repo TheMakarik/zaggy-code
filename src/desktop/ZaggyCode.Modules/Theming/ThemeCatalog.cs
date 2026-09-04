@@ -21,14 +21,15 @@ public sealed class ThemeCatalog(
         foreach (var directory in directories)
         {
             var isSystem = Path.GetFullPath(directory).Equals(systemThemesFolder, StringComparison.OrdinalIgnoreCase);
-            var found = await archiveReader
-                .EnumerateMetadata<ThemeMetadata>([directory], themeOptions.Value.ThemeExtensions, recursive: false)
-                .ToListAsync(token);
-
-            foreach (var theme in found)
+            foreach (var file in Directory.EnumerateFiles(directory, $"*{themeOptions.Value.ThemeExtensions}", SearchOption.TopDirectoryOnly))
             {
-                theme.IsSystemTheme = isSystem;
-                themes[theme.Name] = theme;
+                var metadata = await archiveReader.ReadMetadataAsync<ThemeMetadata>(file);
+                if (metadata is null)
+                    continue;
+
+                metadata.IsSystemTheme = isSystem;
+                metadata.Path = file;
+                themes[metadata.Name] = metadata;
             }
         }
 

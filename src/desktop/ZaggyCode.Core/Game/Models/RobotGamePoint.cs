@@ -8,10 +8,7 @@ public class RobotGamePoint : INotifyPropertyChanged
 
     [XmlAttribute("y")]
     public int Y { get; set => SetField(ref field, value); }
-
-    [XmlAttribute("wall-type")]
-    public WallType WallType { get; set => SetField(ref field, value); }
-
+    
     [XmlAttribute("want-draw")]
     [DefaultValue(false)]
     public bool RequireDraw { get; set => SetField(ref field, value); }
@@ -27,26 +24,72 @@ public class RobotGamePoint : INotifyPropertyChanged
     [XmlAttribute("goal")]
     [DefaultValue(false)]
     public bool IsGoal { get; set => SetField(ref field, value); }
-    
-    [XmlAttribute("customization-props:background-hex")]
+
+    #region Core
+
+    [XmlAttribute("CORE.hex", Namespace = "objects")]
     [DefaultValue(null)]
-    public string? CustomBackgroundHex { get; set => SetField(ref field, value); }
+    public string? CustomCoreBackgroundHex { get; set => SetField(ref field, value); }
     
-    [XmlAttribute("customization-props:border-hex")]
+    [XmlAttribute("CORE.opacity", Namespace = "objects")]
+    [DefaultValue(null)]
+    public string? CustomCoreOpacity { get; set => SetField(ref field, value); }
+    
+    [XmlAttribute("CORE.drew-point-background-hex", Namespace = "objects")]
+    [DefaultValue(null)]
+    public string? CustomCoreDrewPointHex { get; set => SetField(ref field, value); }
+
+    #endregion
+
+    #region Core border
+
+    [XmlAttribute("CORE_BORDER.hex", Namespace = "objects")]
     [DefaultValue(null)]
     public string? CustomBorderHex { get; set => SetField(ref field, value); }
     
-    [XmlAttribute("customization-props:wall-on-point-hex")]
+    [XmlAttribute("CORE_BORDER.opacity", Namespace = "objects")]
+    [DefaultValue(null)]
+    public int? CustomBorderOpacity { get; set => SetField(ref field, value); }
+    
+    [XmlAttribute("CORE_BORDER.radius-left-top", Namespace = "objects")]
+    [DefaultValue(null)]
+    public string? CustomBorderRadiusLeftTop { get; set => SetField(ref field, value); }
+    
+    [XmlAttribute("CORE_BORDER.radius-left-bottom", Namespace = "objects")]
+    [DefaultValue(null)]
+    public string? CustomBorderRadiusLeftBottom { get; set => SetField(ref field, value); }
+    
+    [XmlAttribute("CORE_BORDER.radius-right-top", Namespace = "objects")]
+    [DefaultValue(null)]
+    public string? CustomBorderRadiusRightTop { get; set => SetField(ref field, value); }
+    
+    [XmlAttribute("CORE_BORDER.radius-right-bottom", Namespace = "objects")]
+    [DefaultValue(null)]
+    public string? CustomBorderRadiusRightBottom { get; set => SetField(ref field, value); }
+
+    #endregion
+
+    #region Wall
+
+    [XmlAttribute("WALL.type", Namespace = "objects")]
+    public WallType WallType { get; set => SetField(ref field, value); }
+    
+    [XmlAttribute("WALL.hex", Namespace = "objects")]
     [DefaultValue(null)]
     public string? CustomWallOnPointHex { get; set => SetField(ref field, value); }
     
-    [XmlAttribute("customization-props:drew-point-hex")]
+    [XmlAttribute("WALL.border-hex", Namespace = "objects")]
     [DefaultValue(null)]
-    public string? CustomDrewPointHex { get; set => SetField(ref field, value); }
+    public string? CustomWallBorderOnPointHex { get; set => SetField(ref field, value); }
     
-    [XmlAttribute("customization-props:wall-opacity")]
+    
+    [XmlAttribute("WALL.opacity", Namespace = "objects")]
     [DefaultValue(null)]
     public int? CustomWallOpacity { get; set => SetField(ref field, value); }
+
+    #endregion
+    
+    
 
     public event PropertyChangedEventHandler? PropertyChanged;
 

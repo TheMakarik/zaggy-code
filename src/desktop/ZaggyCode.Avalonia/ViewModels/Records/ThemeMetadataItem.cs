@@ -12,8 +12,13 @@ public sealed record ThemeMetadataItem(
     IBrush Primary,
     IBrush Border,
     IBrush Foreground,
-    bool IsSystemTheme)
+    bool IsSystemTheme,
+    ThemeMetadata Source)
 {
+    public ICommand? CopyCommand { get; init; }
+    public ICommand? DeleteCommand { get; init; }
+    public ICommand? EditCommand { get; init; }
+
     public static ThemeMetadataItem From(ThemeMetadata metadata) => new(
         metadata.Name,
         metadata.Author,
@@ -26,7 +31,8 @@ public sealed record ThemeMetadataItem(
         CreateBrush(metadata.PrimaryColor),
         CreateBrush(metadata.BorderColor),
         CreateBrush(metadata.ForegroundColor),
-        metadata.IsSystemTheme);
+        metadata.IsSystemTheme,
+        metadata);
 
     private static IBrush CreateBrush(string hex)
         => new SolidColorBrush(Color.Parse(hex));

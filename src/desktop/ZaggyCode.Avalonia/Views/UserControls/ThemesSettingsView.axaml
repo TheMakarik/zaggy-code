@@ -48,12 +48,46 @@
                             Padding="0"
                             PointerEntered="OnThemeCardPointerEntered"
                             PointerExited="OnThemeCardPointerExited">
-                            <Button.IsEnabled>
-                                <MultiBinding Converter="{converters:IsNotEqualConverter}">
-                                    <Binding Path="Name" />
-                                    <Binding Path="$parent[ItemsControl].((vm:AppearanceSettingsViewModel)DataContext).SelectedAppTheme" />
-                                </MultiBinding>
-                            </Button.IsEnabled>
+                            <Button.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem
+                                        Header="Удалить"
+                                        Icon="{materialIcons:MaterialIconExt Kind=TrashCan}"
+                                        Command="{Binding DeleteCommand}"
+                                        CommandParameter="{Binding}"
+                                        IsEnabled="{Binding IsSystemTheme, Converter={converters:InverseBooleanConverter}}" />
+                                    <MenuItem
+                                        Header="Редактировать"
+                                        Icon="{materialIcons:MaterialIconExt Kind=Pencil}"
+                                        Command="{Binding EditCommand}"
+                                        CommandParameter="{Binding}"
+                                        IsEnabled="{Binding IsSystemTheme, Converter={converters:InverseBooleanConverter}}" />
+                                    <Separator />
+                                    <MenuItem
+                                        Header="Копировать"
+                                        Icon="{materialIcons:MaterialIconExt Kind=ContentCopy}"
+                                        Command="{Binding CopyCommand}"
+                                        CommandParameter="{Binding}" />
+                                    <MenuItem
+                                        IsEnabled="False"
+                                        IsVisible="{Binding IsSystemTheme}">
+                                        <MenuItem.Header>
+                                            <StackPanel HorizontalAlignment="Center" Spacing="0">
+                                                <TextBlock
+                                                    FontSize="12"
+                                                    Foreground="{DynamicResource ForegroundMutedBrush}"
+                                                    Text="Системная тема,"
+                                                    TextAlignment="Center" />
+                                                <TextBlock
+                                                    FontSize="12"
+                                                    Foreground="{DynamicResource ForegroundMutedBrush}"
+                                                    Text="редактирование не поддерживается"
+                                                    TextAlignment="Center" />
+                                            </StackPanel>
+                                        </MenuItem.Header>
+                                    </MenuItem>
+                                </ContextMenu>
+                            </Button.ContextMenu>
                             <Panel>
                                 <!--  Подложка выбранной темы: держит hover-фон без наведения  -->
                                 <Border

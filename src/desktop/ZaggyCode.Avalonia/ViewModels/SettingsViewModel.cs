@@ -32,6 +32,7 @@ public sealed partial class SettingsViewModel : ViewModelBase
         IOptions<FontSizeOptions> fontSizeOptions,
         IOptions<LoadingOptions> loadingOptions,
         IThemeCatalog themeCatalog,
+        IThemeCopier themeCopier,
         IPythonFunctionNameValidator pythonFunctionNameValidator,
         ILoggerFactory loggerFactory)
     {
@@ -47,6 +48,7 @@ public sealed partial class SettingsViewModel : ViewModelBase
             fontSizeOptions,
             loadingOptions,
             themeCatalog,
+            themeCopier,
             loggerFactory.CreateLogger<AppearanceSettingsViewModel>());
         PythonSettings = new PythonSettingsViewModel(
             pythonSettingsStorage,

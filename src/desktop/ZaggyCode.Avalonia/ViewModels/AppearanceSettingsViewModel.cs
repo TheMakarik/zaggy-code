@@ -24,6 +24,8 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
     private readonly FontSizeOptions _fontSizeOptions;
     private readonly UserData _defaultUserData;
     private readonly IObservableStorage<UserData> _userStorage;
+    private readonly IThemeCatalog _themeCatalog;
+    private readonly IThemeCopier _themeCopier;
     private readonly ILogger<AppearanceSettingsViewModel> _logger;
     private int _originalCodeFontSize;
     private int _originalTerminalFontSize;
@@ -51,11 +53,14 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
         IOptions<FontSizeOptions> fontSizeOptions,
         IOptions<LoadingOptions> loadingOptions,
         IThemeCatalog themeCatalog,
+        IThemeCopier themeCopier,
         ILogger<AppearanceSettingsViewModel> logger)
     {
         _fontSizeOptions = fontSizeOptions.Value;
         _defaultUserData = defaultUserOptions.Value.User;
         _userStorage = userStorage;
+        _themeCatalog = themeCatalog;
+        _themeCopier = themeCopier;
         _logger = logger;
         LoadingDotsMaxCount = loadingOptions.Value.LoadingDotsMaxCount;
         CSharpExamplePath = codeExamplePathOptions.Value.CSharpExamplePath;
@@ -72,7 +77,7 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
         _originalShowCodeLineNumbers = current.ShowCodeLineNumbers;
 
 #pragma warning disable AsyncVoidMethod
-        _ = InitializeAvailableAppThemesAsync(themeCatalog);
+        _ = InitializeAvailableAppThemesAsync();
 #pragma warning restore AsyncVoidMethod
 
         LoadFromUserData(current);
@@ -199,19 +204,11 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
         SelectedAppTheme = _originalSelectedAppTheme;
     }
 
-    private async Task InitializeAvailableAppThemesAsync(IThemeCatalog themeCatalog)
+    private async Task InitializeAvailableAppThemesAsync()
     {
         try
         {
-            // Чтение архивов — синхронный файловый IO внутри async-обёртки,
-            // поэтому уводим в пул потоков, чтобы окно настроек не подвисало.
-            var themes = await Task.Run(async () => await themeCatalog.GetAvailableThemesAsync());
-
-            foreach (var metadata in themes)
-                AvailableAppThemes.Add(ThemeMetadataItem.From(metadata));
-
-            var saved = _userStorage.Current.CurrentTheme;
-            SelectedAppTheme = AvailableAppThemes.Any(theme => theme.Name == saved) ? saved : string.Empty;
+            await LoadAppThemesAsync();
         }
         catch (Exception e)
         {
@@ -222,6 +219,60 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
             IsLoadingThemes = false;
         }
     }
+
+    private async Task ReloadAppThemesAsync()
+    {
+        try
+        {
+            await LoadAppThemesAsync();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Failed to reload application themes");
+        }
+    }
+
+    private async Task LoadAppThemesAsync()
+    {
+        var themes = await Task.Run(async () => await _themeCatalog.GetAvailableThemesAsync());
+
+        AvailableAppThemes.Clear();
+        foreach (var metadata in themes)
+        {
+            var item = ThemeMetadataItem.From(metadata) with
+            {
+                CopyCommand = CopyThemeCommand,
+                DeleteCommand = DeleteThemeCommand,
+                EditCommand = EditThemeCommand
+            };
+            AvailableAppThemes.Add(item);
+        }
+
+        var saved = _userStorage.Current.CurrentTheme;
+        SelectedAppTheme = AvailableAppThemes.Any(theme => theme.Name == saved) ? saved : string.Empty;
+    }
+
+    [ReactiveCommand]
+    private async Task CopyTheme(ThemeMetadataItem item)
+    {
+        try
+        {
+            await _themeCopier.CopyThemeAsync(item.Source);
+            await ReloadAppThemesAsync();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Failed to copy theme '{name}'", item.Name);
+        }
+    }
+
+    [ReactiveCommand]
+    private void DeleteTheme(ThemeMetadataItem item)
+        => _ = NotImplementedOccurred.Handle(Unit.Default);
+
+    [ReactiveCommand]
+    private void EditTheme(ThemeMetadataItem item)
+        => _ = NotImplementedOccurred.Handle(Unit.Default);
 
     [ReactiveCommand]
     private void ChangeCodeFontSize(string? deltaText)

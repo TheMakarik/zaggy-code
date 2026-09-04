@@ -65,6 +65,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly IOptions<PythonDefaultSettingsOptions> _pythonDefaultSettingsOptions;
     private readonly IOptions<CSharpDefaultSettingsOptions> _csharpDefaultSettingsOptions;
     private readonly IOptions<CodeExamplePathOptions> _codeExamplePathOptions;
+    private readonly IThemeCopier _themeCopier;
     private readonly IOptions<FontSizeOptions> _fontSizeOptions;
     private readonly IOptions<CodeThemeDisplayNameOptions> _displayNameOptions;
     private readonly IOptions<CodeThemeIconOptions> _iconOptions;
@@ -87,6 +88,7 @@ public partial class MainWindowViewModel : ViewModelBase
         IObservableStorage<CSharpSettings> csharpSettingsStorage,
         IOptions<CSharpDefaultSettingsOptions> csharpDefaultSettingsOptions,
         IThemeCatalog themeCatalog,
+        IThemeCopier themeCopier,
         IOptions<LoadingOptions> loadingOptions,
         IOptions<DefaultUser> defaultUserOptions,
         IOptions<PythonDefaultSettingsOptions> pythonDefaultSettingsOptions,
@@ -106,6 +108,7 @@ public partial class MainWindowViewModel : ViewModelBase
         _pythonSettingsStorage = pythonSettingsStorage;
         _csharpSettingsStorage = csharpSettingsStorage;
         _themeCatalog = themeCatalog;
+        _themeCopier = themeCopier;
         _loadingOptions = loadingOptions;
         _defaultUserOptions = defaultUserOptions;
         _pythonDefaultSettingsOptions = pythonDefaultSettingsOptions;
@@ -447,6 +450,9 @@ public partial class MainWindowViewModel : ViewModelBase
     [ReactiveCommand]
     private async Task UpdateFontSize(int fontSize)
     {
+        if (TextEditorFontSize == fontSize)
+            return;
+
         TextEditorFontSize = fontSize;
         await ShowEditorFontSizeToast();
     }
@@ -474,6 +480,9 @@ public partial class MainWindowViewModel : ViewModelBase
     [ReactiveCommand]
     private async Task UpdateTerminalFontSize(int fontSize)
     {
+        if (TerminalFontSize == fontSize)
+            return;
+
         TerminalFontSize = fontSize;
         await ShowTerminalFontSizeToast();
     }
@@ -528,6 +537,7 @@ public partial class MainWindowViewModel : ViewModelBase
             _fontSizeOptions,
             _loadingOptions,
             _themeCatalog,
+            _themeCopier,
             _pythonFunctionNameValidator,
             _loggerFactory);
         await OpenSettings.Handle(settingsViewModel);
