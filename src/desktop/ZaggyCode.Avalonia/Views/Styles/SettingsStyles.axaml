@@ -26,6 +26,13 @@
         <Setter Property="Margin" Value="0,0,0,4" />
     </Style>
 
+    <Style Selector="TextBlock.settings-hint">
+        <Setter Property="Foreground" Value="{DynamicResource ForegroundMutedBrush}" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Opacity" Value="0.85" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
     <Style Selector="Button.settings-theme-button">
         <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
         <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}" />

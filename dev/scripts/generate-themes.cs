@@ -21,7 +21,7 @@ using ZaggyCode.Modules.Theming.Options;
 
 const string Author = "TheMakarik";
 var version = new Version(2026, 0, 0);
-var outputDirectory = Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, "dev", "themes"));
+var outputDirectory = Path.GetFullPath(Path.Join(Environment.CurrentDirectory, "dev", "themes"));
 
 var tempRoot = Path.Join(Path.GetTempPath(), "zaggy-theme-generator");
 var tempOptions = new TempOptions

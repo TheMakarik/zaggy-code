@@ -11,7 +11,8 @@ public sealed record ThemeMetadataItem(
     IBrush TerminalBackground,
     IBrush Primary,
     IBrush Border,
-    IBrush Foreground)
+    IBrush Foreground,
+    bool IsSystemTheme)
 {
     public static ThemeMetadataItem From(ThemeMetadata metadata) => new(
         metadata.Name,
@@ -24,7 +25,8 @@ public sealed record ThemeMetadataItem(
         CreateBrush(metadata.TerminalBackgroundColor),
         CreateBrush(metadata.PrimaryColor),
         CreateBrush(metadata.BorderColor),
-        CreateBrush(metadata.ForegroundColor));
+        CreateBrush(metadata.ForegroundColor),
+        metadata.IsSystemTheme);
 
     private static IBrush CreateBrush(string hex)
         => new SolidColorBrush(Color.Parse(hex));

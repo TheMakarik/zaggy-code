@@ -4,7 +4,6 @@
     x:TypeArguments="vm:CSharpSettingsViewModel"
     xmlns="https://github.com/avaloniaui"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:rxui="http://reactiveui.net"
     xmlns:userControls="clr-namespace:ZaggyCode.Avalonia.Views.UserControls"
@@ -15,16 +14,9 @@
     <ScrollViewer>
         <StackPanel Margin="20" Spacing="16">
             <userControls:SettingsSectionHeader
-                Description="Настройки языка C# применяются при сохранении изменений."
+                Description="Разработан Microsoft в 2000 году как объектно-ориентированный язык для платформы .NET. Сегодня активно используется для создания веб-приложений, игр на Unity и корпоративного ПО."
                 IconKind="LanguageCsharp"
                 Title="C#" />
-
-            <TextBlock
-                FontSize="13"
-                Foreground="{DynamicResource ForegroundMutedBrush}"
-                Opacity="0.85"
-                Text="Эти параметры влияют на то, как компилируется и выполняется код, который пишет ученик."
-                TextWrapping="Wrap" />
 
             <TextBlock Classes="settings-section-title" Text="Операторы верхнего уровня" />
             <CheckBox
@@ -32,10 +24,8 @@
                 IsChecked="{Binding UseTopLevelStatements}"
                 ToolTip.Tip="Код в начале файла выполняется без объявления класса и метода Main" />
             <TextBlock
-                FontSize="13"
-                Foreground="{DynamicResource ForegroundMutedBrush}"
-                Text="Код пишется сразу в начале файла и выполняется сверху вниз, как в скриптовом языке. Метод Main и класс генерируются автоматически."
-                TextWrapping="Wrap" />
+                Classes="settings-hint"
+                Text="Код пишется сразу в начале файла и выполняется сверху вниз, как в скриптовом языке. Метод Main и класс генерируются автоматически." />
 
             <TextBlock Classes="settings-section-title" Text="Неявные using" />
             <CheckBox
@@ -43,10 +33,8 @@
                 IsChecked="{Binding EnableImplicitUsings}"
                 ToolTip.Tip="Автоматически подключает стандартные пространства имён, как ImplicitUsings в .csproj" />
             <TextBlock
-                FontSize="13"
-                Foreground="{DynamicResource ForegroundMutedBrush}"
-                Text="Автоматически подключает стандартные пространства имён, как при включённом ImplicitUsings в .csproj: System, System.Collections.Generic, System.IO, System.Linq, System.Net.Http, System.Threading, System.Threading.Tasks."
-                TextWrapping="Wrap" />
+                Classes="settings-hint"
+                Text="Автоматически подключает стандартные пространства имён, как при включённом ImplicitUsings в .csproj: System, System.Collections.Generic, System.IO, System.Linq, System.Net.Http, System.Threading, System.Threading.Tasks." />
 
             <TextBlock Classes="settings-section-title" Text="Ввод-вывод" />
             <CheckBox
@@ -54,10 +42,8 @@
                 IsChecked="{Binding BlockIo}"
                 ToolTip.Tip="Запрещает чтение и запись в стандартные потоки" />
             <TextBlock
-                FontSize="13"
-                Foreground="{DynamicResource ForegroundMutedBrush}"
-                Text="Запрещает чтение и запись в стандартные потоки ввода-вывода, например Console.ReadLine и Console.Write."
-                TextWrapping="Wrap" />
+                Classes="settings-hint"
+                Text="Запрещает чтение и запись в стандартные потоки ввода-вывода, например Console.ReadLine и Console.Write." />
         </StackPanel>
     </ScrollViewer>
 </rxui:ReactiveUserControl>

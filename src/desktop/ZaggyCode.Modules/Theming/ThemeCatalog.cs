@@ -9,6 +9,7 @@ public sealed class ThemeCatalog(
 {
     public async Task<IReadOnlyList<ThemeMetadata>> GetAvailableThemesAsync(CancellationToken token = default)
     {
+        var systemThemesFolder = Path.GetFullPath(themeOptions.Value.SystemThemesFolder);
         var directories = GetExistingDirectories();
         if (directories.Count is 0)
         {
@@ -16,12 +17,23 @@ public sealed class ThemeCatalog(
             return [];
         }
 
-        var themes = await archiveReader
-            .EnumerateMetadata<ThemeMetadata>(directories, themeOptions.Value.ThemeExtensions, recursive: false)
-            .ToListAsync(token);
+        var themes = new Dictionary<string, ThemeMetadata>(StringComparer.Ordinal);
+        foreach (var directory in directories)
+        {
+            var isSystem = Path.GetFullPath(directory).Equals(systemThemesFolder, StringComparison.OrdinalIgnoreCase);
+            var found = await archiveReader
+                .EnumerateMetadata<ThemeMetadata>([directory], themeOptions.Value.ThemeExtensions, recursive: false)
+                .ToListAsync(token);
+
+            foreach (var theme in found)
+            {
+                theme.IsSystemTheme = isSystem;
+                themes[theme.Name] = theme;
+            }
+        }
 
         logger.LogInformation("Found {count} available themes", themes.Count);
-        return themes;
+        return themes.Values.ToList();
     }
 
     public async Task<Theme?> LoadThemeAsync(string name, CancellationToken token = default)
