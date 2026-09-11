@@ -1,0 +1,142 @@
+<rxui:ReactiveUserControl
+    x:Class="ZaggyCode.Avalonia.Views.UserControls.GameControl"
+    x:DataType="vm:MainWindowViewModel"
+    x:TypeArguments="vm:MainWindowViewModel"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:controls="clr-namespace:ZaggyCode.Avalonia.Views.Controls"
+    xmlns:ctxt="clr-namespace:ColorTextBlock.Avalonia;assembly=ColorTextBlock.Avalonia"
+    xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+    xmlns:md="clr-namespace:Markdown.Avalonia.Full;assembly=Markdown.Avalonia.Full"
+    xmlns:records="clr-namespace:ZaggyCode.Avalonia.ViewModels.Records"
+    xmlns:rxui="http://reactiveui.net"
+    xmlns:vm="using:ZaggyCode.Avalonia.ViewModels"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <rxui:ReactiveUserControl.Resources>
+        <SolidColorBrush x:Key="ExpanderHeaderBackground" Color="Transparent" />
+        <SolidColorBrush x:Key="ExpanderHeaderBackgroundPointerOver" Color="Transparent" />
+        <SolidColorBrush x:Key="ExpanderHeaderBackgroundPressed" Color="Transparent" />
+        <SolidColorBrush x:Key="ExpanderHeaderBorderBrush" Color="Transparent" />
+        <SolidColorBrush x:Key="ExpanderHeaderBorderBrushPointerOver" Color="Transparent" />
+        <SolidColorBrush x:Key="ExpanderHeaderBorderBrushPressed" Color="Transparent" />
+        <SolidColorBrush x:Key="ExpanderChevronBackground" Color="Transparent" />
+        <SolidColorBrush x:Key="ExpanderChevronBackgroundPointerOver" Color="Transparent" />
+        <SolidColorBrush x:Key="ExpanderChevronBackgroundPressed" Color="Transparent" />
+        <SolidColorBrush x:Key="ExpanderChevronBorderBrush" Color="Transparent" />
+        <SolidColorBrush x:Key="ExpanderChevronBorderBrushPointerOver" Color="Transparent" />
+        <SolidColorBrush x:Key="ExpanderChevronBorderBrushPressed" Color="Transparent" />
+        <SolidColorBrush x:Key="ExpanderContentBackground" Color="Transparent" />
+        <SolidColorBrush x:Key="ExpanderContentBorderBrush" Color="Transparent" />
+    </rxui:ReactiveUserControl.Resources>
+
+    <rxui:ReactiveUserControl.Styles>
+        <Style Selector="Button.map-number">
+            <Setter Property="Width" Value="40" />
+            <Setter Property="Height" Value="40" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource ForegroundMutedBrush}" />
+        </Style>
+        <Style Selector="Button.map-number materialIcons|MaterialIcon">
+            <Setter Property="Width" Value="26" />
+            <Setter Property="Height" Value="26" />
+        </Style>
+        <Style Selector="Button.map-number.selected">
+            <Setter Property="Background" Value="{DynamicResource PrimaryBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}" />
+        </Style>
+    </rxui:ReactiveUserControl.Styles>
+
+    <ScrollViewer
+        HorizontalScrollBarVisibility="Disabled"
+        VerticalScrollBarVisibility="Auto">
+        <Grid RowDefinitions="Auto,Auto,Auto">
+            <Grid Grid.Row="0" ColumnDefinitions="Auto,*" Margin="8,0,8,8">
+                <TextBlock
+                    Grid.Column="0"
+                    FontSize="16"
+                    FontWeight="SemiBold"
+                    Margin="0,0,16,0"
+                    Text="{Binding CurrentGame.Name}"
+                    VerticalAlignment="Center" />
+
+                <ScrollViewer
+                    Grid.Column="1"
+                    HorizontalScrollBarVisibility="Auto"
+                    VerticalScrollBarVisibility="Disabled">
+                    <ItemsControl ItemsSource="{Binding MapNumbers}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" Spacing="6" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="records:MapNumberItem">
+                                <Button
+                                    Classes="map-number"
+                                    Classes.selected="{Binding IsSelected}"
+                                    Command="{Binding $parent[ItemsControl].((vm:MainWindowViewModel)DataContext).SelectMapCommand}"
+                                    CommandParameter="{Binding}">
+                                    <materialIcons:MaterialIcon Kind="{Binding Icon}" />
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Grid>
+
+            <controls:MapControl
+                x:Name="GameMap"
+                Grid.Row="1"
+                Height="300"
+                BackLaggyPath="{Binding ZaggyBackLaggyPath}"
+                BackPath="{Binding ZaggyBackPath}"
+                CoinPath="{Binding CoinAssetPath}"
+                FixedCellSize="0"
+                FrontLaggyPath="{Binding ZaggyFrontLaggyPath}"
+                FrontPath="{Binding ZaggyFrontPath}"
+                LeftLaggyPath="{Binding ZaggyLeftLaggyPath}"
+                LeftPath="{Binding ZaggyLeftPath}"
+                Map="{Binding CurrentMap}"
+                MarginUnits="1,1,1,1"
+                MoveStepSeconds="{Binding MoveStepSeconds}"
+                PaintedBrush="{DynamicResource MapPaintedBrush}"
+                RightLaggyPath="{Binding ZaggyRightLaggyPath}"
+                RightPath="{Binding ZaggyRightPath}"
+                SadPath="{Binding ZaggySadPath}"
+                SadSeconds="{Binding SadSeconds}"
+                SeaBrush="{DynamicResource MapSeaBrush}" />
+
+            <Expander
+                x:Name="DescriptionExpander"
+                Grid.Row="2"
+                HorizontalAlignment="Stretch"
+                IsExpanded="False"
+                Margin="8,8,8,0">
+                <Expander.Header>
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <materialIcons:MaterialIcon
+                            Width="18"
+                            Height="18"
+                            Kind="BookOpenVariant"
+                            VerticalAlignment="Center" />
+                        <TextBlock Text="Описание" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Expander.Header>
+                <md:MarkdownScrollViewer Markdown="{Binding CurrentGame.Description}">
+                    <md:MarkdownScrollViewer.Styles>
+                        <Style Selector="ctxt|CCode">
+                            <Setter Property="MonospaceFontFamily" Value="Noto Sans Mono,DejaVu Sans Mono,Liberation Mono,Cascadia Code,Consolas,Menlo,Monaco,Monospace" />
+                        </Style>
+                        <Style Selector=".Markdown_Avalonia_MarkdownViewer TextBlock.CodeBlock">
+                            <Setter Property="FontFamily" Value="Noto Sans Mono,DejaVu Sans Mono,Liberation Mono,Cascadia Code,Consolas,Menlo,Monaco,Monospace" />
+                        </Style>
+                    </md:MarkdownScrollViewer.Styles>
+                </md:MarkdownScrollViewer>
+            </Expander>
+        </Grid>
+    </ScrollViewer>
+</rxui:ReactiveUserControl>
