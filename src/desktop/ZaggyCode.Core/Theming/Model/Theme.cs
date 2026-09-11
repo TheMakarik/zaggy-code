@@ -90,4 +90,28 @@ public sealed class Theme
 
     [XmlElement("map-point-background")]
     public required string MapPointBackgroundColor { get; set; }
+
+    [XmlElement("map-sea")]
+    public required string MapSeaColor { get; set; }
+
+    [XmlElement("map-grass")]
+    public required string MapGrassColor { get; set; }
+
+    [XmlElement("map-grass-dark")]
+    public required string MapGrassDarkColor { get; set; }
+
+    [XmlElement("map-coin")]
+    public required string MapCoinColor { get; set; }
+
+    [XmlElement("map-painted")]
+    public required string MapPaintedColor { get; set; }
+
+    [XmlElement("map-require-draw")]
+    public required string MapRequireDrawColor { get; set; }
+
+    [XmlElement("goal-color1")]
+    public required string GoalColor1 { get; set; }
+
+    [XmlElement("goal-color2")]
+    public required string GoalColor2 { get; set; }
 }

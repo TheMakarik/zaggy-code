@@ -25,6 +25,18 @@ public class RobotGamePoint : INotifyPropertyChanged
     [DefaultValue(false)]
     public bool IsGoal { get; set => SetField(ref field, value); }
 
+    #region Goal
+    
+    [XmlAttribute("GOAL.color1-hex", Namespace = "objects")]
+    [DefaultValue(null)]
+    public string? CustomGoalFirstColorHex { get; set => SetField(ref field, value); }
+    
+    [XmlAttribute("GOAL.color2-hex", Namespace = "objects")]
+    [DefaultValue(null)]
+    public string? CustomGoalSecondColorHex { get; set => SetField(ref field, value); }
+
+    #endregion
+
     #region Core
 
     [XmlAttribute("CORE.hex", Namespace = "objects")]
@@ -33,11 +45,15 @@ public class RobotGamePoint : INotifyPropertyChanged
     
     [XmlAttribute("CORE.opacity", Namespace = "objects")]
     [DefaultValue(null)]
-    public string? CustomCoreOpacity { get; set => SetField(ref field, value); }
+    public int? CustomCoreOpacity { get; set => SetField(ref field, value); }
     
     [XmlAttribute("CORE.drew-point-background-hex", Namespace = "objects")]
     [DefaultValue(null)]
     public string? CustomCoreDrewPointHex { get; set => SetField(ref field, value); }
+
+    [XmlAttribute("CORE.drew-point-opacity", Namespace = "objects")]
+    [DefaultValue(null)]
+    public double? RequireDrawCustomOpacity { get; set => SetField(ref field, value); }
 
     #endregion
 
@@ -47,25 +63,42 @@ public class RobotGamePoint : INotifyPropertyChanged
     [DefaultValue(null)]
     public string? CustomBorderHex { get; set => SetField(ref field, value); }
     
-    [XmlAttribute("CORE_BORDER.opacity", Namespace = "objects")]
-    [DefaultValue(null)]
-    public int? CustomBorderOpacity { get; set => SetField(ref field, value); }
+    [XmlAttribute("CORE_BORDER.is_visible", Namespace = "objects")]
+    [DefaultValue(true)]
+    public bool CustomBorderVisible { get; set => SetField(ref field, value); } = true;
     
     [XmlAttribute("CORE_BORDER.radius-left-top", Namespace = "objects")]
     [DefaultValue(null)]
-    public string? CustomBorderRadiusLeftTop { get; set => SetField(ref field, value); }
+    public int? CustomBorderRadiusLeftTop { get; set => SetField(ref field, value); }
     
     [XmlAttribute("CORE_BORDER.radius-left-bottom", Namespace = "objects")]
     [DefaultValue(null)]
-    public string? CustomBorderRadiusLeftBottom { get; set => SetField(ref field, value); }
+    public int? CustomBorderRadiusLeftBottom { get; set => SetField(ref field, value); }
     
     [XmlAttribute("CORE_BORDER.radius-right-top", Namespace = "objects")]
     [DefaultValue(null)]
-    public string? CustomBorderRadiusRightTop { get; set => SetField(ref field, value); }
+    public int? CustomBorderRadiusRightTop { get; set => SetField(ref field, value); }
     
     [XmlAttribute("CORE_BORDER.radius-right-bottom", Namespace = "objects")]
     [DefaultValue(null)]
-    public string? CustomBorderRadiusRightBottom { get; set => SetField(ref field, value); }
+    public int? CustomBorderRadiusRightBottom { get; set => SetField(ref field, value); }
+
+    
+    [XmlAttribute("CORE_BORDER.margin-top", Namespace = "objects")]
+    [DefaultValue(null)]
+    public int? CustomBorderMarginTop { get; set => SetField(ref field, value); }
+    
+    [XmlAttribute("CORE_BORDER.margin-bottom", Namespace = "objects")]
+    [DefaultValue(null)]
+    public int? CustomBorderMarginBottom { get; set => SetField(ref field, value); }
+    
+    [XmlAttribute("CORE_BORDER.margin-right", Namespace = "objects")]
+    [DefaultValue(null)]
+    public int? CustomBorderMarginRight { get; set => SetField(ref field, value); }
+    
+    [XmlAttribute("CORE_BORDER.margin-left", Namespace = "objects")]
+    [DefaultValue(null)]
+    public int? CustomBorderMarginLeft { get; set => SetField(ref field, value); }
 
     #endregion
 

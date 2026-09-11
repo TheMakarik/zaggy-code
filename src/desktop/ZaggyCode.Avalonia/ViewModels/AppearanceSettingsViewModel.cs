@@ -26,6 +26,7 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
     private readonly IObservableStorage<UserData> _userStorage;
     private readonly IThemeCatalog _themeCatalog;
     private readonly IThemeCopier _themeCopier;
+    private readonly IThemeDeleter _themeDeleter;
     private readonly ILogger<AppearanceSettingsViewModel> _logger;
     private int _originalCodeFontSize;
     private int _originalTerminalFontSize;
@@ -54,6 +55,7 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
         IOptions<LoadingOptions> loadingOptions,
         IThemeCatalog themeCatalog,
         IThemeCopier themeCopier,
+        IThemeDeleter themeDeleter,
         ILogger<AppearanceSettingsViewModel> logger)
     {
         _fontSizeOptions = fontSizeOptions.Value;
@@ -61,6 +63,7 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
         _userStorage = userStorage;
         _themeCatalog = themeCatalog;
         _themeCopier = themeCopier;
+        _themeDeleter = themeDeleter;
         _logger = logger;
         LoadingDotsMaxCount = loadingOptions.Value.LoadingDotsMaxCount;
         CSharpExamplePath = codeExamplePathOptions.Value.CSharpExamplePath;
@@ -267,8 +270,18 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
     }
 
     [ReactiveCommand]
-    private void DeleteTheme(ThemeMetadataItem item)
-        => _ = NotImplementedOccurred.Handle(Unit.Default);
+    private async Task DeleteTheme(ThemeMetadataItem item)
+    {
+        try
+        {
+            await _themeDeleter.DeleteThemeAsync(item.Source);
+            await ReloadAppThemesAsync();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Failed to delete theme '{name}'", item.Name);
+        }
+    }
 
     [ReactiveCommand]
     private void EditTheme(ThemeMetadataItem item)

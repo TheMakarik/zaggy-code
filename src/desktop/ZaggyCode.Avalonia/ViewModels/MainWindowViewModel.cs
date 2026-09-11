@@ -29,7 +29,21 @@ public partial class MainWindowViewModel : ViewModelBase
     public PopupOptions PopupOptions { get; }
     public ObservableCollection<CodeThemeItem> AvailableCodeThemes { get; } = [];
     public ObservableCollection<LanguageItem> AvailableLanguages { get; } = [];
+    public ObservableCollection<MapNumberItem> MapNumbers { get; } = [];
     public IOptions<ZaggyAssetsOptions> ZaggyAssets { get; init; }
+
+    public string CoinAssetPath => _mapAssetsOptions.Value.Coin;
+    public string ZaggyFrontPath => ZaggyAssets.Value.ZaggySideFront;
+    public string ZaggyBackPath => ZaggyAssets.Value.ZaggySideBack;
+    public string ZaggyLeftPath => ZaggyAssets.Value.ZaggySideLeft;
+    public string ZaggyRightPath => ZaggyAssets.Value.ZaggySideRight;
+    public string ZaggyFrontLaggyPath => ZaggyAssets.Value.ZaggySideFrontLaggy;
+    public string ZaggyBackLaggyPath => ZaggyAssets.Value.ZaggySideBackLaggy;
+    public string ZaggyLeftLaggyPath => ZaggyAssets.Value.ZaggySideLeftLaggy;
+    public string ZaggyRightLaggyPath => ZaggyAssets.Value.ZaggySideRightLaggy;
+    public string ZaggySadPath => ZaggyAssets.Value.EmotionSad;
+    public double MoveStepSeconds => _animationOptions.Value.MoveStepSeconds;
+    public double SadSeconds => _animationOptions.Value.SadSeconds;
 
     #endregion
 
@@ -70,6 +84,9 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly IOptions<CodeThemeDisplayNameOptions> _displayNameOptions;
     private readonly IOptions<CodeThemeIconOptions> _iconOptions;
     private readonly IPythonFunctionNameValidator _pythonFunctionNameValidator;
+    private readonly IThemeDeleter _themeDeleter;
+    private readonly IOptions<MapAssetsOptions> _mapAssetsOptions;
+    private readonly IOptions<MapAnimationOptions> _animationOptions;
     private readonly ILogger<MainWindowViewModel> _logger;
     private readonly ILoggerFactory _loggerFactory;
     private readonly object _executionLock = new();
@@ -98,6 +115,9 @@ public partial class MainWindowViewModel : ViewModelBase
         IOptions<CodeThemeDisplayNameOptions> displayNameOptions,
         IOptions<CodeThemeIconOptions> iconOptions,
         IPythonFunctionNameValidator pythonFunctionNameValidator,
+        IThemeDeleter themeDeleter,
+        IOptions<MapAssetsOptions> mapAssetsOptions,
+        IOptions<MapAnimationOptions> animationOptions,
         ILoggerFactory loggerFactory)
     {
         _robotGameEngine = robotGameEngine;
@@ -117,6 +137,9 @@ public partial class MainWindowViewModel : ViewModelBase
         _displayNameOptions = displayNameOptions;
         _iconOptions = iconOptions;
         _pythonFunctionNameValidator = pythonFunctionNameValidator;
+        _themeDeleter = themeDeleter;
+        _mapAssetsOptions = mapAssetsOptions;
+        _animationOptions = animationOptions;
         _loggerFactory = loggerFactory;
         _executionSpeed = userStorage.Current.LastSpeed;
         _selectedLanguage = userStorage.Current.LastLanguage;
@@ -130,7 +153,14 @@ public partial class MainWindowViewModel : ViewModelBase
         PopupOptions = popupOptions.Value;
         MaxFontSize = _fontSizeOptions.Value.MaxFontSize;
         MinFontSize = _fontSizeOptions.Value.MinFontSize;
-        CurrentMap = CreateSampleMap();
+        CurrentGame = CreateTestGame();
+        Debug.Assert(CurrentGame.Maps.Count <= MaxMaps, "Не более 9 карт");
+
+        for (var index = 0; index < CurrentGame.Maps.Count; index++)
+            MapNumbers.Add(new MapNumberItem(index + 1));
+
+        CurrentMap = CurrentGame.Maps[0];
+        MapNumbers[0].IsSelected = true;
 
         InitializeMessageBusSubscriptions();
         InitializeAvailableCodeThemes();
@@ -157,47 +187,87 @@ public partial class MainWindowViewModel : ViewModelBase
 #pragma warning restore AsyncVoidMethod
     }
 
-    // Small demonstration island; replaced once the level loader exists.
-    public static Map CreateSampleMap()
+    private static readonly int[] TestMapSizes = [3, 4, 5];
+    private const int MaxMaps = 9;
+
+    // Тестовая игра: три карты, require-draw образует букву Г разных размеров.
+    public static Game CreateTestGame()
     {
-        const int width = 8;
-        const int height = 6;
+        ObservableCollection<Map> maps = [.. TestMapSizes.Select(CreateLetterMap)];
 
-        var grid = new GamePoint[width, height];
-        for (var y = 0; y < height; y++)
+        return new Game
         {
-            for (var x = 0; x < width; x++)
-                grid[x, y] = new GamePoint { X = x, Y = y };
-        }
+            Name = "Тестовая игра",
+            Description = """
+                # Тестовая игра
 
-        // A rock wall running between columns 3 and 4 for the middle rows.
-        for (var y = 1; y <= 3; y++)
-        {
-            grid[3, y].WallType = WallType.Right;
-            grid[4, y].WallType = WallType.Left;
-        }
+                Добро пожаловать в **тестовую игру**! Управляй роботом **Загги** и закрась букву **Г**.
 
-        // A solid boulder the robot can neither enter nor pass.
-        grid[6, 1].WallType = WallType.Full;
-        grid[1, 4].IsSpawn = true;
+                ## Цель
+                - Закрась все клетки буквы **Г** — они помечены как *require-draw*.
+                - Собери **монетки** в тайной комнате за стеной: там закраска не требуется.
+                - Доведи Загги до **финиша** — клетка в шахматку.
 
-        // Collect every coin and reach the goal in the bottom-right corner.
-        grid[1, 1].HasCoin = true;
-        grid[2, 2].HasCoin = true;
-        grid[5, 3].HasCoin = true;
-        grid[7, 5].IsGoal = true;
+                ## Подсказки
+                > Если Загги врежется в стену, он загрустит и вернётся назад.
+
+                1. Сначала пройди по вертикали вниз.
+                2. Затем поверни и пройди по горизонтали.
+
+                | Клетка | Значение |
+                |--------|----------|
+                | `require-draw` | нужно закрасить |
+                | монетка | собрать |
+                | финиш | завершить уровень |
+
+                Удачи!
+                """,
+            Author = "TheMakarik",
+            Difficulty = Difficulty.VeryEasy,
+            Maps = maps
+        };
+    }
+
+    private static Map CreateLetterMap(int size)
+    {
+        const int cornerRadius = 14;
 
         ObservableCollection<GamePoint> points = [];
-        for (var y = 0; y < height; y++)
+        for (var y = 0; y < size; y++)
         {
-            for (var x = 0; x < width; x++)
-                points.Add(grid[x, y]);
+            for (var x = 0; x < size; x++)
+                points.Add(new GamePoint { X = x, Y = y, RequireDraw = x == 0 || y == 0 });
         }
+
+        points.First(point => point.X == 0 && point.Y == size - 1).IsSpawn = true;
+        points.First(point => point.X == size - 1 && point.Y == 0).IsGoal = true;
+
+        // Сплошная стена буквой Г: колонка 1 (снизу оставлен проход) + строка 1.
+        for (var y = 1; y < size - 1; y++)
+            points.First(point => point.X == 1 && point.Y == y).WallType = WallType.Full;
+
+        for (var x = 2; x < size; x++)
+            points.First(point => point.X == x && point.Y == 1).WallType = WallType.Full;
+
+        // Монетки в скрытой комнате за стеной (закраска там не требуется).
+        points.First(point => point.X == size - 1 && point.Y == size - 1).HasCoin = true;
+        if (size > 3)
+            points.First(point => point.X == 2 && point.Y == 2).HasCoin = true;
+
+        // На большой карте — боковая стеночка между монетками.
+        if (size > 4)
+            points.First(point => point.X == 3 && point.Y == 3).WallType = WallType.BottomRight;
+
+        // Немного скруглить внешние углы карты.
+        points.First(point => point.X == 0 && point.Y == 0).CustomBorderRadiusLeftTop = cornerRadius;
+        points.First(point => point.X == size - 1 && point.Y == 0).CustomBorderRadiusRightTop = cornerRadius;
+        points.First(point => point.X == 0 && point.Y == size - 1).CustomBorderRadiusLeftBottom = cornerRadius;
+        points.First(point => point.X == size - 1 && point.Y == size - 1).CustomBorderRadiusRightBottom = cornerRadius;
 
         return new Map
         {
-            Width = width,
-            Height = height,
+            Width = size,
+            Height = size,
             Points = points
         };
     }
@@ -501,6 +571,19 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     [ReactiveCommand]
+    private void SelectMap(MapNumberItem item)
+    {
+        var index = item.Number - 1;
+        if (index < 0 || index >= CurrentGame.Maps.Count)
+            return;
+
+        CurrentMap = CurrentGame.Maps[index];
+
+        foreach (var mapNumber in MapNumbers)
+            mapNumber.IsSelected = ReferenceEquals(mapNumber, item);
+    }
+
+    [ReactiveCommand]
     private void ToggleShowSidebar()
     {
         ShowSidebar = !ShowSidebar;
@@ -538,6 +621,7 @@ public partial class MainWindowViewModel : ViewModelBase
             _loadingOptions,
             _themeCatalog,
             _themeCopier,
+            _themeDeleter,
             _pythonFunctionNameValidator,
             _loggerFactory);
         await OpenSettings.Handle(settingsViewModel);

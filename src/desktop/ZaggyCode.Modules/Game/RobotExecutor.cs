@@ -1,3 +1,5 @@
+using System.Drawing;
+
 namespace ZaggyCode.Modules.Game;
 
 public sealed class RobotExecutor : IRobotExecutor
@@ -13,6 +15,7 @@ public sealed class RobotExecutor : IRobotExecutor
         Debug.Assert(_robotRobotGamePoint is { X: >= 0, Y: >= 0 });
     }
 
+    public Func<bool, Point>? CheckThatCellFilled { get; set; }
     public EventHandler<RobotPointUpdatedEventArgs>? RobotPointUpdated { get; set; }
     public EventHandler<RobotDeadEventArgs>? RobotDied { get; set; }
     public EventHandler<DrawPointEventArgs>? DrawPoint { get; set; }

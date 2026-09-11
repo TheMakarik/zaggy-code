@@ -64,7 +64,7 @@ public sealed class RobotGameEngine(
 
     public async Task RunCodeAsync(string code, CancellationToken token)
     {
-        throw new NotImplementedException();
+        await _languageRunner.ExecuteAsync(code, token);
     }
 
     private void SetValue<T>(out T target, T value)

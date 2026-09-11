@@ -76,6 +76,7 @@ public sealed class Bootstrapper
             .AddOptions<CSharpDefaultSettingsOptions>()
             .AddOptions<MapAssetsOptions>()
             .AddOptions<ZaggyAssetsOptions>()
+            .AddOptions<MapAnimationOptions>()
             .AddOptions<PythonValidationOptions>()
             .AddOptions<ThemeOptions>()
             .AddOptions<LoadingOptions>();

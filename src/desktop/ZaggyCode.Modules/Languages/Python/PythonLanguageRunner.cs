@@ -74,7 +74,7 @@ public sealed class PythonLanguageRunner : ILanguageRunner
         token.ThrowIfCancellationRequested();
         _python.Engine.SetTrace(CreateCancellationTrace(token));
 
-        var methods = typeof(IRobotExecutor).GetMethods();
+        var methods = executor.GetMethodsToUseInRobot();
         _logger.LogDebug("Methods for executor: [{methods}]", string.Join(",", methods));
 
         SetExecutorVariables(methods, executor);
@@ -164,7 +164,7 @@ public sealed class PythonLanguageRunner : ILanguageRunner
     private string FormatVariable(string methodInfoName) => ClrRobotExecutorPrefix + methodInfoName;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void SetExecutorVariables(MethodInfo[] methods, IRobotExecutor executor)
+    private void SetExecutorVariables(IReadOnlyCollection<MethodInfo> methods, IRobotExecutor executor)
     {
         foreach (var methodInfo in methods)
         {

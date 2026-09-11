@@ -22,6 +22,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:records="clr-namespace:ZaggyCode.Avalonia.ViewModels.Records"
     xmlns:rxui="http://reactiveui.net"
+    xmlns:userControls="clr-namespace:ZaggyCode.Avalonia.Views.UserControls"
     xmlns:vm="using:ZaggyCode.Avalonia.ViewModels"
     xmlns:vt="using:VirtualTerminal"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
@@ -622,11 +623,9 @@
                             Classes="card"
                             Grid.Column="2"
                             Margin="6,12,12,12">
-							<controls:MapView
+							<userControls:GameControl
 								x:Name="GameMapView"
-								Margin="8"
-								MarginUnits="1,1,1,1"
-								Map="{Binding CurrentMap}"/>
+								Margin="8" />
                         </Border>
                     </Grid>
                 </Grid>
@@ -734,7 +733,8 @@
                     Classes="icon-button"
                     Click="CloseFontSizeToastButton_Click"
                     Content="{materialIcons:MaterialIconExt Kind=Close}"
-                    Grid.Column="1" />
+                    Grid.Column="1"
+                    Margin="5,0,0,0" />
             </Grid>
         </Border>
     </Grid>

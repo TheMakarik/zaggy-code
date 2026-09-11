@@ -1,12 +1,22 @@
 namespace ZaggyCode.Tests.Theming;
 
+using System.Text.Json;
+
 public class ThemeCopierTests : IDisposable
 {
     private readonly TestFileSystem _fileSystem = new();
     private readonly IOptions<ThemeOptions> _themeOptions;
+    private readonly IOptions<MetadataOptions> _metadataOptions;
+    private readonly IOptions<TempOptions> _tempOptions;
+    private readonly TarBZip2ArchiveReader _reader;
+    private readonly TarBZip2ArchiveCompressor _compressor;
 
     public ThemeCopierTests()
     {
+        var metadataOptions = new MetadataOptions { MetadataFile = "meta.json" };
+        _metadataOptions = A.Fake<IOptions<MetadataOptions>>();
+        A.CallTo(() => _metadataOptions.Value).Returns(metadataOptions);
+
         _themeOptions = A.Fake<IOptions<ThemeOptions>>();
         A.CallTo(() => _themeOptions.Value).Returns(new ThemeOptions
         {
@@ -15,15 +25,22 @@ public class ThemeCopierTests : IDisposable
             SystemThemesFolder = _fileSystem.CreateDirectory(),
             ExternThemesFolder = _fileSystem.CreateDirectory()
         });
+
+        _tempOptions = CreateTempOptions();
+        _reader = new TarBZip2ArchiveReader(
+            A.Dummy<ILogger<TarBZip2ArchiveReader>>(),
+            new MetadataParser(_metadataOptions),
+            _tempOptions);
+        _compressor = new TarBZip2ArchiveCompressor(
+            A.Dummy<ILogger<TarBZip2ArchiveCompressor>>(),
+            _tempOptions);
     }
 
     [Fact]
-    public async Task CopyThemeAsync_WhenSourceExists_CopiesToExternFolderAndReturnsPath()
+    public async Task CopyThemeAsync_WhenSourceExists_CopiesToExternFolderWithDistinctName()
     {
         // Arrange
-        var sourcePath = _fileSystem.CreateFile(".zct");
-        var sourceContent = "archive-content";
-        File.WriteAllText(sourcePath, sourceContent);
+        var sourcePath = await CreateArchiveAsync("Primus", _themeOptions.Value.SystemThemesFolder);
         var theme = CreateMetadata("Primus", sourcePath);
         var systemUnderTests = CreateSystemUnderTests();
 
@@ -32,17 +49,17 @@ public class ThemeCopierTests : IDisposable
 
         // Assert
         copiedPath.Should().Be(Path.Join(_themeOptions.Value.ExternThemesFolder, "Primus - копия.zct"));
+        var copiedMetadata = await _reader.ReadMetadataAsync<ThemeMetadata>(copiedPath);
         File.Exists(copiedPath).Should().BeTrue();
-        File.ReadAllText(copiedPath).Should().Be(sourceContent);
+        copiedMetadata!.Name.Should().Be("Primus - копия");
     }
 
     [Fact]
     public async Task CopyThemeAsync_WhenCopyNameAlreadyExists_AddsSequentialNumber()
     {
         // Arrange
-        var sourcePath = _fileSystem.CreateFile(".zct");
-        var existingCopy = Path.Join(_themeOptions.Value.ExternThemesFolder, "Primus - копия.zct");
-        File.WriteAllText(existingCopy, "existing");
+        var sourcePath = await CreateArchiveAsync("Primus", _themeOptions.Value.SystemThemesFolder);
+        await CreateArchiveAsync("Primus - копия", _themeOptions.Value.ExternThemesFolder);
         var theme = CreateMetadata("Primus", sourcePath);
         var systemUnderTests = CreateSystemUnderTests();
 
@@ -51,16 +68,17 @@ public class ThemeCopierTests : IDisposable
 
         // Assert
         copiedPath.Should().Be(Path.Join(_themeOptions.Value.ExternThemesFolder, "Primus - копия (1).zct"));
-        File.Exists(copiedPath).Should().BeTrue();
+        var copiedMetadata = await _reader.ReadMetadataAsync<ThemeMetadata>(copiedPath);
+        copiedMetadata!.Name.Should().Be("Primus - копия (1)");
     }
 
     [Fact]
     public async Task CopyThemeAsync_WhenMultipleCopiesExist_AddsNextNumber()
     {
         // Arrange
-        var sourcePath = _fileSystem.CreateFile(".zct");
-        File.WriteAllText(Path.Join(_themeOptions.Value.ExternThemesFolder, "Primus - копия.zct"), "a");
-        File.WriteAllText(Path.Join(_themeOptions.Value.ExternThemesFolder, "Primus - копия (1).zct"), "b");
+        var sourcePath = await CreateArchiveAsync("Primus", _themeOptions.Value.SystemThemesFolder);
+        await CreateArchiveAsync("Primus - копия", _themeOptions.Value.ExternThemesFolder);
+        await CreateArchiveAsync("Primus - копия (1)", _themeOptions.Value.ExternThemesFolder);
         var theme = CreateMetadata("Primus", sourcePath);
         var systemUnderTests = CreateSystemUnderTests();
 
@@ -87,7 +105,30 @@ public class ThemeCopierTests : IDisposable
 
     private ThemeCopier CreateSystemUnderTests()
     {
-        return new ThemeCopier(A.Dummy<ILogger<ThemeCopier>>(), _themeOptions);
+        return new ThemeCopier(
+            A.Dummy<ILogger<ThemeCopier>>(),
+            _reader,
+            _compressor,
+            new TempFolderProvider(_tempOptions),
+            _themeOptions,
+            _metadataOptions);
+    }
+
+    private async Task<string> CreateArchiveAsync(string name, string folder)
+    {
+        var stagingDirectory = Path.Join(_tempOptions.Value.TempToCompress, Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(stagingDirectory);
+
+        await using (var metadataStream = File.Create(Path.Join(stagingDirectory, "meta.json")))
+        {
+            await JsonSerializer.SerializeAsync(metadataStream, CreateMetadata(name, string.Empty));
+        }
+
+        await File.WriteAllTextAsync(Path.Join(stagingDirectory, "theme.xml"), "<theme/>");
+
+        var archivePath = Path.Join(folder, $"{name}.zct");
+        await _compressor.CompressAsync(archivePath, stagingDirectory);
+        return archivePath;
     }
 
     private static ThemeMetadata CreateMetadata(string name, string path) => new()
@@ -104,6 +145,20 @@ public class ThemeCopierTests : IDisposable
         ForegroundColor = "#161616",
         Path = path
     };
+
+    private IOptions<TempOptions> CreateTempOptions()    {
+        var tempBase = _fileSystem.CreateDirectory();
+        var options = new TempOptions
+        {
+            TempDirectoryPath = Path.Join(tempBase, "temp"),
+            TempToCompress = Path.Join(tempBase, "to-compress"),
+            TempFromCompress = Path.Join(tempBase, "from-compress")
+        };
+
+        var fake = A.Fake<IOptions<TempOptions>>();
+        A.CallTo(() => fake.Value).Returns(options);
+        return fake;
+    }
 
     public void Dispose()
     {

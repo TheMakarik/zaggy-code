@@ -33,6 +33,7 @@ public sealed partial class SettingsViewModel : ViewModelBase
         IOptions<LoadingOptions> loadingOptions,
         IThemeCatalog themeCatalog,
         IThemeCopier themeCopier,
+        IThemeDeleter themeDeleter,
         IPythonFunctionNameValidator pythonFunctionNameValidator,
         ILoggerFactory loggerFactory)
     {
@@ -49,6 +50,7 @@ public sealed partial class SettingsViewModel : ViewModelBase
             loadingOptions,
             themeCatalog,
             themeCopier,
+            themeDeleter,
             loggerFactory.CreateLogger<AppearanceSettingsViewModel>());
         PythonSettings = new PythonSettingsViewModel(
             pythonSettingsStorage,
@@ -85,6 +87,8 @@ public sealed partial class SettingsViewModel : ViewModelBase
         _logger.LogInformation("Saving settings");
 
         var current = _userStorage.Current;
+        var codeFontSizeChanged = current.CodeFontSize != AppearanceSettings.CodeFontSize;
+        var terminalFontSizeChanged = current.TerminalFontSize != AppearanceSettings.TerminalFontSize;
         current.CodeFontSize = AppearanceSettings.CodeFontSize;
         current.TerminalFontSize = AppearanceSettings.TerminalFontSize;
         current.UseSystemTitleBar = AppearanceSettings.UseSystemTitleBar;
@@ -112,8 +116,10 @@ public sealed partial class SettingsViewModel : ViewModelBase
         MessageBus.Current.SendMessage(new EnableCodeHighlightingChangedMessage(AppearanceSettings.EnableCodeHighlighting));
         MessageBus.Current.SendMessage(new ShowCodeLineNumbersChangedMessage(AppearanceSettings.ShowCodeLineNumbers));
         MessageBus.Current.SendMessage(new AppThemeChangedMessage(AppearanceSettings.SelectedAppTheme));
-        MessageBus.Current.SendMessage(new FontSizeToastMessage("редактора", AppearanceSettings.CodeFontSize));
-        MessageBus.Current.SendMessage(new FontSizeToastMessage("терминала", AppearanceSettings.TerminalFontSize));
+        if (codeFontSizeChanged)
+            MessageBus.Current.SendMessage(new FontSizeToastMessage("редактора", AppearanceSettings.CodeFontSize));
+        if (terminalFontSizeChanged)
+            MessageBus.Current.SendMessage(new FontSizeToastMessage("терминала", AppearanceSettings.TerminalFontSize));
 
         AppearanceSettings.AcceptChanges();
         PythonSettings.AcceptChanges();

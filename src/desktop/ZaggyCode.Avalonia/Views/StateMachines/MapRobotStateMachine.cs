@@ -5,7 +5,7 @@ namespace ZaggyCode.Avalonia.Views.StateMachines;
 public sealed class MapRobotStateMachine
 {
     private readonly Lock _stateLock = new();
-    private readonly HashSet<Cell> _painted = [];
+    private readonly HashSet<System.Drawing.Point> _drawn = [];
     private readonly HashSet<Cell> _collected = [];
 
     private Map? _map;
@@ -35,6 +35,9 @@ public sealed class MapRobotStateMachine
         return _cells[cell.Column, cell.Row];
     }
 
+    public GamePoint GetOrCreateCell(int column, int row)
+        => GetOrCreatePoint(new Cell(column, row));
+
     public void SetMap(Map? map)
     {
         _map = map;
@@ -48,7 +51,7 @@ public sealed class MapRobotStateMachine
 
         lock (_stateLock)
         {
-            _painted.Clear();
+            _drawn.Clear();
             _collected.Clear();
         }
 
@@ -71,10 +74,10 @@ public sealed class MapRobotStateMachine
         StateChanged?.Invoke(this, EventArgs.Empty);
     }
 
-    public bool IsPainted(int column, int row)
+    public bool IsDrawn(int column, int row)
     {
         lock (_stateLock)
-            return _painted.Contains(new Cell(column, row));
+            return _drawn.Contains(new System.Drawing.Point(column, row));
     }
 
     public bool IsCollected(int column, int row)
@@ -158,15 +161,15 @@ public sealed class MapRobotStateMachine
         StateChanged?.Invoke(this, EventArgs.Empty);
     }
 
-    public void ClearPainted()
+    public void ClearDrawn()
     {
         lock (_stateLock)
-            _painted.Clear();
+            _drawn.Clear();
 
         StateChanged?.Invoke(this, EventArgs.Empty);
     }
 
-    public void SetPainted(int column, int row, bool painted)
+    public void SetDrawn(int column, int row, bool drawn)
     {
         var cell = new Cell(column, row);
         if (!IsWithinBounds(cell))
@@ -174,10 +177,10 @@ public sealed class MapRobotStateMachine
 
         lock (_stateLock)
         {
-            if (painted)
-                _painted.Add(cell);
+            if (drawn)
+                _drawn.Add(new System.Drawing.Point(column, row));
             else
-                _painted.Remove(cell);
+                _drawn.Remove(new System.Drawing.Point(column, row));
         }
 
         StateChanged?.Invoke(this, EventArgs.Empty);
@@ -222,8 +225,8 @@ public sealed class MapRobotStateMachine
 
     private void Rebuild()
     {
+        _drawn.Clear();
         _collected.Clear();
-        _painted.Clear();
 
         var map = _map;
         if (map is null)

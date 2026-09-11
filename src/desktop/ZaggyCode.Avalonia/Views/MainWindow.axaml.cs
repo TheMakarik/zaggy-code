@@ -1,3 +1,5 @@
+using Avalonia.Input.Platform;
+
 namespace ZaggyCode.Avalonia.Views;
 
 public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
@@ -39,7 +41,11 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         Terminal.CurrentSession = _terminalSession;
 
         MessageBus.Current.Listen<AppThemeChangedMessage>()
-            .Subscribe(message => Dispatcher.UIThread.Post(() => _ = ApplyAppThemeAsync(message.ThemeName)));
+            .Subscribe(message => Dispatcher.UIThread.Post(() =>
+            {
+                _ = ApplyAppThemeAsync(message.ThemeName);
+                GameMapView.InvalidateVisual();
+            }));
 
         var backspaceGesture = new KeyGesture(Key.Back);
         DeleteSelectionMenuItem.InputGesture = backspaceGesture;

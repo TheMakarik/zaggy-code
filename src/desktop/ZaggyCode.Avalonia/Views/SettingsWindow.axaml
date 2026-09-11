@@ -186,17 +186,29 @@
                         Spacing="10">
                         <Button
                             Classes="settings-footer-button"
-                            Command="{Binding ResetToDefaultsCommand}"
-                            Content="Сбросить все" />
+                            Command="{Binding ResetToDefaultsCommand}">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <materialIcons:MaterialIcon Kind="Restart" />
+                                <TextBlock Text="Сбросить все" />
+                            </StackPanel>
+                        </Button>
                         <Button
                             Classes="settings-footer-button"
-                            Command="{Binding CancelSettingsCommand}"
-                            Content="Отмена" />
+                            Command="{Binding CancelSettingsCommand}">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <materialIcons:MaterialIcon Kind="Close" />
+                                <TextBlock Text="Отмена" />
+                            </StackPanel>
+                        </Button>
                         <Button
                             Classes="settings-footer-button primary-action"
                             Command="{Binding SaveSettingsCommand}"
-                            Content="Сохранить"
-                            IsEnabled="{Binding HasChangesAndPythonSettingsValid}" />
+                            IsEnabled="{Binding HasChangesAndPythonSettingsValid}">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <materialIcons:MaterialIcon Kind="ContentSave" />
+                                <TextBlock Text="Сохранить" />
+                            </StackPanel>
+                        </Button>
                     </StackPanel>
                 </Border>
             </Grid>

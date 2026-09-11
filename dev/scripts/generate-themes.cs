@@ -57,7 +57,9 @@ Theme CreateTheme(
     string terminalBackground, string terminalForeground,
     string sidebar,
     string systemAccent, string systemAccentLight1, string systemAccentDark1,
-    string mapWall, string mapPointBorder, string mapPointBackground) => new()
+    string mapWall, string mapPointBorder, string mapPointBackground,
+    string mapSea, string mapGrass, string mapGrassDark, string mapCoin, string mapPainted,
+    string mapRequireDraw, string goalColor1, string goalColor2) => new()
 {
     BackgroundColor = background,
     BackgroundSecondaryColor = backgroundSecondary,
@@ -87,7 +89,15 @@ Theme CreateTheme(
     SystemAccentColorDark1 = systemAccentDark1,
     MapWallColor = mapWall,
     MapPointBorderColor = mapPointBorder,
-    MapPointBackgroundColor = mapPointBackground
+    MapPointBackgroundColor = mapPointBackground,
+    MapSeaColor = mapSea,
+    MapGrassColor = mapGrass,
+    MapGrassDarkColor = mapGrassDark,
+    MapCoinColor = mapCoin,
+    MapPaintedColor = mapPainted,
+    MapRequireDrawColor = mapRequireDraw,
+    GoalColor1 = goalColor1,
+    GoalColor2 = goalColor2
 };
 
 ThemeMetadata CreateMetadata(string name, string description, Theme theme) => new()
@@ -115,7 +125,10 @@ var primus = CreateTheme(
     terminalBackground: "#1A1A1A", terminalForeground: "#F0F0F0",
     sidebar: "#242424",
     systemAccent: "#8A9A7A", systemAccentLight1: "#A8BC9A", systemAccentDark1: "#6A7A5A",
-    mapWall: "#8A8F96", mapPointBorder: "#F0F0F0", mapPointBackground: "#383838");
+    mapWall: "#8A8F96", mapPointBorder: "#8A9A7A", mapPointBackground: "#383838",
+    mapSea: "#E6E6E6", mapGrass: "#4E6E4E", mapGrassDark: "#455F45", mapCoin: "#F2C14E", mapPainted: "#73F2C14E",
+    mapRequireDraw: "#8A9A7A",
+    goalColor1: "#000000", goalColor2: "#FFFFFF");
 
 var tero = CreateTheme(
     background: "#2B211B", backgroundSecondary: "#352922", surface: "#403329", surfaceLight: "#4C3D30", surfaceHover: "#594838",
@@ -127,7 +140,10 @@ var tero = CreateTheme(
     terminalBackground: "#261E18", terminalForeground: "#F2E9DF",
     sidebar: "#352922",
     systemAccent: "#C97B4A", systemAccentLight1: "#E09A6A", systemAccentDark1: "#A05E36",
-    mapWall: "#7A6650", mapPointBorder: "#F2E9DF", mapPointBackground: "#4C3D30");
+    mapWall: "#7A6650", mapPointBorder: "#C97B4A", mapPointBackground: "#4C3D30",
+    mapSea: "#1E1612", mapGrass: "#6B4A3A", mapGrassDark: "#5A3E30", mapCoin: "#D9A441", mapPainted: "#73D9A441",
+    mapRequireDraw: "#C97B4A",
+    goalColor1: "#000000", goalColor2: "#FFFFFF");
 
 var viola = CreateTheme(
     background: "#232130", backgroundSecondary: "#2A2839", surface: "#322F44", surfaceLight: "#3B3850", surfaceHover: "#45415E",
@@ -139,7 +155,10 @@ var viola = CreateTheme(
     terminalBackground: "#201E2C", terminalForeground: "#EDEAF5",
     sidebar: "#2A2839",
     systemAccent: "#9B84D9", systemAccentLight1: "#B7A5E8", systemAccentDark1: "#7A63B8",
-    mapWall: "#6E6890", mapPointBorder: "#EDEAF5", mapPointBackground: "#45415E");
+    mapWall: "#6E6890", mapPointBorder: "#9B84D9", mapPointBackground: "#45415E",
+    mapSea: "#1A1A24", mapGrass: "#4C4A66", mapGrassDark: "#3E3C58", mapCoin: "#E0B458", mapPainted: "#73E0B458",
+    mapRequireDraw: "#9B84D9",
+    goalColor1: "#000000", goalColor2: "#FFFFFF");
 
 var brilla = CreateTheme(
     background: "#12262B", backgroundSecondary: "#17343B", surface: "#1D424B", surfaceLight: "#255059", surfaceHover: "#2D5F6A",
@@ -151,7 +170,10 @@ var brilla = CreateTheme(
     terminalBackground: "#12262B", terminalForeground: "#EFF7F8",
     sidebar: "#17343B",
     systemAccent: "#17A2B8", systemAccentLight1: "#37BDD2", systemAccentDark1: "#106E7D",
-    mapWall: "#106E7D", mapPointBorder: "#EFF7F8", mapPointBackground: "#255059");
+    mapWall: "#B59664", mapPointBorder: "#B59664", mapPointBackground: "#255059",
+    mapSea: "#0E2126", mapGrass: "#1D424B", mapGrassDark: "#16343B", mapCoin: "#E8B840", mapPainted: "#73E8B840",
+    mapRequireDraw: "#B59664",
+    goalColor1: "#000000", goalColor2: "#FFFFFF");
 
 (string Name, string Description, Theme Theme)[] themes =
 [
