@@ -5,6 +5,7 @@ public partial class AboutWindow : Window
     public AboutWindow()
     {
         InitializeComponent();
+        this.ApplyThemeDecorations();
 
         DataContext = App.Services.GetRequiredService<AboutViewModel>();
 

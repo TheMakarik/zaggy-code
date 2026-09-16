@@ -4,7 +4,8 @@ public sealed class ThemeApplier(
     ILogger<ThemeApplier> logger,
     IThemeCatalog themeCatalog,
     IThemeSetterProxy themeSetterProxy,
-    IObservableStorage<UserData> userStorage) : IThemeApplier
+    IObservableStorage<UserData> userStorage,
+    IObservableStorage<ThemeSettings> themeSettingsStorage) : IThemeApplier
 {
     private const string FallbackThemeName = "Primus";
     private const string ColorSuffix = "Color";
@@ -16,7 +17,7 @@ public sealed class ThemeApplier(
             .ToArray();
 
     public async Task ApplySavedThemeAsync()
-        => await ApplyThemeAsync(userStorage.Current.CurrentTheme);
+        => await ApplyThemeAsync(themeSettingsStorage.Current.CurrentTheme);
 
     public async Task ApplyThemeAsync(string name)
     {
@@ -47,7 +48,7 @@ public sealed class ThemeApplier(
 
         logger.LogWarning("Theme {name} was not found, falling back to {fallback}", name, FallbackThemeName);
 
-        userStorage.Current.CurrentTheme = FallbackThemeName;
+        themeSettingsStorage.Current.CurrentTheme = FallbackThemeName;
         await ShowThemeNotFoundDialogAsync(name);
 
         return await themeCatalog.LoadThemeAsync(FallbackThemeName);

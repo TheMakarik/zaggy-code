@@ -37,15 +37,11 @@
 
     <Color x:Key="MapWallColor">#8A8F96</Color>
     <Color x:Key="MapPointBorderColor">#8A9A7A</Color>
-    <Color x:Key="MapPointBackgroundColor">#383838</Color>
 
     <Color x:Key="GoalColor1Color">#000000</Color>
     <Color x:Key="GoalColor2Color">#FFFFFF</Color>
 
     <Color x:Key="MapSeaColor">#1A2733</Color>
-    <Color x:Key="MapGrassColor">#4E6E4E</Color>
-    <Color x:Key="MapGrassDarkColor">#455F45</Color>
-    <Color x:Key="MapCoinColor">#F2C14E</Color>
     <Color x:Key="MapPaintedColor">#73F2C14E</Color>
     <Color x:Key="MapRequireDrawColor">#8A9A7A</Color>
 
@@ -86,15 +82,11 @@
 
     <SolidColorBrush Color="{DynamicResource MapWallColor}" x:Key="MapWallBrush" />
     <SolidColorBrush Color="{DynamicResource MapPointBorderColor}" x:Key="MapPointBorderBrush" />
-    <SolidColorBrush Color="{DynamicResource MapPointBackgroundColor}" x:Key="MapPointBackgroundBrush" />
 
     <SolidColorBrush Color="{DynamicResource GoalColor1Color}" x:Key="GoalColor1Brush" />
     <SolidColorBrush Color="{DynamicResource GoalColor2Color}" x:Key="GoalColor2Brush" />
 
     <SolidColorBrush Color="{DynamicResource MapSeaColor}" x:Key="MapSeaBrush" />
-    <SolidColorBrush Color="{DynamicResource MapGrassColor}" x:Key="MapGrassBrush" />
-    <SolidColorBrush Color="{DynamicResource MapGrassDarkColor}" x:Key="MapGrassDarkBrush" />
-    <SolidColorBrush Color="{DynamicResource MapCoinColor}" x:Key="MapCoinBrush" />
     <SolidColorBrush Color="{DynamicResource MapPaintedColor}" x:Key="MapPaintedBrush" />
     <SolidColorBrush Color="{DynamicResource MapRequireDrawColor}" x:Key="MapRequireDrawBrush" />
 

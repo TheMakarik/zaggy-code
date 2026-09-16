@@ -1,0 +1,59 @@
+<Window
+    Background="{DynamicResource BackgroundBrush}"
+    BorderBrush="{DynamicResource ForegroundBrush}"
+    BorderThickness="1"
+    CanResize="False"
+    Foreground="{DynamicResource ForegroundBrush}"
+    ShowInTaskbar="False"
+    SizeToContent="Height"
+    Title="Новая тема"
+    Width="400"
+    WindowStartupLocation="CenterOwner"
+    x:Class="ZaggyCode.Avalonia.Views.Dialogs.AddThemeWindow"
+    x:DataType="vm:AddThemeViewModel"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:controls="clr-namespace:ZaggyCode.Avalonia.Views.Controls"
+    xmlns:vm="using:ZaggyCode.Avalonia.ViewModels"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Grid RowDefinitions="Auto,Auto">
+        <controls:DialogTitleBar
+            Grid.Row="0"
+            Name="CustomTitleBar"
+            Title="Новая тема" />
+
+        <StackPanel
+            Grid.Row="1"
+            Margin="24"
+            Spacing="14">
+            <controls:SvgFromContent
+                Height="96"
+                HorizontalAlignment="Center"
+                Path="{Binding ZaggyQuestionPath}"
+                Width="96" />
+
+            <TextBlock
+                HorizontalAlignment="Center"
+                Text="Введите название новой темы" />
+
+            <TextBox
+                Name="ThemeNameBox"
+                PlaceholderText="Название темы"
+                Text="{Binding ThemeName, Mode=TwoWay}" />
+
+            <StackPanel
+                HorizontalAlignment="Right"
+                Orientation="Horizontal"
+                Spacing="10">
+                <Button
+                    Command="{Binding CancelCommand}"
+                    Content="Отмена"
+                    IsCancel="True" />
+                <Button
+                    Command="{Binding ConfirmCommand}"
+                    Content="Создать"
+                    IsDefault="True" />
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</Window>

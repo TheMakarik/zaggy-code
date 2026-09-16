@@ -23,9 +23,11 @@ public sealed partial class SettingsViewModel : ViewModelBase
 
     public SettingsViewModel(
         IObservableStorage<UserData> userStorage,
+        IObservableStorage<ThemeSettings> themeSettingsStorage,
         IObservableStorage<PythonSettings> pythonSettingsStorage,
         IObservableStorage<CSharpSettings> csharpSettingsStorage,
         IOptions<DefaultUser> defaultUserOptions,
+        IOptions<DefaultThemeSettings> defaultThemeSettingsOptions,
         IOptions<PythonDefaultSettingsOptions> pythonDefaultSettingsOptions,
         IOptions<CSharpDefaultSettingsOptions> csharpDefaultSettingsOptions,
         IOptions<CodeExamplePathOptions> codeExamplePathOptions,
@@ -34,6 +36,10 @@ public sealed partial class SettingsViewModel : ViewModelBase
         IThemeCatalog themeCatalog,
         IThemeCopier themeCopier,
         IThemeDeleter themeDeleter,
+        IThemeEditorService themeEditor,
+        IThemeCreator themeCreator,
+        IOptions<ThemeOptions> themeOptions,
+        IOptions<ZaggyAssetsOptions> zaggyAssets,
         IPythonFunctionNameValidator pythonFunctionNameValidator,
         ILoggerFactory loggerFactory)
     {
@@ -44,13 +50,19 @@ public sealed partial class SettingsViewModel : ViewModelBase
 
         AppearanceSettings = new AppearanceSettingsViewModel(
             userStorage,
+            themeSettingsStorage,
             defaultUserOptions,
+            defaultThemeSettingsOptions,
             codeExamplePathOptions,
             fontSizeOptions,
             loadingOptions,
             themeCatalog,
             themeCopier,
             themeDeleter,
+            themeEditor,
+            themeCreator,
+            themeOptions,
+            zaggyAssets,
             loggerFactory.CreateLogger<AppearanceSettingsViewModel>());
         PythonSettings = new PythonSettingsViewModel(
             pythonSettingsStorage,
@@ -96,7 +108,6 @@ public sealed partial class SettingsViewModel : ViewModelBase
         current.CodeTheme = AppearanceSettings.SelectedCodeTheme;
         current.EnableCodeHighlighting = AppearanceSettings.EnableCodeHighlighting;
         current.ShowCodeLineNumbers = AppearanceSettings.ShowCodeLineNumbers;
-        current.CurrentTheme = AppearanceSettings.SelectedAppTheme;
 
         var pythonCurrent = _pythonSettingsStorage.Current;
         pythonCurrent.UseEntryFunction = PythonSettings.UseEntryFunction;

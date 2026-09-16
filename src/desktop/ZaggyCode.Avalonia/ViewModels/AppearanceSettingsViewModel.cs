@@ -10,6 +10,7 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
     [Reactive] private bool _showSidebar;
     [Reactive] private string _selectedCodeTheme = string.Empty;
     [Reactive] private string _selectedAppTheme = string.Empty;
+    [Reactive] private ThemeCreationBehavior _themeCreationBehavior;
     [Reactive] private bool _isLoadingThemes = true;
     [Reactive] private bool _enableCodeHighlighting;
     [Reactive] private bool _showCodeLineNumbers;
@@ -24,9 +25,15 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
     private readonly FontSizeOptions _fontSizeOptions;
     private readonly UserData _defaultUserData;
     private readonly IObservableStorage<UserData> _userStorage;
+    private readonly IObservableStorage<ThemeSettings> _themeSettingsStorage;
+    private readonly ThemeSettings _defaultThemeSettings;
     private readonly IThemeCatalog _themeCatalog;
     private readonly IThemeCopier _themeCopier;
     private readonly IThemeDeleter _themeDeleter;
+    private readonly IThemeEditorService _themeEditor;
+    private readonly IThemeCreator _themeCreator;
+    private readonly ThemeOptions _themeOptions;
+    private readonly string _zaggyQuestionPath;
     private readonly ILogger<AppearanceSettingsViewModel> _logger;
     private int _originalCodeFontSize;
     private int _originalTerminalFontSize;
@@ -34,6 +41,7 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
     private bool _originalShowSidebar;
     private string _originalCodeTheme = string.Empty;
     private string _originalSelectedAppTheme = string.Empty;
+    private ThemeCreationBehavior _originalThemeCreationBehavior;
     private bool _originalEnableCodeHighlighting;
     private bool _originalShowCodeLineNumbers;
 
@@ -43,27 +51,42 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
 
     public ObservableCollection<CodeThemeItem> AvailableCodeThemes { get; } = [];
     public ObservableCollection<ThemeMetadataItem> AvailableAppThemes { get; } = [];
+    public IReadOnlyList<ThemeCreationBehavior> ThemeCreationBehaviorValues { get; } = Enum.GetValues<ThemeCreationBehavior>();
     public Interaction<string, string> ApplyCodeThemeInteraction { get; } = new();
+    public Interaction<ThemeEditorViewModel, Unit> OpenThemeEditor { get; } = new();
+    public Interaction<AddThemeViewModel, string?> OpenAddTheme { get; } = new();
     public string CSharpExamplePath { get; }
     public string PythonExamplePath { get; }
 
     public AppearanceSettingsViewModel(
         IObservableStorage<UserData> userStorage,
+        IObservableStorage<ThemeSettings> themeSettingsStorage,
         IOptions<DefaultUser> defaultUserOptions,
+        IOptions<DefaultThemeSettings> defaultThemeSettingsOptions,
         IOptions<CodeExamplePathOptions> codeExamplePathOptions,
         IOptions<FontSizeOptions> fontSizeOptions,
         IOptions<LoadingOptions> loadingOptions,
         IThemeCatalog themeCatalog,
         IThemeCopier themeCopier,
         IThemeDeleter themeDeleter,
+        IThemeEditorService themeEditor,
+        IThemeCreator themeCreator,
+        IOptions<ThemeOptions> themeOptions,
+        IOptions<ZaggyAssetsOptions> zaggyAssets,
         ILogger<AppearanceSettingsViewModel> logger)
     {
         _fontSizeOptions = fontSizeOptions.Value;
         _defaultUserData = defaultUserOptions.Value.User;
         _userStorage = userStorage;
+        _themeSettingsStorage = themeSettingsStorage;
+        _defaultThemeSettings = defaultThemeSettingsOptions.Value.Settings;
         _themeCatalog = themeCatalog;
         _themeCopier = themeCopier;
         _themeDeleter = themeDeleter;
+        _themeEditor = themeEditor;
+        _themeCreator = themeCreator;
+        _themeOptions = themeOptions.Value;
+        _zaggyQuestionPath = zaggyAssets.Value.EmotionQuestion;
         _logger = logger;
         LoadingDotsMaxCount = loadingOptions.Value.LoadingDotsMaxCount;
         CSharpExamplePath = codeExamplePathOptions.Value.CSharpExamplePath;
@@ -75,7 +98,8 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
         _originalUseSystemTitleBar = current.UseSystemTitleBar;
         _originalShowSidebar = current.ShowSidebar;
         _originalCodeTheme = current.CodeTheme;
-        _originalSelectedAppTheme = current.CurrentTheme;
+        _originalSelectedAppTheme = themeSettingsStorage.Current.CurrentTheme;
+        _originalThemeCreationBehavior = themeSettingsStorage.Current.OnCreateBehavior;
         _originalEnableCodeHighlighting = current.EnableCodeHighlighting;
         _originalShowCodeLineNumbers = current.ShowCodeLineNumbers;
 
@@ -84,6 +108,7 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
 #pragma warning restore AsyncVoidMethod
 
         LoadFromUserData(current);
+        ThemeCreationBehavior = themeSettingsStorage.Current.OnCreateBehavior;
         HasChanges = false;
 
         InitializeMessageBusSubscriptions();
@@ -95,6 +120,7 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
                 nameof(ShowSidebar),
                 nameof(SelectedCodeTheme),
                 nameof(SelectedAppTheme),
+                nameof(ThemeCreationBehavior),
                 nameof(EnableCodeHighlighting),
                 nameof(ShowCodeLineNumbers))
             .Subscribe(_ => UpdateHasChanges());
@@ -128,8 +154,9 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
         SelectedCodeTheme = _defaultUserData.CodeTheme;
         EnableCodeHighlighting = _defaultUserData.EnableCodeHighlighting;
         ShowCodeLineNumbers = _defaultUserData.ShowCodeLineNumbers;
+        ThemeCreationBehavior = _defaultThemeSettings.OnCreateBehavior;
 
-        ApplyAppThemeSelection(_defaultUserData.CurrentTheme);
+        ApplyAppThemeSelection(_defaultThemeSettings.CurrentTheme);
     }
 
     public void AcceptChanges()
@@ -140,8 +167,13 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
         _originalShowSidebar = ShowSidebar;
         _originalCodeTheme = SelectedCodeTheme;
         _originalSelectedAppTheme = SelectedAppTheme;
+        _originalThemeCreationBehavior = ThemeCreationBehavior;
         _originalEnableCodeHighlighting = EnableCodeHighlighting;
         _originalShowCodeLineNumbers = ShowCodeLineNumbers;
+
+        _themeSettingsStorage.Current.CurrentTheme = SelectedAppTheme;
+        _themeSettingsStorage.Current.OnCreateBehavior = ThemeCreationBehavior;
+
         HasChanges = false;
     }
 
@@ -165,6 +197,7 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
             ShowSidebar != _originalShowSidebar ||
             SelectedCodeTheme != _originalCodeTheme ||
             SelectedAppTheme != _originalSelectedAppTheme ||
+            ThemeCreationBehavior != _originalThemeCreationBehavior ||
             EnableCodeHighlighting != _originalEnableCodeHighlighting ||
             ShowCodeLineNumbers != _originalShowCodeLineNumbers;
     }
@@ -205,6 +238,7 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
     {
         MessageBus.Current.SendMessage(new AppThemeChangedMessage(_originalSelectedAppTheme));
         SelectedAppTheme = _originalSelectedAppTheme;
+        ThemeCreationBehavior = _originalThemeCreationBehavior;
     }
 
     private async Task InitializeAvailableAppThemesAsync()
@@ -251,8 +285,11 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
             AvailableAppThemes.Add(item);
         }
 
-        var saved = _userStorage.Current.CurrentTheme;
-        SelectedAppTheme = AvailableAppThemes.Any(theme => theme.Name == saved) ? saved : string.Empty;
+        var saved = _themeSettingsStorage.Current.CurrentTheme;
+        var selected = AvailableAppThemes.Any(theme => theme.Name == saved) ? saved : string.Empty;
+
+        if (SelectedAppTheme != selected)
+            SelectedAppTheme = selected;
     }
 
     [ReactiveCommand]
@@ -284,8 +321,82 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
     }
 
     [ReactiveCommand]
-    private void EditTheme(ThemeMetadataItem item)
-        => _ = NotImplementedOccurred.Handle(Unit.Default);
+    private async Task EditTheme(ThemeMetadataItem item)
+    {
+        if (item.IsSystemTheme)
+            return;
+
+        try
+        {
+            ApplyAppThemeSelection(item.Name);
+
+            var editor = new ThemeEditorViewModel(_themeEditor);
+            await editor.InitializeAsync(item.Name);
+            await OpenThemeEditor.Handle(editor);
+            await ReloadAppThemesAsync();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Failed to edit theme '{name}'", item.Name);
+        }
+    }
+
+    [ReactiveCommand]
+    private async Task AddNewTheme()
+    {
+        try
+        {
+            var existingNames = AvailableAppThemes.Select(theme => theme.Name).ToList();
+            var viewModel = new AddThemeViewModel(existingNames, _zaggyQuestionPath);
+            var name = await OpenAddTheme.Handle(viewModel);
+            if (string.IsNullOrWhiteSpace(name))
+                return;
+
+            await CreateThemeAsync(name);
+            await ReloadAppThemesAsync();
+
+            if (ThemeCreationBehavior == ThemeCreationBehavior.Nothing)
+                return;
+
+            ApplyAppThemeSelection(name);
+
+            if (ThemeCreationBehavior != ThemeCreationBehavior.OpenEditorAndApply)
+                return;
+
+            var editor = new ThemeEditorViewModel(_themeEditor);
+            await editor.InitializeAsync(name);
+            await OpenThemeEditor.Handle(editor);
+            await ReloadAppThemesAsync();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Failed to create a new theme");
+        }
+    }
+
+    private async Task CreateThemeAsync(string name)
+    {
+        var source = await _themeCatalog.LoadThemeAsync("Primus")
+            ?? throw new InvalidOperationException("Default theme 'Primus' was not found");
+
+        var metadata = new ThemeMetadata
+        {
+            Name = name,
+            Description = "Пользовательская тема",
+            CreatedAtVersion = new Version(2026, 0, 0),
+            Author = "Пользователь",
+            BackgroundColor = source.BackgroundColor,
+            SidebarBackgroundColor = source.SidebarBackgroundColor,
+            EditorBackgroundColor = source.EditorBackgroundColor,
+            TerminalBackgroundColor = source.TerminalBackgroundColor,
+            PrimaryColor = source.PrimaryColor,
+            BorderColor = source.BorderColor,
+            ForegroundColor = source.ForegroundColor
+        };
+
+        Directory.CreateDirectory(_themeOptions.ExternThemesFolder);
+        await _themeCreator.CreateAsync(source, metadata, _themeOptions.ExternThemesFolder);
+    }
 
     [ReactiveCommand]
     private void ChangeCodeFontSize(string? deltaText)

@@ -280,7 +280,8 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         ViewModel?.WhenAnyValue(vm => vm.EnableCodeHighlighting)
             .Subscribe(ApplyCodeHighlighting);
 
-        _ = ViewModel.InitializeGameEngineAsync();
+        if (ViewModel is not null)
+            _ = ViewModel.InitializeGameEngineAsync();
     }
 
     private void ApplyCodeHighlighting(bool isEnabled)

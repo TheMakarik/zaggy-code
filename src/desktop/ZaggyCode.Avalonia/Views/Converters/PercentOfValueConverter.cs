@@ -10,11 +10,12 @@ public sealed class PercentOfValueConverter : MarkupExtension, IValueConverter
         var percent = parameter switch
         {
             double d => d,
-            IConvertible c => System.Convert.ToDouble(c, culture),
+            string s when double.TryParse(s, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsed) => parsed,
+            IConvertible c => System.Convert.ToDouble(c, CultureInfo.InvariantCulture),
             _ => 1d
         };
 
-        return System.Convert.ToDouble(convertible, culture) * percent;
+        return System.Convert.ToDouble(convertible, CultureInfo.InvariantCulture) * percent;
     }
 
     public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)

@@ -78,6 +78,7 @@ global using ZaggyCode.Core.Common.Utils;
 global using ZaggyCode.Core.Data.Interfaces;
 global using ZaggyCode.Core.Data.Model;
 global using ZaggyCode.Core.Theming.Model;
+global using ZaggyCode.Core.Theming.Enums;
 global using ZaggyCode.Core.Game.Enums;
 global using ZaggyCode.Core.Game.EventArgs;
 global using ZaggyCode.Core.Game.Interfaces;

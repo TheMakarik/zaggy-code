@@ -5,6 +5,7 @@ public partial class ConfirmSaveSettingsChangesWindow : Window
     public ConfirmSaveSettingsChangesWindow()
     {
         InitializeComponent();
+        this.ApplyThemeDecorations();
         
         this.GetObservable(Window.WindowDecorationsProperty)
             .Subscribe(decorations => CustomTitleBar.IsVisible = decorations != WindowDecorations.Full);

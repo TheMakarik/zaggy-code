@@ -1,0 +1,169 @@
+<Window
+    Background="{DynamicResource BackgroundBrush}"
+    BorderBrush="{DynamicResource ForegroundBrush}"
+    BorderThickness="1"
+    CanResize="True"
+    Foreground="{DynamicResource ForegroundBrush}"
+    Height="640"
+    MinHeight="480"
+    MinWidth="560"
+    ShowInTaskbar="False"
+    Title="Редактор темы"
+    Width="640"
+    WindowStartupLocation="CenterOwner"
+    x:Class="ZaggyCode.Avalonia.Views.Dialogs.ThemeEditorWindow"
+    x:DataType="vm:ThemeEditorViewModel"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:controls="clr-namespace:ZaggyCode.Avalonia.Views.Controls"
+    xmlns:converters="clr-namespace:ZaggyCode.Avalonia.Views.Converters"
+    xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+    xmlns:theming="clr-namespace:ZaggyCode.Core.Theming.Model;assembly=ZaggyCode.Core"
+    xmlns:vm="using:ZaggyCode.Avalonia.ViewModels"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Window.Styles>
+        <Style Selector="Grid.color-row TextBlock.color-name">
+            <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}" />
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Duration="0:0:0.15" Property="Foreground" />
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="Grid.color-row Border.color-swatch">
+            <Setter Property="BorderBrush" Value="{DynamicResource ForegroundBrush}" />
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Duration="0:0:0.15" Property="BorderBrush" />
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="Grid.color-row:pointerover TextBlock.color-name">
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}" />
+        </Style>
+        <Style Selector="Grid.color-row:pointerover Border.color-swatch">
+            <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBrush}" />
+        </Style>
+
+        <Style Selector="Button.color-reset">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="CornerRadius" Value="6" />
+            <Setter Property="Padding" Value="4" />
+            <Setter Property="Foreground" Value="{DynamicResource ForegroundMutedBrush}" />
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Duration="0:0:0.15" Property="Foreground" />
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="Button.color-reset:pointerover:not(:disabled)">
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}" />
+        </Style>
+        <Style Selector="Button.color-reset materialIcons|MaterialIcon">
+            <Setter Property="Width" Value="18" />
+            <Setter Property="Height" Value="18" />
+        </Style>
+    </Window.Styles>
+
+    <Grid RowDefinitions="Auto,Auto,*,Auto">
+        <controls:DialogTitleBar
+            Grid.Row="0"
+            Name="CustomTitleBar"
+            Title="Редактор темы" />
+
+        <Menu Grid.Row="1">
+            <MenuItem Header="Файл">
+                <MenuItem
+                    Command="{Binding ViewXmlCommand}"
+                    Header="Просмотр XML"
+                    Icon="{materialIcons:MaterialIconExt Kind=FileCodeOutline}" />
+                <MenuItem
+                    Command="{Binding EditMetadataCommand}"
+                    Header="Редактировать Метаданные"
+                    Icon="{materialIcons:MaterialIconExt Kind=TagEdit}" />
+            </MenuItem>
+            <MenuItem Header="Справка">
+                <MenuItem
+                    Command="{Binding OpenAboutCommand}"
+                    Header="О приложении"
+                    Icon="{materialIcons:MaterialIconExt Kind=InfoOutline}" />
+                <MenuItem
+                    Command="{Binding OpenHelpCommand}"
+                    Header="Работа с темами"
+                    Icon="{materialIcons:MaterialIconExt Kind=BookOpenVariant}" />
+            </MenuItem>
+        </Menu>
+
+        <ScrollViewer
+            Grid.Row="2"
+            Margin="16">
+            <ItemsControl ItemsSource="{Binding Colors}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="theming:ThemeColorEntry">
+                        <Grid
+                            Classes="color-row"
+                            ColumnDefinitions="Auto,*,Auto">
+                            <Button
+                                Grid.Column="0"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                Command="{Binding $parent[ItemsControl].((vm:ThemeEditorViewModel)DataContext).OpenColorPickerCommand}"
+                                CommandParameter="{Binding}"
+                                Padding="2"
+                                ToolTip.Tip="Выбрать цвет">
+                                <Border
+                                    Classes="color-swatch"
+                                    Width="22"
+                                    Height="22"
+                                    Background="{Binding Value, Converter={converters:HexStringToBrushConverter}}"
+                                    BorderThickness="1"
+                                    CornerRadius="11" />
+                            </Button>
+
+                            <TextBlock
+                                Grid.Column="1"
+                                Classes="color-name"
+                                Margin="10,0"
+                                VerticalAlignment="Center"
+                                Text="{Binding DisplayName}" />
+
+                            <Button
+                                Grid.Column="2"
+                                Classes="color-reset"
+                                Command="{Binding $parent[ItemsControl].((vm:ThemeEditorViewModel)DataContext).ResetColorCommand}"
+                                CommandParameter="{Binding}"
+                                IsEnabled="{Binding IsChanged}"
+                                ToolTip.Tip="Сбросить цвет">
+                                <materialIcons:MaterialIcon Kind="Restart" />
+                            </Button>
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+
+        <Border Grid.Row="3" Padding="16,12">
+            <StackPanel
+                HorizontalAlignment="Right"
+                Orientation="Horizontal"
+                Spacing="10">
+                <Button Classes="settings-footer-button" Command="{Binding CancelCommand}">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <materialIcons:MaterialIcon Kind="Close" />
+                        <TextBlock Text="Отмена" />
+                    </StackPanel>
+                </Button>
+                <Button
+                    Classes="settings-footer-button primary-action"
+                    Command="{Binding SaveCommand}"
+                    IsEnabled="{Binding IsDirty}">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <materialIcons:MaterialIcon Kind="ContentSave" />
+                        <TextBlock Text="Сохранить" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>

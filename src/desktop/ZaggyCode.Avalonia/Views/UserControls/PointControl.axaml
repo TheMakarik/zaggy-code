@@ -96,24 +96,42 @@
             </Grid>
 
             <Viewbox
-                Height="{Binding $parent[UserControl].Bounds.Height, Converter={converters:PercentOfValueConverter}, ConverterParameter=0.25}"
                 HorizontalAlignment="Center"
                 IsVisible="{Binding RequireDraw}"
-                Stretch="Uniform"
+                Stretch="Fill"
                 VerticalAlignment="Center"
-                Width="{Binding $parent[UserControl].Bounds.Width, Converter={converters:PercentOfValueConverter}, ConverterParameter=0.25}">
+                ZIndex="2">
+                <Viewbox.Height>
+                    <MultiBinding Converter="{converters:PointRelativeSizeConverter}" ConverterParameter="0.25">
+                        <Binding Path="$parent[UserControl].Bounds.Height" />
+                        <Binding Path="RequireDrawMarkHeight" />
+                    </MultiBinding>
+                </Viewbox.Height>
+                <Viewbox.Width>
+                    <MultiBinding Converter="{converters:PointRelativeSizeConverter}" ConverterParameter="0.25">
+                        <Binding Path="$parent[UserControl].Bounds.Width" />
+                        <Binding Path="RequireDrawMarkWidth" />
+                    </MultiBinding>
+                </Viewbox.Width>
                 <Canvas Width="16" Height="16">
                     <Path
                         Data="M1,1 L15,15 M15,1 L1,15"
                         Stroke="{DynamicResource MapRequireDrawBrush}"
-                        StrokeLineCap="Round"
-                        StrokeThickness="2" />
+                        StrokeLineCap="Round">
+                        <Path.StrokeThickness>
+                            <MultiBinding Converter="{converters:RequireDrawMarkThicknessConverter}">
+                                <Binding Path="RequireDrawMarkThickness" />
+                                <Binding Path="MakeRequireDrawOnGoalBold" />
+                            </MultiBinding>
+                        </Path.StrokeThickness>
+                    </Path>
                 </Canvas>
             </Viewbox>
 
             <Image
                 HorizontalAlignment="Center"
                 IsVisible="{Binding HasCoin}"
+                ZIndex="3"
                 Source="{Binding $parent[UserControl].(controls:MapAssetPaths.CoinPath), Converter={converters:ImagePathConverter}}"
                 Stretch="Uniform"
                 VerticalAlignment="Center"
@@ -122,6 +140,7 @@
             <Grid
                 ColumnDefinitions="*,*,*,*,*,*,*,*"
                 IsVisible="{Binding IsGoal}"
+                ZIndex="1"
                 RowDefinitions="*,*,*,*,*,*,*,*">
                 <Rectangle Grid.Row="0" Grid.Column="0" Fill="{DynamicResource GoalColor1Brush}" />
                 <Rectangle Grid.Row="0" Grid.Column="1" Fill="{DynamicResource GoalColor2Brush}" />

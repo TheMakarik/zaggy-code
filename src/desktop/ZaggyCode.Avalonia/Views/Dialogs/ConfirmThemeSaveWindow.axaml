@@ -1,0 +1,49 @@
+<Window
+    Background="{DynamicResource BackgroundBrush}"
+    BorderBrush="{DynamicResource ForegroundBrush}"
+    BorderThickness="1"
+    CanResize="False"
+    Foreground="{DynamicResource ForegroundBrush}"
+    MaxWidth="460"
+    ShowInTaskbar="False"
+    SizeToContent="Height"
+    Title="Сохранение темы"
+    Width="420"
+    WindowStartupLocation="CenterOwner"
+    x:Class="ZaggyCode.Avalonia.Views.Dialogs.ConfirmThemeSaveWindow"
+    x:DataType="vm:ConfirmThemeSaveViewModel"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:controls="clr-namespace:ZaggyCode.Avalonia.Views.Controls"
+    xmlns:vm="using:ZaggyCode.Avalonia.ViewModels"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Grid RowDefinitions="Auto,Auto">
+        <controls:DialogTitleBar
+            Grid.Row="0"
+            Name="CustomTitleBar"
+            Title="Сохранение темы" />
+
+        <StackPanel
+            Grid.Row="1"
+            Margin="24,16,24,20"
+            Spacing="16">
+            <TextBlock
+                FontSize="16"
+                FontWeight="SemiBold"
+                Text="{Binding ThemeName, StringFormat='Желаете сохранить изменения в теме «{0}»?'}"
+                TextWrapping="Wrap" />
+
+            <StackPanel
+                HorizontalAlignment="Right"
+                Orientation="Horizontal"
+                Spacing="10">
+                <Button Command="{Binding CancelCommand}" Content="Отмена" />
+                <Button Command="{Binding DeclineCommand}" Content="Не сохранять" />
+                <Button
+                    Command="{Binding ConfirmCommand}"
+                    Content="Сохранить"
+                    IsDefault="True" />
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</Window>

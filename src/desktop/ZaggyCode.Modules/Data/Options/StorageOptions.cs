@@ -31,4 +31,10 @@ public sealed class StorageOptions
         get => field;
         set => field = Environment.ExpandEnvironmentVariables(value);
     }
+
+    public required string ThemeSettingsPath
+    {
+        get => field;
+        set => field = Environment.ExpandEnvironmentVariables(value);
+    }
 }

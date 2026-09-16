@@ -71,15 +71,20 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private readonly IRobotGameEngine _robotGameEngine;
     private readonly IObservableStorage<UserData> _userStorage;
+    private readonly IObservableStorage<ThemeSettings> _themeSettingsStorage;
     private readonly IObservableStorage<PythonSettings> _pythonSettingsStorage;
     private readonly IObservableStorage<CSharpSettings> _csharpSettingsStorage;
     private readonly IThemeCatalog _themeCatalog;
     private readonly IOptions<LoadingOptions> _loadingOptions;
     private readonly IOptions<DefaultUser> _defaultUserOptions;
+    private readonly IOptions<DefaultThemeSettings> _defaultThemeSettingsOptions;
     private readonly IOptions<PythonDefaultSettingsOptions> _pythonDefaultSettingsOptions;
     private readonly IOptions<CSharpDefaultSettingsOptions> _csharpDefaultSettingsOptions;
     private readonly IOptions<CodeExamplePathOptions> _codeExamplePathOptions;
     private readonly IThemeCopier _themeCopier;
+    private readonly IThemeEditorService _themeEditor;
+    private readonly IThemeCreator _themeCreator;
+    private readonly IOptions<ThemeOptions> _themeOptions;
     private readonly IOptions<FontSizeOptions> _fontSizeOptions;
     private readonly IOptions<CodeThemeDisplayNameOptions> _displayNameOptions;
     private readonly IOptions<CodeThemeIconOptions> _iconOptions;
@@ -101,13 +106,18 @@ public partial class MainWindowViewModel : ViewModelBase
         IRobotGameEngine robotGameEngine,
         IOptions<ZaggyAssetsOptions> zaggyAssets,
         IObservableStorage<UserData> userStorage,
+        IObservableStorage<ThemeSettings> themeSettingsStorage,
         IObservableStorage<PythonSettings> pythonSettingsStorage,
         IObservableStorage<CSharpSettings> csharpSettingsStorage,
         IOptions<CSharpDefaultSettingsOptions> csharpDefaultSettingsOptions,
         IThemeCatalog themeCatalog,
         IThemeCopier themeCopier,
+        IThemeEditorService themeEditor,
+        IThemeCreator themeCreator,
+        IOptions<ThemeOptions> themeOptions,
         IOptions<LoadingOptions> loadingOptions,
         IOptions<DefaultUser> defaultUserOptions,
+        IOptions<DefaultThemeSettings> defaultThemeSettingsOptions,
         IOptions<PythonDefaultSettingsOptions> pythonDefaultSettingsOptions,
         IOptions<CodeExamplePathOptions> codeExamplePathOptions,
         IOptions<PopupOptions> popupOptions,
@@ -125,12 +135,17 @@ public partial class MainWindowViewModel : ViewModelBase
         _logger = logger;
         _fontSizeOptions = textFontSize;
         _userStorage = userStorage;
+        _themeSettingsStorage = themeSettingsStorage;
         _pythonSettingsStorage = pythonSettingsStorage;
         _csharpSettingsStorage = csharpSettingsStorage;
         _themeCatalog = themeCatalog;
         _themeCopier = themeCopier;
+        _themeEditor = themeEditor;
+        _themeCreator = themeCreator;
+        _themeOptions = themeOptions;
         _loadingOptions = loadingOptions;
         _defaultUserOptions = defaultUserOptions;
+        _defaultThemeSettingsOptions = defaultThemeSettingsOptions;
         _pythonDefaultSettingsOptions = pythonDefaultSettingsOptions;
         _csharpDefaultSettingsOptions = csharpDefaultSettingsOptions;
         _codeExamplePathOptions = codeExamplePathOptions;
@@ -240,7 +255,10 @@ public partial class MainWindowViewModel : ViewModelBase
         }
 
         points.First(point => point.X == 0 && point.Y == size - 1).IsSpawn = true;
-        points.First(point => point.X == size - 1 && point.Y == 0).IsGoal = true;
+
+        var goal = points.First(point => point.X == size - 1 && point.Y == 0);
+        goal.IsGoal = true;
+        goal.MakeRequireDrawOnGoalBold = true;
 
         // Сплошная стена буквой Г: колонка 1 (снизу оставлен проход) + строка 1.
         for (var y = 1; y < size - 1; y++)
@@ -611,9 +629,11 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         var settingsViewModel = new SettingsViewModel(
             _userStorage,
+            _themeSettingsStorage,
             _pythonSettingsStorage,
             _csharpSettingsStorage,
             _defaultUserOptions,
+            _defaultThemeSettingsOptions,
             _pythonDefaultSettingsOptions,
             _csharpDefaultSettingsOptions,
             _codeExamplePathOptions,
@@ -622,6 +642,10 @@ public partial class MainWindowViewModel : ViewModelBase
             _themeCatalog,
             _themeCopier,
             _themeDeleter,
+            _themeEditor,
+            _themeCreator,
+            _themeOptions,
+            ZaggyAssets,
             _pythonFunctionNameValidator,
             _loggerFactory);
         await OpenSettings.Handle(settingsViewModel);

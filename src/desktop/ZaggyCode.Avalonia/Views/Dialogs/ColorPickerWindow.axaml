@@ -1,0 +1,45 @@
+<Window
+    Background="{DynamicResource BackgroundBrush}"
+    BorderBrush="{DynamicResource ForegroundBrush}"
+    BorderThickness="1"
+    CanResize="False"
+    Foreground="{DynamicResource ForegroundBrush}"
+    ShowInTaskbar="False"
+    SizeToContent="Height"
+    Title="Выбор цвета"
+    Width="360"
+    WindowStartupLocation="CenterOwner"
+    x:Class="ZaggyCode.Avalonia.Views.Dialogs.ColorPickerWindow"
+    x:DataType="vm:ColorPickerViewModel"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:controls="clr-namespace:ZaggyCode.Avalonia.Views.Controls"
+    xmlns:cp="clr-namespace:Avalonia.Controls;assembly=Avalonia.Controls.ColorPicker"
+    xmlns:vm="using:ZaggyCode.Avalonia.ViewModels"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Grid RowDefinitions="Auto,Auto">
+        <controls:DialogTitleBar
+            Grid.Row="0"
+            Name="CustomTitleBar"
+            Title="Выбор цвета" />
+
+        <StackPanel
+            Grid.Row="1"
+            Margin="16"
+            Spacing="12">
+            <TextBlock
+                FontWeight="SemiBold"
+                Text="{Binding ColorName}" />
+
+            <cp:ColorView
+                Color="{Binding Color, Mode=TwoWay}"
+                HorizontalAlignment="Center" />
+
+            <Button
+                Command="{Binding CloseCommand}"
+                Content="Готово"
+                HorizontalAlignment="Right"
+                IsDefault="True" />
+        </StackPanel>
+    </Grid>
+</Window>

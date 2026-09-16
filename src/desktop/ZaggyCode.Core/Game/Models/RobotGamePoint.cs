@@ -57,6 +57,26 @@ public class RobotGamePoint : INotifyPropertyChanged
 
     #endregion
 
+    #region Require draw mark
+
+    [XmlAttribute("MARK.width", Namespace = "objects")]
+    [DefaultValue(null)]
+    public double? RequireDrawMarkWidth { get; set => SetField(ref field, value); }
+
+    [XmlAttribute("MARK.height", Namespace = "objects")]
+    [DefaultValue(null)]
+    public double? RequireDrawMarkHeight { get; set => SetField(ref field, value); }
+
+    [XmlAttribute("MARK.thickness", Namespace = "objects")]
+    [DefaultValue(null)]
+    public double? RequireDrawMarkThickness { get; set => SetField(ref field, value); }
+
+    [XmlAttribute("MARK.on-goal-bold", Namespace = "objects")]
+    [DefaultValue(false)]
+    public bool MakeRequireDrawOnGoalBold { get; set => SetField(ref field, value); }
+
+    #endregion
+
     #region Core border
 
     [XmlAttribute("CORE_BORDER.hex", Namespace = "objects")]

@@ -88,20 +88,8 @@ public sealed class Theme
     [XmlElement("map-point-border")]
     public required string MapPointBorderColor { get; set; }
 
-    [XmlElement("map-point-background")]
-    public required string MapPointBackgroundColor { get; set; }
-
     [XmlElement("map-sea")]
     public required string MapSeaColor { get; set; }
-
-    [XmlElement("map-grass")]
-    public required string MapGrassColor { get; set; }
-
-    [XmlElement("map-grass-dark")]
-    public required string MapGrassDarkColor { get; set; }
-
-    [XmlElement("map-coin")]
-    public required string MapCoinColor { get; set; }
 
     [XmlElement("map-painted")]
     public required string MapPaintedColor { get; set; }

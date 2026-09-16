@@ -73,4 +73,12 @@ public static class ServiceCollectionExtensions
             provider => provider.GetRequiredService<IOptions<CSharpDefaultSettingsOptions>>().Value.Settings,
             Modules.Data.Json.CSharpSettingsSerializerContext.Default.CSharpSettings);
     }
+
+    public static IServiceCollection AddThemeSettingsStorage(this IServiceCollection services)
+    {
+        return services.AddObservableStorage<ThemeSettings>(
+            options => options.ThemeSettingsPath,
+            provider => provider.GetRequiredService<IOptions<DefaultThemeSettings>>().Value.Settings,
+            Modules.Data.Json.ThemeSettingsSerializerContext.Default.ThemeSettings);
+    }
 }

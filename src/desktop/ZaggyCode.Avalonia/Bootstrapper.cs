@@ -53,7 +53,8 @@ public sealed class Bootstrapper
         builder.Services
             .AddPythonSettingsStorage()
             .AddCSharpSettingsStorage()
-            .AddUserDataStorage();
+            .AddUserDataStorage()
+            .AddThemeSettingsStorage();
 
         builder.Logging
             .ClearProviders()
@@ -66,6 +67,7 @@ public sealed class Bootstrapper
             .AddOptions<CodeThemeIconOptions>()
             .AddOptions<PopupOptions>()
             .AddOptions<DefaultUser>()
+            .AddOptions<DefaultThemeSettings>()
             .AddOptions<StorageOptions>()
             .AddOptions<SpeedMillisecondsOptions>()
             .AddOptions<MetadataOptions>()
@@ -79,6 +81,7 @@ public sealed class Bootstrapper
             .AddOptions<MapAnimationOptions>()
             .AddOptions<PythonValidationOptions>()
             .AddOptions<ThemeOptions>()
+            .AddOptions<ThemeColorDisplayNameOptions>()
             .AddOptions<LoadingOptions>();
 
         

@@ -10,6 +10,7 @@ public partial class ThemeNotFoundWindow : Window
     public ThemeNotFoundWindow(string missingThemeName)
     {
         InitializeComponent();
+        this.ApplyThemeDecorations();
 
         if (!string.IsNullOrEmpty(missingThemeName))
             MessageText.Text = $"Тема \"{missingThemeName}\" не была найдена. Была выбрана стандартная тема Primus.";
