@@ -1,0 +1,88 @@
+<Window
+    Background="{DynamicResource BackgroundBrush}"
+    BorderBrush="{DynamicResource ForegroundBrush}"
+    BorderThickness="1"
+    CanResize="False"
+    Foreground="{DynamicResource ForegroundBrush}"
+    ShowInTaskbar="False"
+    SizeToContent="Height"
+    Title="Об AvaloniaUI"
+    Width="360"
+    WindowStartupLocation="CenterOwner"
+    x:Class="ZaggyCode.Avalonia.Views.Dialogs.AboutAvaloniaWindow"
+    x:DataType="vm:AboutAvaloniaViewModel"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:controls="clr-namespace:ZaggyCode.Avalonia.Views.Controls"
+    xmlns:converters="clr-namespace:ZaggyCode.Avalonia.Views.Converters"
+    xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+    xmlns:vm="using:ZaggyCode.Avalonia.ViewModels"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Window.Styles>
+        <Style Selector="Button.link">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="6,2" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}" />
+        </Style>
+        <Style Selector="Button.link:pointerover">
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryLightBrush}" />
+        </Style>
+    </Window.Styles>
+
+    <Grid RowDefinitions="Auto,*">
+        <controls:DialogTitleBar
+            Grid.Row="0"
+            Name="CustomTitleBar"
+            Title="Об AvaloniaUI" />
+
+        <StackPanel
+            Grid.Row="1"
+            HorizontalAlignment="Center"
+            Margin="24"
+            Spacing="10"
+            VerticalAlignment="Center">
+            <Image
+                Height="120"
+                HorizontalAlignment="Center"
+                Source="{Binding LogoPath, Converter={converters:ImagePathConverter}}"
+                Width="120" />
+
+            <TextBlock
+                FontSize="24"
+                FontWeight="Bold"
+                HorizontalAlignment="Center"
+                Text="{Binding Title}" />
+
+            <Separator Margin="24,14,24,14" />
+
+            <TextBlock
+                FontSize="14"
+                HorizontalAlignment="Center"
+                LineHeight="20"
+                MaxWidth="300"
+                Text="{Binding Description}"
+                TextAlignment="Center"
+                TextWrapping="Wrap" />
+
+            <StackPanel
+                HorizontalAlignment="Center"
+                Margin="0,18,0,0"
+                Spacing="4">
+                <Button Classes="link" Command="{Binding OpenWebsiteCommand}">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <materialIcons:MaterialIcon Kind="WebBox" />
+                        <TextBlock Text="{Binding WebsiteText}" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+                <Button Classes="link" Command="{Binding OpenGitHubCommand}">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <materialIcons:MaterialIcon Kind="SourceRepository" />
+                        <TextBlock Text="{Binding GitHubText}" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</Window>
