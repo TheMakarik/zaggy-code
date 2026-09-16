@@ -127,6 +127,12 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
             context.SetOutput(Unit.Default);
         });
 
+        ViewModel.OpenAboutAvalonia.RegisterHandler(async context =>
+        {
+            await new Views.Dialogs.AboutAvaloniaWindow().ShowDialog(this);
+            context.SetOutput(Unit.Default);
+        });
+
         ViewModel.NotImplementedOccurred.RegisterHandler(async context =>
         {
             var notImplementedWindow = new NotImplementedWindow

@@ -38,6 +38,12 @@ public partial class ThemeEditorWindow : Window
                 context.SetOutput(Unit.Default);
             });
 
+            viewModel.OpenAboutAvaloniaInteraction.RegisterHandler(async context =>
+            {
+                await new AboutAvaloniaWindow().ShowDialog(this);
+                context.SetOutput(Unit.Default);
+            });
+
             viewModel.OpenColorPicker.RegisterHandler(async context =>
             {
                 var window = new ColorPickerWindow { DataContext = context.Input };

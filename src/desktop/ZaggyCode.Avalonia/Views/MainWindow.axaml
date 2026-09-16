@@ -246,6 +246,10 @@
                                 Command="{Binding OpenAboutCommand}"
                                 Header="О приложении"
                                 Icon="{materialIcons:MaterialIconExt Kind=About}" />
+                            <MenuItem
+                                Command="{Binding OpenAboutAvaloniaCommand}"
+                                Header="Об AvaloniaUI"
+                                Icon="{materialIcons:MaterialIconExt Kind=OpenInNew}" />
                             <MenuItem Header="Руководство по программированию" Icon="{materialIcons:MaterialIconExt Kind=Code}">
                                 <MenuItem Header="C# (Си Шарп)" Icon="{materialIcons:MaterialIconExt Kind=LanguageCsharp}" />
                             </MenuItem>
@@ -408,6 +412,10 @@
                                     Command="{Binding OpenAboutCommand}"
                                     Header="О приложении"
                                     Icon="{materialIcons:MaterialIconExt Kind=About}" />
+                                <MenuItem
+                                    Command="{Binding OpenAboutAvaloniaCommand}"
+                                    Header="Об AvaloniaUI"
+                                    Icon="{materialIcons:MaterialIconExt Kind=OpenInNew}" />
                                 <MenuItem Header="Руководство по программированию" Icon="{materialIcons:MaterialIconExt Kind=Code}">
                                     <MenuItem Header="C# (Си Шарп)" Icon="{materialIcons:MaterialIconExt Kind=LanguageCsharp}" />
                                 </MenuItem>

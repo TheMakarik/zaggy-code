@@ -89,6 +89,10 @@
                     Header="О приложении"
                     Icon="{materialIcons:MaterialIconExt Kind=InfoOutline}" />
                 <MenuItem
+                    Command="{Binding OpenAboutAvaloniaCommand}"
+                    Header="Об AvaloniaUI"
+                    Icon="{materialIcons:MaterialIconExt Kind=OpenInNew}" />
+                <MenuItem
                     Command="{Binding OpenHelpCommand}"
                     Header="Работа с темами"
                     Icon="{materialIcons:MaterialIconExt Kind=BookOpenVariant}" />

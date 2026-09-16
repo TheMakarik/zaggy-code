@@ -9,6 +9,7 @@ public sealed partial class ThemeEditorViewModel : ViewModelBase
     public Interaction<bool, Unit> CloseInteraction { get; } = new();
     public Interaction<ColorPickerViewModel, Unit> OpenColorPicker { get; } = new();
     public Interaction<Unit, Unit> OpenAboutInteraction { get; } = new();
+    public Interaction<Unit, Unit> OpenAboutAvaloniaInteraction { get; } = new();
     public Interaction<Unit, Unit> ViewXmlInteraction { get; } = new();
     public Interaction<Unit, Unit> EditMetadataInteraction { get; } = new();
     public Interaction<Unit, Unit> HelpInteraction { get; } = new();
@@ -86,6 +87,10 @@ public sealed partial class ThemeEditorViewModel : ViewModelBase
     [ReactiveCommand]
     private async Task OpenAboutAsync()
         => await OpenAboutInteraction.Handle(Unit.Default);
+
+    [ReactiveCommand]
+    private async Task OpenAboutAvaloniaAsync()
+        => await OpenAboutAvaloniaInteraction.Handle(Unit.Default);
 
     [ReactiveCommand]
     private async Task OpenHelpAsync()

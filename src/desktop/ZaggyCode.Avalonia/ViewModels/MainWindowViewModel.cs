@@ -64,6 +64,7 @@ public partial class MainWindowViewModel : ViewModelBase
     public readonly Interaction<string, Unit> ApplyCodeTheme = new();
     public readonly Interaction<SettingsViewModel, Unit> OpenSettings = new();
     public readonly Interaction<Unit, Unit> OpenAbout = new();
+    public readonly Interaction<Unit, Unit> OpenAboutAvalonia = new();
 
     #endregion
 
@@ -623,6 +624,10 @@ public partial class MainWindowViewModel : ViewModelBase
     [ReactiveCommand]
     private async Task OpenAboutAsync()
         => await OpenAbout.Handle(Unit.Default);
+
+    [ReactiveCommand]
+    private async Task OpenAboutAvaloniaAsync()
+        => await OpenAboutAvalonia.Handle(Unit.Default);
 
     [ReactiveCommand]
     private async Task OpenSettingsAsync()
