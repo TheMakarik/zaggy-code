@@ -283,23 +283,10 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
     {
         base.OnLoaded(e);
 
-        ViewModel?.WhenAnyValue(vm => vm.EnableCodeHighlighting)
-            .Subscribe(ApplyCodeHighlighting);
+        InstallCodeHighlighting();
 
         if (ViewModel is not null)
             _ = ViewModel.InitializeGameEngineAsync();
-    }
-
-    private void ApplyCodeHighlighting(bool isEnabled)
-    {
-        if (isEnabled)
-        {
-            InstallCodeHighlighting();
-            return;
-        }
-
-        _textMateInstallation?.Dispose();
-        _textMateInstallation = null;
     }
 
     private void InstallCodeHighlighting()

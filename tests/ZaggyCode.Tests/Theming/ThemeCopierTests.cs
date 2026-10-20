@@ -136,13 +136,13 @@ public class ThemeCopierTests : IDisposable
         Name = name,
         CreatedAtVersion = new Version(1, 0),
         Author = "Author",
-        BackgroundColor = "#101010",
+        WindowBackgroundColor = "#101010",
         SidebarBackgroundColor = "#111111",
         EditorBackgroundColor = "#121212",
         TerminalBackgroundColor = "#131313",
-        PrimaryColor = "#141414",
+        AccentColor = "#141414",
         BorderColor = "#151515",
-        ForegroundColor = "#161616",
+        TextPrimaryColor = "#161616",
         Path = path
     };
 

@@ -8,12 +8,11 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
     [Reactive] private int _terminalFontSize;
     [Reactive] private bool _useSystemTitleBar;
     [Reactive] private bool _showSidebar;
+    [Reactive] private SidebarPosition _sidebarPosition = SidebarPosition.Left;
     [Reactive] private string _selectedCodeTheme = string.Empty;
     [Reactive] private string _selectedAppTheme = string.Empty;
     [Reactive] private ThemeCreationBehavior _themeCreationBehavior;
     [Reactive] private bool _isLoadingThemes = true;
-    [Reactive] private bool _enableCodeHighlighting;
-    [Reactive] private bool _showCodeLineNumbers;
     [Reactive] private bool _hasChanges;
     [Reactive] private bool _canDecreaseCodeFontSize;
     [Reactive] private bool _canIncreaseCodeFontSize;
@@ -39,11 +38,10 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
     private int _originalTerminalFontSize;
     private bool _originalUseSystemTitleBar;
     private bool _originalShowSidebar;
+    private SidebarPosition _originalSidebarPosition;
     private string _originalCodeTheme = string.Empty;
     private string _originalSelectedAppTheme = string.Empty;
     private ThemeCreationBehavior _originalThemeCreationBehavior;
-    private bool _originalEnableCodeHighlighting;
-    private bool _originalShowCodeLineNumbers;
 
     public int MinFontSize => _fontSizeOptions.MinFontSize;
     public int MaxFontSize => _fontSizeOptions.MaxFontSize;
@@ -52,6 +50,7 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
     public ObservableCollection<CodeThemeItem> AvailableCodeThemes { get; } = [];
     public ObservableCollection<ThemeMetadataItem> AvailableAppThemes { get; } = [];
     public IReadOnlyList<ThemeCreationBehavior> ThemeCreationBehaviorValues { get; } = Enum.GetValues<ThemeCreationBehavior>();
+    public IReadOnlyList<SidebarPosition> SidebarPositionValues { get; } = Enum.GetValues<SidebarPosition>();
     public Interaction<string, string> ApplyCodeThemeInteraction { get; } = new();
     public Interaction<ThemeEditorViewModel, Unit> OpenThemeEditor { get; } = new();
     public Interaction<AddThemeViewModel, string?> OpenAddTheme { get; } = new();
@@ -97,11 +96,10 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
         _originalTerminalFontSize = current.TerminalFontSize;
         _originalUseSystemTitleBar = current.UseSystemTitleBar;
         _originalShowSidebar = current.ShowSidebar;
+        _originalSidebarPosition = current.SidebarPosition;
         _originalCodeTheme = current.CodeTheme;
         _originalSelectedAppTheme = themeSettingsStorage.Current.CurrentTheme;
         _originalThemeCreationBehavior = themeSettingsStorage.Current.OnCreateBehavior;
-        _originalEnableCodeHighlighting = current.EnableCodeHighlighting;
-        _originalShowCodeLineNumbers = current.ShowCodeLineNumbers;
 
 #pragma warning disable AsyncVoidMethod
         _ = InitializeAvailableAppThemesAsync();
@@ -118,11 +116,10 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
                 nameof(TerminalFontSize),
                 nameof(UseSystemTitleBar),
                 nameof(ShowSidebar),
+                nameof(SidebarPosition),
                 nameof(SelectedCodeTheme),
                 nameof(SelectedAppTheme),
-                nameof(ThemeCreationBehavior),
-                nameof(EnableCodeHighlighting),
-                nameof(ShowCodeLineNumbers))
+                nameof(ThemeCreationBehavior))
             .Subscribe(_ => UpdateHasChanges());
 
         this.WhenAnyValue(viewModel => viewModel.SelectedCodeTheme)
@@ -151,9 +148,8 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
         TerminalFontSize = _defaultUserData.TerminalFontSize;
         UseSystemTitleBar = _defaultUserData.UseSystemTitleBar;
         ShowSidebar = _defaultUserData.ShowSidebar;
+        SidebarPosition = _defaultUserData.SidebarPosition;
         SelectedCodeTheme = _defaultUserData.CodeTheme;
-        EnableCodeHighlighting = _defaultUserData.EnableCodeHighlighting;
-        ShowCodeLineNumbers = _defaultUserData.ShowCodeLineNumbers;
         ThemeCreationBehavior = _defaultThemeSettings.OnCreateBehavior;
 
         ApplyAppThemeSelection(_defaultThemeSettings.CurrentTheme);
@@ -165,11 +161,10 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
         _originalTerminalFontSize = TerminalFontSize;
         _originalUseSystemTitleBar = UseSystemTitleBar;
         _originalShowSidebar = ShowSidebar;
+        _originalSidebarPosition = SidebarPosition;
         _originalCodeTheme = SelectedCodeTheme;
         _originalSelectedAppTheme = SelectedAppTheme;
         _originalThemeCreationBehavior = ThemeCreationBehavior;
-        _originalEnableCodeHighlighting = EnableCodeHighlighting;
-        _originalShowCodeLineNumbers = ShowCodeLineNumbers;
 
         _themeSettingsStorage.Current.CurrentTheme = SelectedAppTheme;
         _themeSettingsStorage.Current.OnCreateBehavior = ThemeCreationBehavior;
@@ -183,9 +178,8 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
         TerminalFontSize = userData.TerminalFontSize;
         UseSystemTitleBar = userData.UseSystemTitleBar;
         ShowSidebar = userData.ShowSidebar;
+        SidebarPosition = userData.SidebarPosition;
         SelectedCodeTheme = userData.CodeTheme;
-        EnableCodeHighlighting = userData.EnableCodeHighlighting;
-        ShowCodeLineNumbers = userData.ShowCodeLineNumbers;
     }
 
     private void UpdateHasChanges()
@@ -195,11 +189,10 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
             TerminalFontSize != _originalTerminalFontSize ||
             UseSystemTitleBar != _originalUseSystemTitleBar ||
             ShowSidebar != _originalShowSidebar ||
+            SidebarPosition != _originalSidebarPosition ||
             SelectedCodeTheme != _originalCodeTheme ||
             SelectedAppTheme != _originalSelectedAppTheme ||
-            ThemeCreationBehavior != _originalThemeCreationBehavior ||
-            EnableCodeHighlighting != _originalEnableCodeHighlighting ||
-            ShowCodeLineNumbers != _originalShowCodeLineNumbers;
+            ThemeCreationBehavior != _originalThemeCreationBehavior;
     }
 
     private void InitializeMessageBusSubscriptions()
@@ -385,13 +378,13 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
             Description = "Пользовательская тема",
             CreatedAtVersion = new Version(2026, 0, 0),
             Author = "Пользователь",
-            BackgroundColor = source.BackgroundColor,
+            WindowBackgroundColor = source.WindowBackgroundColor,
             SidebarBackgroundColor = source.SidebarBackgroundColor,
             EditorBackgroundColor = source.EditorBackgroundColor,
             TerminalBackgroundColor = source.TerminalBackgroundColor,
-            PrimaryColor = source.PrimaryColor,
+            AccentColor = source.AccentColor,
             BorderColor = source.BorderColor,
-            ForegroundColor = source.ForegroundColor
+            TextPrimaryColor = source.TextPrimaryColor
         };
 
         Directory.CreateDirectory(_themeOptions.ExternThemesFolder);

@@ -12,6 +12,7 @@ global using System.Xml.Serialization;
 global using Microsoft.Scripting.Hosting;
 global using ZaggyCode.Core.Archiving.Interfaces;
 global using ZaggyCode.Core.Archiving.Model;
+global using ZaggyCode.Core.Data.Enums;
 global using ZaggyCode.Core.Data.Model;
 global using ZaggyCode.Core.Theming.Interfaces;
 global using ZaggyCode.Core.Theming.Model;

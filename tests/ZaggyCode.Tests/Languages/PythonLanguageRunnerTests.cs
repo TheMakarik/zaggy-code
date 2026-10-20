@@ -176,8 +176,6 @@ public class PythonLanguageRunnerTests : LanguageRunnerTests
         var storage = A.Fake<IObservableStorage<UserData>>();
         A.CallTo(() => storage.Current).Returns(new UserData
         {
-            EnableCodeHighlighting = true,
-            ShowCodeLineNumbers = true,
             CodeFontSize = 14,
             CodeTheme = "Light",
             LastLanguage = Language.Python,
@@ -185,7 +183,8 @@ public class PythonLanguageRunnerTests : LanguageRunnerTests
             LastSpeed = ExecutionSpeed.X1,
             TerminalFontSize = 18,
             UseSystemTitleBar = false,
-            ShowSidebar = true
+            ShowSidebar = true,
+            SidebarPosition = SidebarPosition.Left
         });
         return storage;
     }

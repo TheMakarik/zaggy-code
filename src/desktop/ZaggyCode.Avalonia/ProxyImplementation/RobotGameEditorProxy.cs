@@ -2,7 +2,7 @@ namespace ZaggyCode.Avalonia.ProxyImplementation;
 
 public sealed class RobotGameEditorProxy : IRobotGameEditorProxy
 {
-    private const string ExecutionLineColorResource = "ForegroundDarkColor";
+    private const string ExecutionLineColorResource = "TextSubtleColor";
 
     private readonly Lock _attachLock = new();
     private TextEditor? _editor;

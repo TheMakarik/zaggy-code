@@ -3,9 +3,11 @@
     x:DataType="vm:AppearanceSettingsViewModel"
     x:TypeArguments="vm:AppearanceSettingsViewModel"
     xmlns="https://github.com/avaloniaui"
+
     xmlns:avaloniaEdit="https://github.com/avaloniaui/avaloniaedit"
     xmlns:converters="clr-namespace:ZaggyCode.Avalonia.Views.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:enums="clr-namespace:ZaggyCode.Core.Data.Enums;assembly=ZaggyCode.Core"
     xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:records="clr-namespace:ZaggyCode.Avalonia.ViewModels.Records"
@@ -15,17 +17,10 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     mc:Ignorable="d">
 
-    <!--  Номера строк служат левым отступом; оставляем небольшой зазор, когда они скрыты  -->
-    <rxui:ReactiveUserControl.Styles>
-        <Style Selector="avaloniaEdit|TextEditor[ShowLineNumbers=False]">
-            <Setter Property="Padding" Value="3,0,0,0" />
-        </Style>
-    </rxui:ReactiveUserControl.Styles>
-
     <ScrollViewer>
         <StackPanel Margin="20" Spacing="20">
             <userControls:SettingsSectionHeader
-                Description="Настройки внешнего вида приложения: шрифты редактора и терминала, оформление окна и подсветка синтаксиса кода."
+                Description="Настройки внешнего вида приложения: шрифты редактора и терминала, оформление окна и тема подсветки синтаксиса."
                 IconKind="Eye"
                 Title="Вид" />
 
@@ -98,20 +93,27 @@
             <CheckBox Content="Использовать системную рамку окна" IsChecked="{Binding UseSystemTitleBar}" />
             <CheckBox Content="Показывать боковую панель" IsChecked="{Binding ShowSidebar}" />
 
-            <TextBlock Classes="settings-section-title" Text="Редактор" />
-
-            <CheckBox
-                Content="Подсветка синтаксиса"
-                IsChecked="{Binding EnableCodeHighlighting}"
-                ToolTip.Tip="Отключите, чтобы редактор кода отображался без цветовой подсветки" />
-            <CheckBox
-                Content="Показывать номера строк"
-                IsChecked="{Binding ShowCodeLineNumbers}"
-                ToolTip.Tip="Отображение нумерации строк в редакторе кода" />
+            <Grid ColumnDefinitions="*,Auto">
+                <TextBlock
+                    Grid.Column="0"
+                    Text="Положение боковой панели"
+                    VerticalAlignment="Center" />
+                <ComboBox
+                    Grid.Column="1"
+                    ItemsSource="{Binding SidebarPositionValues}"
+                    SelectedItem="{Binding SidebarPosition}"
+                    Width="150">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate x:DataType="enums:SidebarPosition">
+                            <TextBlock Text="{Binding ., Converter={converters:SidebarPositionToTextConverter}}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+            </Grid>
 
             <TextBlock Classes="settings-section-title" Text="Тема подсветки синтаксиса" />
 
-            <ItemsControl IsEnabled="{Binding EnableCodeHighlighting}" ItemsSource="{Binding AvailableCodeThemes}">
+            <ItemsControl ItemsSource="{Binding AvailableCodeThemes}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <WrapPanel />
@@ -158,7 +160,7 @@
                     LineNumbersForeground="{DynamicResource EditorLineNumberBrush}"
                     Margin="0,0,4,0"
                     Name="CSharpExampleEditor"
-                    ShowLineNumbers="{Binding ShowCodeLineNumbers}" />
+                    ShowLineNumbers="True" />
                 <avaloniaEdit:TextEditor
                     Background="{DynamicResource EditorBackgroundBrush}"
                     FontSize="14"
@@ -168,7 +170,7 @@
                     LineNumbersForeground="{DynamicResource EditorLineNumberBrush}"
                     Margin="4,0,0,0"
                     Name="PythonExampleEditor"
-                    ShowLineNumbers="{Binding ShowCodeLineNumbers}" />
+                    ShowLineNumbers="True" />
             </Grid>
         </StackPanel>
     </ScrollViewer>

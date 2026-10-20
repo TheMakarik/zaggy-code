@@ -1,0 +1,24 @@
+<Styles xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Style Selector="GridSplitter">
+        <Setter Property="Background" Value="{DynamicResource HoverBackgroundBrush}" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+    </Style>
+
+    <!--  Невидимый разделитель между редактором и картой  -->
+    <Style Selector="GridSplitter.subtle">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Width" Value="4" />
+        <Setter Property="Cursor" Value="SizeWestEast" />
+    </Style>
+
+    <Style Selector="GridSplitter.horizontal">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Height" Value="8" />
+        <Setter Property="Cursor" Value="SizeNorthSouth" />
+    </Style>
+
+    <Style Selector="GridSplitter.horizontal:pointerover">
+        <Setter Property="Background" Value="Transparent" />
+    </Style>
+</Styles>

@@ -1,8 +1,43 @@
 <Styles xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <StyleInclude Source="/Views/Styles/CommonStyles.axaml" />
-    <StyleInclude Source="/Views/Styles/MenuStyles.axaml" />
-    <StyleInclude Source="/Views/Styles/ButtonStyles.axaml" />
-    <StyleInclude Source="/Views/Styles/ComboBoxStyles.axaml" />
-    <StyleInclude Source="/Views/Styles/EditorStyles.axaml" />
-    <StyleInclude Source="/Views/Styles/SettingsStyles.axaml" />
+    <StyleInclude Source="/Views/Styles/Common/Resources.axaml" />
+
+    <StyleInclude Source="/Views/Styles/Common/Window.axaml" />
+    <StyleInclude Source="/Views/Styles/Common/MainBackground.axaml" />
+    <StyleInclude Source="/Views/Styles/Common/Sidebar.axaml" />
+    <StyleInclude Source="/Views/Styles/Common/FooterBar.axaml" />
+    <StyleInclude Source="/Views/Styles/Common/TextBlock.axaml" />
+    <StyleInclude Source="/Views/Styles/Common/Label.axaml" />
+    <StyleInclude Source="/Views/Styles/Common/Card.axaml" />
+    <StyleInclude Source="/Views/Styles/Common/HeaderBar.axaml" />
+    <StyleInclude Source="/Views/Styles/Common/TerminalHeader.axaml" />
+    <StyleInclude Source="/Views/Styles/Common/ToolTip.axaml" />
+
+    <StyleInclude Source="/Views/Styles/Menu/MenuThemes.axaml" />
+    <StyleInclude Source="/Views/Styles/Menu/MenuFlyoutPresenter.axaml" />
+    <StyleInclude Source="/Views/Styles/Menu/FullMenu.axaml" />
+    <StyleInclude Source="/Views/Styles/Menu/CompactMenu.axaml" />
+
+    <StyleInclude Source="/Views/Styles/Button/IconButton.axaml" />
+    <StyleInclude Source="/Views/Styles/Button/RunButton.axaml" />
+    <StyleInclude Source="/Views/Styles/Button/PrimaryActionButton.axaml" />
+    <StyleInclude Source="/Views/Styles/Button/WindowControlButton.axaml" />
+    <StyleInclude Source="/Views/Styles/Button/SpeedButton.axaml" />
+    <StyleInclude Source="/Views/Styles/Button/SpeedFlyoutButton.axaml" />
+
+    <StyleInclude Source="/Views/Styles/Flyout/SpeedFlyoutPresenter.axaml" />
+
+    <StyleInclude Source="/Views/Styles/ComboBox/ComboBox.axaml" />
+    <StyleInclude Source="/Views/Styles/ComboBox/ComboBoxItem.axaml" />
+    <StyleInclude Source="/Views/Styles/ComboBox/LanguageSelector.axaml" />
+
+    <StyleInclude Source="/Views/Styles/Editor/TextEditor.axaml" />
+    <StyleInclude Source="/Views/Styles/Editor/GridSplitter.axaml" />
+
+    <StyleInclude Source="/Views/Styles/Settings/SettingsTabControl.axaml" />
+    <StyleInclude Source="/Views/Styles/Settings/SettingsSectionTitle.axaml" />
+    <StyleInclude Source="/Views/Styles/Settings/SettingsHint.axaml" />
+    <StyleInclude Source="/Views/Styles/Settings/SettingsThemeButton.axaml" />
+    <StyleInclude Source="/Views/Styles/Settings/SettingsFooterButton.axaml" />
+    <StyleInclude Source="/Views/Styles/Settings/SettingsFontButton.axaml" />
+    <StyleInclude Source="/Views/Styles/Settings/SettingsToast.axaml" />
 </Styles>

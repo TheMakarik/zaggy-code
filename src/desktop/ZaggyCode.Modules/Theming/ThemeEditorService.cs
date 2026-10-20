@@ -145,13 +145,13 @@ public sealed class ThemeEditorService : IThemeEditorService
             Description = original.Description,
             CreatedAtVersion = original.CreatedAtVersion,
             Author = original.Author,
-            BackgroundColor = theme.BackgroundColor,
+            WindowBackgroundColor = theme.WindowBackgroundColor,
             SidebarBackgroundColor = theme.SidebarBackgroundColor,
             EditorBackgroundColor = theme.EditorBackgroundColor,
             TerminalBackgroundColor = theme.TerminalBackgroundColor,
-            PrimaryColor = theme.PrimaryColor,
+            AccentColor = theme.AccentColor,
             BorderColor = theme.BorderColor,
-            ForegroundColor = theme.ForegroundColor
+            TextPrimaryColor = theme.TextPrimaryColor
         };
     }
 

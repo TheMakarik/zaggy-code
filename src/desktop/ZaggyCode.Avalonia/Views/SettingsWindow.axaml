@@ -1,7 +1,7 @@
 <rxui:ReactiveWindow
-    Background="{DynamicResource BackgroundBrush}"
+    Background="{DynamicResource WindowBackgroundBrush}"
     CanResize="True"
-    Foreground="{DynamicResource ForegroundBrush}"
+    Foreground="{DynamicResource TextPrimaryBrush}"
     Height="600"
     MinHeight="500"
     MinWidth="700"

@@ -24,13 +24,13 @@ public sealed record ThemeMetadataItem(
         metadata.Author,
         metadata.CreatedAtVersion,
         metadata.Description ?? string.Empty,
-        CreateBrush(metadata.BackgroundColor),
+        CreateBrush(metadata.WindowBackgroundColor),
         CreateBrush(metadata.SidebarBackgroundColor),
         CreateBrush(metadata.EditorBackgroundColor),
         CreateBrush(metadata.TerminalBackgroundColor),
-        CreateBrush(metadata.PrimaryColor),
+        CreateBrush(metadata.AccentColor),
         CreateBrush(metadata.BorderColor),
-        CreateBrush(metadata.ForegroundColor),
+        CreateBrush(metadata.TextPrimaryColor),
         metadata.IsSystemTheme,
         metadata);
 

@@ -25,23 +25,8 @@ public partial class AppearanceSettingsView : ReactiveUserControl<AppearanceSett
             LoadExampleCode(CSharpExampleEditor, ViewModel.CSharpExamplePath);
             LoadExampleCode(PythonExampleEditor, ViewModel.PythonExamplePath);
 
-            ViewModel.WhenAnyValue(vm => vm.EnableCodeHighlighting)
-                .Subscribe(ApplyCodeHighlighting);
-        };
-    }
-
-    private void ApplyCodeHighlighting(bool isEnabled)
-    {
-        if (isEnabled)
-        {
             InstallExampleEditorsHighlighting();
-            return;
-        }
-
-        _csharpTextMateInstallation?.Dispose();
-        _csharpTextMateInstallation = null;
-        _pythonTextMateInstallation?.Dispose();
-        _pythonTextMateInstallation = null;
+        };
     }
 
     private void InstallExampleEditorsHighlighting()

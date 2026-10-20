@@ -1,9 +1,9 @@
 <Window
-    Background="{DynamicResource BackgroundBrush}"
-    BorderBrush="{DynamicResource ForegroundBrush}"
+    Background="{DynamicResource WindowBackgroundBrush}"
+    BorderBrush="{DynamicResource TextPrimaryBrush}"
     BorderThickness="1"
     CanResize="True"
-    Foreground="{DynamicResource ForegroundBrush}"
+    Foreground="{DynamicResource TextPrimaryBrush}"
     Height="640"
     MinHeight="480"
     MinWidth="560"
@@ -23,7 +23,7 @@
 
     <Window.Styles>
         <Style Selector="Grid.color-row TextBlock.color-name">
-            <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
             <Setter Property="Transitions">
                 <Transitions>
                     <BrushTransition Duration="0:0:0.15" Property="Foreground" />
@@ -31,7 +31,7 @@
             </Setter>
         </Style>
         <Style Selector="Grid.color-row Border.color-swatch">
-            <Setter Property="BorderBrush" Value="{DynamicResource ForegroundBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource TextPrimaryBrush}" />
             <Setter Property="Transitions">
                 <Transitions>
                     <BrushTransition Duration="0:0:0.15" Property="BorderBrush" />
@@ -39,10 +39,10 @@
             </Setter>
         </Style>
         <Style Selector="Grid.color-row:pointerover TextBlock.color-name">
-            <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
         </Style>
         <Style Selector="Grid.color-row:pointerover Border.color-swatch">
-            <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
         </Style>
 
         <Style Selector="Button.color-reset">
@@ -50,7 +50,7 @@
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="CornerRadius" Value="6" />
             <Setter Property="Padding" Value="4" />
-            <Setter Property="Foreground" Value="{DynamicResource ForegroundMutedBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}" />
             <Setter Property="Transitions">
                 <Transitions>
                     <BrushTransition Duration="0:0:0.15" Property="Foreground" />
@@ -58,7 +58,7 @@
             </Setter>
         </Style>
         <Style Selector="Button.color-reset:pointerover:not(:disabled)">
-            <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
         </Style>
         <Style Selector="Button.color-reset materialIcons|MaterialIcon">
             <Setter Property="Width" Value="18" />

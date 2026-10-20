@@ -1,7 +1,7 @@
 <rxui:ReactiveWindow
-    Background="{DynamicResource BackgroundBrush}"
+    Background="{DynamicResource WindowBackgroundBrush}"
     CanResize="True"
-    Foreground="{DynamicResource ForegroundBrush}"
+    Foreground="{DynamicResource TextPrimaryBrush}"
     Name="ThisWindow"
     Title="Программирование с Загги"
     WindowDecorations="{Binding UseOsDecoration, Converter={converters:BoolToWindowDecorationsConverter}}"
@@ -17,6 +17,7 @@
     xmlns:controls="clr-namespace:ZaggyCode.Avalonia.Views.Controls"
     xmlns:converters="clr-namespace:ZaggyCode.Avalonia.Views.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:dataEnums="clr-namespace:ZaggyCode.Core.Data.Enums;assembly=ZaggyCode.Core"
     xmlns:enums="clr-namespace:ZaggyCode.Core.Languages.Enums;assembly=ZaggyCode.Core"
     xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -35,17 +36,10 @@
         <KeyBinding Command="{Binding RunSelectedCodeCommand}" Gesture="Ctrl+Alt+R" />
     </rxui:ReactiveWindow.KeyBindings>
 
-    <!--  Номера строк служат левым отступом; оставляем небольшой зазор, когда они скрыты  -->
-    <rxui:ReactiveWindow.Styles>
-        <Style Selector="avaloniaEdit|TextEditor[ShowLineNumbers=False]">
-            <Setter Property="Padding" Value="3,0,0,0" />
-        </Style>
-    </rxui:ReactiveWindow.Styles>
-
     <Grid
         Classes="main-background"
         ColumnDefinitions="6,*,6"
-        RowDefinitions="6,Auto,*,6">
+        RowDefinitions="6,Auto,Auto,*,Auto,Auto,6">
         <Border
             Background="Transparent"
             Cursor="TopLeftCorner"
@@ -72,7 +66,7 @@
             Cursor="LeftSide"
             Grid.Column="0"
             Grid.Row="1"
-            Grid.RowSpan="2"
+            Grid.RowSpan="5"
             PointerPressed="ResizeHandle_PointerPressed"
             Tag="Left" />
         <Border
@@ -80,30 +74,114 @@
             Cursor="RightSide"
             Grid.Column="2"
             Grid.Row="1"
-            Grid.RowSpan="2"
+            Grid.RowSpan="5"
             PointerPressed="ResizeHandle_PointerPressed"
             Tag="Right" />
         <Border
             Background="Transparent"
             Cursor="BottomLeftCorner"
             Grid.Column="0"
-            Grid.Row="3"
+            Grid.Row="6"
             PointerPressed="ResizeHandle_PointerPressed"
             Tag="BottomLeft" />
         <Border
             Background="Transparent"
             Cursor="BottomSide"
             Grid.Column="1"
-            Grid.Row="3"
+            Grid.Row="6"
             PointerPressed="ResizeHandle_PointerPressed"
             Tag="Bottom" />
         <Border
             Background="Transparent"
             Cursor="BottomRightCorner"
             Grid.Column="2"
-            Grid.Row="3"
+            Grid.Row="6"
             PointerPressed="ResizeHandle_PointerPressed"
             Tag="BottomRight" />
+
+        <!--  Горизонтальная боковая панель (сверху или снизу)  -->
+        <Border
+            Classes="sidebar"
+            Grid.Column="1"
+            Grid.Row="{Binding SidebarRow}"
+            IsVisible="{Binding IsHorizontalSidebarVisible}"
+            Padding="6,4">
+            <StackPanel Orientation="Horizontal" Spacing="4">
+                <Button
+                    Classes="icon-button run-button"
+                    Command="{Binding ExecuteCodeCommand}"
+                    Content="{materialIcons:MaterialIconExt Kind=Play}"
+                    ToolTip.Tip="Запустить Загги" />
+                <Button
+                    Classes="icon-button"
+                    Content="{materialIcons:MaterialIconExt Kind=ViewListOutline}"
+                    ToolTip.Tip="Открыть загруженные уровни" />
+                <Button
+                    Classes="icon-button"
+                    Command="{Binding ThrowNotImplementedCommand}"
+                    Content="{materialIcons:MaterialIconExt Kind=Download}"
+                    ToolTip.Tip="Установить уровень из интернета" />
+                <Button
+                    Classes="icon-button"
+                    Content="{materialIcons:MaterialIconExt Kind=FileDownload}"
+                    ToolTip.Tip="Установить уровень из файла" />
+                <Button
+                    Classes="icon-button"
+                    Content="{materialIcons:MaterialIconExt Kind=ContentSave}"
+                    ToolTip.Tip="Сохранить" />
+                <Button Classes="icon-button" ToolTip.Tip="Скорость">
+                    <TextBlock HorizontalAlignment="Center" Text="{Binding ExecutionSpeed}" />
+                    <Button.Flyout>
+                        <Flyout Placement="BottomEdgeAlignedLeft">
+                            <Border
+                                Background="{DynamicResource CardBackgroundBrush}"
+                                CornerRadius="{DynamicResource SmallCornerRadius}"
+                                Padding="4">
+                                <ItemsControl ItemsSource="{Binding Source={x:Type enums:ExecutionSpeed}, Converter={converters:EnumValuesConverter}}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Orientation="Horizontal" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="x:String">
+                                            <Button
+                                                Classes="speed-flyout-button"
+                                                Command="{Binding DataContext.ChangeExecutionSpeedCommand, ElementName=ThisWindow}"
+                                                CommandParameter="{Binding .}"
+                                                Content="{Binding .}"
+                                                Margin="5,0">
+                                                <Button.IsEnabled>
+                                                    <MultiBinding Converter="{converters:IsNotEqualConverter}">
+                                                        <Binding Path="." />
+                                                        <Binding ElementName="ThisWindow" Path="DataContext.ExecutionSpeed" />
+                                                    </MultiBinding>
+                                                </Button.IsEnabled>
+                                            </Button>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </Border>
+                        </Flyout>
+                    </Button.Flyout>
+                </Button>
+                <Button
+                    Classes="icon-button"
+                    Command="{Binding OpenAboutCommand}"
+                    Content="{materialIcons:MaterialIconExt Kind=HelpBox}"
+                    ToolTip.Tip="Справка по приложению" />
+                <Button
+                    Classes="icon-button"
+                    Command="{Binding OpenSettingsCommand}"
+                    Content="{materialIcons:MaterialIconExt Kind=Settings}"
+                    ToolTip.Tip="Настройки" />
+                <Button
+                    Classes="icon-button"
+                    Command="{Binding ChangeTerminalVisibilityCommand}"
+                    Content="{materialIcons:MaterialIconExt Kind=Terminal}"
+                    ToolTip.Tip="Терминал" />
+            </StackPanel>
+        </Border>
 
         <!--  Шапка  -->
         <Border
@@ -111,12 +189,12 @@
             Grid.Column="1"
             Grid.Row="1"
             Name="HeaderBar"
-            Padding="12,8">
+            Padding="10,6">
             <Grid ColumnDefinitions="Auto,*,Auto">
                 <StackPanel
                     Grid.Column="0"
                     Orientation="Horizontal"
-                    Spacing="12"
+                    Spacing="10"
                     VerticalAlignment="Center">
 
                     <Menu Classes="full-menu" IsVisible="{Binding #ThisWindow.Bounds.Width, Converter={converters:WidthToVisibilityConverter}, ConverterParameter='&gt;=900'}">
@@ -174,7 +252,6 @@
                             <MenuItem
                                 Header="Тема подсветки синтаксиса"
                                 Icon="{materialIcons:MaterialIconExt Kind=CodeBlockBraces}"
-                                IsEnabled="{Binding EnableCodeHighlighting}"
                                 ItemsSource="{Binding AvailableCodeThemes}"
                                 Name="CodeThemeMenu">
                                 <MenuItem.ItemContainerTheme>
@@ -202,6 +279,28 @@
                                 </MenuItem.ItemContainerTheme>
                             </MenuItem>
                             <MenuItem
+                                Header="Положение боковой панели"
+                                Icon="{materialIcons:MaterialIconExt Kind=PageLayoutSidebarLeft}"
+                                IsEnabled="{Binding DataContext.ShowSidebar, ElementName=ThisWindow}"
+                                ItemsSource="{Binding Source={x:Type dataEnums:SidebarPosition}, Converter={converters:EnumValuesConverter}}">
+                                <MenuItem.ItemContainerTheme>
+                                    <ControlTheme
+                                        BasedOn="{StaticResource {x:Type MenuItem}}"
+                                        TargetType="MenuItem"
+                                        x:DataType="dataEnums:SidebarPosition">
+                                        <Setter Property="Header" Value="{Binding ., Converter={converters:SidebarPositionToTextConverter}}" />
+                                        <Setter Property="Command" Value="{Binding DataContext.ChangeSidebarPositionCommand, ElementName=ThisWindow}" />
+                                        <Setter Property="CommandParameter" Value="{Binding .}" />
+                                        <Setter Property="IsEnabled">
+                                            <MultiBinding Converter="{converters:IsNotEqualConverter}">
+                                                <Binding Path="." />
+                                                <Binding Path="DataContext.SidebarPosition" ElementName="ThisWindow" />
+                                            </MultiBinding>
+                                        </Setter>
+                                    </ControlTheme>
+                                </MenuItem.ItemContainerTheme>
+                            </MenuItem>
+                            <MenuItem
                                 Command="{Binding DataContext.ToggleShowSidebarCommand, ElementName=ThisWindow}"
                                 Header="Показывать боковое меню"
                                 Icon="{materialIcons:MaterialIconExt Kind=PageLayoutSidebarLeft}"
@@ -212,18 +311,6 @@
                                 Header="Использовать системную рамку окна"
                                 Icon="{materialIcons:MaterialIconExt Kind=WindowMaximize}"
                                 IsChecked="{Binding DataContext.UseOsDecoration, ElementName=ThisWindow}"
-                                Theme="{StaticResource ZaggyToggleMenuItem}" />
-                            <MenuItem
-                                Command="{Binding DataContext.ToggleShowCodeLineNumbersCommand, ElementName=ThisWindow}"
-                                Header="Нумерация строк"
-                                Icon="{materialIcons:MaterialIconExt Kind=FormatListNumbered}"
-                                IsChecked="{Binding DataContext.ShowCodeLineNumbers, ElementName=ThisWindow}"
-                                Theme="{StaticResource ZaggyToggleMenuItem}" />
-                            <MenuItem
-                                Command="{Binding DataContext.ToggleEnableCodeHighlightingCommand, ElementName=ThisWindow}"
-                                Header="Подсветка синтаксиса"
-                                Icon="{materialIcons:MaterialIconExt Kind=FormatColorHighlight}"
-                                IsChecked="{Binding DataContext.EnableCodeHighlighting, ElementName=ThisWindow}"
                                 Theme="{StaticResource ZaggyToggleMenuItem}" />
                         </MenuItem>
 
@@ -263,7 +350,7 @@
                         <MenuItem Background="Transparent" Padding="8">
                             <MenuItem.Header>
                                 <materialIcons:MaterialIcon
-                                    Foreground="{DynamicResource ForegroundBrush}"
+                                    Foreground="{DynamicResource TextPrimaryBrush}"
                                     Height="24"
                                     Kind="Menu"
                                     Width="24" />
@@ -323,7 +410,6 @@
                                 <MenuItem
                                     Header="Тема подсветки синтаксиса"
                                     Icon="{materialIcons:MaterialIconExt Kind=CodeBlockBraces}"
-                                    IsEnabled="{Binding EnableCodeHighlighting}"
                                     ItemsSource="{Binding AvailableCodeThemes}">
                                     <MenuItem.ItemContainerTheme>
                                         <ControlTheme
@@ -350,6 +436,27 @@
                                     </MenuItem.ItemContainerTheme>
                                 </MenuItem>
                                 <MenuItem
+                                    Header="Положение боковой панели"
+                                    Icon="{materialIcons:MaterialIconExt Kind=PageLayoutSidebarLeft}"
+                                    ItemsSource="{Binding Source={x:Type dataEnums:SidebarPosition}, Converter={converters:EnumValuesConverter}}">
+                                    <MenuItem.ItemContainerTheme>
+                                        <ControlTheme
+                                            BasedOn="{StaticResource {x:Type MenuItem}}"
+                                            TargetType="MenuItem"
+                                            x:DataType="dataEnums:SidebarPosition">
+                                            <Setter Property="Header" Value="{Binding ., Converter={converters:SidebarPositionToTextConverter}}" />
+                                            <Setter Property="Command" Value="{Binding DataContext.ChangeSidebarPositionCommand, ElementName=ThisWindow}" />
+                                            <Setter Property="CommandParameter" Value="{Binding .}" />
+                                            <Setter Property="IsEnabled">
+                                                <MultiBinding Converter="{converters:IsNotEqualConverter}">
+                                                    <Binding Path="." />
+                                                    <Binding Path="DataContext.SidebarPosition" ElementName="ThisWindow" />
+                                                </MultiBinding>
+                                            </Setter>
+                                        </ControlTheme>
+                                    </MenuItem.ItemContainerTheme>
+                                </MenuItem>
+                                <MenuItem
                                     Command="{Binding DataContext.ToggleShowSidebarCommand, ElementName=ThisWindow}"
                                     Header="Показывать боковое меню"
                                     Icon="{materialIcons:MaterialIconExt Kind=PageLayoutSidebarLeft}"
@@ -360,18 +467,6 @@
                                     Header="Использовать системную рамку окна"
                                     Icon="{materialIcons:MaterialIconExt Kind=WindowMaximize}"
                                     IsChecked="{Binding DataContext.UseOsDecoration, ElementName=ThisWindow}"
-                                    Theme="{StaticResource ZaggyToggleMenuItem}" />
-                                <MenuItem
-                                    Command="{Binding DataContext.ToggleShowCodeLineNumbersCommand, ElementName=ThisWindow}"
-                                    Header="Нумерация строк"
-                                    Icon="{materialIcons:MaterialIconExt Kind=FormatListNumbered}"
-                                    IsChecked="{Binding DataContext.ShowCodeLineNumbers, ElementName=ThisWindow}"
-                                    Theme="{StaticResource ZaggyToggleMenuItem}" />
-                                <MenuItem
-                                    Command="{Binding DataContext.ToggleEnableCodeHighlightingCommand, ElementName=ThisWindow}"
-                                    Header="Подсветка синтаксиса"
-                                    Icon="{materialIcons:MaterialIconExt Kind=FormatColorHighlight}"
-                                    IsChecked="{Binding DataContext.EnableCodeHighlighting, ElementName=ThisWindow}"
                                     Theme="{StaticResource ZaggyToggleMenuItem}" />
                                 <MenuItem Header="Текст" Icon="{materialIcons:MaterialIconExt Kind=FontSize}">
                                     <MenuItem
@@ -469,20 +564,21 @@
         <!--  Рабочая область  -->
         <Grid
             Classes="main-background"
-            ColumnDefinitions="Auto,*"
+            ColumnDefinitions="Auto,*,Auto"
             Grid.Column="1"
-            Grid.Row="2">
-            <!--  Левая боковая панель  -->
+            Grid.Row="3">
+            <!--  Вертикальная боковая панель (слева или справа)  -->
             <Border
                 Classes="sidebar"
-                IsVisible="{Binding ShowSidebar}"
-                Padding="6"
-                Width="45">
+                Grid.Column="{Binding SidebarColumn}"
+                IsVisible="{Binding IsVerticalSidebarVisible}"
+                Padding="4"
+                Width="42">
                 <Grid RowDefinitions="Auto,*,Auto">
                     <StackPanel
                         Grid.Row="0"
                         Orientation="Vertical"
-                        Spacing="6">
+                        Spacing="4">
                         <Button
                             Classes="icon-button run-button"
                             Command="{Binding ExecuteCodeCommand}"
@@ -510,7 +606,7 @@
                             <Button.Flyout>
                                 <Flyout Placement="RightEdgeAlignedTop">
                                     <Border
-                                        Background="{DynamicResource SurfaceBrush}"
+                                        Background="{DynamicResource CardBackgroundBrush}"
                                         CornerRadius="{DynamicResource SmallCornerRadius}"
                                         Padding="4">
                                         <ItemsControl ItemsSource="{Binding Source={x:Type enums:ExecutionSpeed}, Converter={converters:EnumValuesConverter}}">
@@ -546,7 +642,7 @@
                     <StackPanel
                         Grid.Row="2"
                         Orientation="Vertical"
-                        Spacing="6">
+                        Spacing="4">
                         <Button
                             Classes="icon-button"
                             Command="{Binding OpenAboutCommand}"
@@ -584,7 +680,7 @@
                                 Foreground="{DynamicResource EditorForegroundBrush}"
                                 LineNumbersForeground="{DynamicResource EditorLineNumberBrush}"
                                 Name="Editor"
-                                ShowLineNumbers="{Binding ShowCodeLineNumbers}">
+                                ShowLineNumbers="True">
                                 <Interaction.Behaviors>
                                     <behaviors:TextEditorZoomBehavior
                                         MaxFontSize="{Binding MaxFontSize, Mode=OneTime}"
@@ -658,7 +754,7 @@
                                     Spacing="8"
                                     VerticalAlignment="Center">
                                     <materialIcons:MaterialIcon
-                                        Foreground="{DynamicResource PrimaryBrush}"
+                                        Foreground="{DynamicResource AccentBrush}"
                                         Height="18"
                                         Kind="Terminal"
                                         Width="18" />
@@ -719,12 +815,24 @@
             </Grid>
         </Grid>
 
+        <!--  Нижняя строка состояния  -->
+        <Border
+            Classes="footer-bar"
+            Grid.Column="1"
+            Grid.Row="5"
+            Padding="10,3">
+            <TextBlock
+                Name="FooterText"
+                FontSize="12"
+                VerticalAlignment="Center" />
+        </Border>
+
         <Border
             Classes="settings-toast"
             Grid.Column="0"
             Grid.ColumnSpan="3"
             Grid.Row="0"
-            Grid.RowSpan="4"
+            Grid.RowSpan="7"
             HorizontalAlignment="Center"
             IsVisible="False"
             Margin="0,0,0,20"

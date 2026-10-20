@@ -1,0 +1,11 @@
+<Styles xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Styles.Resources>
+        <ResourceDictionary>
+            <CornerRadius x:Key="CardCornerRadius">10</CornerRadius>
+            <CornerRadius x:Key="SmallCornerRadius">8</CornerRadius>
+            <CornerRadius x:Key="ButtonCornerRadius">8</CornerRadius>
+            <Thickness x:Key="CardPadding">12</Thickness>
+        </ResourceDictionary>
+    </Styles.Resources>
+</Styles>

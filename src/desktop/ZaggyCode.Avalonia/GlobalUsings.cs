@@ -75,6 +75,7 @@ global using ZaggyCode.Avalonia.Theming;
 global using ZaggyCode.Core.Archiving.Interfaces;
 global using ZaggyCode.Core.Common;
 global using ZaggyCode.Core.Common.Utils;
+global using ZaggyCode.Core.Data.Enums;
 global using ZaggyCode.Core.Data.Interfaces;
 global using ZaggyCode.Core.Data.Model;
 global using ZaggyCode.Core.Theming.Model;

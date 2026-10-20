@@ -1,9 +1,9 @@
 <Window
-    Background="{DynamicResource BackgroundBrush}"
-    BorderBrush="{DynamicResource ForegroundBrush}"
+    Background="{DynamicResource WindowBackgroundBrush}"
+    BorderBrush="{DynamicResource TextPrimaryBrush}"
     BorderThickness="1"
     CanResize="False"
-    Foreground="{DynamicResource ForegroundBrush}"
+    Foreground="{DynamicResource TextPrimaryBrush}"
     ShowInTaskbar="False"
     SizeToContent="Height"
     Title="Выбор цвета"

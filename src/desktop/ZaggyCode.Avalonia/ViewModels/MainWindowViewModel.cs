@@ -9,8 +9,7 @@ public partial class MainWindowViewModel : ViewModelBase
     [Reactive] private bool _isRunning = false;
     [Reactive] private bool _useOsDecoration = false;
     [Reactive] private bool _showSidebar = true;
-    [Reactive] private bool _enableCodeHighlighting = true;
-    [Reactive] private bool _showCodeLineNumbers = true;
+    [Reactive] private SidebarPosition _sidebarPosition = SidebarPosition.Left;
     [Reactive] private ExecutionSpeed _executionSpeed;
     [Reactive] private Language _selectedLanguage;
     [Reactive] private LanguageItem? _selectedLanguageItem;
@@ -25,6 +24,14 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public int MaxFontSize { get; init; }
     public int MinFontSize { get; init; }
+    public bool IsSidebarLeft => SidebarPosition == SidebarPosition.Left;
+    public bool IsSidebarRight => SidebarPosition == SidebarPosition.Right;
+    public bool IsSidebarTop => SidebarPosition == SidebarPosition.Top;
+    public bool IsSidebarBottom => SidebarPosition == SidebarPosition.Bottom;
+    public bool IsVerticalSidebarVisible => ShowSidebar && (IsSidebarLeft || IsSidebarRight);
+    public bool IsHorizontalSidebarVisible => ShowSidebar && (IsSidebarTop || IsSidebarBottom);
+    public int SidebarColumn => IsSidebarRight ? 2 : 0;
+    public int SidebarRow => IsSidebarTop ? 2 : 4;
     public string CodeTheme { get; private set; }
     public PopupOptions PopupOptions { get; }
     public ObservableCollection<CodeThemeItem> AvailableCodeThemes { get; } = [];
@@ -163,8 +170,7 @@ public partial class MainWindowViewModel : ViewModelBase
         _terminalFontSize = userStorage.Current.TerminalFontSize;
         _useOsDecoration = userStorage.Current.UseSystemTitleBar;
         _showSidebar = userStorage.Current.ShowSidebar;
-        _enableCodeHighlighting = userStorage.Current.EnableCodeHighlighting;
-        _showCodeLineNumbers = userStorage.Current.ShowCodeLineNumbers;
+        _sidebarPosition = userStorage.Current.SidebarPosition;
         CodeTheme = userStorage.Current.CodeTheme;
         PopupOptions = popupOptions.Value;
         MaxFontSize = _fontSizeOptions.Value.MaxFontSize;
@@ -347,11 +353,8 @@ public partial class MainWindowViewModel : ViewModelBase
         MessageBus.Current.Listen<ShowSidebarChangedMessage>()
             .Subscribe(message => ShowSidebar = message.ShowSidebar);
 
-        MessageBus.Current.Listen<EnableCodeHighlightingChangedMessage>()
-            .Subscribe(message => EnableCodeHighlighting = message.EnableCodeHighlighting);
-
-        MessageBus.Current.Listen<ShowCodeLineNumbersChangedMessage>()
-            .Subscribe(message => ShowCodeLineNumbers = message.ShowCodeLineNumbers);
+        MessageBus.Current.Listen<SidebarPositionChangedMessage>()
+            .Subscribe(message => SidebarPosition = message.SidebarPosition);
 
 #pragma warning disable AsyncVoidMethod
         MessageBus.Current.Listen<CodeThemeChangedMessage>()
@@ -382,16 +385,22 @@ public partial class MainWindowViewModel : ViewModelBase
             .Subscribe(_ => _userStorage.Current.UseSystemTitleBar = _useOsDecoration);
 
         this.WhenAnyValue(vm => vm.ShowSidebar)
-            .Where(showSidebar => showSidebar != _userStorage.Current.ShowSidebar)
-            .Subscribe(_ => _userStorage.Current.ShowSidebar = _showSidebar);
+            .Subscribe(showSidebar =>
+            {
+                if (showSidebar != _userStorage.Current.ShowSidebar)
+                    _userStorage.Current.ShowSidebar = showSidebar;
 
-        this.WhenAnyValue(vm => vm.EnableCodeHighlighting)
-            .Where(enable => enable != _userStorage.Current.EnableCodeHighlighting)
-            .Subscribe(_ => _userStorage.Current.EnableCodeHighlighting = _enableCodeHighlighting);
+                RaiseSidebarLayoutChanged();
+            });
 
-        this.WhenAnyValue(vm => vm.ShowCodeLineNumbers)
-            .Where(showLineNumbers => showLineNumbers != _userStorage.Current.ShowCodeLineNumbers)
-            .Subscribe(_ => _userStorage.Current.ShowCodeLineNumbers = _showCodeLineNumbers);
+        this.WhenAnyValue(vm => vm.SidebarPosition)
+            .Subscribe(position =>
+            {
+                if (position != _userStorage.Current.SidebarPosition)
+                    _userStorage.Current.SidebarPosition = position;
+
+                RaiseSidebarLayoutChanged();
+            });
 
         this.WhenAnyValue(vm => vm.ExecutionSpeed)
             .Where(speed => speed != _userStorage.Current.LastSpeed)
@@ -400,6 +409,18 @@ public partial class MainWindowViewModel : ViewModelBase
         this.WhenAnyValue(vm => vm.SelectedLanguage)
             .Where(language => language != _userStorage.Current.LastLanguage)
             .Subscribe(_ => _userStorage.Current.LastLanguage = _selectedLanguage);
+    }
+
+    private void RaiseSidebarLayoutChanged()
+    {
+        this.RaisePropertyChanged(nameof(IsSidebarLeft));
+        this.RaisePropertyChanged(nameof(IsSidebarRight));
+        this.RaisePropertyChanged(nameof(IsSidebarTop));
+        this.RaisePropertyChanged(nameof(IsSidebarBottom));
+        this.RaisePropertyChanged(nameof(IsVerticalSidebarVisible));
+        this.RaisePropertyChanged(nameof(IsHorizontalSidebarVisible));
+        this.RaisePropertyChanged(nameof(SidebarColumn));
+        this.RaisePropertyChanged(nameof(SidebarRow));
     }
 
     private void InitializeGameEngine()
@@ -502,14 +523,6 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     [ReactiveCommand]
-    private void ToggleShowCodeLineNumbers()
-        => ShowCodeLineNumbers = !ShowCodeLineNumbers;
-
-    [ReactiveCommand]
-    private void ToggleEnableCodeHighlighting()
-        => EnableCodeHighlighting = !EnableCodeHighlighting;
-
-    [ReactiveCommand]
     private async Task IncrementEditorFontSize()
     {
         if (TextEditorFontSize >= _fontSizeOptions.Value.MaxFontSize)
@@ -606,6 +619,13 @@ public partial class MainWindowViewModel : ViewModelBase
     private void ToggleShowSidebar()
     {
         ShowSidebar = !ShowSidebar;
+    }
+
+    [ReactiveCommand]
+    private void ChangeSidebarPosition(string? position)
+    {
+        if (Enum.TryParse<SidebarPosition>(position, out var value))
+            SidebarPosition = value;
     }
 
     [ReactiveCommand]

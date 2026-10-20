@@ -26,7 +26,7 @@
             <!--  Вложенный MenuItem (элементы подменю)  -->
             <ControlTheme TargetType="MenuItem" x:Key="{x:Type MenuItem}">
                 <Setter Property="Background" Value="Transparent" />
-                <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}" />
+                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
                 <Setter Property="Padding" Value="10,7" />
                 <Setter Property="CornerRadius" Value="{DynamicResource ButtonCornerRadius}" />
                 <Setter Property="Template">
@@ -53,7 +53,7 @@
                                         Name="PART_HeaderPresenter"
                                         VerticalAlignment="Center" />
                                     <TextBlock
-                                        Foreground="{DynamicResource ForegroundMutedBrush}"
+                                        Foreground="{DynamicResource TextMutedBrush}"
                                         Grid.Column="2"
                                         HorizontalAlignment="Right"
                                         Margin="12,0,0,0"
@@ -63,7 +63,7 @@
                                         VerticalAlignment="Center" />
                                     <Path
                                         Data="{StaticResource MenuItemChevronPathData}"
-                                        Fill="{DynamicResource ForegroundMutedBrush}"
+                                        Fill="{DynamicResource TextMutedBrush}"
                                         Grid.Column="3"
                                         Height="10"
                                         Margin="8,0,0,0"
@@ -82,7 +82,7 @@
                                 Placement="RightEdgeAlignedTop"
                                 WindowManagerAddShadowHint="False">
                                 <Border
-                                    Background="{DynamicResource SurfaceBrush}"
+                                    Background="{DynamicResource CardBackgroundBrush}"
                                     BorderBrush="{DynamicResource BorderBrush}"
                                     BorderThickness="1"
                                     CornerRadius="{DynamicResource SmallCornerRadius}"
@@ -110,18 +110,18 @@
 
                 <Style Selector="^:selected">
                     <Style Selector="^ /template/ Border#PART_LayoutRoot">
-                        <Setter Property="Background" Value="{DynamicResource SurfaceHoverBrush}" />
+                        <Setter Property="Background" Value="{DynamicResource HoverBackgroundBrush}" />
                     </Style>
                     <Style Selector="^ /template/ ContentPresenter#PART_HeaderPresenter">
-                        <Setter Property="Foreground" Value="{DynamicResource PrimaryLightBrush}" />
+                        <Setter Property="Foreground" Value="{DynamicResource AccentHoverBrush}" />
                     </Style>
                     <Style Selector="^ /template/ Path#PART_ChevronPath">
-                        <Setter Property="Fill" Value="{DynamicResource PrimaryLightBrush}" />
+                        <Setter Property="Fill" Value="{DynamicResource AccentHoverBrush}" />
                     </Style>
                 </Style>
 
                 <Style Selector="^:pressed /template/ Border#PART_LayoutRoot">
-                    <Setter Property="Background" Value="{DynamicResource PrimaryDarkBrush}" />
+                    <Setter Property="Background" Value="{DynamicResource AccentPressedBrush}" />
                 </Style>
 
                 <Style Selector="^:disabled">
@@ -131,7 +131,7 @@
                 </Style>
 
                 <Style Selector="^:open /template/ Path#PART_ChevronPath">
-                    <Setter Property="Fill" Value="{DynamicResource PrimaryLightBrush}" />
+                    <Setter Property="Fill" Value="{DynamicResource AccentHoverBrush}" />
                 </Style>
 
                 <Style Selector="^:empty /template/ Path#PART_ChevronPath">
@@ -150,7 +150,7 @@
             <!--  Пункт верхнего уровня строки меню  -->
             <ControlTheme TargetType="MenuItem" x:Key="ZaggyTopLevelMenuItem">
                 <Setter Property="Background" Value="Transparent" />
-                <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}" />
+                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
                 <Setter Property="Padding" Value="12,10" />
                 <Setter Property="CornerRadius" Value="{DynamicResource ButtonCornerRadius}" />
                 <Setter Property="Template">
@@ -186,7 +186,7 @@
                                     Placement="BottomEdgeAlignedLeft"
                                     WindowManagerAddShadowHint="False">
                                     <Border
-                                        Background="{DynamicResource SurfaceBrush}"
+                                        Background="{DynamicResource CardBackgroundBrush}"
                                         BorderBrush="{DynamicResource BorderBrush}"
                                         BorderThickness="1"
                                         CornerRadius="{DynamicResource SmallCornerRadius}"
@@ -215,15 +215,15 @@
 
                 <Style Selector="^:selected">
                     <Style Selector="^ /template/ Border#PART_LayoutRoot">
-                        <Setter Property="Background" Value="{DynamicResource SurfaceHoverBrush}" />
+                        <Setter Property="Background" Value="{DynamicResource HoverBackgroundBrush}" />
                     </Style>
                     <Style Selector="^ /template/ ContentPresenter#PART_HeaderPresenter">
-                        <Setter Property="Foreground" Value="{DynamicResource PrimaryLightBrush}" />
+                        <Setter Property="Foreground" Value="{DynamicResource AccentHoverBrush}" />
                     </Style>
                 </Style>
 
                 <Style Selector="^:pressed /template/ Border#PART_LayoutRoot">
-                    <Setter Property="Background" Value="{DynamicResource PrimaryDarkBrush}" />
+                    <Setter Property="Background" Value="{DynamicResource AccentPressedBrush}" />
                 </Style>
 
                 <Style Selector="^:disabled">
@@ -276,7 +276,7 @@
                                         Name="PART_HeaderPresenter"
                                         VerticalAlignment="Center" />
                                     <TextBlock
-                                        Foreground="{DynamicResource ForegroundMutedBrush}"
+                                        Foreground="{DynamicResource TextMutedBrush}"
                                         Grid.Column="4"
                                         HorizontalAlignment="Right"
                                         Margin="12,0,0,0"
@@ -286,7 +286,7 @@
                                         VerticalAlignment="Center" />
                                     <Path
                                         Data="{StaticResource MenuItemChevronPathData}"
-                                        Fill="{DynamicResource ForegroundMutedBrush}"
+                                        Fill="{DynamicResource TextMutedBrush}"
                                         Grid.Column="5"
                                         Height="10"
                                         Margin="8,0,0,0"
@@ -305,7 +305,7 @@
                                 Placement="RightEdgeAlignedTop"
                                 WindowManagerAddShadowHint="False">
                                 <Border
-                                    Background="{DynamicResource SurfaceBrush}"
+                                    Background="{DynamicResource CardBackgroundBrush}"
                                     BorderBrush="{DynamicResource BorderBrush}"
                                     BorderThickness="1"
                                     CornerRadius="{DynamicResource SmallCornerRadius}"
@@ -349,37 +349,4 @@
             </ControlTheme>
         </ResourceDictionary>
     </Styles.Resources>
-
-    <!--  Попапы меню FluentTheme рисует дефолтным чёрным — перекрываем темой приложения  -->
-    <Style Selector="MenuFlyoutPresenter">
-        <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
-        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
-        <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}" />
-    </Style>
-
-
-    <!--  Полная встроенная строка меню  -->
-    <Style Selector="Menu.full-menu">
-        <Setter Property="Background" Value="Transparent" />
-        <Setter Property="VerticalAlignment" Value="Center" />
-    </Style>
-
-    <Style Selector="Menu.full-menu &gt; MenuItem">
-        <Setter Property="Background" Value="Transparent" />
-        <Setter Property="Padding" Value="12,10" />
-        <Setter Property="FontSize" Value="14" />
-        <Setter Property="CornerRadius" Value="{DynamicResource ButtonCornerRadius}" />
-    </Style>
-
-    <!--  Компактное меню-гамбургер  -->
-    <Style Selector="Menu.compact-menu">
-        <Setter Property="Background" Value="Transparent" />
-        <Setter Property="VerticalAlignment" Value="Center" />
-    </Style>
-
-    <Style Selector="Menu.compact-menu &gt; MenuItem">
-        <Setter Property="Background" Value="Transparent" />
-        <Setter Property="Padding" Value="8" />
-        <Setter Property="CornerRadius" Value="{DynamicResource ButtonCornerRadius}" />
-    </Style>
 </Styles>

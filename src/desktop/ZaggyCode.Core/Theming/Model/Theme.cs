@@ -5,49 +5,55 @@ using System.Xml.Serialization;
 public sealed class Theme
 {
     [XmlElement("background")]
-    public required string BackgroundColor { get; set; }
+    public required string WindowBackgroundColor { get; set; }
 
     [XmlElement("background-secondary")]
-    public required string BackgroundSecondaryColor { get; set; }
+    public required string HeaderBackgroundColor { get; set; }
 
     [XmlElement("surface")]
-    public required string SurfaceColor { get; set; }
+    public required string CardBackgroundColor { get; set; }
 
     [XmlElement("surface-light")]
-    public required string SurfaceLightColor { get; set; }
+    public required string ElevatedBackgroundColor { get; set; }
 
     [XmlElement("surface-hover")]
-    public required string SurfaceHoverColor { get; set; }
+    public required string HoverBackgroundColor { get; set; }
+
+    [XmlElement("sidebar-background")]
+    public required string SidebarBackgroundColor { get; set; }
 
     [XmlElement("primary")]
-    public required string PrimaryColor { get; set; }
+    public required string AccentColor { get; set; }
 
     [XmlElement("primary-light")]
-    public required string PrimaryLightColor { get; set; }
+    public required string AccentHoverColor { get; set; }
 
     [XmlElement("primary-dark")]
-    public required string PrimaryDarkColor { get; set; }
+    public required string AccentPressedColor { get; set; }
+
+    [XmlElement("accent")]
+    public required string SystemAccentColor { get; set; }
 
     [XmlElement("foreground")]
-    public required string ForegroundColor { get; set; }
+    public required string TextPrimaryColor { get; set; }
 
     [XmlElement("foreground-muted")]
-    public required string ForegroundMutedColor { get; set; }
+    public required string TextMutedColor { get; set; }
 
     [XmlElement("foreground-dark")]
-    public required string ForegroundDarkColor { get; set; }
+    public required string TextSubtleColor { get; set; }
 
     [XmlElement("border")]
     public required string BorderColor { get; set; }
 
     [XmlElement("border-light")]
-    public required string BorderLightColor { get; set; }
+    public required string BorderHighlightColor { get; set; }
 
     [XmlElement("success")]
     public required string SuccessColor { get; set; }
 
     [XmlElement("success-dark")]
-    public required string SuccessDarkColor { get; set; }
+    public required string SuccessHoverColor { get; set; }
 
     [XmlElement("error")]
     public required string ErrorColor { get; set; }
@@ -70,29 +76,17 @@ public sealed class Theme
     [XmlElement("terminal-foreground")]
     public required string TerminalForegroundColor { get; set; }
 
-    [XmlElement("sidebar-background")]
-    public required string SidebarBackgroundColor { get; set; }
-
-    [XmlElement("accent")]
-    public required string SystemAccentColor { get; set; }
-
-    [XmlElement("accent-light1")]
-    public required string SystemAccentColorLight1 { get; set; }
-
-    [XmlElement("accent-dark1")]
-    public required string SystemAccentColorDark1 { get; set; }
+    [XmlElement("map-background")]
+    public required string MapBackgroundColor { get; set; }
 
     [XmlElement("map-wall")]
     public required string MapWallColor { get; set; }
 
+    [XmlElement("map-painted")]
+    public required string MapPaintedCellColor { get; set; }
+
     [XmlElement("map-point-border")]
     public required string MapPointBorderColor { get; set; }
-
-    [XmlElement("map-sea")]
-    public required string MapSeaColor { get; set; }
-
-    [XmlElement("map-painted")]
-    public required string MapPaintedColor { get; set; }
 
     [XmlElement("map-require-draw")]
     public required string MapRequireDrawColor { get; set; }

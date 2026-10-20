@@ -103,12 +103,12 @@
                                             <StackPanel HorizontalAlignment="Center" Spacing="0">
                                                 <TextBlock
                                                     FontSize="12"
-                                                    Foreground="{DynamicResource ForegroundMutedBrush}"
+                                                    Foreground="{DynamicResource TextMutedBrush}"
                                                     Text="Системная тема,"
                                                     TextAlignment="Center" />
                                                 <TextBlock
                                                     FontSize="12"
-                                                    Foreground="{DynamicResource ForegroundMutedBrush}"
+                                                    Foreground="{DynamicResource TextMutedBrush}"
                                                     Text="редактирование не поддерживается"
                                                     TextAlignment="Center" />
                                             </StackPanel>
@@ -119,8 +119,8 @@
                             <Panel>
                                 <!--  Подложка выбранной темы: держит hover-фон без наведения  -->
                                 <Border
-                                    Background="{DynamicResource SurfaceHoverBrush}"
-                                    BorderBrush="{DynamicResource PrimaryLightBrush}"
+                                    Background="{DynamicResource HoverBackgroundBrush}"
+                                    BorderBrush="{DynamicResource AccentHoverBrush}"
                                     BorderThickness="2"
                                     CornerRadius="12"
                                     IsHitTestVisible="False">
@@ -152,7 +152,7 @@
                                 </Border>
 
                                 <materialIcons:MaterialIcon
-                                    Foreground="{DynamicResource PrimaryLightBrush}"
+                                    Foreground="{DynamicResource AccentHoverBrush}"
                                     HorizontalAlignment="Right"
                                     Kind="Check"
                                     VerticalAlignment="Top">
@@ -169,7 +169,7 @@
                                     IsLightDismissEnabled="False"
                                     Placement="Top">
                                     <Border
-                                        Background="{DynamicResource SurfaceBrush}"
+                                        Background="{DynamicResource CardBackgroundBrush}"
                                         BorderBrush="{DynamicResource BorderBrush}"
                                         BorderThickness="1"
                                         BoxShadow="0 4 16 0 #22000000"
@@ -183,11 +183,11 @@
                                                 Text="{Binding Name}" />
                                             <TextBlock
                                                 FontSize="12"
-                                                Foreground="{DynamicResource ForegroundMutedColor}"
+                                                Foreground="{DynamicResource TextMutedColor}"
                                                 Text="{Binding Author, StringFormat='Автор: {0}'}" />
                                             <TextBlock
                                                 FontSize="12"
-                                                Foreground="{DynamicResource ForegroundMutedColor}"
+                                                Foreground="{DynamicResource TextMutedColor}"
                                                 Text="{Binding Version, StringFormat='Версия: {0}'}" />
                                             <TextBlock
                                                 FontSize="12"

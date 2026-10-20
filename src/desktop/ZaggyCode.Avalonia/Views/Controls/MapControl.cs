@@ -602,7 +602,7 @@ public sealed class MapControl : Control
     public override void Render(DrawingContext context)
     {
         var size = Bounds.Size;
-        context.DrawRectangle(SeaBrush ?? Brush("MapSeaBrush"), null, new Rect(size));
+        context.DrawRectangle(SeaBrush ?? Brush("MapBackgroundBrush"), null, new Rect(size));
 
         var columns = _stateMachine.ColumnCount;
         var rows = _stateMachine.RowCount;
@@ -615,7 +615,7 @@ public sealed class MapControl : Control
 
         var offset = layout.Offset;
         var cell = layout.CellSize;
-        var defaultBrush = PaintedBrush ?? Brush("MapPaintedBrush");
+        var defaultBrush = PaintedBrush ?? Brush("MapPaintedCellBrush");
 
         for (var row = 0; row < rows; row++)
         {

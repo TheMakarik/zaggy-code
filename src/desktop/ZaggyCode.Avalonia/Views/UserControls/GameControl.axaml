@@ -37,16 +37,16 @@
             <Setter Property="CornerRadius" Value="8" />
             <Setter Property="HorizontalContentAlignment" Value="Center" />
             <Setter Property="VerticalContentAlignment" Value="Center" />
-            <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
-            <Setter Property="Foreground" Value="{DynamicResource ForegroundMutedBrush}" />
+            <Setter Property="Background" Value="{DynamicResource CardBackgroundBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}" />
         </Style>
         <Style Selector="Button.map-number materialIcons|MaterialIcon">
             <Setter Property="Width" Value="26" />
             <Setter Property="Height" Value="26" />
         </Style>
         <Style Selector="Button.map-number.selected">
-            <Setter Property="Background" Value="{DynamicResource PrimaryBrush}" />
-            <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}" />
+            <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
         </Style>
     </rxui:ReactiveUserControl.Styles>
 
@@ -103,12 +103,12 @@
                 Map="{Binding CurrentMap}"
                 MarginUnits="1,1,1,1"
                 MoveStepSeconds="{Binding MoveStepSeconds}"
-                PaintedBrush="{DynamicResource MapPaintedBrush}"
+                PaintedBrush="{DynamicResource MapPaintedCellBrush}"
                 RightLaggyPath="{Binding ZaggyRightLaggyPath}"
                 RightPath="{Binding ZaggyRightPath}"
                 SadPath="{Binding ZaggySadPath}"
                 SadSeconds="{Binding SadSeconds}"
-                SeaBrush="{DynamicResource MapSeaBrush}" />
+                SeaBrush="{DynamicResource MapBackgroundBrush}" />
 
             <Expander
                 x:Name="DescriptionExpander"

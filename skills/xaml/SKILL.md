@@ -7,9 +7,16 @@ Views/
 ├── Converters/         # Конвертеры как MarkupExtension
 ├── Controls/           # Кастомные контролы (MapView)
 ├── UserControls/       # Составные контролы
-├── Styles/             # Стили и темы
-│   ├── Colors.axaml    # Цветовые ресурсы
-│   └── Controls.axaml  # Стили контролов
+├── Styles/             # Стили: папка на контрол, файл на класс стиля
+│   ├── Colors/         # Цветовые ресурсы (Colors.axaml)
+│   ├── Common/         # База: окно, фоны, панели, карточки, подсказки
+│   ├── Button/         # icon-button, run-button, primary-action и т.д.
+│   ├── ComboBox/       # ComboBox, ComboBoxItem, language-selector
+│   ├── Menu/           # MenuThemes, пункты меню, full/compact
+│   ├── Editor/         # TextEditor, GridSplitter
+│   ├── Flyout/         # презентеры попапов
+│   ├── Settings/       # стили окна настроек
+│   └── MainStyles.axaml  # StyleInclude всех файлов
 ├── Dialogs/            # Диалоговые окна
 ├── Utils/              # UI-утилиты
 └── TerminalEngine/     # Реализация xterm движка (VirtualTerminal.Avalonia)

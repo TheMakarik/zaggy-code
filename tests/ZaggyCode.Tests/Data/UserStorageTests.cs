@@ -20,8 +20,7 @@ public class UserStorageTests : IDisposable
         {
             User = new UserData()
             {
-                EnableCodeHighlighting = true,
-                ShowCodeLineNumbers = true,
+                SidebarPosition = SidebarPosition.Right,
                 CodeFontSize = 14,
                 CodeTheme = "Light",
                 LastLanguage = Language.CSharp,
@@ -79,7 +78,7 @@ public class UserStorageTests : IDisposable
         // Assert
         var actualContent = await File.ReadAllTextAsync(_jsonPath);
         actualContent.Should().Contain(expectedUser.CodeFontSize.ToString());
-        actualContent.Should().Contain(expectedUser.EnableCodeHighlighting.ToString().ToLower());
+        actualContent.Should().Contain(expectedUser.CodeTheme);
         actualContent.Should().NotBe(corruptedContent);
     }
 
@@ -92,18 +91,18 @@ public class UserStorageTests : IDisposable
 
         var firstContent = await File.ReadAllTextAsync(_jsonPath);
         var newTheme = "Dark";
-        var newLineNumbers = false;
+        var newSidebarPosition = SidebarPosition.Bottom;
 
         // Act
         systemUnderTests.Current.CodeTheme = newTheme;
-        systemUnderTests.Current.ShowCodeLineNumbers = newLineNumbers;
+        systemUnderTests.Current.SidebarPosition = newSidebarPosition;
 
         await Task.Delay(1500);
 
         // Assert
         var actualContent = await File.ReadAllTextAsync(_jsonPath);
         actualContent.Should().Contain(newTheme);
-        actualContent.Should().Contain(newLineNumbers.ToString().ToLower());
+        actualContent.Should().Contain(((int)newSidebarPosition).ToString());
         actualContent.Should().NotBe(firstContent);
     }
 

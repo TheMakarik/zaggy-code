@@ -10,7 +10,7 @@ public sealed class ThemeApplier(
     private const string FallbackThemeName = "Primus";
     private const string ColorSuffix = "Color";
 
-    // Имя ресурса выводится из свойства темы: BackgroundColor → Background (+ Color/Brush в прокси).
+    // Имя ресурса выводится из свойства темы: WindowBackgroundColor → Background (+ Color/Brush в прокси).
     private static readonly PropertyInfo[] ThemeColorProperties =
         typeof(Theme).GetProperties()
             .Where(property => property.PropertyType == typeof(string))

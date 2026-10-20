@@ -82,7 +82,7 @@ public class ThemeCatalogTests : IDisposable
         // Assert
         themes.Should().ContainSingle();
         themes[0].IsSystemTheme.Should().BeFalse();
-        themes[0].BackgroundColor.Should().Be("#200000");
+        themes[0].WindowBackgroundColor.Should().Be("#200000");
         themes[0].Path.Should().Be(externFile);
     }
 
@@ -101,13 +101,13 @@ public class ThemeCatalogTests : IDisposable
         Name = name,
         CreatedAtVersion = new Version(1, 0),
         Author = "Author",
-        BackgroundColor = background,
+        WindowBackgroundColor = background,
         SidebarBackgroundColor = "#111111",
         EditorBackgroundColor = "#121212",
         TerminalBackgroundColor = "#131313",
-        PrimaryColor = "#141414",
+        AccentColor = "#141414",
         BorderColor = "#151515",
-        ForegroundColor = "#161616"
+        TextPrimaryColor = "#161616"
     };
 
     public void Dispose()

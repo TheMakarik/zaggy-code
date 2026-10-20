@@ -1,9 +1,9 @@
 <Window
-    Background="{DynamicResource BackgroundBrush}"
-    BorderBrush="{DynamicResource ForegroundBrush}"
+    Background="{DynamicResource WindowBackgroundBrush}"
+    BorderBrush="{DynamicResource TextPrimaryBrush}"
     BorderThickness="1"
     CanResize="False"
-    Foreground="{DynamicResource ForegroundBrush}"
+    Foreground="{DynamicResource TextPrimaryBrush}"
     Height="506"
     ShowInTaskbar="False"
     Title="О приложении"
@@ -65,7 +65,7 @@
             <StackPanel HorizontalAlignment="Center" Margin="0,18,0,0" Spacing="4">
                 <TextBlock
                     FontSize="12"
-                    Foreground="{DynamicResource ForegroundMutedBrush}"
+                    Foreground="{DynamicResource TextMutedBrush}"
                     HorizontalAlignment="Center"
                     Text="Разработчики:" />
                 <TextBlock

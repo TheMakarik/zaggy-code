@@ -1,9 +1,9 @@
 <Window
-    Background="{DynamicResource BackgroundBrush}"
-    BorderBrush="{DynamicResource ForegroundBrush}"
+    Background="{DynamicResource WindowBackgroundBrush}"
+    BorderBrush="{DynamicResource TextPrimaryBrush}"
     BorderThickness="1"
     CanResize="False"
-    Foreground="{DynamicResource ForegroundBrush}"
+    Foreground="{DynamicResource TextPrimaryBrush}"
     ShowInTaskbar="False"
     SizeToContent="Height"
     Title="Об AvaloniaUI"
@@ -24,10 +24,10 @@
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="Padding" Value="6,2" />
             <Setter Property="Cursor" Value="Hand" />
-            <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
         </Style>
         <Style Selector="Button.link:pointerover">
-            <Setter Property="Foreground" Value="{DynamicResource PrimaryLightBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource AccentHoverBrush}" />
         </Style>
     </Window.Styles>
 

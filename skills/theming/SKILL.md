@@ -13,7 +13,7 @@
 ## Добавление нового цвета темы
 1. **Модель** `src/desktop/ZaggyCode.Core/Theming/Model/Theme.cs` — объяви `required` строковое свойство и `[XmlElement("...")]`.
 2. **Генератор** `dev/scripts/generate-themes.cs` — добавь параметр в `CreateTheme` и передай его в инициализатор `Theme`, затем задай значение для каждой из 4 тем (Primus, Tero, Viola, Brilla).
-3. **Default-ресурсы** `src/desktop/ZaggyCode.Avalonia/Views/Styles/Colors.axaml` — добавь `<Color x:Key="XColor">` и `<SolidColorBrush x:Key="XBrush" Color="{DynamicResource XColor}"/>`. Это «клон Primus», значения должны совпадать с Primus.
+3. **Default-ресурсы** `src/desktop/ZaggyCode.Avalonia/Views/Styles/Colors/Colors.axaml` — добавь `<Color x:Key="XColor">` и `<SolidColorBrush x:Key="XBrush" Color="{DynamicResource XColor}"/>`. Это «клон Primus», значения должны совпадать с Primus.
 4. **Регенерация архивов** — см. ниже.
 
 ## Регенерация тем (.zct)

@@ -63,7 +63,7 @@ public class ThemeCreatorTests : IDisposable
         actualMetadata!.Name.Should().Be(_metadata.Name);
         actualMetadata.Author.Should().Be(_metadata.Author);
         actualMetadata.CreatedAtVersion.Should().Be(_metadata.CreatedAtVersion);
-        actualMetadata.BackgroundColor.Should().Be(_metadata.BackgroundColor);
+        actualMetadata.WindowBackgroundColor.Should().Be(_metadata.WindowBackgroundColor);
     }
 
     [Fact]
@@ -83,7 +83,7 @@ public class ThemeCreatorTests : IDisposable
         await using var themeStream = File.OpenRead(themeFile);
         var actualTheme = new XmlSerializer<Theme>().Deserialize(themeStream);
         actualTheme.Should().NotBeNull();
-        actualTheme!.BackgroundColor.Should().Be(_theme.BackgroundColor);
+        actualTheme!.WindowBackgroundColor.Should().Be(_theme.WindowBackgroundColor);
         actualTheme.MapWallColor.Should().Be(_theme.MapWallColor);
     }
 
@@ -94,21 +94,21 @@ public class ThemeCreatorTests : IDisposable
 
     private Theme CreateTheme() => new()
     {
-        BackgroundColor = "#101010",
-        BackgroundSecondaryColor = "#202020",
-        SurfaceColor = "#303030",
-        SurfaceLightColor = "#404040",
-        SurfaceHoverColor = "#505050",
-        PrimaryColor = "#606060",
-        PrimaryLightColor = "#707070",
-        PrimaryDarkColor = "#808080",
-        ForegroundColor = "#909090",
-        ForegroundMutedColor = "#A0A0A0",
-        ForegroundDarkColor = "#B0B0B0",
+        WindowBackgroundColor = "#101010",
+        HeaderBackgroundColor = "#202020",
+        CardBackgroundColor = "#303030",
+        ElevatedBackgroundColor = "#404040",
+        HoverBackgroundColor = "#505050",
+        AccentColor = "#606060",
+        AccentHoverColor = "#707070",
+        AccentPressedColor = "#808080",
+        TextPrimaryColor = "#909090",
+        TextMutedColor = "#A0A0A0",
+        TextSubtleColor = "#B0B0B0",
         BorderColor = "#C0C0C0",
-        BorderLightColor = "#D0D0D0",
+        BorderHighlightColor = "#D0D0D0",
         SuccessColor = "#E0E0E0",
-        SuccessDarkColor = "#F0F0F0",
+        SuccessHoverColor = "#F0F0F0",
         ErrorColor = "#010203",
         WarningColor = "#040506",
         EditorBackgroundColor = "#070809",
@@ -118,12 +118,10 @@ public class ThemeCreatorTests : IDisposable
         TerminalForegroundColor = "#141516",
         SidebarBackgroundColor = "#171819",
         SystemAccentColor = "#1A1B1C",
-        SystemAccentColorLight1 = "#1D1E1F",
-        SystemAccentColorDark1 = "#202122",
         MapWallColor = _fixture.Create<string>(),
         MapPointBorderColor = _fixture.Create<string>(),
-        MapSeaColor = _fixture.Create<string>(),
-        MapPaintedColor = _fixture.Create<string>(),
+        MapBackgroundColor = _fixture.Create<string>(),
+        MapPaintedCellColor = _fixture.Create<string>(),
         MapRequireDrawColor = _fixture.Create<string>(),
         GoalColor1 = _fixture.Create<string>(),
         GoalColor2 = _fixture.Create<string>()
@@ -135,13 +133,13 @@ public class ThemeCreatorTests : IDisposable
         Description = _fixture.Create<string>(),
         CreatedAtVersion = new Version(1, 0),
         Author = _fixture.Create<string>(),
-        BackgroundColor = "#101010",
+        WindowBackgroundColor = "#101010",
         SidebarBackgroundColor = "#171819",
         EditorBackgroundColor = "#070809",
         TerminalBackgroundColor = "#111213",
-        PrimaryColor = "#606060",
+        AccentColor = "#606060",
         BorderColor = "#C0C0C0",
-        ForegroundColor = "#909090"
+        TextPrimaryColor = "#909090"
     };
 
     private IOptions<TempOptions> CreateTempOptions()

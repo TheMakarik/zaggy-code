@@ -18,7 +18,7 @@ public class ThemeMetadataSerializationTests
         json.Should().Contain("\"created-at-version\"");
         json.Should().Contain("\"background-color\"");
         json.Should().Contain("\"foreground-color\"");
-        json.Should().NotContain("\"BackgroundColor\"");
+        json.Should().NotContain("\"WindowBackgroundColor\"");
         json.Should().NotContain("\"CreatedAtVersion\"");
     }
 
@@ -69,8 +69,8 @@ public class ThemeMetadataSerializationTests
         metadata.Description.Should().Be("Custom");
         metadata.Author.Should().Be("TheMakarik");
         metadata.CreatedAtVersion.Should().Be(new Version(2026, 0, 0));
-        metadata.BackgroundColor.Should().Be("#101010");
-        metadata.ForegroundColor.Should().Be("#161616");
+        metadata.WindowBackgroundColor.Should().Be("#101010");
+        metadata.TextPrimaryColor.Should().Be("#161616");
         metadata.IsSystemTheme.Should().BeFalse();
         metadata.Path.Should().BeNull();
     }
@@ -80,12 +80,12 @@ public class ThemeMetadataSerializationTests
         Name = "Primus",
         CreatedAtVersion = new Version(2026, 0, 0),
         Author = "TheMakarik",
-        BackgroundColor = "#101010",
+        WindowBackgroundColor = "#101010",
         SidebarBackgroundColor = "#111111",
         EditorBackgroundColor = "#121212",
         TerminalBackgroundColor = "#131313",
-        PrimaryColor = "#141414",
+        AccentColor = "#141414",
         BorderColor = "#151515",
-        ForegroundColor = "#161616"
+        TextPrimaryColor = "#161616"
     };
 }

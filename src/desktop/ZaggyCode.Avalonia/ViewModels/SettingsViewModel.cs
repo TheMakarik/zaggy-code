@@ -105,9 +105,8 @@ public sealed partial class SettingsViewModel : ViewModelBase
         current.TerminalFontSize = AppearanceSettings.TerminalFontSize;
         current.UseSystemTitleBar = AppearanceSettings.UseSystemTitleBar;
         current.ShowSidebar = AppearanceSettings.ShowSidebar;
+        current.SidebarPosition = AppearanceSettings.SidebarPosition;
         current.CodeTheme = AppearanceSettings.SelectedCodeTheme;
-        current.EnableCodeHighlighting = AppearanceSettings.EnableCodeHighlighting;
-        current.ShowCodeLineNumbers = AppearanceSettings.ShowCodeLineNumbers;
 
         var pythonCurrent = _pythonSettingsStorage.Current;
         pythonCurrent.UseEntryFunction = PythonSettings.UseEntryFunction;
@@ -123,9 +122,8 @@ public sealed partial class SettingsViewModel : ViewModelBase
         MessageBus.Current.SendMessage(new TerminalFontSizeChangedMessage(AppearanceSettings.TerminalFontSize));
         MessageBus.Current.SendMessage(new UseSystemTitleBarChangedMessage(AppearanceSettings.UseSystemTitleBar));
         MessageBus.Current.SendMessage(new ShowSidebarChangedMessage(AppearanceSettings.ShowSidebar));
+        MessageBus.Current.SendMessage(new SidebarPositionChangedMessage(AppearanceSettings.SidebarPosition));
         MessageBus.Current.SendMessage(new CodeThemeChangedMessage(AppearanceSettings.SelectedCodeTheme));
-        MessageBus.Current.SendMessage(new EnableCodeHighlightingChangedMessage(AppearanceSettings.EnableCodeHighlighting));
-        MessageBus.Current.SendMessage(new ShowCodeLineNumbersChangedMessage(AppearanceSettings.ShowCodeLineNumbers));
         MessageBus.Current.SendMessage(new AppThemeChangedMessage(AppearanceSettings.SelectedAppTheme));
         if (codeFontSizeChanged)
             MessageBus.Current.SendMessage(new FontSizeToastMessage("редактора", AppearanceSettings.CodeFontSize));

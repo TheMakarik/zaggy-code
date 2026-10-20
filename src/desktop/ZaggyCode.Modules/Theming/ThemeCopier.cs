@@ -56,13 +56,13 @@ public sealed class ThemeCopier(
         Author = source.Author,
         CreatedAtVersion = source.CreatedAtVersion,
         Description = source.Description,
-        BackgroundColor = source.BackgroundColor,
+        WindowBackgroundColor = source.WindowBackgroundColor,
         SidebarBackgroundColor = source.SidebarBackgroundColor,
         EditorBackgroundColor = source.EditorBackgroundColor,
         TerminalBackgroundColor = source.TerminalBackgroundColor,
-        PrimaryColor = source.PrimaryColor,
+        AccentColor = source.AccentColor,
         BorderColor = source.BorderColor,
-        ForegroundColor = source.ForegroundColor
+        TextPrimaryColor = source.TextPrimaryColor
     };
 
     private string BuildCopyName(string name)
