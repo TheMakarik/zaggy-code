@@ -8,7 +8,6 @@ public partial class MainWindowViewModel : ViewModelBase
     [Reactive] private bool _isTerminalExists = true;
     [Reactive] private bool _isRunning = false;
     [Reactive] private bool _useOsDecoration = false;
-    [Reactive] private bool _showSidebar = true;
     [Reactive] private SidebarPosition _sidebarPosition = SidebarPosition.Left;
     [Reactive] private ExecutionSpeed _executionSpeed;
     [Reactive] private Language _selectedLanguage;
@@ -27,9 +26,8 @@ public partial class MainWindowViewModel : ViewModelBase
     public bool IsSidebarLeft => SidebarPosition == SidebarPosition.Left;
     public bool IsSidebarRight => SidebarPosition == SidebarPosition.Right;
     public bool IsSidebarTop => SidebarPosition == SidebarPosition.Top;
-    public bool IsSidebarBottom => SidebarPosition == SidebarPosition.Bottom;
-    public bool IsVerticalSidebarVisible => ShowSidebar && (IsSidebarLeft || IsSidebarRight);
-    public bool IsHorizontalSidebarVisible => ShowSidebar && (IsSidebarTop || IsSidebarBottom);
+    public bool IsVerticalSidebarVisible => IsSidebarLeft || IsSidebarRight;
+    public bool IsHorizontalSidebarVisible => IsSidebarTop;
     public int SidebarColumn => IsSidebarRight ? 2 : 0;
     public int SidebarRow => IsSidebarTop ? 2 : 4;
     public string CodeTheme { get; private set; }
@@ -169,7 +167,6 @@ public partial class MainWindowViewModel : ViewModelBase
         _textEditorFontSize = userStorage.Current.CodeFontSize;
         _terminalFontSize = userStorage.Current.TerminalFontSize;
         _useOsDecoration = userStorage.Current.UseSystemTitleBar;
-        _showSidebar = userStorage.Current.ShowSidebar;
         _sidebarPosition = userStorage.Current.SidebarPosition;
         CodeTheme = userStorage.Current.CodeTheme;
         PopupOptions = popupOptions.Value;
@@ -350,9 +347,6 @@ public partial class MainWindowViewModel : ViewModelBase
         MessageBus.Current.Listen<UseSystemTitleBarChangedMessage>()
             .Subscribe(message => UseOsDecoration = message.UseSystemTitleBar);
 
-        MessageBus.Current.Listen<ShowSidebarChangedMessage>()
-            .Subscribe(message => ShowSidebar = message.ShowSidebar);
-
         MessageBus.Current.Listen<SidebarPositionChangedMessage>()
             .Subscribe(message => SidebarPosition = message.SidebarPosition);
 
@@ -384,15 +378,6 @@ public partial class MainWindowViewModel : ViewModelBase
             .Where(useOsDecoration => useOsDecoration != _userStorage.Current.UseSystemTitleBar)
             .Subscribe(_ => _userStorage.Current.UseSystemTitleBar = _useOsDecoration);
 
-        this.WhenAnyValue(vm => vm.ShowSidebar)
-            .Subscribe(showSidebar =>
-            {
-                if (showSidebar != _userStorage.Current.ShowSidebar)
-                    _userStorage.Current.ShowSidebar = showSidebar;
-
-                RaiseSidebarLayoutChanged();
-            });
-
         this.WhenAnyValue(vm => vm.SidebarPosition)
             .Subscribe(position =>
             {
@@ -416,7 +401,6 @@ public partial class MainWindowViewModel : ViewModelBase
         this.RaisePropertyChanged(nameof(IsSidebarLeft));
         this.RaisePropertyChanged(nameof(IsSidebarRight));
         this.RaisePropertyChanged(nameof(IsSidebarTop));
-        this.RaisePropertyChanged(nameof(IsSidebarBottom));
         this.RaisePropertyChanged(nameof(IsVerticalSidebarVisible));
         this.RaisePropertyChanged(nameof(IsHorizontalSidebarVisible));
         this.RaisePropertyChanged(nameof(SidebarColumn));
@@ -613,12 +597,6 @@ public partial class MainWindowViewModel : ViewModelBase
 
         foreach (var mapNumber in MapNumbers)
             mapNumber.IsSelected = ReferenceEquals(mapNumber, item);
-    }
-
-    [ReactiveCommand]
-    private void ToggleShowSidebar()
-    {
-        ShowSidebar = !ShowSidebar;
     }
 
     [ReactiveCommand]

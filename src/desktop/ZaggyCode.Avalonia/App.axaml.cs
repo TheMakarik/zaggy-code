@@ -20,7 +20,10 @@ public partial class App : Application
         var mainWindow = new MainWindow();
         desktop.MainWindow = mainWindow;
 
-        var loading = new Window();
+        var loading = new Window
+        {
+            Icon = new WindowIcon(Path.Join(AppContext.BaseDirectory, "Assets", "logo.ico"))
+        };
         loading.Show();
          
         base.OnFrameworkInitializationCompleted();

@@ -95,7 +95,7 @@
                     Grid.Row="0"
                     IsVisible="{Binding AppearanceSettings.UseSystemTitleBar, Converter={converters:InverseBooleanConverter}}"
                     Name="HeaderBar"
-                    Padding="12,8">
+                    Padding="8,4">
                     <Grid ColumnDefinitions="Auto,*,Auto">
                         <StackPanel
                             Grid.Column="0"

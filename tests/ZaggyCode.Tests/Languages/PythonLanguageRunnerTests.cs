@@ -183,7 +183,6 @@ public class PythonLanguageRunnerTests : LanguageRunnerTests
             LastSpeed = ExecutionSpeed.X1,
             TerminalFontSize = 18,
             UseSystemTitleBar = false,
-            ShowSidebar = true,
             SidebarPosition = SidebarPosition.Left
         });
         return storage;

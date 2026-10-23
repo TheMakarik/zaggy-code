@@ -7,7 +7,6 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
     [Reactive] private int _codeFontSize;
     [Reactive] private int _terminalFontSize;
     [Reactive] private bool _useSystemTitleBar;
-    [Reactive] private bool _showSidebar;
     [Reactive] private SidebarPosition _sidebarPosition = SidebarPosition.Left;
     [Reactive] private string _selectedCodeTheme = string.Empty;
     [Reactive] private string _selectedAppTheme = string.Empty;
@@ -37,7 +36,6 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
     private int _originalCodeFontSize;
     private int _originalTerminalFontSize;
     private bool _originalUseSystemTitleBar;
-    private bool _originalShowSidebar;
     private SidebarPosition _originalSidebarPosition;
     private string _originalCodeTheme = string.Empty;
     private string _originalSelectedAppTheme = string.Empty;
@@ -95,7 +93,6 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
         _originalCodeFontSize = current.CodeFontSize;
         _originalTerminalFontSize = current.TerminalFontSize;
         _originalUseSystemTitleBar = current.UseSystemTitleBar;
-        _originalShowSidebar = current.ShowSidebar;
         _originalSidebarPosition = current.SidebarPosition;
         _originalCodeTheme = current.CodeTheme;
         _originalSelectedAppTheme = themeSettingsStorage.Current.CurrentTheme;
@@ -115,7 +112,6 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
                 nameof(CodeFontSize),
                 nameof(TerminalFontSize),
                 nameof(UseSystemTitleBar),
-                nameof(ShowSidebar),
                 nameof(SidebarPosition),
                 nameof(SelectedCodeTheme),
                 nameof(SelectedAppTheme),
@@ -147,7 +143,6 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
         CodeFontSize = _defaultUserData.CodeFontSize;
         TerminalFontSize = _defaultUserData.TerminalFontSize;
         UseSystemTitleBar = _defaultUserData.UseSystemTitleBar;
-        ShowSidebar = _defaultUserData.ShowSidebar;
         SidebarPosition = _defaultUserData.SidebarPosition;
         SelectedCodeTheme = _defaultUserData.CodeTheme;
         ThemeCreationBehavior = _defaultThemeSettings.OnCreateBehavior;
@@ -160,7 +155,6 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
         _originalCodeFontSize = CodeFontSize;
         _originalTerminalFontSize = TerminalFontSize;
         _originalUseSystemTitleBar = UseSystemTitleBar;
-        _originalShowSidebar = ShowSidebar;
         _originalSidebarPosition = SidebarPosition;
         _originalCodeTheme = SelectedCodeTheme;
         _originalSelectedAppTheme = SelectedAppTheme;
@@ -177,7 +171,6 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
         CodeFontSize = userData.CodeFontSize;
         TerminalFontSize = userData.TerminalFontSize;
         UseSystemTitleBar = userData.UseSystemTitleBar;
-        ShowSidebar = userData.ShowSidebar;
         SidebarPosition = userData.SidebarPosition;
         SelectedCodeTheme = userData.CodeTheme;
     }
@@ -188,7 +181,6 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
             CodeFontSize != _originalCodeFontSize ||
             TerminalFontSize != _originalTerminalFontSize ||
             UseSystemTitleBar != _originalUseSystemTitleBar ||
-            ShowSidebar != _originalShowSidebar ||
             SidebarPosition != _originalSidebarPosition ||
             SelectedCodeTheme != _originalCodeTheme ||
             SelectedAppTheme != _originalSelectedAppTheme ||
@@ -212,6 +204,12 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
     private void SelectCodeTheme(string themeName)
     {
         SelectedCodeTheme = themeName;
+    }
+
+    [ReactiveCommand]
+    private void SelectSidebarPosition(SidebarPosition position)
+    {
+        SidebarPosition = position;
     }
 
     [ReactiveCommand]

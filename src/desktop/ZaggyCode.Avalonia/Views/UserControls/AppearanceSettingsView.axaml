@@ -5,6 +5,7 @@
     xmlns="https://github.com/avaloniaui"
 
     xmlns:avaloniaEdit="https://github.com/avaloniaui/avaloniaedit"
+    xmlns:controls="clr-namespace:ZaggyCode.Avalonia.Views.Controls"
     xmlns:converters="clr-namespace:ZaggyCode.Avalonia.Views.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:enums="clr-namespace:ZaggyCode.Core.Data.Enums;assembly=ZaggyCode.Core"
@@ -91,25 +92,68 @@
             <TextBlock Classes="settings-section-title" Text="Окна" />
 
             <CheckBox Content="Использовать системную рамку окна" IsChecked="{Binding UseSystemTitleBar}" />
-            <CheckBox Content="Показывать боковую панель" IsChecked="{Binding ShowSidebar}" />
 
-            <Grid ColumnDefinitions="*,Auto">
-                <TextBlock
-                    Grid.Column="0"
-                    Text="Положение боковой панели"
-                    VerticalAlignment="Center" />
-                <ComboBox
-                    Grid.Column="1"
-                    ItemsSource="{Binding SidebarPositionValues}"
-                    SelectedItem="{Binding SidebarPosition}"
-                    Width="150">
-                    <ComboBox.ItemTemplate>
-                        <DataTemplate x:DataType="enums:SidebarPosition">
-                            <TextBlock Text="{Binding ., Converter={converters:SidebarPositionToTextConverter}}" />
-                        </DataTemplate>
-                    </ComboBox.ItemTemplate>
-                </ComboBox>
-            </Grid>
+            <TextBlock Classes="settings-section-title" Text="Боковая панель" />
+
+            <ItemsControl ItemsSource="{Binding SidebarPositionValues}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="enums:SidebarPosition">
+                        <Button
+                            Classes="settings-theme-button"
+                            Command="{Binding $parent[ItemsControl].((vm:AppearanceSettingsViewModel)DataContext).SelectSidebarPositionCommand}"
+                            CommandParameter="{Binding .}"
+                            CornerRadius="12"
+                            Margin="3,4"
+                            Padding="0">
+                            <Panel>
+                                <Border
+                                    Background="{DynamicResource HoverBackgroundBrush}"
+                                    BorderBrush="{DynamicResource AccentHoverBrush}"
+                                    BorderThickness="2"
+                                    CornerRadius="12"
+                                    IsHitTestVisible="False">
+                                    <Border.IsVisible>
+                                        <MultiBinding Converter="{converters:IsEqualConverter}">
+                                            <Binding Path="." />
+                                            <Binding Path="$parent[ItemsControl].((vm:AppearanceSettingsViewModel)DataContext).SidebarPosition" />
+                                        </MultiBinding>
+                                    </Border.IsVisible>
+                                </Border>
+
+                                <Border CornerRadius="12" Padding="10">
+                                    <StackPanel Spacing="6">
+                                        <controls:SidebarPositionPreview
+                                            AccentBrush="{DynamicResource AccentBrush}"
+                                            ContentBrush="{DynamicResource EditorBackgroundBrush}"
+                                            HeaderBrush="{DynamicResource HeaderBackgroundBrush}"
+                                            Height="70"
+                                            OutlineBrush="{DynamicResource BorderBrush}"
+                                            Position="{Binding .}"
+                                            SidebarBrush="{DynamicResource SidebarBackgroundBrush}"
+                                            Width="110"
+                                            WindowBackgroundBrush="{DynamicResource WindowBackgroundBrush}" />
+                                        <StackPanel
+                                            HorizontalAlignment="Center"
+                                            Orientation="Horizontal"
+                                            Spacing="4">
+                                            <materialIcons:MaterialIcon
+                                                Height="14"
+                                                Kind="{Binding ., Converter={converters:SidebarPositionToIconConverter}}"
+                                                Width="14" />
+                                            <TextBlock Text="{Binding ., Converter={converters:SidebarPositionToTextConverter}}" />
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Border>
+                            </Panel>
+                        </Button>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
 
             <TextBlock Classes="settings-section-title" Text="Тема подсветки синтаксиса" />
 

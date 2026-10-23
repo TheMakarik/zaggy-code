@@ -31,8 +31,8 @@
 
     <rxui:ReactiveUserControl.Styles>
         <Style Selector="Button.map-number">
-            <Setter Property="Width" Value="40" />
-            <Setter Property="Height" Value="40" />
+            <Setter Property="Width" Value="32" />
+            <Setter Property="Height" Value="32" />
             <Setter Property="Padding" Value="0" />
             <Setter Property="CornerRadius" Value="8" />
             <Setter Property="HorizontalContentAlignment" Value="Center" />
@@ -54,10 +54,10 @@
         HorizontalScrollBarVisibility="Disabled"
         VerticalScrollBarVisibility="Auto">
         <Grid RowDefinitions="Auto,Auto,Auto">
-            <Grid Grid.Row="0" ColumnDefinitions="Auto,*" Margin="8,0,8,8">
+            <Grid Grid.Row="0" ColumnDefinitions="Auto,*" Margin="8,0,8,4">
                 <TextBlock
                     Grid.Column="0"
-                    FontSize="16"
+                    FontSize="12"
                     FontWeight="SemiBold"
                     Margin="0,0,16,0"
                     Text="{Binding CurrentGame.Name}"

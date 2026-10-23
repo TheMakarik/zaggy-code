@@ -91,7 +91,7 @@ public class UserStorageTests : IDisposable
 
         var firstContent = await File.ReadAllTextAsync(_jsonPath);
         var newTheme = "Dark";
-        var newSidebarPosition = SidebarPosition.Bottom;
+        var newSidebarPosition = SidebarPosition.Hidden;
 
         // Act
         systemUnderTests.Current.CodeTheme = newTheme;

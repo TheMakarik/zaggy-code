@@ -8,6 +8,7 @@ public partial class SettingsWindow : ReactiveWindow<SettingsViewModel>
     public SettingsWindow()
     {
         InitializeComponent();
+        this.ApplyZaggyIcon();
 
         HeaderBar.PointerPressed += (_, e) =>
         {

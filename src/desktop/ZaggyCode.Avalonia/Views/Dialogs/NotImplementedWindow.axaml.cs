@@ -6,15 +6,12 @@ public partial class NotImplementedWindow : Window
     {
         InitializeComponent();
         this.ApplyThemeDecorations();
+        this.ApplyZaggyIcon();
         
         this.GetObservable(Window.WindowDecorationsProperty)
             .Subscribe(decorations => CustomTitleBar.IsVisible = decorations != WindowDecorations.Full);
         
-        PointerPressed += (_, e) =>
-        {
-            if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
-                BeginMoveDrag(e);
-        };
+        this.EnableWindowDrag();
     }
 
     private void OkButton_Click(object? sender, RoutedEventArgs e)

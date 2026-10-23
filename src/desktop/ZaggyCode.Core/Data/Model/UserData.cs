@@ -3,7 +3,6 @@ namespace ZaggyCode.Core.Data.Model;
 public sealed class UserData : INotifyPropertyChanged
 {
     public bool UseSystemTitleBar { get; set => SetField(ref field, value); }
-    public bool ShowSidebar { get; set => SetField(ref field, value); }
     public SidebarPosition SidebarPosition { get; set => SetField(ref field, value); }
     public int CodeFontSize { get; set => SetField(ref field, value); }
     public required string CodeTheme { get; set => SetField(ref field, value); }

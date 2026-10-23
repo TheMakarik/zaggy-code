@@ -6,6 +6,7 @@ public partial class AboutAvaloniaWindow : Window
     {
         InitializeComponent();
         this.ApplyThemeDecorations();
+        this.ApplyZaggyIcon();
 
         var viewModel = App.Services.GetRequiredService<AboutAvaloniaViewModel>();
         DataContext = viewModel;
@@ -13,11 +14,7 @@ public partial class AboutAvaloniaWindow : Window
         this.GetObservable(Window.WindowDecorationsProperty)
             .Subscribe(decorations => CustomTitleBar.IsVisible = decorations != WindowDecorations.Full);
 
-        PointerPressed += (_, e) =>
-        {
-            if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
-                BeginMoveDrag(e);
-        };
+        this.EnableWindowDrag();
 
         viewModel.OpenUrlInteraction.RegisterHandler(async context =>
         {

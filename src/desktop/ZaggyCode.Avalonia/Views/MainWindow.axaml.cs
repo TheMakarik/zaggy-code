@@ -1,4 +1,5 @@
 using Avalonia.Input.Platform;
+using Avalonia.VisualTree;
 
 namespace ZaggyCode.Avalonia.Views;
 
@@ -20,8 +21,18 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
 
         HeaderBar.PointerPressed += (_, e) =>
         {
-            if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
-                BeginMoveDrag(e);
+            if (!e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
+                return;
+
+            // Нажатия на пункты меню приходят сюда из попапа по логическому дереву.
+            // Без этой проверки BeginMoveDrag перехватывает клик и пункты меню не срабатывают.
+            if (e.Source is Visual source &&
+                (source.FindAncestorOfType<MenuItem>() is not null ||
+                 source.FindAncestorOfType<Button>() is not null ||
+                 source.FindAncestorOfType<ComboBox>() is not null))
+                return;
+
+            BeginMoveDrag(e);
         };
 
         MinimizeButton.Click += (_, __) => WindowState = WindowState.Minimized;

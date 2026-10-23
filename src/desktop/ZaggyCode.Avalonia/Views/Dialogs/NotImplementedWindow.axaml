@@ -48,10 +48,14 @@
 
         <Button
             Click="OkButton_Click"
-            Content="ОК"
             Grid.Row="1"
             HorizontalAlignment="Right"
-            IsDefault="True" />
+            IsDefault="True">
+            <StackPanel Orientation="Horizontal" Spacing="6">
+                <materialIcons:MaterialIcon Kind="Check" />
+                <TextBlock Text="ОК" />
+            </StackPanel>
+        </Button>
         </Grid>
     </Grid>
 </Window>

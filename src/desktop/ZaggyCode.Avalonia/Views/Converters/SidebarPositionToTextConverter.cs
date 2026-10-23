@@ -7,7 +7,7 @@ public sealed class SidebarPositionToTextConverter : MarkupExtension, IValueConv
         nameof(SidebarPosition.Left) => "Слева",
         nameof(SidebarPosition.Right) => "Справа",
         nameof(SidebarPosition.Top) => "Сверху",
-        nameof(SidebarPosition.Bottom) => "Снизу",
+        nameof(SidebarPosition.Hidden) => "Не показывать",
         _ => string.Empty
     };
 

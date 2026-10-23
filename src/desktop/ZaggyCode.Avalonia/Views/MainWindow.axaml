@@ -106,7 +106,7 @@
             Grid.Row="{Binding SidebarRow}"
             IsVisible="{Binding IsHorizontalSidebarVisible}"
             Padding="6,4">
-            <StackPanel Orientation="Horizontal" Spacing="4">
+            <StackPanel Orientation="Horizontal" Spacing="3">
                 <Button
                     Classes="icon-button run-button"
                     Command="{Binding ExecuteCodeCommand}"
@@ -185,23 +185,27 @@
 
         <!--  Шапка  -->
         <Border
+            BorderThickness="0"
             Classes="header-bar"
             Grid.Column="1"
             Grid.Row="1"
             Name="HeaderBar"
-            Padding="10,6">
+            Padding="8,4">
             <Grid ColumnDefinitions="Auto,*,Auto">
                 <StackPanel
                     Grid.Column="0"
                     Orientation="Horizontal"
-                    Spacing="10"
+                    Spacing="6"
                     VerticalAlignment="Center">
 
                     <Menu Classes="full-menu" IsVisible="{Binding #ThisWindow.Bounds.Width, Converter={converters:WidthToVisibilityConverter}, ConverterParameter='&gt;=900'}">
                         <MenuItem Header="Уровни" Icon="{materialIcons:MaterialIconExt Kind=Games}">
                             <MenuItem Header="Открыть уровень из файловой системы" Icon="{materialIcons:MaterialIconExt Kind=Games}" />
                             <MenuItem Header="Создать уровень" Icon="{materialIcons:MaterialIconExt Kind=Create}" />
-                            <MenuItem Command="{Binding ThrowNotImplementedCommand}" Header="Загрузить уровень из репозитория" Icon="{materialIcons:MaterialIconExt Kind=Download}" />
+                            <MenuItem
+                                Command="{Binding ThrowNotImplementedCommand}"
+                                Header="Загрузить уровень из репозитория"
+                                Icon="{materialIcons:MaterialIconExt Kind=Download}" />
                             <MenuItem
                                 Header="Скорость"
                                 Icon="{materialIcons:MaterialIconExt Kind=Speedometer}"
@@ -272,7 +276,7 @@
                                         <Setter Property="IsEnabled">
                                             <MultiBinding Converter="{converters:IsNotEqualConverter}">
                                                 <Binding Path="ThemeName" />
-                                                <Binding Path="DataContext.CodeTheme" ElementName="ThisWindow" />
+                                                <Binding ElementName="ThisWindow" Path="DataContext.CodeTheme" />
                                             </MultiBinding>
                                         </Setter>
                                     </ControlTheme>
@@ -281,7 +285,6 @@
                             <MenuItem
                                 Header="Положение боковой панели"
                                 Icon="{materialIcons:MaterialIconExt Kind=PageLayoutSidebarLeft}"
-                                IsEnabled="{Binding DataContext.ShowSidebar, ElementName=ThisWindow}"
                                 ItemsSource="{Binding Source={x:Type dataEnums:SidebarPosition}, Converter={converters:EnumValuesConverter}}">
                                 <MenuItem.ItemContainerTheme>
                                     <ControlTheme
@@ -289,23 +292,24 @@
                                         TargetType="MenuItem"
                                         x:DataType="dataEnums:SidebarPosition">
                                         <Setter Property="Header" Value="{Binding ., Converter={converters:SidebarPositionToTextConverter}}" />
+                                        <Setter Property="Icon">
+                                            <Setter.Value>
+                                                <DataTemplate x:DataType="dataEnums:SidebarPosition">
+                                                    <materialIcons:MaterialIcon Kind="{Binding ., Converter={converters:SidebarPositionToIconConverter}}" />
+                                                </DataTemplate>
+                                            </Setter.Value>
+                                        </Setter>
                                         <Setter Property="Command" Value="{Binding DataContext.ChangeSidebarPositionCommand, ElementName=ThisWindow}" />
                                         <Setter Property="CommandParameter" Value="{Binding .}" />
                                         <Setter Property="IsEnabled">
                                             <MultiBinding Converter="{converters:IsNotEqualConverter}">
                                                 <Binding Path="." />
-                                                <Binding Path="DataContext.SidebarPosition" ElementName="ThisWindow" />
+                                                <Binding ElementName="ThisWindow" Path="DataContext.SidebarPosition" />
                                             </MultiBinding>
                                         </Setter>
                                     </ControlTheme>
                                 </MenuItem.ItemContainerTheme>
                             </MenuItem>
-                            <MenuItem
-                                Command="{Binding DataContext.ToggleShowSidebarCommand, ElementName=ThisWindow}"
-                                Header="Показывать боковое меню"
-                                Icon="{materialIcons:MaterialIconExt Kind=PageLayoutSidebarLeft}"
-                                IsChecked="{Binding DataContext.ShowSidebar, ElementName=ThisWindow}"
-                                Theme="{StaticResource ZaggyToggleMenuItem}" />
                             <MenuItem
                                 Command="{Binding DataContext.ToggleUseSystemTitleBarCommand, ElementName=ThisWindow}"
                                 Header="Использовать системную рамку окна"
@@ -319,7 +323,10 @@
                                 Command="{Binding OpenSettingsCommand}"
                                 Header="Настройки"
                                 Icon="{materialIcons:MaterialIconExt Kind=Settings}" />
-                            <MenuItem Command="{Binding ThrowNotImplementedCommand}" Header="Управление горячими клавишами" Icon="{materialIcons:MaterialIconExt Kind=KeyboardSettings}" />
+                            <MenuItem
+                                Command="{Binding ThrowNotImplementedCommand}"
+                                Header="Управление горячими клавишами"
+                                Icon="{materialIcons:MaterialIconExt Kind=KeyboardSettings}" />
                             <MenuItem
                                 Command="{Binding DataContext.ChangeTerminalVisibilityCommand, ElementName=ThisWindow}"
                                 Header="Терминал"
@@ -351,15 +358,18 @@
                             <MenuItem.Header>
                                 <materialIcons:MaterialIcon
                                     Foreground="{DynamicResource TextPrimaryBrush}"
-                                    Height="24"
+                                    Height="20"
                                     Kind="Menu"
-                                    Width="24" />
+                                    Width="20" />
                             </MenuItem.Header>
 
                             <MenuItem Header="Уровни" Icon="{materialIcons:MaterialIconExt Kind=Games}">
                                 <MenuItem Header="Открыть уровень из файловой системы" Icon="{materialIcons:MaterialIconExt Kind=Games}" />
                                 <MenuItem Header="Создать уровень" Icon="{materialIcons:MaterialIconExt Kind=Create}" />
-                                <MenuItem Command="{Binding ThrowNotImplementedCommand}" Header="Загрузить уровень из репозитория" Icon="{materialIcons:MaterialIconExt Kind=Download}" />
+                                <MenuItem
+                                    Command="{Binding ThrowNotImplementedCommand}"
+                                    Header="Загрузить уровень из репозитория"
+                                    Icon="{materialIcons:MaterialIconExt Kind=Download}" />
                                 <MenuItem
                                     Header="Скорость"
                                     Icon="{materialIcons:MaterialIconExt Kind=Speedometer}"
@@ -429,7 +439,7 @@
                                             <Setter Property="IsEnabled">
                                                 <MultiBinding Converter="{converters:IsNotEqualConverter}">
                                                     <Binding Path="ThemeName" />
-                                                    <Binding Path="DataContext.CodeTheme" ElementName="ThisWindow" />
+                                                    <Binding ElementName="ThisWindow" Path="DataContext.CodeTheme" />
                                                 </MultiBinding>
                                             </Setter>
                                         </ControlTheme>
@@ -445,23 +455,24 @@
                                             TargetType="MenuItem"
                                             x:DataType="dataEnums:SidebarPosition">
                                             <Setter Property="Header" Value="{Binding ., Converter={converters:SidebarPositionToTextConverter}}" />
+                                            <Setter Property="Icon">
+                                                <Setter.Value>
+                                                    <DataTemplate x:DataType="dataEnums:SidebarPosition">
+                                                        <materialIcons:MaterialIcon Kind="{Binding ., Converter={converters:SidebarPositionToIconConverter}}" />
+                                                    </DataTemplate>
+                                                </Setter.Value>
+                                            </Setter>
                                             <Setter Property="Command" Value="{Binding DataContext.ChangeSidebarPositionCommand, ElementName=ThisWindow}" />
                                             <Setter Property="CommandParameter" Value="{Binding .}" />
                                             <Setter Property="IsEnabled">
                                                 <MultiBinding Converter="{converters:IsNotEqualConverter}">
                                                     <Binding Path="." />
-                                                    <Binding Path="DataContext.SidebarPosition" ElementName="ThisWindow" />
+                                                    <Binding ElementName="ThisWindow" Path="DataContext.SidebarPosition" />
                                                 </MultiBinding>
                                             </Setter>
                                         </ControlTheme>
                                     </MenuItem.ItemContainerTheme>
                                 </MenuItem>
-                                <MenuItem
-                                    Command="{Binding DataContext.ToggleShowSidebarCommand, ElementName=ThisWindow}"
-                                    Header="Показывать боковое меню"
-                                    Icon="{materialIcons:MaterialIconExt Kind=PageLayoutSidebarLeft}"
-                                    IsChecked="{Binding DataContext.ShowSidebar, ElementName=ThisWindow}"
-                                    Theme="{StaticResource ZaggyToggleMenuItem}" />
                                 <MenuItem
                                     Command="{Binding DataContext.ToggleUseSystemTitleBarCommand, ElementName=ThisWindow}"
                                     Header="Использовать системную рамку окна"
@@ -493,7 +504,10 @@
                                     Command="{Binding OpenSettingsCommand}"
                                     Header="Настройки"
                                     Icon="{materialIcons:MaterialIconExt Kind=Settings}" />
-                                <MenuItem Command="{Binding ThrowNotImplementedCommand}" Header="Управление горячими клавишами" Icon="{materialIcons:MaterialIconExt Kind=KeyboardSettings}" />
+                                <MenuItem
+                                    Command="{Binding ThrowNotImplementedCommand}"
+                                    Header="Управление горячими клавишами"
+                                    Icon="{materialIcons:MaterialIconExt Kind=KeyboardSettings}" />
                                 <MenuItem
                                     Command="{Binding DataContext.ChangeTerminalVisibilityCommand, ElementName=ThisWindow}"
                                     Header="Терминал"
@@ -525,7 +539,10 @@
                         <ComboBox.ItemTemplate>
                             <DataTemplate x:DataType="records:LanguageItem">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <materialIcons:MaterialIcon Kind="{Binding IconKind}" />
+                                    <materialIcons:MaterialIcon
+                                        Height="13"
+                                        Kind="{Binding IconKind}"
+                                        Width="13" />
                                     <TextBlock Text="{Binding Name}" />
                                 </StackPanel>
                             </DataTemplate>
@@ -567,18 +584,18 @@
             ColumnDefinitions="Auto,*,Auto"
             Grid.Column="1"
             Grid.Row="3">
-            <!--  Вертикальная боковая панель (слева или справа)  -->
+
             <Border
                 Classes="sidebar"
                 Grid.Column="{Binding SidebarColumn}"
                 IsVisible="{Binding IsVerticalSidebarVisible}"
                 Padding="4"
-                Width="42">
+                Width="41">
                 <Grid RowDefinitions="Auto,*,Auto">
                     <StackPanel
                         Grid.Row="0"
                         Orientation="Vertical"
-                        Spacing="4">
+                        Spacing="3">
                         <Button
                             Classes="icon-button run-button"
                             Command="{Binding ExecuteCodeCommand}"
@@ -642,7 +659,7 @@
                     <StackPanel
                         Grid.Row="2"
                         Orientation="Vertical"
-                        Spacing="4">
+                        Spacing="3">
                         <Button
                             Classes="icon-button"
                             Command="{Binding OpenAboutCommand}"
@@ -727,9 +744,7 @@
                             Classes="card"
                             Grid.Column="2"
                             Margin="6,12,12,12">
-							<userControls:GameControl
-								x:Name="GameMapView"
-								Margin="8" />
+                            <userControls:GameControl Margin="8" x:Name="GameMapView" />
                         </Border>
                     </Grid>
                 </Grid>
@@ -737,6 +752,7 @@
                 <GridSplitter Classes="horizontal" Grid.Row="2" />
 
                 <Border
+                    BorderThickness="1"
                     Classes="card"
                     Grid.Row="3"
                     IsVisible="{Binding IsTerminalVisible}"
@@ -746,7 +762,7 @@
                         <Border
                             Classes="terminal-header"
                             Grid.Row="0"
-                            Padding="10,6">
+                            Padding="8,3">
                             <Grid ColumnDefinitions="Auto,*,Auto">
                                 <StackPanel
                                     Grid.Column="0"
@@ -755,10 +771,11 @@
                                     VerticalAlignment="Center">
                                     <materialIcons:MaterialIcon
                                         Foreground="{DynamicResource AccentBrush}"
-                                        Height="18"
+                                        Height="14"
                                         Kind="Terminal"
-                                        Width="18" />
+                                        Width="14" />
                                     <TextBlock
+                                        FontSize="11"
                                         FontWeight="SemiBold"
                                         Text="Терминал"
                                         VerticalAlignment="Center" />
@@ -771,20 +788,22 @@
                                     <Button
                                         Classes="window-control"
                                         Command="{Binding ChangeTerminalVisibilityCommand}"
+                                        Padding="4"
                                         ToolTip.Tip="Свернуть терминал">
                                         <materialIcons:MaterialIcon
-                                            Height="16"
+                                            Height="12"
                                             Kind="Minus"
-                                            Width="16" />
+                                            Width="12" />
                                     </Button>
                                     <Button
                                         Classes="window-control close"
                                         Command="{Binding CloseTheTerminalCommand}"
+                                        Padding="4"
                                         ToolTip.Tip="Закрыть терминал">
                                         <materialIcons:MaterialIcon
-                                            Height="16"
+                                            Height="12"
                                             Kind="Close"
-                                            Width="16" />
+                                            Width="12" />
                                     </Button>
                                 </StackPanel>
                             </Grid>
@@ -817,13 +836,14 @@
 
         <!--  Нижняя строка состояния  -->
         <Border
+            BorderThickness="0"
             Classes="footer-bar"
             Grid.Column="1"
             Grid.Row="5"
             Padding="10,3">
             <TextBlock
-                Name="FooterText"
                 FontSize="12"
+                Name="FooterText"
                 VerticalAlignment="Center" />
         </Border>
 

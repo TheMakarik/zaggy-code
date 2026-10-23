@@ -5,5 +5,5 @@ public enum SidebarPosition
     Left,
     Right,
     Top,
-    Bottom
+    Hidden
 }

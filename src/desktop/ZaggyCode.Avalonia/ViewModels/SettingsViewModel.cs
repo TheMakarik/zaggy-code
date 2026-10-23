@@ -104,7 +104,6 @@ public sealed partial class SettingsViewModel : ViewModelBase
         current.CodeFontSize = AppearanceSettings.CodeFontSize;
         current.TerminalFontSize = AppearanceSettings.TerminalFontSize;
         current.UseSystemTitleBar = AppearanceSettings.UseSystemTitleBar;
-        current.ShowSidebar = AppearanceSettings.ShowSidebar;
         current.SidebarPosition = AppearanceSettings.SidebarPosition;
         current.CodeTheme = AppearanceSettings.SelectedCodeTheme;
 
@@ -121,7 +120,6 @@ public sealed partial class SettingsViewModel : ViewModelBase
         MessageBus.Current.SendMessage(new CodeFontSizeChangedMessage(AppearanceSettings.CodeFontSize));
         MessageBus.Current.SendMessage(new TerminalFontSizeChangedMessage(AppearanceSettings.TerminalFontSize));
         MessageBus.Current.SendMessage(new UseSystemTitleBarChangedMessage(AppearanceSettings.UseSystemTitleBar));
-        MessageBus.Current.SendMessage(new ShowSidebarChangedMessage(AppearanceSettings.ShowSidebar));
         MessageBus.Current.SendMessage(new SidebarPositionChangedMessage(AppearanceSettings.SidebarPosition));
         MessageBus.Current.SendMessage(new CodeThemeChangedMessage(AppearanceSettings.SelectedCodeTheme));
         MessageBus.Current.SendMessage(new AppThemeChangedMessage(AppearanceSettings.SelectedAppTheme));

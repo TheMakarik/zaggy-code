@@ -1,4 +1,7 @@
-<Styles xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+<Styles
+    xmlns="https://github.com/avaloniaui"
+    xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <Style Selector="Grid.sidebar">
         <Setter Property="Background" Value="{DynamicResource SidebarBackgroundBrush}" />
@@ -6,5 +9,21 @@
 
     <Style Selector="Border.sidebar">
         <Setter Property="Background" Value="{DynamicResource SidebarBackgroundBrush}" />
+    </Style>
+
+    <!--  Кнопки уменьшены вместе с панелью  -->
+    <Style Selector="Border.sidebar Button.icon-button">
+        <Setter Property="Width" Value="24" />
+        <Setter Property="Height" Value="24" />
+        <Setter Property="Padding" Value="4" />
+    </Style>
+
+    <Style Selector="Border.sidebar Button.icon-button materialIcons|MaterialIcon">
+        <Setter Property="Width" Value="14" />
+        <Setter Property="Height" Value="14" />
+    </Style>
+
+    <Style Selector="Border.sidebar Button.icon-button TextBlock">
+        <Setter Property="FontSize" Value="11" />
     </Style>
 </Styles>

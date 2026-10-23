@@ -13,6 +13,7 @@
     x:DataType="vm:AddThemeViewModel"
     xmlns="https://github.com/avaloniaui"
     xmlns:controls="clr-namespace:ZaggyCode.Avalonia.Views.Controls"
+    xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
     xmlns:vm="using:ZaggyCode.Avalonia.ViewModels"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
@@ -47,12 +48,20 @@
                 Spacing="10">
                 <Button
                     Command="{Binding CancelCommand}"
-                    Content="Отмена"
-                    IsCancel="True" />
+                    IsCancel="True">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <materialIcons:MaterialIcon Kind="Close" />
+                        <TextBlock Text="Отмена" />
+                    </StackPanel>
+                </Button>
                 <Button
                     Command="{Binding ConfirmCommand}"
-                    Content="Создать"
-                    IsDefault="True" />
+                    IsDefault="True">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <materialIcons:MaterialIcon Kind="Plus" />
+                        <TextBlock Text="Создать" />
+                    </StackPanel>
+                </Button>
             </StackPanel>
         </StackPanel>
     </Grid>

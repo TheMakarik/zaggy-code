@@ -23,7 +23,7 @@ public sealed class DialogTitleBar : Border
     public DialogTitleBar()
     {
         Classes.Add("header-bar");
-        Padding = new Thickness(12, 8);
+        Padding = new Thickness(8, 4);
 
         _titleText = new TextBlock
         {

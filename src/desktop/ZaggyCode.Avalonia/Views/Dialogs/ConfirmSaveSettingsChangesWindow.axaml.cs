@@ -6,15 +6,12 @@ public partial class ConfirmSaveSettingsChangesWindow : Window
     {
         InitializeComponent();
         this.ApplyThemeDecorations();
+        this.ApplyZaggyIcon();
         
         this.GetObservable(Window.WindowDecorationsProperty)
             .Subscribe(decorations => CustomTitleBar.IsVisible = decorations != WindowDecorations.Full);
 
-        PointerPressed += (_, e) =>
-        {
-            if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
-                BeginMoveDrag(e);
-        };
+        this.EnableWindowDrag();
 
         CustomTitleBar.CloseRequested += (_, _) => Close(false);
 

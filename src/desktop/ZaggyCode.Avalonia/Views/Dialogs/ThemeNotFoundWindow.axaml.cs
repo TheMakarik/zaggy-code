@@ -11,6 +11,7 @@ public partial class ThemeNotFoundWindow : Window
     {
         InitializeComponent();
         this.ApplyThemeDecorations();
+        this.ApplyZaggyIcon();
 
         if (!string.IsNullOrEmpty(missingThemeName))
             MessageText.Text = $"Тема \"{missingThemeName}\" не была найдена. Была выбрана стандартная тема Primus.";
@@ -18,11 +19,7 @@ public partial class ThemeNotFoundWindow : Window
         this.GetObservable(Window.WindowDecorationsProperty)
             .Subscribe(decorations => CustomTitleBar.IsVisible = decorations != WindowDecorations.Full);
 
-        PointerPressed += (_, e) =>
-        {
-            if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
-                BeginMoveDrag(e);
-        };
+        this.EnableWindowDrag();
     }
 
     private void OnOkClick(object? sender, RoutedEventArgs e)

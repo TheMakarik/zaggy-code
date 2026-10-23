@@ -61,12 +61,20 @@
                 Spacing="10">
                 <Button
                     Command="{Binding DeclineCommand}"
-                    Content="Нет"
-                    IsCancel="True" />
+                    IsCancel="True">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <materialIcons:MaterialIcon Kind="Close" />
+                        <TextBlock Text="Нет" />
+                    </StackPanel>
+                </Button>
                 <Button
                     Command="{Binding ConfirmCommand}"
-                    Content="Да, сохранить"
-                    IsDefault="True" />
+                    IsDefault="True">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <materialIcons:MaterialIcon Kind="ContentSave" />
+                        <TextBlock Text="Да, сохранить" />
+                    </StackPanel>
+                </Button>
             </StackPanel>
         </Grid>
     </Grid>

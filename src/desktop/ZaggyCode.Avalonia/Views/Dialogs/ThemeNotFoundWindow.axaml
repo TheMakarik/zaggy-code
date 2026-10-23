@@ -13,6 +13,7 @@
     x:Class="ZaggyCode.Avalonia.Views.Dialogs.ThemeNotFoundWindow"
     xmlns="https://github.com/avaloniaui"
     xmlns:controls="clr-namespace:ZaggyCode.Avalonia.Views.Controls"
+    xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <Grid RowDefinitions="Auto,*,Auto">
@@ -51,11 +52,15 @@
 
         <Button
             Click="OnOkClick"
-            Content="Ок"
             Grid.Row="2"
             HorizontalAlignment="Right"
             IsDefault="True"
             Margin="0,0,24,20"
-            MinWidth="90" />
+            MinWidth="90">
+            <StackPanel Orientation="Horizontal" Spacing="6">
+                <materialIcons:MaterialIcon Kind="Check" />
+                <TextBlock Text="Ок" />
+            </StackPanel>
+        </Button>
     </Grid>
 </Window>
