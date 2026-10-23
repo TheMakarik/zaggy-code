@@ -15,7 +15,7 @@ public sealed class TarBZip2ArchiveCompressor(
                 $"Folder '{folderToCompress}' must be placed inside to-compress directory '{toCompressRoot}'",
                 nameof(folderToCompress));
 
-        logger.LogInformation("Compressing {folder} into {archive}", fullFolderPath, pathToArchive);
+        logger.LogInformation("Сжатие {folder} в {archive}", fullFolderPath, pathToArchive);
 
         await using var archiveStream = File.Open(pathToArchive, FileMode.Create, FileAccess.Write);
         using var writer = WriterFactory.OpenWriter(
@@ -30,7 +30,7 @@ public sealed class TarBZip2ArchiveCompressor(
             writer.Write(entryName, fileStream, modificationTime: null);
         }
 
-        logger.LogInformation("Compressed {folder} into {archive}", fullFolderPath, pathToArchive);
+        logger.LogInformation("Сжато {folder} в {archive}", fullFolderPath, pathToArchive);
     }
 
     public void Dispose() { }

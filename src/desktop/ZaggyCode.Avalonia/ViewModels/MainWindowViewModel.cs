@@ -450,7 +450,7 @@ public partial class MainWindowViewModel : ViewModelBase
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Failed to switch game engine language to {Language}", language);
+            _logger.LogError(e, "Не удалось переключить язык игрового движка на {Language}", language);
         }
     }
 
@@ -462,7 +462,7 @@ public partial class MainWindowViewModel : ViewModelBase
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Failed to set game engine speed to {Speed}", speed);
+            _logger.LogError(e, "Не удалось установить скорость игрового движка: {Speed}", speed);
         }
     }
 
@@ -487,7 +487,7 @@ public partial class MainWindowViewModel : ViewModelBase
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Game engine warm-up failed");
+            _logger.LogError(e, "Не удалось выполнить прогрев игрового движка");
         }
     }
 
@@ -710,7 +710,7 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         try
         {
-            _logger.LogDebug("Code execution was requested");
+            _logger.LogDebug("Запрошено выполнение кода");
             var code = codeOverride ?? await GetCodeToExecute.Handle(Unit.Default);
             var (input, output) = await GetTerminalStreams.Handle(Unit.Default);
             //var map = await GetGameMap.Handle(Unit.Default);
@@ -733,7 +733,7 @@ public partial class MainWindowViewModel : ViewModelBase
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Error while running code");
+            _logger.LogError(e, "Ошибка при выполнении кода");
         }
     }
 
@@ -758,7 +758,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private void OnCodeErrorOccurred(object? sender, CodeErrorOccurredEventArgs args)
     {
-        _logger.LogWarning("Code error: {Text}", args.Text);
+        _logger.LogWarning("Ошибка в коде: {Text}", args.Text);
     }
 
     #endregion

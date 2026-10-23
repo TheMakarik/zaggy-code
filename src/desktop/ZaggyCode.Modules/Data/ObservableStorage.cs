@@ -20,7 +20,7 @@ public sealed class ObservableStorage<T>(
 
     public void BeginObserve()
     {
-        logger.LogInformation("Observe {type} at {path}", typeof(T).Name, filePath);
+        logger.LogInformation("Наблюдение за {type} по пути {path}", typeof(T).Name, filePath);
         updateWaiter.BeginObserve(Current, FlushUpdatesAsync, updateInterval);
     }
 
@@ -31,7 +31,7 @@ public sealed class ObservableStorage<T>(
 
     public async Task LoadAsync()
     {
-        logger.LogInformation("Begin loading {type} from {path}", typeof(T).Name, filePath);
+        logger.LogInformation("Начало загрузки {type} из {path}", typeof(T).Name, filePath);
 
         if (!File.Exists(filePath))
         {
@@ -48,7 +48,7 @@ public sealed class ObservableStorage<T>(
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Error loading {type} from {path}", typeof(T).Name, filePath);
+            logger.LogError(e, "Ошибка загрузки {type} из {path}", typeof(T).Name, filePath);
             File.Delete(filePath);
             await CreateDefaultFileAsync();
         }
@@ -62,7 +62,7 @@ public sealed class ObservableStorage<T>(
         if (!Directory.Exists(directory))
             Directory.CreateDirectory(directory!);
 
-        logger.LogInformation("{type} was not found. Creating default file {path}", typeof(T).Name, filePath);
+        logger.LogInformation("{type} не найден. Создание файла по умолчанию {path}", typeof(T).Name, filePath);
         await using var file = File.Create(filePath);
         Current = createDefault();
         await JsonSerializer.SerializeAsync(file, Current, jsonTypeInfo);
@@ -73,6 +73,6 @@ public sealed class ObservableStorage<T>(
         await using (var file = File.Open(filePath, FileMode.Truncate))
             await JsonSerializer.SerializeAsync(file, Current, jsonTypeInfo);
 
-        logger.LogInformation("{type} file saved successfully. Content: {content}", typeof(T).Name, await File.ReadAllTextAsync(filePath));
+        logger.LogInformation("Файл {type} успешно сохранён. Содержимое: {content}", typeof(T).Name, await File.ReadAllTextAsync(filePath));
     }
 }

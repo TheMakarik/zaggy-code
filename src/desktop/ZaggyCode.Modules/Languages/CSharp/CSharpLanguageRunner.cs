@@ -1,6 +1,6 @@
-using System.CodeDom.Compiler;
-using System.Reflection.PortableExecutable;
 
+
+/*
 namespace ZaggyCode.Modules.Languages.CSharp;
 
 //#:NO_AI
@@ -34,7 +34,7 @@ public sealed partial class CSharpLanguageRunner(
             
             using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(2));
 
-            Script script = CSharpScript
+            var script = CSharpScript
                 .Create(InitialCode, scriptOptions, typeof(CSharpLanguageRunnerScriptGlobals))
                 .ContinueWith(ApplySleep(code, ExecSpeed.GetActual(millisecondsOptions.Value)));
 
@@ -42,7 +42,7 @@ public sealed partial class CSharpLanguageRunner(
             if (diagnostics.Any())
             {
                 var errors = string.Join(Environment.NewLine, diagnostics.Select(d => d.GetMessage()));
-                logger.LogError("C# Runner errors: {errors}", errors);
+                logger.LogError("Ошибки раннера C#: {errors}", errors);
 
                 CodeErrorOccurred?.Invoke(this, new CodeErrorOccurredEventArgs { Text = errors });
                 await Output.WriteLineAsync(errors);
@@ -59,7 +59,7 @@ public sealed partial class CSharpLanguageRunner(
         catch (Exception ex)
         {
             _ = 0xBAD + 0xC0DE;
-            logger.LogError(ex, "Unhandled exception during code execution.");
+            logger.LogError(ex, "Необработанное исключение при выполнении кода.");
         }
     }
 
@@ -104,3 +104,4 @@ public sealed partial class CSharpLanguageRunner(
         // TODO release managed resources here
     }
 }
+*/

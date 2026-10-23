@@ -96,7 +96,7 @@ public sealed partial class SettingsViewModel : ViewModelBase
     [ReactiveCommand]
     private async Task SaveSettingsAsync()
     {
-        _logger.LogInformation("Saving settings");
+        _logger.LogInformation("Сохранение настроек");
 
         var current = _userStorage.Current;
         var codeFontSizeChanged = current.CodeFontSize != AppearanceSettings.CodeFontSize;
@@ -138,7 +138,7 @@ public sealed partial class SettingsViewModel : ViewModelBase
     [ReactiveCommand]
     private async Task CancelSettingsAsync()
     {
-        _logger.LogInformation("Cancelling settings changes");
+        _logger.LogInformation("Отмена изменений настроек");
         await CloseSettingsInteraction.Handle(Unit.Default);
     }
 

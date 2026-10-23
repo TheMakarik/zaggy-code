@@ -11,7 +11,7 @@ public sealed class ThemeSetterProxy(ILogger<ThemeSetterProxy> logger) : IThemeS
             return;
 
         var color = Color.Parse(hex);
-        logger.LogDebug("Setting color theme: {key}={value}", name, hex);
+        logger.LogDebug("Установка цвета темы: {key}={value}", name, hex);
         resources[$"{name}Color"] = color;
         resources[$"{name}Brush"] = new SolidColorBrush(color);
     }

@@ -24,7 +24,7 @@ public sealed class ThemeCreator(
             var archivePath = Path.Join(outputDirectory, $"{metadata.Name}{themeOptions.Value.ThemeExtensions}");
             await compressor.CompressAsync(archivePath, stagingDirectory);
 
-            logger.LogInformation("Created theme archive {archive} for theme {name}", archivePath, metadata.Name);
+            logger.LogInformation("Создан архив темы {archive} для темы {name}", archivePath, metadata.Name);
         }
         finally
         {

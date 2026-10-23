@@ -13,7 +13,7 @@ public sealed class ThemeCatalog(
         var directories = GetExistingDirectories();
         if (directories.Count is 0)
         {
-            logger.LogWarning("No theme directories found");
+            logger.LogWarning("Каталоги тем не найдены");
             return [];
         }
 
@@ -33,7 +33,7 @@ public sealed class ThemeCatalog(
             }
         }
 
-        logger.LogInformation("Found {count} available themes", themes.Count);
+        logger.LogInformation("Найдено доступных тем: {count}", themes.Count);
         return themes.Values.ToList();
     }
 
@@ -42,7 +42,7 @@ public sealed class ThemeCatalog(
         var archivePath = await FindThemeArchive(name);
         if (archivePath is null)
         {
-            logger.LogWarning("Theme {name} was not found", name);
+            logger.LogWarning("Тема {name} не найдена", name);
             return null;
         }
 
@@ -52,7 +52,7 @@ public sealed class ThemeCatalog(
             var themeFile = Path.Join(extractedDirectory.FullName, themeOptions.Value.ThemeFileName);
             if (!File.Exists(themeFile))
             {
-                logger.LogError("Theme {name} archive does not contain {file}", name, themeOptions.Value.ThemeFileName);
+                logger.LogError("Архив темы {name} не содержит файл {file}", name, themeOptions.Value.ThemeFileName);
                 return null;
             }
 
@@ -60,7 +60,7 @@ public sealed class ThemeCatalog(
             var theme = themeSerializer.Deserialize(themeStream);
 
             if (theme is null)
-                logger.LogError("Failed to deserialize theme {name} from {file}", name, themeFile);
+                logger.LogError("Не удалось десериализовать тему {name} из {file}", name, themeFile);
 
             return theme;
         }

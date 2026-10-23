@@ -11,6 +11,6 @@ public sealed class ThemeDeleter(ILogger<ThemeDeleter> logger) : IThemeDeleter
             throw new FileNotFoundException($"Theme archive '{theme.Name}' was not found", theme.Path);
 
         await Task.Run(() => File.Delete(theme.Path), token);
-        logger.LogInformation("Deleted theme '{name}' ({path})", theme.Name, theme.Path);
+        logger.LogInformation("Удалена тема «{name}» ({path})", theme.Name, theme.Path);
     }
 }

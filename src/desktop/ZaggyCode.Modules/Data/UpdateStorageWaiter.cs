@@ -10,7 +10,7 @@ public sealed class UpdateStorageWaiter(ILogger<UpdateStorageWaiter> logger) : I
     {
         observable.PropertyChanged += (_, args) =>
         {
-            logger.LogInformation("Property changed: {propertyName}", args.PropertyName);
+            logger.LogInformation("Изменено свойство: {propertyName}", args.PropertyName);
             Interlocked.Increment(ref _version);
         };
 
@@ -25,7 +25,7 @@ public sealed class UpdateStorageWaiter(ILogger<UpdateStorageWaiter> logger) : I
 
                 await flushAsync();
                 Interlocked.Exchange(ref _lastFlushedVersion, currentVersion);
-                logger.LogInformation("Updates flushed successfully");
+                logger.LogInformation("Изменения успешно сохранены");
             }
         }, TaskCreationOptions.LongRunning);
     }

@@ -13,7 +13,7 @@ public sealed class TarBZip2ArchiveReader(
         Debug.Assert(extension.StartsWith('.'), "extensions must starts with '.'");
         Debug.Assert(archiveDirectories.All(Directory.Exists), "All directories must exists");
 
-        logger.LogDebug("Start enumerating archives metadata in directories: {dirs}",
+        logger.LogDebug("Начало перечисления метаданных архивов в каталогах: {dirs}",
             string.Join(", ", archiveDirectories));
 
         var files = ReadArchiveFiles(extension, recursive, archiveDirectories);
@@ -37,7 +37,7 @@ public sealed class TarBZip2ArchiveReader(
             yield return metadata;
         }
 
-        logger.LogInformation("Enumerated {c} metadata files", metadataFilesCount);
+        logger.LogInformation("Перечислено файлов метаданных: {c}", metadataFilesCount);
     }
 
     public async Task<T?> ReadMetadataAsync<T>(string archivePath) where T : ArchiveMetadata
@@ -65,7 +65,7 @@ public sealed class TarBZip2ArchiveReader(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Failed to open archive from {file}", file);
+            logger.LogError(ex, "Не удалось прочитать архив {file}", file);
             return null;
         }
     }
@@ -75,7 +75,7 @@ public sealed class TarBZip2ArchiveReader(
     {
         foreach (var directory in archiveDirectories)
         {
-            logger.LogDebug("Searching archives in directory: {directory}", directory);
+            logger.LogDebug("Поиск архивов в каталоге: {directory}", directory);
             var files = Directory.EnumerateFiles(directory, $"*{extension}",
                 recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
             foreach (var file in files)
@@ -89,7 +89,7 @@ public sealed class TarBZip2ArchiveReader(
 
         if (!await BZip2Stream.IsBZip2Async(stream))
         {
-            logger.LogError("File {file} is not BZip2 archive", file);
+            logger.LogError("Файл {file} не является BZip2-архивом", file);
             await stream.DisposeAsync();
             return null;
         }
@@ -116,7 +116,7 @@ public sealed class TarBZip2ArchiveReader(
 
         if (!await TarArchive.IsTarFileAsync(decompressedStream))
         {
-            logger.LogError("File {file} is not .tar.bz2 archive", file);
+            logger.LogError("Файл {file} не является архивом .tar.bz2", file);
             await decompressedStream.DisposeAsync();
             return null;
         }
@@ -142,7 +142,7 @@ public sealed class TarBZip2ArchiveReader(
             if (args.PercentComplete is null)
                 return;
             
-            logger.LogDebug("Extracted entry: {entry}", args.EntryPath);
+            logger.LogDebug("Извлечён элемент: {entry}", args.EntryPath);
             var floorPerCent = Convert.ToInt32(args.PercentComplete.Value);
             oneHundredPerCentBasedProgress.Report(floorPerCent);
         };

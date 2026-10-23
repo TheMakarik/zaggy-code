@@ -1,5 +1,3 @@
-using ZaggyCode.Modules.Theming.Options;
-
 namespace ZaggyCode.Modules.Theming;
 
 public sealed class ThemeEditorService : IThemeEditorService
@@ -124,7 +122,7 @@ public sealed class ThemeEditorService : IThemeEditorService
         foreach (var entry in _colors)
             entry.MarkSaved();
 
-        _logger.LogInformation("Saved edited theme '{name}'", _metadata.Name);
+        _logger.LogInformation("Сохранена изменённая тема «{name}»", _metadata.Name);
         Notify(nameof(IsDirty));
     }
 

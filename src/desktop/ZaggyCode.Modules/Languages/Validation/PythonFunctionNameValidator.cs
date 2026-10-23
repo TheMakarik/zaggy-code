@@ -48,7 +48,7 @@ public sealed class PythonFunctionNameValidator(
         var stdlibPath = scriptsOptions.Value.StandardLibraryPath;
         if (!Directory.Exists(stdlibPath))
         {
-            logger.LogWarning("Standard library path does not exist: {path}", stdlibPath);
+            logger.LogWarning("Путь к стандартной библиотеке не существует: {path}", stdlibPath);
             return;
         }
 

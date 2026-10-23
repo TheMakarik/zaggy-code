@@ -1,5 +1,3 @@
-using ZaggyCode.Modules.Game.Json;
-
 namespace ZaggyCode.Modules.Game;
 
 public sealed class RobotGameEngine(
@@ -155,7 +153,7 @@ public sealed class RobotGameEngine(
         try
         {
             token.ThrowIfCancellationRequested();
-            logger.LogDebug("Start searching language runner for {language}", language);
+            logger.LogDebug("Поиск раннера языка для {language}", language);
             var runner = scope.ServiceProvider.GetRequiredKeyedService<ILanguageRunner>(language);
 
             token.ThrowIfCancellationRequested();
@@ -166,7 +164,7 @@ public sealed class RobotGameEngine(
                 _languageRunner = runner;
             }
 
-            logger.LogDebug("Successfully create language runner instance");
+            logger.LogDebug("Экземпляр раннера языка успешно создан");
             ApplyRunnerConfiguration(token);
             ready.TrySetResult();
         }
@@ -179,7 +177,7 @@ public sealed class RobotGameEngine(
         {
             ready.TrySetException(ex);
             ClearPublishedScope(scope);
-            logger.LogError(ex, "Failed to create language runner for {language}", language);
+            logger.LogError(ex, "Не удалось создать раннер языка для {language}", language);
         }
     }
 
@@ -264,14 +262,14 @@ public sealed class RobotGameEngine(
         return task.ContinueWith((result) =>
         {
             if (result.IsCompletedSuccessfully)
-                logger.LogInformation("{name} was completed successfully", taskName);
+                logger.LogInformation("Задача {name} успешно завершена", taskName);
             else if (result.IsCanceled)
-                logger.LogInformation("{name} was canceled", taskName);
+                logger.LogInformation("Задача {name} отменена", taskName);
             else if (result.Exception is not null)
-                logger.LogError(result.Exception, "{name} failed", taskName);
+                logger.LogError(result.Exception, "Задача {name} завершилась с ошибкой", taskName);
             else
                 logger.LogCritical(
-                    "Something go wrong during task execution, but nobody know that, {taskPath} JSON: {taskJson}",
+                    "Что-то пошло не так при выполнении задачи, но причина неизвестна. {taskPath} JSON: {taskJson}",
                     typeof(Task).FullName,
                     JsonSerializer.Serialize(result, TaskSerializerContext.Default.Options));
         });

@@ -33,9 +33,9 @@ public sealed class GameCodeStorage(
         _creatingFilesTasks.AddOrUpdate(key, Task.Run(async () =>
         {
             var path = GeneratePath(key);
-            logger.LogDebug("Adding code to the path {path}", path);
+            logger.LogDebug("Добавление кода в путь {path}", path);
             await File.WriteAllTextAsync(path, code);
-            logger.LogInformation("Added successfully code to the path {path}", path);
+            logger.LogInformation("Код успешно добавлен в путь {path}", path);
         }), (_, task) => task);
     }
 
@@ -44,7 +44,7 @@ public sealed class GameCodeStorage(
         var key = GetKey(gamePath, language);
         if (_codes.TryGetValue(key, out var code))
         {
-            logger.LogDebug("Got code from the memory key: {key}", key);
+            logger.LogDebug("Код получен из памяти по ключу: {key}", key);
             return code;
         }
 
@@ -62,10 +62,10 @@ public sealed class GameCodeStorage(
         if (code is not null)
         {
             _codes.AddOrUpdate(key, code, (k, v) => code);
-            logger.LogDebug("Got code from the path: {path}", path);
+            logger.LogDebug("Код получен из пути: {path}", path);
         }
         else
-            logger.LogDebug("Cound not find code for the key {key} in the memory or in the path {path}", key, path);
+            logger.LogDebug("Не удалось найти код по ключу {key} в памяти или по пути {path}", key, path);
         return code;
     }
 

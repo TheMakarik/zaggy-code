@@ -27,7 +27,7 @@ public sealed class ThemeCopier(
             Directory.Delete(extractedDirectory.FullName, recursive: true);
         }
 
-        logger.LogInformation("Copied theme '{name}' to {path}", theme.Name, targetPath);
+        logger.LogInformation("Тема «{name}» скопирована в {path}", theme.Name, targetPath);
         return targetPath;
     }
 

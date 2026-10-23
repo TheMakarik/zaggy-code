@@ -37,7 +37,7 @@ public sealed class ThemeApplier(
             themeSetterProxy.SetColor(resourceName, hex);
         }
 
-        logger.LogInformation("Applied theme {name}", name);
+        logger.LogInformation("Применена тема {name}", name);
     }
 
     private async Task<Theme?> LoadThemeOrFallbackAsync(string name)
@@ -46,7 +46,7 @@ public sealed class ThemeApplier(
         if (theme is not null)
             return theme;
 
-        logger.LogWarning("Theme {name} was not found, falling back to {fallback}", name, FallbackThemeName);
+        logger.LogWarning("Тема {name} не найдена, используется резервная тема {fallback}", name, FallbackThemeName);
 
         themeSettingsStorage.Current.CurrentTheme = FallbackThemeName;
         await ShowThemeNotFoundDialogAsync(name);
@@ -72,7 +72,7 @@ public sealed class ThemeApplier(
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Failed to show theme-not-found dialog");
+            logger.LogError(e, "Не удалось показать диалог «Тема не найдена»");
         }
     }
 

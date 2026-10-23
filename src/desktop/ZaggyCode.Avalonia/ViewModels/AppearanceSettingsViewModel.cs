@@ -242,7 +242,7 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Failed to load application themes");
+            _logger.LogError(e, "Не удалось загрузить темы приложения");
         }
         finally
         {
@@ -258,7 +258,7 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Failed to reload application themes");
+            _logger.LogError(e, "Не удалось перезагрузить темы приложения");
         }
     }
 
@@ -295,7 +295,7 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Failed to copy theme '{name}'", item.Name);
+            _logger.LogError(e, "Не удалось скопировать тему «{name}»", item.Name);
         }
     }
 
@@ -309,7 +309,7 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Failed to delete theme '{name}'", item.Name);
+            _logger.LogError(e, "Не удалось удалить тему «{name}»", item.Name);
         }
     }
 
@@ -330,7 +330,7 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Failed to edit theme '{name}'", item.Name);
+            _logger.LogError(e, "Не удалось начать редактирование темы «{name}»", item.Name);
         }
     }
 
@@ -363,7 +363,7 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Failed to create a new theme");
+            _logger.LogError(e, "Не удалось создать новую тему");
         }
     }
 
@@ -396,7 +396,7 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
     {
         if (!int.TryParse(deltaText, out var delta))
         {
-            _logger.LogWarning("Failed to parse code font size delta: {DeltaText}", deltaText);
+            _logger.LogWarning("Не удалось разобрать изменение размера шрифта редактора: {DeltaText}", deltaText);
             return;
         }
 
@@ -408,7 +408,7 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
     {
         if (!int.TryParse(deltaText, out var delta))
         {
-            _logger.LogWarning("Failed to parse terminal font size delta: {DeltaText}", deltaText);
+            _logger.LogWarning("Не удалось разобрать изменение размера шрифта терминала: {DeltaText}", deltaText);
             return;
         }
 

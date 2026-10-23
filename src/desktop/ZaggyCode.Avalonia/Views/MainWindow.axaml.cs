@@ -95,7 +95,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         }
         catch (Exception e)
         {
-            Log.Logger.Error(e, "Failed to apply app theme {Theme}", themeName);
+            Log.Logger.Error(e, "Не удалось применить тему приложения {Theme}", themeName);
         }
     }
 

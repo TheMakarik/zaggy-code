@@ -56,7 +56,7 @@ public sealed class PythonLanguageRunner : ILanguageRunner
         _python.SetVariable(ClrInput, CreateInputHandler(input));
         _python.Engine.ExecuteFile(_pythonOptions.Value.RedirectIoPath, _python);
 
-        _logger.LogInformation("Redirected IO for python (IO support = {ioSupport})", !_pythonSettingsStorage.Current.SupressIo);
+        _logger.LogInformation("Ввод-вывод Python перенаправлен (поддержка ввода-вывода = {ioSupport})", !_pythonSettingsStorage.Current.SupressIo);
     }
 
     public void SetSpeed(ExecutionSpeed speed, CancellationToken token)
@@ -66,7 +66,7 @@ public sealed class PythonLanguageRunner : ILanguageRunner
 
         _actualSpeed = speed.GetActual(_speedOptions.Value);
 
-        _logger.LogInformation("Set python execution speed to {ms}ms", _actualSpeed);
+        _logger.LogInformation("Скорость выполнения Python установлена: {ms} мс", _actualSpeed);
     }
 
     public void SetExecutor(IRobotExecutor executor, CancellationToken token)
@@ -75,13 +75,13 @@ public sealed class PythonLanguageRunner : ILanguageRunner
         _python.Engine.SetTrace(CreateCancellationTrace(token));
 
         var methods = executor.GetMethodsToUseInRobot();
-        _logger.LogDebug("Methods for executor: [{methods}]", string.Join(",", methods));
+        _logger.LogDebug("Методы исполнителя: [{methods}]", string.Join(",", methods));
 
         SetExecutorVariables(methods, executor);
         _python.SetVariable(ClrRobotPath, _pythonOptions.Value.RobotPath);
         _python.Engine.ExecuteFile(_pythonOptions.Value.PrepareModules, _python);
 
-        _logger.LogInformation("Set executor for python");
+        _logger.LogInformation("Исполнитель для Python установлен");
     }
 
     public async Task ExecuteAsync(string code, CancellationToken token)
@@ -116,17 +116,17 @@ public sealed class PythonLanguageRunner : ILanguageRunner
         }
         catch (Exception e) when (e is OperationCanceledException || e.InnerException is OperationCanceledException)
         {
-            _logger.LogDebug("Code execution was canceled");
+            _logger.LogDebug("Выполнение кода отменено");
         }
         catch (Exception e) when (IsPythonException(e))
         {
             CodeErrorOccurred?.Invoke(this, new CodeErrorOccurredEventArgs { Text = $"{e.GetType().Name} {e.Message}".Trim() });
-            _logger.LogWarning(e, "Python execution error: {ErrorType}", e.GetType().Name);
+            _logger.LogWarning(e, "Ошибка выполнения Python: {ErrorType}", e.GetType().Name);
         }
         catch (Exception e)
         {
             CodeErrorOccurred?.Invoke(this, new CodeErrorOccurredEventArgs { Text = $".NET error: {e}" });
-            _logger.LogError(e, "Unexpected error during Python execution");
+            _logger.LogError(e, "Непредвиденная ошибка при выполнении Python");
         }
     }
 
@@ -134,14 +134,14 @@ public sealed class PythonLanguageRunner : ILanguageRunner
     {
         ClearEvents();
         _python.Engine.SetTrace(null);
-        _logger.LogInformation("Disposed Script Runner");
+        _logger.LogInformation("Исполнитель скриптов освобождён");
     }
 
     public ValueTask DisposeAsync()
     {
         ClearEvents();
         _python.Engine.SetTrace(null);
-        _logger.LogInformation("Disposed Script Runner");
+        _logger.LogInformation("Исполнитель скриптов освобождён");
 
         return ValueTask.CompletedTask;
     }

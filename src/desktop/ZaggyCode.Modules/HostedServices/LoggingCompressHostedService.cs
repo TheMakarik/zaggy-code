@@ -48,12 +48,12 @@ public sealed class LoggingCompressHostedService(
                 File.Delete(file);
             }
 
-            logger.LogInformation("Compressed {Count} log file(s) older than {RetentionDays} days into {ArchivePath}",
+            logger.LogInformation("Сжато файлов логов: {Count} (старше {RetentionDays} дн.) в {ArchivePath}",
                 files.Length, options.Value.RetentionDays, archivePath);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Failed to compress old log files");
+            logger.LogError(ex, "Не удалось сжать старые файлы логов");
         }
     }
 }

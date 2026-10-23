@@ -43,8 +43,8 @@ public partial class App : Application
         {
             mainWindow.Show();
             loading.Close();
-            System.Diagnostics.Debug.WriteLine($"Error while loading: {ex}");
-            Log.Logger.Error(ex, "Error while loading application");
+            System.Diagnostics.Debug.WriteLine($"Ошибка при загрузке: {ex}");
+            Log.Logger.Error(ex, "Ошибка при загрузке приложения");
         }
     }
 
@@ -56,7 +56,7 @@ public partial class App : Application
         }
         catch (Exception e)
         {
-            Log.Logger.Error(e, "Failed to apply startup theme");
+            Log.Logger.Error(e, "Не удалось применить стартовую тему");
         }
     }
 }

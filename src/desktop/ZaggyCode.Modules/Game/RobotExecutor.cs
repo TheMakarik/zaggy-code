@@ -1,5 +1,3 @@
-using System.Drawing;
-
 namespace ZaggyCode.Modules.Game;
 
 public sealed class RobotExecutor : IRobotExecutor
