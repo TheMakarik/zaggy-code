@@ -4,5 +4,6 @@ public enum RobotDeadType
 {
     Wall,
     EndOfTheMap,
-    DrawUnrequiredCell
+    DrawUnrequiredCell,
+    CodeBehind
 }
