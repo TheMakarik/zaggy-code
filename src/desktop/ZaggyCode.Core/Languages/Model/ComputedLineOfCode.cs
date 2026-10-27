@@ -1,6 +1,8 @@
 namespace ZaggyCode.Core.Languages.Model;
 
-public sealed record ComputedLineOfCode(int LineNumber, RobotStateUpdate Update, string? ErrorMessage = null)
+public readonly ref struct ComputedLineOfCode(int lineNumber, RobotStateUpdate update, CodeError codeError = default)
 {
-    public bool ErrorOccured => ErrorMessage is not null;
-};
+    public int LineNumber { get; } = lineNumber;
+    public RobotStateUpdate Update { get; } = update;
+    public CodeError CodeError { get; } = codeError;
+}
