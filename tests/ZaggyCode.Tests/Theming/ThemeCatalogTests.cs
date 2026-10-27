@@ -92,7 +92,6 @@ public class ThemeCatalogTests : IDisposable
             A.Dummy<ILogger<ThemeCatalog>>(),
             reader,
             _themeOptions,
-            A.Dummy<ITempFolderProvider>(),
             new XmlSerializer<Theme>());
     }
 

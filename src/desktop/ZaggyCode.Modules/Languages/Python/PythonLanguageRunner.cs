@@ -229,7 +229,7 @@ public sealed class PythonLanguageRunner : ILanguageRunner
                 return string.Empty;
             }
 
-            return input.ReadLine();
+            return input.ReadLine() ?? string.Empty;
         };
     }
 

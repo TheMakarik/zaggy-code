@@ -12,7 +12,7 @@ public sealed class PythonSettings : INotifyPropertyChanged
     {
         get => field;
         set => SetField(ref field, value);
-    }
+    } = string.Empty;
 
     public bool SupressIo
     {

@@ -2,7 +2,7 @@ namespace ZaggyCode.Avalonia.Views.Controls;
 
 internal sealed class RobotSpriteSet
 {
-    public IImage Front { get; private init; }
+    public IImage Front { get; private init; } = null!;
     public IImage Back { get; private init; } = null!;
     public IImage Left { get; private init; } = null!;
     public IImage Right { get; private init; } = null!;

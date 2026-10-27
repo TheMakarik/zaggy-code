@@ -14,12 +14,12 @@ public class TextEditorZoomBehavior : Behavior<TextEditor>
     public static readonly StyledProperty<double> ZoomStepProperty =
         AvaloniaProperty.Register<TextEditorZoomBehavior, double>(nameof(ZoomStep), 1);
 
-    private ICommand _updateFontSizeCommand;
+    private ICommand? _updateFontSizeCommand;
 
-    public static readonly DirectProperty<TextEditorZoomBehavior, ICommand> UpdateFontSizeCommandProperty = AvaloniaProperty.RegisterDirect<TextEditorZoomBehavior, ICommand>(
+    public static readonly DirectProperty<TextEditorZoomBehavior, ICommand?> UpdateFontSizeCommandProperty = AvaloniaProperty.RegisterDirect<TextEditorZoomBehavior, ICommand?>(
         nameof(UpdateFontSizeCommand), o => o.UpdateFontSizeCommand, (o, v) => o.UpdateFontSizeCommand = v);
 
-    public ICommand UpdateFontSizeCommand
+    public ICommand? UpdateFontSizeCommand
     {
         get => _updateFontSizeCommand;
         set => SetAndRaise(UpdateFontSizeCommandProperty, ref _updateFontSizeCommand, value);
@@ -67,7 +67,7 @@ public class TextEditorZoomBehavior : Behavior<TextEditor>
         AssociatedObject.RemoveHandler(InputElement.PointerWheelChangedEvent, OnPointerWheelChanged);
     }
 
-    private void OnKeyDown(object sender, KeyEventArgs e)
+    private void OnKeyDown(object? sender, KeyEventArgs e)
     {
         if (AssociatedObject is null) return;
 
@@ -92,7 +92,7 @@ public class TextEditorZoomBehavior : Behavior<TextEditor>
         }
     }
 
-    private void OnPointerWheelChanged(object sender, PointerWheelEventArgs e)
+    private void OnPointerWheelChanged(object? sender, PointerWheelEventArgs e)
     {
         if (AssociatedObject is null) return;
 

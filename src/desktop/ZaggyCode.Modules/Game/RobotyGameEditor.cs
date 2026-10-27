@@ -2,14 +2,15 @@ namespace ZaggyCode.Modules.Game;
 
 public sealed class RobotyGameEditor : IRobotyGameEditor
 {
-    private FileStream _stream;
+    private FileStream? _stream;
     public GameModel OpenEditable(string path)
     {
         if (File.Exists(path))
         {
             _stream = File.Open(path, FileMode.Open);
             var game = new XmlSerializer(typeof(GameModel)).Deserialize(_stream) as GameModel;
-            game.Path = path;
+            if (game is not null)
+                game.Path = path;
         }
 
         throw new NotImplementedException();

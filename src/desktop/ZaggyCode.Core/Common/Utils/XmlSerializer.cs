@@ -50,37 +50,37 @@ public sealed class XmlSerializer<T> : XmlSerializer
         return (T?)_serializer.Deserialize(xmlReader, encodingStyle, events);
     }
     
-    public new void Serialize(Stream stream, T? obj)
+    public void Serialize(Stream stream, T? obj)
     {
         _serializer.Serialize(stream, obj);
     }
     
-    public new void Serialize(TextWriter textWriter, T? obj)
+    public void Serialize(TextWriter textWriter, T? obj)
     {
         _serializer.Serialize(textWriter, obj);
     }
     
-    public new void Serialize(XmlWriter xmlWriter, T? obj)
+    public void Serialize(XmlWriter xmlWriter, T? obj)
     {
         _serializer.Serialize(xmlWriter, obj);
     }
     
-    public new void Serialize(XmlWriter xmlWriter, T? obj, XmlSerializerNamespaces? namespaces)
+    public void Serialize(XmlWriter xmlWriter, T? obj, XmlSerializerNamespaces? namespaces)
     {
         _serializer.Serialize(xmlWriter, obj, namespaces);
     }
     
-    public new void Serialize(XmlWriter xmlWriter, T? obj, XmlSerializerNamespaces? namespaces, string? encodingStyle)
+    public void Serialize(XmlWriter xmlWriter, T? obj, XmlSerializerNamespaces? namespaces, string? encodingStyle)
     {
         _serializer.Serialize(xmlWriter, obj, namespaces, encodingStyle);
     }
     
-    public new void Serialize(Stream stream, T? obj, XmlSerializerNamespaces? namespaces)
+    public void Serialize(Stream stream, T? obj, XmlSerializerNamespaces? namespaces)
     {
         _serializer.Serialize(stream, obj, namespaces);
     }
     
-    public new void Serialize(TextWriter textWriter, T? obj, XmlSerializerNamespaces? namespaces)
+    public void Serialize(TextWriter textWriter, T? obj, XmlSerializerNamespaces? namespaces)
     {
         _serializer.Serialize(textWriter, obj, namespaces);
     }

@@ -112,7 +112,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
 
     private void RegisterInteractionHandlers()
     {
-        ViewModel.GetCodeToExecute.RegisterHandler(context =>
+        ViewModel!.GetCodeToExecute.RegisterHandler(context =>
             Dispatcher.Invoke(() => context.SetOutput(Editor.Text)));
 
         ViewModel.GetSelectedCode.RegisterHandler(context =>

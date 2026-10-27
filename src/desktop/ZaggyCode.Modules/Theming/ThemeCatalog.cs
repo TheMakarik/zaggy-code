@@ -4,7 +4,6 @@ public sealed class ThemeCatalog(
     ILogger<ThemeCatalog> logger,
     IArchiveReader archiveReader,
     IOptions<ThemeOptions> themeOptions,
-    ITempFolderProvider tempFolderProvider,
     XmlSerializer<Theme> themeSerializer) : IThemeCatalog
 {
     public async Task<IReadOnlyList<ThemeMetadata>> GetAvailableThemesAsync(CancellationToken token = default)
