@@ -12,7 +12,7 @@
 | Проект | Ответственность |
 |--------|-----------------|
 | `ZaggyCode.Core` | Абстракции: интерфейсы, модели, enum, события, атрибуты. Не зависит ни от чего. |
-| `ZaggyCode.Modules` | Реализации модулей: `Data` (хранение), `Game` (исполнитель/робот), `Languages` (раннеры языков). Зависит только от `Core.Contracts`. |
+| `ZaggyCode.Modules` | Реализации модулей: `Data` (хранение), `GamesRuntime` (исполнитель/робот и раннеры языков). Зависит только от `Core.Contracts`. |
 | `ZaggyCode.Avalonia` | UI на Avalonia + композиция приложения. Зависит от `Core` и `Core.Contracts`, содержит `Bootstrapper` и регистрацию DI. |
 | `ZaggyCode.Tests` | Юнит-тесты на `Modules`. |
 

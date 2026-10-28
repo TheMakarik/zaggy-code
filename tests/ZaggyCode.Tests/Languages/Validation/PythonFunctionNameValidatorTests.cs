@@ -1,4 +1,4 @@
-using ZaggyCode.Modules.Languages.Validation;
+using ZaggyCode.Modules.GamesRuntime.Validation;
 
 namespace ZaggyCode.Tests.Languages.Validation;
 

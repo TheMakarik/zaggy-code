@@ -27,15 +27,15 @@
     </ItemGroup>
 
     <Target Name="CopyPythonLibToOutput" AfterTargets="Build">
-        <Copy SourceFiles="@(PythonStdLib)" DestinationFiles="@(PythonStdLib->'$(OutputPath)Languages\Python\Lib\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+        <Copy SourceFiles="@(PythonStdLib)" DestinationFiles="@(PythonStdLib->'$(OutputPath)GamesRuntime\Python\Lib\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
     </Target>
 
     <ItemGroup>
-        <Content Include="Languages\Python\*.py">
+        <Content Include="GamesRuntime\Python\*.py">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
-        <None Remove="Languages\Python\Documentation\1.Введение_в_язык\1.Знакомство_с_языком_Python.md" />
-        <Content Include="Languages\Python\Documentation\1.Введение\1.Знакомство_С_Языком_Python.md">
+        <None Remove="GamesRuntime\Python\Documentation\1.Введение_в_язык\1.Знакомство_с_языком_Python.md" />
+        <Content Include="GamesRuntime\Python\Documentation\1.Введение\1.Знакомство_С_Языком_Python.md">
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
     </ItemGroup>

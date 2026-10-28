@@ -39,7 +39,7 @@
     </ItemGroup>
 
     <Target Name="CopyPythonLibToOutput" BeforeTargets="Build">
-        <Copy SourceFiles="@(PythonStdLib)" DestinationFiles="@(PythonStdLib->'$(OutputPath)Languages\Python\Lib\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+        <Copy SourceFiles="@(PythonStdLib)" DestinationFiles="@(PythonStdLib->'$(OutputPath)GamesRuntime\Python\Lib\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
     </Target>
 
     <ItemGroup>
@@ -49,13 +49,13 @@
         <Content Include="..\..\src\desktop\ZaggyCode.Avalonia\appsettings.json">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
-        <Content Include="..\..\src\desktop\ZaggyCode.Modules\Languages\Python\*.py">
+        <Content Include="..\..\src\desktop\ZaggyCode.Modules\GamesRuntime\Python\*.py">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-            <Link>Languages\Python\%(Filename)%(Extension)</Link>
+            <Link>GamesRuntime\Python\%(Filename)%(Extension)</Link>
         </Content>
-        <Content Include="..\..\src\desktop\ZaggyCode.Modules\Languages\Python\PythonCode*.py">
+        <Content Include="..\..\src\desktop\ZaggyCode.Modules\GamesRuntime\Python\PythonCode*.py">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-            <Link>Languages\Python\PythonCode\%(Filename)%(Extension)</Link>
+            <Link>GamesRuntime\Python\PythonCode\%(Filename)%(Extension)</Link>
         </Content>
     </ItemGroup>
 

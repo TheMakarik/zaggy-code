@@ -1,4 +1,4 @@
-using ZaggyCode.Core.Game.Attributes;
+using ZaggyCode.Core.GamesRuntime.Attributes;
 
 namespace ZaggyCode.Core.Common;
 

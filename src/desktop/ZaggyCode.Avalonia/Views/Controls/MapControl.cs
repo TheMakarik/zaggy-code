@@ -1,6 +1,6 @@
 using ZaggyCode.Avalonia.Views.Records;
 using ZaggyCode.Avalonia.Views.StateMachines;
-using ZaggyCode.Core.Game.Enums;
+using ZaggyCode.Core.GamesRuntime.Enums;
 
 namespace ZaggyCode.Avalonia.Views.Controls;
 

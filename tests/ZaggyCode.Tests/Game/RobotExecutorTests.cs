@@ -1,5 +1,5 @@
 using System.Collections.ObjectModel;
-using ZaggyCode.Modules.Game;
+using ZaggyCode.Modules.GamesRuntime;
 
 namespace ZaggyCode.Tests.Game;
 

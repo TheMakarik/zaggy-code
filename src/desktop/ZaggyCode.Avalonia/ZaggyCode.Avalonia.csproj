@@ -81,11 +81,11 @@
     </ItemGroup>
 
     <Target Name="CopyPythonLibToOutput" BeforeTargets="Build">
-        <Copy SourceFiles="@(PythonStdLib)" DestinationFiles="@(PythonStdLib->'$(OutputPath)Languages\Python\Lib\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+        <Copy SourceFiles="@(PythonStdLib)" DestinationFiles="@(PythonStdLib->'$(OutputPath)GamesRuntime\Python\Lib\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
     </Target>
 
     <Target Name="CopyPythonLibToPublish" AfterTargets="Publish">
-        <Copy SourceFiles="@(PythonStdLib)" DestinationFiles="@(PythonStdLib->'$(PublishDir)Languages\Python\Lib\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+        <Copy SourceFiles="@(PythonStdLib)" DestinationFiles="@(PythonStdLib->'$(PublishDir)GamesRuntime\Python\Lib\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
     </Target>
 
     <ItemGroup>
