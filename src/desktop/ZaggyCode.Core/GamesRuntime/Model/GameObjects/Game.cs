@@ -1,4 +1,4 @@
-namespace ZaggyCode.Core.GamesRuntime.Models;
+namespace ZaggyCode.Core.GamesRuntime.Model.GameObjects;
 
 [XmlRoot("game")]
 public sealed class Game : INotifyPropertyChanged, INotifyCollectionChanged
