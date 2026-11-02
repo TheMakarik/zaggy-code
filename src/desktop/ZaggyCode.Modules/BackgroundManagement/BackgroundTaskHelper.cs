@@ -1,3 +1,5 @@
+using ZaggyCode.Core.BackgroundManagement.Dto;
+
 namespace ZaggyCode.Modules.BackgroundManagement;
 
 public sealed class BackgroundTaskHelper(ILogger<IBackgroundTaskHelper> logger) : IBackgroundTaskHelper

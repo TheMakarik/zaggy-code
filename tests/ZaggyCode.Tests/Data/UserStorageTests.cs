@@ -1,3 +1,4 @@
+using ZaggyCode.Core.LanguageRuntime.Enums;
 using ZaggyCode.Modules.Data.Json;
 
 namespace ZaggyCode.Tests.Data;

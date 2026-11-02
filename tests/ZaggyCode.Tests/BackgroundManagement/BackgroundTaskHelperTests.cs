@@ -1,6 +1,6 @@
 using ZaggyCode.Core.BackgroundManagement;
+using ZaggyCode.Core.BackgroundManagement.Dto;
 using ZaggyCode.Core.BackgroundManagement.Model;
-using ZaggyCode.Core.BackgroundManagment.Dto;
 using ZaggyCode.Modules.BackgroundManagement;
 
 namespace ZaggyCode.Tests.BackgroundManagement;

@@ -1,3 +1,5 @@
+using ZaggyCode.Core.LanguageRuntime.Enums;
+
 namespace ZaggyCode.Tests.Languages;
 
 public class PythonLanguageRunnerTests : LanguageRunnerTests

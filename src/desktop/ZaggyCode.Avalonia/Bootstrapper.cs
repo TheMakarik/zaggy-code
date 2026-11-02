@@ -1,3 +1,5 @@
+using ZaggyCode.Core.LanguageRuntime.Attributes;
+
 namespace ZaggyCode.Avalonia;
 
 public sealed class Bootstrapper
@@ -95,12 +97,12 @@ public sealed class Bootstrapper
         builder.Services.AddSingleton<RobotGameTerminalProxy>();
         builder.Services.AddSingleton<IRobotGameTerminalProxy>(provider => provider.GetRequiredService<RobotGameTerminalProxy>());
 
+        Log.Information("Зарегистрированно {количество} сервисов", builder.Services.Count);
         var app = builder.Build();
 
         _ = app.RunAsync();
 
         await using var scope = app.Services.CreateAsyncScope();
-
 #if DEBUG
         try
         {

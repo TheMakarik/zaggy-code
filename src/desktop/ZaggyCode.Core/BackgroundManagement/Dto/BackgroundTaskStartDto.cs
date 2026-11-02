@@ -1,4 +1,4 @@
-namespace ZaggyCode.Core.BackgroundManagment.Dto;
+namespace ZaggyCode.Core.BackgroundManagement.Dto;
 
 public sealed class BackgroundTaskStartDto
 {

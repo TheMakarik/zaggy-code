@@ -1,3 +1,5 @@
+using ZaggyCode.Core.LanguageRuntime.Enums;
+
 namespace ZaggyCode.Tests.Languages.Base;
 
 public abstract class LanguageRunnerTests : IDisposable

@@ -1,3 +1,5 @@
+using ZaggyCode.Core.LanguageRuntime.Validation;
+
 namespace ZaggyCode.Avalonia.Views.Converters;
 
 public sealed class PythonValidationResultToStringConverter : MarkupExtension, IValueConverter

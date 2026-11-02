@@ -1,6 +1,6 @@
 using ObservableCollections;
+using ZaggyCode.Core.BackgroundManagement.Dto;
 using ZaggyCode.Core.BackgroundManagement.Model;
-using ZaggyCode.Core.BackgroundManagment.Dto;
 
 namespace ZaggyCode.Core.BackgroundManagement;
 

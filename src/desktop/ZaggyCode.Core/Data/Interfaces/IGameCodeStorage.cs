@@ -1,3 +1,5 @@
+using ZaggyCode.Core.LanguageRuntime.Enums;
+
 namespace ZaggyCode.Core.Data.Interfaces;
 
 //#:NO_AI

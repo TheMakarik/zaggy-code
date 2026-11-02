@@ -1,3 +1,5 @@
+using ZaggyCode.Core.BackgroundManagement.Dto;
+
 namespace ZaggyCode.Modules.BackgroundManagement.Extensions;
 
 public static class BackgroundTaskDtoExtensions

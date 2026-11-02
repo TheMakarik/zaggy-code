@@ -1,3 +1,5 @@
+using ZaggyCode.Core.LanguageRuntime.Validation;
+
 namespace ZaggyCode.Avalonia.ViewModels;
 
 public sealed partial class PythonSettingsViewModel : ViewModelBase

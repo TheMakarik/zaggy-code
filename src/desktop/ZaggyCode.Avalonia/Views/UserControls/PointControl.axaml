@@ -3,13 +3,13 @@
     d:DesignWidth="800"
     mc:Ignorable="d"
     x:Class="ZaggyCode.Avalonia.Views.UserControls.PointControl"
-    x:DataType="game:RobotGamePoint"
+    x:DataType="robot:RobotGamePoint"
     xmlns="https://github.com/avaloniaui"
     xmlns:controls="clr-namespace:ZaggyCode.Avalonia.Views.Controls"
     xmlns:converters="clr-namespace:ZaggyCode.Avalonia.Views.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:game="clr-namespace:ZaggyCode.Core.GamesRuntime.Models;assembly=ZaggyCode.Core"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:robot="clr-namespace:ZaggyCode.Core.RobotGameCore.Model;assembly=ZaggyCode.Core"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <UserControl.Styles>
@@ -42,15 +42,13 @@
         </Border.Margin>
 
         <Grid>
-            <Rectangle
-                Fill="{Binding CustomCoreBackgroundHex, Converter={converters:HexStringToBrushConverter}}"
-                Opacity="{Binding CustomCoreOpacity, Converter={converters:NullableDoubleConverter}}" />
+            <Rectangle Fill="{Binding CustomCoreBackgroundHex, Converter={converters:HexStringToBrushConverter}}" Opacity="{Binding CustomCoreOpacity, Converter={converters:NullableDoubleConverter}}" />
 
             <Grid>
                 <Rectangle
                     Classes="wall-segment"
                     Fill="{DynamicResource MapWallBrush}"
-                    IsVisible="{Binding WallType, Converter={converters:WallEdgeVisibilityConverter}, ConverterParameter=Full}"
+                    IsVisible="{Binding RobotWallType, Converter={converters:WallEdgeVisibilityConverter}, ConverterParameter=Full}"
                     Opacity="{Binding CustomWallOpacity, Converter={converters:NullableDoubleConverter}}"
                     Stroke="{Binding CustomWallBorderOnPointHex, Converter={converters:HexStringToBrushConverter}}" />
 
@@ -59,7 +57,7 @@
                     Fill="{DynamicResource MapWallBrush}"
                     Height="{Binding $parent[UserControl].Bounds.Height, Converter={converters:PercentOfValueConverter}, ConverterParameter=0.15}"
                     HorizontalAlignment="Stretch"
-                    IsVisible="{Binding WallType, Converter={converters:WallEdgeVisibilityConverter}, ConverterParameter=Top}"
+                    IsVisible="{Binding RobotWallType, Converter={converters:WallEdgeVisibilityConverter}, ConverterParameter=Top}"
                     Opacity="{Binding CustomWallOpacity, Converter={converters:NullableDoubleConverter}}"
                     Stroke="{Binding CustomWallBorderOnPointHex, Converter={converters:HexStringToBrushConverter}}"
                     VerticalAlignment="Top" />
@@ -69,7 +67,7 @@
                     Fill="{DynamicResource MapWallBrush}"
                     Height="{Binding $parent[UserControl].Bounds.Height, Converter={converters:PercentOfValueConverter}, ConverterParameter=0.15}"
                     HorizontalAlignment="Stretch"
-                    IsVisible="{Binding WallType, Converter={converters:WallEdgeVisibilityConverter}, ConverterParameter=Bottom}"
+                    IsVisible="{Binding RobotWallType, Converter={converters:WallEdgeVisibilityConverter}, ConverterParameter=Bottom}"
                     Opacity="{Binding CustomWallOpacity, Converter={converters:NullableDoubleConverter}}"
                     Stroke="{Binding CustomWallBorderOnPointHex, Converter={converters:HexStringToBrushConverter}}"
                     VerticalAlignment="Bottom" />
@@ -78,7 +76,7 @@
                     Classes="wall-segment"
                     Fill="{DynamicResource MapWallBrush}"
                     HorizontalAlignment="Left"
-                    IsVisible="{Binding WallType, Converter={converters:WallEdgeVisibilityConverter}, ConverterParameter=Left}"
+                    IsVisible="{Binding RobotWallType, Converter={converters:WallEdgeVisibilityConverter}, ConverterParameter=Left}"
                     Opacity="{Binding CustomWallOpacity, Converter={converters:NullableDoubleConverter}}"
                     Stroke="{Binding CustomWallBorderOnPointHex, Converter={converters:HexStringToBrushConverter}}"
                     VerticalAlignment="Stretch"
@@ -88,7 +86,7 @@
                     Classes="wall-segment"
                     Fill="{DynamicResource MapWallBrush}"
                     HorizontalAlignment="Right"
-                    IsVisible="{Binding WallType, Converter={converters:WallEdgeVisibilityConverter}, ConverterParameter=Right}"
+                    IsVisible="{Binding RobotWallType, Converter={converters:WallEdgeVisibilityConverter}, ConverterParameter=Right}"
                     Opacity="{Binding CustomWallOpacity, Converter={converters:NullableDoubleConverter}}"
                     Stroke="{Binding CustomWallBorderOnPointHex, Converter={converters:HexStringToBrushConverter}}"
                     VerticalAlignment="Stretch"
@@ -113,7 +111,7 @@
                         <Binding Path="RequireDrawMarkWidth" />
                     </MultiBinding>
                 </Viewbox.Width>
-                <Canvas Width="16" Height="16">
+                <Canvas Height="16" Width="16">
                     <Path
                         Data="M1,1 L15,15 M15,1 L1,15"
                         Stroke="{DynamicResource MapRequireDrawBrush}"
@@ -131,81 +129,273 @@
             <Image
                 HorizontalAlignment="Center"
                 IsVisible="{Binding HasCoin}"
-                ZIndex="3"
                 Source="{Binding $parent[UserControl].(controls:MapAssetPaths.CoinPath), Converter={converters:ImagePathConverter}}"
                 Stretch="Uniform"
                 VerticalAlignment="Center"
-                Width="{Binding $parent[UserControl].Bounds.Width, Converter={converters:PercentOfValueConverter}, ConverterParameter=0.6}" />
+                Width="{Binding $parent[UserControl].Bounds.Width, Converter={converters:PercentOfValueConverter}, ConverterParameter=0.6}"
+                ZIndex="3" />
 
             <Grid
                 ColumnDefinitions="*,*,*,*,*,*,*,*"
                 IsVisible="{Binding IsGoal}"
-                ZIndex="1"
-                RowDefinitions="*,*,*,*,*,*,*,*">
-                <Rectangle Grid.Row="0" Grid.Column="0" Fill="{DynamicResource GoalColor1Brush}" />
-                <Rectangle Grid.Row="0" Grid.Column="1" Fill="{DynamicResource GoalColor2Brush}" />
-                <Rectangle Grid.Row="0" Grid.Column="2" Fill="{DynamicResource GoalColor1Brush}" />
-                <Rectangle Grid.Row="0" Grid.Column="3" Fill="{DynamicResource GoalColor2Brush}" />
-                <Rectangle Grid.Row="0" Grid.Column="4" Fill="{DynamicResource GoalColor1Brush}" />
-                <Rectangle Grid.Row="0" Grid.Column="5" Fill="{DynamicResource GoalColor2Brush}" />
-                <Rectangle Grid.Row="0" Grid.Column="6" Fill="{DynamicResource GoalColor1Brush}" />
-                <Rectangle Grid.Row="0" Grid.Column="7" Fill="{DynamicResource GoalColor2Brush}" />
-                <Rectangle Grid.Row="1" Grid.Column="0" Fill="{DynamicResource GoalColor2Brush}" />
-                <Rectangle Grid.Row="1" Grid.Column="1" Fill="{DynamicResource GoalColor1Brush}" />
-                <Rectangle Grid.Row="1" Grid.Column="2" Fill="{DynamicResource GoalColor2Brush}" />
-                <Rectangle Grid.Row="1" Grid.Column="3" Fill="{DynamicResource GoalColor1Brush}" />
-                <Rectangle Grid.Row="1" Grid.Column="4" Fill="{DynamicResource GoalColor2Brush}" />
-                <Rectangle Grid.Row="1" Grid.Column="5" Fill="{DynamicResource GoalColor1Brush}" />
-                <Rectangle Grid.Row="1" Grid.Column="6" Fill="{DynamicResource GoalColor2Brush}" />
-                <Rectangle Grid.Row="1" Grid.Column="7" Fill="{DynamicResource GoalColor1Brush}" />
-                <Rectangle Grid.Row="2" Grid.Column="0" Fill="{DynamicResource GoalColor1Brush}" />
-                <Rectangle Grid.Row="2" Grid.Column="1" Fill="{DynamicResource GoalColor2Brush}" />
-                <Rectangle Grid.Row="2" Grid.Column="2" Fill="{DynamicResource GoalColor1Brush}" />
-                <Rectangle Grid.Row="2" Grid.Column="3" Fill="{DynamicResource GoalColor2Brush}" />
-                <Rectangle Grid.Row="2" Grid.Column="4" Fill="{DynamicResource GoalColor1Brush}" />
-                <Rectangle Grid.Row="2" Grid.Column="5" Fill="{DynamicResource GoalColor2Brush}" />
-                <Rectangle Grid.Row="2" Grid.Column="6" Fill="{DynamicResource GoalColor1Brush}" />
-                <Rectangle Grid.Row="2" Grid.Column="7" Fill="{DynamicResource GoalColor2Brush}" />
-                <Rectangle Grid.Row="3" Grid.Column="0" Fill="{DynamicResource GoalColor2Brush}" />
-                <Rectangle Grid.Row="3" Grid.Column="1" Fill="{DynamicResource GoalColor1Brush}" />
-                <Rectangle Grid.Row="3" Grid.Column="2" Fill="{DynamicResource GoalColor2Brush}" />
-                <Rectangle Grid.Row="3" Grid.Column="3" Fill="{DynamicResource GoalColor1Brush}" />
-                <Rectangle Grid.Row="3" Grid.Column="4" Fill="{DynamicResource GoalColor2Brush}" />
-                <Rectangle Grid.Row="3" Grid.Column="5" Fill="{DynamicResource GoalColor1Brush}" />
-                <Rectangle Grid.Row="3" Grid.Column="6" Fill="{DynamicResource GoalColor2Brush}" />
-                <Rectangle Grid.Row="3" Grid.Column="7" Fill="{DynamicResource GoalColor1Brush}" />
-                <Rectangle Grid.Row="4" Grid.Column="0" Fill="{DynamicResource GoalColor1Brush}" />
-                <Rectangle Grid.Row="4" Grid.Column="1" Fill="{DynamicResource GoalColor2Brush}" />
-                <Rectangle Grid.Row="4" Grid.Column="2" Fill="{DynamicResource GoalColor1Brush}" />
-                <Rectangle Grid.Row="4" Grid.Column="3" Fill="{DynamicResource GoalColor2Brush}" />
-                <Rectangle Grid.Row="4" Grid.Column="4" Fill="{DynamicResource GoalColor1Brush}" />
-                <Rectangle Grid.Row="4" Grid.Column="5" Fill="{DynamicResource GoalColor2Brush}" />
-                <Rectangle Grid.Row="4" Grid.Column="6" Fill="{DynamicResource GoalColor1Brush}" />
-                <Rectangle Grid.Row="4" Grid.Column="7" Fill="{DynamicResource GoalColor2Brush}" />
-                <Rectangle Grid.Row="5" Grid.Column="0" Fill="{DynamicResource GoalColor2Brush}" />
-                <Rectangle Grid.Row="5" Grid.Column="1" Fill="{DynamicResource GoalColor1Brush}" />
-                <Rectangle Grid.Row="5" Grid.Column="2" Fill="{DynamicResource GoalColor2Brush}" />
-                <Rectangle Grid.Row="5" Grid.Column="3" Fill="{DynamicResource GoalColor1Brush}" />
-                <Rectangle Grid.Row="5" Grid.Column="4" Fill="{DynamicResource GoalColor2Brush}" />
-                <Rectangle Grid.Row="5" Grid.Column="5" Fill="{DynamicResource GoalColor1Brush}" />
-                <Rectangle Grid.Row="5" Grid.Column="6" Fill="{DynamicResource GoalColor2Brush}" />
-                <Rectangle Grid.Row="5" Grid.Column="7" Fill="{DynamicResource GoalColor1Brush}" />
-                <Rectangle Grid.Row="6" Grid.Column="0" Fill="{DynamicResource GoalColor1Brush}" />
-                <Rectangle Grid.Row="6" Grid.Column="1" Fill="{DynamicResource GoalColor2Brush}" />
-                <Rectangle Grid.Row="6" Grid.Column="2" Fill="{DynamicResource GoalColor1Brush}" />
-                <Rectangle Grid.Row="6" Grid.Column="3" Fill="{DynamicResource GoalColor2Brush}" />
-                <Rectangle Grid.Row="6" Grid.Column="4" Fill="{DynamicResource GoalColor1Brush}" />
-                <Rectangle Grid.Row="6" Grid.Column="5" Fill="{DynamicResource GoalColor2Brush}" />
-                <Rectangle Grid.Row="6" Grid.Column="6" Fill="{DynamicResource GoalColor1Brush}" />
-                <Rectangle Grid.Row="6" Grid.Column="7" Fill="{DynamicResource GoalColor2Brush}" />
-                <Rectangle Grid.Row="7" Grid.Column="0" Fill="{DynamicResource GoalColor2Brush}" />
-                <Rectangle Grid.Row="7" Grid.Column="1" Fill="{DynamicResource GoalColor1Brush}" />
-                <Rectangle Grid.Row="7" Grid.Column="2" Fill="{DynamicResource GoalColor2Brush}" />
-                <Rectangle Grid.Row="7" Grid.Column="3" Fill="{DynamicResource GoalColor1Brush}" />
-                <Rectangle Grid.Row="7" Grid.Column="4" Fill="{DynamicResource GoalColor2Brush}" />
-                <Rectangle Grid.Row="7" Grid.Column="5" Fill="{DynamicResource GoalColor1Brush}" />
-                <Rectangle Grid.Row="7" Grid.Column="6" Fill="{DynamicResource GoalColor2Brush}" />
-                <Rectangle Grid.Row="7" Grid.Column="7" Fill="{DynamicResource GoalColor1Brush}" />
+                RowDefinitions="*,*,*,*,*,*,*,*"
+                ZIndex="1">
+                <Rectangle
+                    Fill="{DynamicResource GoalColor1Brush}"
+                    Grid.Column="0"
+                    Grid.Row="0" />
+                <Rectangle
+                    Fill="{DynamicResource GoalColor2Brush}"
+                    Grid.Column="1"
+                    Grid.Row="0" />
+                <Rectangle
+                    Fill="{DynamicResource GoalColor1Brush}"
+                    Grid.Column="2"
+                    Grid.Row="0" />
+                <Rectangle
+                    Fill="{DynamicResource GoalColor2Brush}"
+                    Grid.Column="3"
+                    Grid.Row="0" />
+                <Rectangle
+                    Fill="{DynamicResource GoalColor1Brush}"
+                    Grid.Column="4"
+                    Grid.Row="0" />
+                <Rectangle
+                    Fill="{DynamicResource GoalColor2Brush}"
+                    Grid.Column="5"
+                    Grid.Row="0" />
+                <Rectangle
+                    Fill="{DynamicResource GoalColor1Brush}"
+                    Grid.Column="6"
+                    Grid.Row="0" />
+                <Rectangle
+                    Fill="{DynamicResource GoalColor2Brush}"
+                    Grid.Column="7"
+                    Grid.Row="0" />
+                <Rectangle
+                    Fill="{DynamicResource GoalColor2Brush}"
+                    Grid.Column="0"
+                    Grid.Row="1" />
+                <Rectangle
+                    Fill="{DynamicResource GoalColor1Brush}"
+                    Grid.Column="1"
+                    Grid.Row="1" />
+                <Rectangle
+                    Fill="{DynamicResource GoalColor2Brush}"
+                    Grid.Column="2"
+                    Grid.Row="1" />
+                <Rectangle
+                    Fill="{DynamicResource GoalColor1Brush}"
+                    Grid.Column="3"
+                    Grid.Row="1" />
+                <Rectangle
+                    Fill="{DynamicResource GoalColor2Brush}"
+                    Grid.Column="4"
+                    Grid.Row="1" />
+                <Rectangle
+                    Fill="{DynamicResource GoalColor1Brush}"
+                    Grid.Column="5"
+                    Grid.Row="1" />
+                <Rectangle
+                    Fill="{DynamicResource GoalColor2Brush}"
+                    Grid.Column="6"
+                    Grid.Row="1" />
+                <Rectangle
+                    Fill="{DynamicResource GoalColor1Brush}"
+                    Grid.Column="7"
+                    Grid.Row="1" />
+                <Rectangle
+                    Fill="{DynamicResource GoalColor1Brush}"
+                    Grid.Column="0"
+                    Grid.Row="2" />
+                <Rectangle
+                    Fill="{DynamicResource GoalColor2Brush}"
+                    Grid.Column="1"
+                    Grid.Row="2" />
+                <Rectangle
+                    Fill="{DynamicResource GoalColor1Brush}"
+                    Grid.Column="2"
+                    Grid.Row="2" />
+                <Rectangle
+                    Fill="{DynamicResource GoalColor2Brush}"
+                    Grid.Column="3"
+                    Grid.Row="2" />
+                <Rectangle
+                    Fill="{DynamicResource GoalColor1Brush}"
+                    Grid.Column="4"
+                    Grid.Row="2" />
+                <Rectangle
+                    Fill="{DynamicResource GoalColor2Brush}"
+                    Grid.Column="5"
+                    Grid.Row="2" />
+                <Rectangle
+                    Fill="{DynamicResource GoalColor1Brush}"
+                    Grid.Column="6"
+                    Grid.Row="2" />
+                <Rectangle
+                    Fill="{DynamicResource GoalColor2Brush}"
+                    Grid.Column="7"
+                    Grid.Row="2" />
+                <Rectangle
+                    Fill="{DynamicResource GoalColor2Brush}"
+                    Grid.Column="0"
+                    Grid.Row="3" />
+                <Rectangle
+                    Fill="{DynamicResource GoalColor1Brush}"
+                    Grid.Column="1"
+                    Grid.Row="3" />
+                <Rectangle
+                    Fill="{DynamicResource GoalColor2Brush}"
+                    Grid.Column="2"
+                    Grid.Row="3" />
+                <Rectangle
+                    Fill="{DynamicResource GoalColor1Brush}"
+                    Grid.Column="3"
+                    Grid.Row="3" />
+                <Rectangle
+                    Fill="{DynamicResource GoalColor2Brush}"
+                    Grid.Column="4"
+                    Grid.Row="3" />
+                <Rectangle
+                    Fill="{DynamicResource GoalColor1Brush}"
+                    Grid.Column="5"
+                    Grid.Row="3" />
+                <Rectangle
+                    Fill="{DynamicResource GoalColor2Brush}"
+                    Grid.Column="6"
+                    Grid.Row="3" />
+                <Rectangle
+                    Fill="{DynamicResource GoalColor1Brush}"
+                    Grid.Column="7"
+                    Grid.Row="3" />
+                <Rectangle
+                    Fill="{DynamicResource GoalColor1Brush}"
+                    Grid.Column="0"
+                    Grid.Row="4" />
+                <Rectangle
+                    Fill="{DynamicResource GoalColor2Brush}"
+                    Grid.Column="1"
+                    Grid.Row="4" />
+                <Rectangle
+                    Fill="{DynamicResource GoalColor1Brush}"
+                    Grid.Column="2"
+                    Grid.Row="4" />
+                <Rectangle
+                    Fill="{DynamicResource GoalColor2Brush}"
+                    Grid.Column="3"
+                    Grid.Row="4" />
+                <Rectangle
+                    Fill="{DynamicResource GoalColor1Brush}"
+                    Grid.Column="4"
+                    Grid.Row="4" />
+                <Rectangle
+                    Fill="{DynamicResource GoalColor2Brush}"
+                    Grid.Column="5"
+                    Grid.Row="4" />
+                <Rectangle
+                    Fill="{DynamicResource GoalColor1Brush}"
+                    Grid.Column="6"
+                    Grid.Row="4" />
+                <Rectangle
+                    Fill="{DynamicResource GoalColor2Brush}"
+                    Grid.Column="7"
+                    Grid.Row="4" />
+                <Rectangle
+                    Fill="{DynamicResource GoalColor2Brush}"
+                    Grid.Column="0"
+                    Grid.Row="5" />
+                <Rectangle
+                    Fill="{DynamicResource GoalColor1Brush}"
+                    Grid.Column="1"
+                    Grid.Row="5" />
+                <Rectangle
+                    Fill="{DynamicResource GoalColor2Brush}"
+                    Grid.Column="2"
+                    Grid.Row="5" />
+                <Rectangle
+                    Fill="{DynamicResource GoalColor1Brush}"
+                    Grid.Column="3"
+                    Grid.Row="5" />
+                <Rectangle
+                    Fill="{DynamicResource GoalColor2Brush}"
+                    Grid.Column="4"
+                    Grid.Row="5" />
+                <Rectangle
+                    Fill="{DynamicResource GoalColor1Brush}"
+                    Grid.Column="5"
+                    Grid.Row="5" />
+                <Rectangle
+                    Fill="{DynamicResource GoalColor2Brush}"
+                    Grid.Column="6"
+                    Grid.Row="5" />
+                <Rectangle
+                    Fill="{DynamicResource GoalColor1Brush}"
+                    Grid.Column="7"
+                    Grid.Row="5" />
+                <Rectangle
+                    Fill="{DynamicResource GoalColor1Brush}"
+                    Grid.Column="0"
+                    Grid.Row="6" />
+                <Rectangle
+                    Fill="{DynamicResource GoalColor2Brush}"
+                    Grid.Column="1"
+                    Grid.Row="6" />
+                <Rectangle
+                    Fill="{DynamicResource GoalColor1Brush}"
+                    Grid.Column="2"
+                    Grid.Row="6" />
+                <Rectangle
+                    Fill="{DynamicResource GoalColor2Brush}"
+                    Grid.Column="3"
+                    Grid.Row="6" />
+                <Rectangle
+                    Fill="{DynamicResource GoalColor1Brush}"
+                    Grid.Column="4"
+                    Grid.Row="6" />
+                <Rectangle
+                    Fill="{DynamicResource GoalColor2Brush}"
+                    Grid.Column="5"
+                    Grid.Row="6" />
+                <Rectangle
+                    Fill="{DynamicResource GoalColor1Brush}"
+                    Grid.Column="6"
+                    Grid.Row="6" />
+                <Rectangle
+                    Fill="{DynamicResource GoalColor2Brush}"
+                    Grid.Column="7"
+                    Grid.Row="6" />
+                <Rectangle
+                    Fill="{DynamicResource GoalColor2Brush}"
+                    Grid.Column="0"
+                    Grid.Row="7" />
+                <Rectangle
+                    Fill="{DynamicResource GoalColor1Brush}"
+                    Grid.Column="1"
+                    Grid.Row="7" />
+                <Rectangle
+                    Fill="{DynamicResource GoalColor2Brush}"
+                    Grid.Column="2"
+                    Grid.Row="7" />
+                <Rectangle
+                    Fill="{DynamicResource GoalColor1Brush}"
+                    Grid.Column="3"
+                    Grid.Row="7" />
+                <Rectangle
+                    Fill="{DynamicResource GoalColor2Brush}"
+                    Grid.Column="4"
+                    Grid.Row="7" />
+                <Rectangle
+                    Fill="{DynamicResource GoalColor1Brush}"
+                    Grid.Column="5"
+                    Grid.Row="7" />
+                <Rectangle
+                    Fill="{DynamicResource GoalColor2Brush}"
+                    Grid.Column="6"
+                    Grid.Row="7" />
+                <Rectangle
+                    Fill="{DynamicResource GoalColor1Brush}"
+                    Grid.Column="7"
+                    Grid.Row="7" />
             </Grid>
         </Grid>
     </Border>

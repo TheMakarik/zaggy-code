@@ -1,4 +1,8 @@
-using ZaggyCode.Core.GamesRuntime.Model.GameObjects;
+using ZaggyCode.Core.LanguageRuntime.Enums;
+using ZaggyCode.Core.LanguageRuntime.Validation;
+using ZaggyCode.Core.GamesCore.Enums.Metadata;
+using ZaggyCode.Core.RobotGameCore.Enums;
+using ZaggyCode.Core.RobotGameCore.Model;
 
 namespace ZaggyCode.Avalonia.ViewModels;
 
@@ -14,8 +18,8 @@ public partial class MainWindowViewModel : ViewModelBase
     [Reactive] private ExecutionSpeed _executionSpeed;
     [Reactive] private Language _selectedLanguage;
     [Reactive] private LanguageItem? _selectedLanguageItem;
-    [Reactive] private Game _currentGame;
-    [Reactive] private Map _currentMap;
+    [Reactive] private RobotGame _currentRobotGame;
+    [Reactive] private RobotMap _currentRobotMap;
     [Reactive] private int _textEditorFontSize;
     [Reactive] private int _terminalFontSize;
 
@@ -174,13 +178,13 @@ public partial class MainWindowViewModel : ViewModelBase
         PopupOptions = popupOptions.Value;
         MaxFontSize = _fontSizeOptions.Value.MaxFontSize;
         MinFontSize = _fontSizeOptions.Value.MinFontSize;
-        CurrentGame = CreateTestGame();
-        Debug.Assert(CurrentGame.Maps.Count <= MaxMaps, "Не более 9 карт");
+        CurrentRobotGame = CreateTestGame();
+        Debug.Assert(CurrentRobotGame.Maps.Count <= MaxMaps, "Не более 9 карт");
 
-        for (var index = 0; index < CurrentGame.Maps.Count; index++)
+        for (var index = 0; index < CurrentRobotGame.Maps.Count; index++)
             MapNumbers.Add(new MapNumberItem(index + 1));
 
-        CurrentMap = CurrentGame.Maps[0];
+        CurrentRobotMap = CurrentRobotGame.Maps[0];
         MapNumbers[0].IsSelected = true;
 
         InitializeMessageBusSubscriptions();
@@ -212,11 +216,11 @@ public partial class MainWindowViewModel : ViewModelBase
     private const int MaxMaps = 9;
 
     // Тестовая игра: три карты, require-draw образует букву Г разных размеров.
-    public static Game CreateTestGame()
+    public static RobotGame CreateTestGame()
     {
-        ObservableCollection<Map> maps = [.. TestMapSizes.Select(CreateLetterMap)];
+        ObservableCollection<RobotMap> maps = [.. TestMapSizes.Select(CreateLetterMap)];
 
-        return new Game
+        return new RobotGame
         {
             Name = "Тестовая игра",
             Description = """
@@ -249,7 +253,7 @@ public partial class MainWindowViewModel : ViewModelBase
         };
     }
 
-    private static Map CreateLetterMap(int size)
+    private static RobotMap CreateLetterMap(int size)
     {
         const int cornerRadius = 14;
 
@@ -268,10 +272,10 @@ public partial class MainWindowViewModel : ViewModelBase
 
         // Сплошная стена буквой Г: колонка 1 (снизу оставлен проход) + строка 1.
         for (var y = 1; y < size - 1; y++)
-            points.First(point => point.X == 1 && point.Y == y).WallType = WallType.Full;
+            points.First(point => point.X == 1 && point.Y == y).WallType = RobotWallType.Full;
 
         for (var x = 2; x < size; x++)
-            points.First(point => point.X == x && point.Y == 1).WallType = WallType.Full;
+            points.First(point => point.X == x && point.Y == 1).WallType = RobotWallType.Full;
 
         // Монетки в скрытой комнате за стеной (закраска там не требуется).
         points.First(point => point.X == size - 1 && point.Y == size - 1).HasCoin = true;
@@ -280,7 +284,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
         // На большой карте — боковая стеночка между монетками.
         if (size > 4)
-            points.First(point => point.X == 3 && point.Y == 3).WallType = WallType.BottomRight;
+            points.First(point => point.X == 3 && point.Y == 3).WallType = RobotWallType.BottomRight;
 
         // Немного скруглить внешние углы карты.
         points.First(point => point.X == 0 && point.Y == 0).CustomBorderRadiusLeftTop = cornerRadius;
@@ -288,7 +292,7 @@ public partial class MainWindowViewModel : ViewModelBase
         points.First(point => point.X == 0 && point.Y == size - 1).CustomBorderRadiusLeftBottom = cornerRadius;
         points.First(point => point.X == size - 1 && point.Y == size - 1).CustomBorderRadiusRightBottom = cornerRadius;
 
-        return new Map
+        return new RobotMap
         {
             Width = size,
             Height = size,
@@ -463,7 +467,7 @@ public partial class MainWindowViewModel : ViewModelBase
             });
 
             //var map = await GetGameMap.Handle(Unit.Default);
-            var map = CurrentMap;
+            var map = CurrentRobotMap;
 
             if (map is not null)
                 _robotGameEngine.CurrentMap = map;
@@ -592,10 +596,10 @@ public partial class MainWindowViewModel : ViewModelBase
     private void SelectMap(MapNumberItem item)
     {
         var index = item.Number - 1;
-        if (index < 0 || index >= CurrentGame.Maps.Count)
+        if (index < 0 || index >= CurrentRobotGame.Maps.Count)
             return;
 
-        CurrentMap = CurrentGame.Maps[index];
+        CurrentRobotMap = CurrentRobotGame.Maps[index];
 
         foreach (var mapNumber in MapNumbers)
             mapNumber.IsSelected = ReferenceEquals(mapNumber, item);
@@ -694,7 +698,7 @@ public partial class MainWindowViewModel : ViewModelBase
             var code = codeOverride ?? await GetCodeToExecute.Handle(Unit.Default);
             var (input, output) = await GetTerminalStreams.Handle(Unit.Default);
             //var map = await GetGameMap.Handle(Unit.Default);
-            var map = CurrentMap;
+            var map = CurrentRobotMap;
 
 #if DEBUG
             SelectedLanguage = Language.Python;

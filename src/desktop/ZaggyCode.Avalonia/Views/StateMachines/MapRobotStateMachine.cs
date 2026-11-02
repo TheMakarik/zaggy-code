@@ -1,4 +1,6 @@
 using ZaggyCode.Avalonia.Views.Records;
+using ZaggyCode.Core.RobotGameCore.Enums;
+using ZaggyCode.Core.RobotGameCore.Model;
 
 namespace ZaggyCode.Avalonia.Views.StateMachines;
 
@@ -8,19 +10,19 @@ public sealed class MapRobotStateMachine
     private readonly HashSet<System.Drawing.Point> _drawn = [];
     private readonly HashSet<Cell> _collected = [];
 
-    private Map? _map;
+    private RobotMap? _map;
     private GamePoint?[,] _cells = new GamePoint?[0, 0];
     private MapSize _mapSize;
 
     private Cell _logicalCell;
     private Cell _spawnCell;
-    private Direction _direction = Direction.Down;
+    private RobotDirection _robotDirection = RobotDirection.Down;
 
     public int ColumnCount => _mapSize.Columns;
     public int RowCount => _mapSize.Rows;
     public int LogicalColumn => _logicalCell.Column;
     public int LogicalRow => _logicalCell.Row;
-    public Direction Direction => _direction;
+    public RobotDirection RobotDirection => _robotDirection;
 
     public event EventHandler? StateChanged;
 
@@ -38,7 +40,7 @@ public sealed class MapRobotStateMachine
     public GamePoint GetOrCreateCell(int column, int row)
         => GetOrCreatePoint(new Cell(column, row));
 
-    public void SetMap(Map? map)
+    public void SetMap(RobotMap? map)
     {
         _map = map;
         Rebuild();
@@ -47,7 +49,7 @@ public sealed class MapRobotStateMachine
     public void Reset()
     {
         _logicalCell = _spawnCell;
-        _direction = Direction.Down;
+        _robotDirection = RobotDirection.Down;
 
         lock (_stateLock)
         {
@@ -68,9 +70,9 @@ public sealed class MapRobotStateMachine
         StateChanged?.Invoke(this, EventArgs.Empty);
     }
 
-    public void SetDirection(Direction direction)
+    public void SetDirection(RobotDirection robotDirection)
     {
-        _direction = direction;
+        _robotDirection = robotDirection;
         StateChanged?.Invoke(this, EventArgs.Empty);
     }
 
@@ -86,14 +88,14 @@ public sealed class MapRobotStateMachine
             return _collected.Contains(new Cell(column, row));
     }
 
-    public void SetWall(int column, int row, WallType wallType)
+    public void SetWall(int column, int row, RobotWallType robotWallType)
     {
         var cell = new Cell(column, row);
         if (!IsWithinBounds(cell))
             return;
 
         var point = GetOrCreatePoint(cell);
-        point.WallType = wallType;
+        point.WallType = robotWallType;
         StateChanged?.Invoke(this, EventArgs.Empty);
     }
 
@@ -259,7 +261,7 @@ public sealed class MapRobotStateMachine
 
         _spawnCell = new Cell(spawn?.X ?? 0, spawn?.Y ?? 0);
         _logicalCell = _spawnCell;
-        _direction = Direction.Down;
+        _robotDirection = RobotDirection.Down;
 
         StateChanged?.Invoke(this, EventArgs.Empty);
     }

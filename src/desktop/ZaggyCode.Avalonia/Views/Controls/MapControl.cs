@@ -1,6 +1,8 @@
 using ZaggyCode.Avalonia.Views.Records;
 using ZaggyCode.Avalonia.Views.StateMachines;
-using ZaggyCode.Core.GamesRuntime.Enums;
+using ZaggyCode.Core.GamesCore.Enums;
+using ZaggyCode.Core.RobotGameCore.Enums;
+using ZaggyCode.Core.RobotGameCore.Model;
 
 namespace ZaggyCode.Avalonia.Views.Controls;
 
@@ -47,7 +49,7 @@ public sealed class MapControl : Control
     private Cell _flashCell;
     private Cell _animationTarget;
 
-    public Map? Map
+    public RobotMap? Map
     {
         get => GetValue(MapProperty);
         set => SetValue(MapProperty, value);
@@ -149,8 +151,8 @@ public sealed class MapControl : Control
         set => SetValue(PaintedBrushProperty, value);
     }
 
-    public static readonly StyledProperty<Map?> MapProperty =
-        AvaloniaProperty.Register<MapControl, Map?>(nameof(Map));
+    public static readonly StyledProperty<RobotMap?> MapProperty =
+        AvaloniaProperty.Register<MapControl, RobotMap?>(nameof(Map));
 
     public static readonly StyledProperty<string?> CoinPathProperty =
         AvaloniaProperty.Register<MapControl, string?>(nameof(CoinPath));
@@ -216,7 +218,7 @@ public sealed class MapControl : Control
 
         if (change.Property == MapProperty)
         {
-            _stateMachine.SetMap(change.NewValue as Map);
+            _stateMachine.SetMap(change.NewValue as RobotMap);
             RebuildCells();
             ResetRenderPosition();
             InvalidateMeasure();
@@ -325,9 +327,9 @@ public sealed class MapControl : Control
         StartMoveAnimation(column, row);
     }
 
-    public void SetRobotDirection(Direction direction)
+    public void SetRobotDirection(RobotDirection robotDirection)
     {
-        _stateMachine.SetDirection(direction);
+        _stateMachine.SetDirection(robotDirection);
         UpdateRobotSprite();
     }
 
@@ -371,7 +373,7 @@ public sealed class MapControl : Control
     }
 
     // Реакция на столкновение/выход за край: попытка движения, грустный смайл, возврат, laggy-ассет.
-    public void PlayCollisionAnimation(Direction? attemptedDirection)
+    public void PlayCollisionAnimation(RobotDirection? attemptedDirection)
     {
         if (!Dispatcher.UIThread.CheckAccess())
         {
@@ -391,9 +393,9 @@ public sealed class MapControl : Control
         _ = RunCollisionAnimationAsync(attemptedDirection, _stateMachine.LogicalColumn, _stateMachine.LogicalRow);
     }
 
-    public void PlayDeathAnimation(Direction? attemptedDirection) => PlayCollisionAnimation(attemptedDirection);
+    public void PlayDeathAnimation(RobotDirection? attemptedDirection) => PlayCollisionAnimation(attemptedDirection);
 
-    private async Task RunCollisionAnimationAsync(Direction? attemptedDirection, int column, int row)
+    private async Task RunCollisionAnimationAsync(RobotDirection? attemptedDirection, int column, int row)
     {
         var layout = CalculateLayout(Bounds.Size);
         var cell = layout.CellSize;
@@ -403,10 +405,10 @@ public sealed class MapControl : Control
         {
             var bump = attemptedDirection.Value switch
             {
-                Direction.Up => new CellOffset(0, -1),
-                Direction.Down => new CellOffset(0, 1),
-                Direction.Left => new CellOffset(-1, 0),
-                Direction.Right => new CellOffset(1, 0),
+                RobotDirection.Up => new CellOffset(0, -1),
+                RobotDirection.Down => new CellOffset(0, 1),
+                RobotDirection.Left => new CellOffset(-1, 0),
+                RobotDirection.Right => new CellOffset(1, 0),
                 _ => new CellOffset(0, 0)
             };
 
@@ -738,7 +740,7 @@ public sealed class MapControl : Control
         if (_isDead)
             return;
 
-        var direction = _stateMachine.Direction;
+        var direction = _stateMachine.RobotDirection;
         _robotImage.Source = _isLaggy
             ? LaggyFor(direction)
             : SpriteFor(direction);
@@ -746,21 +748,21 @@ public sealed class MapControl : Control
         _robotImage.IsVisible = true;
     }
 
-    private IImage? SpriteFor(Direction direction) => direction switch
+    private IImage? SpriteFor(RobotDirection robotDirection) => robotDirection switch
     {
-        Direction.Up => _back,
-        Direction.Down => _front,
-        Direction.Left => _left,
-        Direction.Right => _right,
+        RobotDirection.Up => _back,
+        RobotDirection.Down => _front,
+        RobotDirection.Left => _left,
+        RobotDirection.Right => _right,
         _ => _front
     };
 
-    private IImage? LaggyFor(Direction direction) => direction switch
+    private IImage? LaggyFor(RobotDirection robotDirection) => robotDirection switch
     {
-        Direction.Up => _backLaggy,
-        Direction.Down => _frontLaggy,
-        Direction.Left => _leftLaggy,
-        Direction.Right => _rightLaggy,
+        RobotDirection.Up => _backLaggy,
+        RobotDirection.Down => _frontLaggy,
+        RobotDirection.Left => _leftLaggy,
+        RobotDirection.Right => _rightLaggy,
         _ => _frontLaggy
     };
 

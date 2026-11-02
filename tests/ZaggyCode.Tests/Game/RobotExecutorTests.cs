@@ -1,5 +1,7 @@
 using System.Collections.ObjectModel;
-using ZaggyCode.Modules.GamesRuntime;
+using ZaggyCode.Core.RobotGameCore.Enums;
+using ZaggyCode.Core.RobotGameCore.Model;
+using ZaggyCode.Modules.LanguageRuntime;
 
 namespace ZaggyCode.Tests.Game;
 
@@ -49,7 +51,7 @@ public class RobotExecutorTests
     {
         // Arrange
         var map = CreateDefaultMap();
-        GetPoint(map, 2, 2).WallType = WallType.Top;
+        GetPoint(map, 2, 2).RobotWallType = RobotWallType.Top;
         var systemUnderTests = new RobotExecutor(map);
         RobotDeadEventArgs? deadArgs = null;
         RobotPointUpdatedEventArgs? updatedArgs = null;
@@ -70,7 +72,7 @@ public class RobotExecutorTests
     {
         // Arrange
         var map = CreateDefaultMap();
-        GetPoint(map, 2, 1).WallType = WallType.Bottom;
+        GetPoint(map, 2, 1).RobotWallType = RobotWallType.Bottom;
         var systemUnderTests = new RobotExecutor(map);
         RobotDeadEventArgs? deadArgs = null;
         systemUnderTests.RobotDied += (_, args) => deadArgs = args;
@@ -88,7 +90,7 @@ public class RobotExecutorTests
     {
         // Arrange
         var map = CreateDefaultMap();
-        GetPoint(map, 2, 3).WallType = WallType.Full;
+        GetPoint(map, 2, 3).RobotWallType = RobotWallType.Full;
         var systemUnderTests = new RobotExecutor(map);
         RobotDeadEventArgs? deadArgs = null;
         systemUnderTests.RobotDied += (_, args) => deadArgs = args;
@@ -193,7 +195,7 @@ public class RobotExecutorTests
     {
         // Arrange
         var map = CreateDefaultMap();
-        GetPoint(map, 2, 2).WallType = WallType.Top;
+        GetPoint(map, 2, 2).RobotWallType = RobotWallType.Top;
         var systemUnderTests = new RobotExecutor(map);
 
         // Act & Assert
@@ -208,7 +210,7 @@ public class RobotExecutorTests
     {
         // Arrange
         var map = CreateDefaultMap();
-        GetPoint(map, 1, 2).WallType = WallType.Right;
+        GetPoint(map, 1, 2).RobotWallType = RobotWallType.Right;
         var systemUnderTests = new RobotExecutor(map);
 
         // Act & Assert
@@ -220,7 +222,7 @@ public class RobotExecutorTests
     {
         // Arrange
         var map = CreateDefaultMap();
-        GetPoint(map, 3, 2).WallType = WallType.Full;
+        GetPoint(map, 3, 2).RobotWallType = RobotWallType.Full;
         var systemUnderTests = new RobotExecutor(map);
 
         // Act & Assert
@@ -327,7 +329,7 @@ public class RobotExecutorTests
         systemUnderTests.IsCellFilled().Should().BeFalse();
     }
 
-    private static Map CreateDefaultMap(int spawnX = 2, int spawnY = 2, int width = 4, int height = 4)
+    private static RobotMap CreateDefaultMap(int spawnX = 2, int spawnY = 2, int width = 4, int height = 4)
     {
         ObservableCollection<RobotGamePoint> points = [];
         for (var y = 0; y < height; y++)
@@ -343,11 +345,11 @@ public class RobotExecutorTests
             }
         }
 
-        return new Map { Width = width, Height = height, Points = points };
+        return new RobotMap { Width = width, Height = height, Points = points };
     }
 
-    private static RobotGamePoint GetPoint(Map map, int x, int y)
+    private static RobotGamePoint GetPoint(RobotMap robotMap, int x, int y)
     {
-        return map.Points.First(point => point.X == x && point.Y == y);
+        return robotMap.Points.First(point => point.X == x && point.Y == y);
     }
 }

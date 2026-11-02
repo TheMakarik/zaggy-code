@@ -13,20 +13,20 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <rxui:ReactiveUserControl.Resources>
-        <SolidColorBrush x:Key="ExpanderHeaderBackground" Color="Transparent" />
-        <SolidColorBrush x:Key="ExpanderHeaderBackgroundPointerOver" Color="Transparent" />
-        <SolidColorBrush x:Key="ExpanderHeaderBackgroundPressed" Color="Transparent" />
-        <SolidColorBrush x:Key="ExpanderHeaderBorderBrush" Color="Transparent" />
-        <SolidColorBrush x:Key="ExpanderHeaderBorderBrushPointerOver" Color="Transparent" />
-        <SolidColorBrush x:Key="ExpanderHeaderBorderBrushPressed" Color="Transparent" />
-        <SolidColorBrush x:Key="ExpanderChevronBackground" Color="Transparent" />
-        <SolidColorBrush x:Key="ExpanderChevronBackgroundPointerOver" Color="Transparent" />
-        <SolidColorBrush x:Key="ExpanderChevronBackgroundPressed" Color="Transparent" />
-        <SolidColorBrush x:Key="ExpanderChevronBorderBrush" Color="Transparent" />
-        <SolidColorBrush x:Key="ExpanderChevronBorderBrushPointerOver" Color="Transparent" />
-        <SolidColorBrush x:Key="ExpanderChevronBorderBrushPressed" Color="Transparent" />
-        <SolidColorBrush x:Key="ExpanderContentBackground" Color="Transparent" />
-        <SolidColorBrush x:Key="ExpanderContentBorderBrush" Color="Transparent" />
+        <SolidColorBrush Color="Transparent" x:Key="ExpanderHeaderBackground" />
+        <SolidColorBrush Color="Transparent" x:Key="ExpanderHeaderBackgroundPointerOver" />
+        <SolidColorBrush Color="Transparent" x:Key="ExpanderHeaderBackgroundPressed" />
+        <SolidColorBrush Color="Transparent" x:Key="ExpanderHeaderBorderBrush" />
+        <SolidColorBrush Color="Transparent" x:Key="ExpanderHeaderBorderBrushPointerOver" />
+        <SolidColorBrush Color="Transparent" x:Key="ExpanderHeaderBorderBrushPressed" />
+        <SolidColorBrush Color="Transparent" x:Key="ExpanderChevronBackground" />
+        <SolidColorBrush Color="Transparent" x:Key="ExpanderChevronBackgroundPointerOver" />
+        <SolidColorBrush Color="Transparent" x:Key="ExpanderChevronBackgroundPressed" />
+        <SolidColorBrush Color="Transparent" x:Key="ExpanderChevronBorderBrush" />
+        <SolidColorBrush Color="Transparent" x:Key="ExpanderChevronBorderBrushPointerOver" />
+        <SolidColorBrush Color="Transparent" x:Key="ExpanderChevronBorderBrushPressed" />
+        <SolidColorBrush Color="Transparent" x:Key="ExpanderContentBackground" />
+        <SolidColorBrush Color="Transparent" x:Key="ExpanderContentBorderBrush" />
     </rxui:ReactiveUserControl.Resources>
 
     <rxui:ReactiveUserControl.Styles>
@@ -50,17 +50,18 @@
         </Style>
     </rxui:ReactiveUserControl.Styles>
 
-    <ScrollViewer
-        HorizontalScrollBarVisibility="Disabled"
-        VerticalScrollBarVisibility="Auto">
+    <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
         <Grid RowDefinitions="Auto,Auto,Auto">
-            <Grid Grid.Row="0" ColumnDefinitions="Auto,*" Margin="8,0,8,4">
+            <Grid
+                ColumnDefinitions="Auto,*"
+                Grid.Row="0"
+                Margin="8,0,8,4">
                 <TextBlock
-                    Grid.Column="0"
                     FontSize="12"
                     FontWeight="SemiBold"
+                    Grid.Column="0"
                     Margin="0,0,16,0"
-                    Text="{Binding CurrentGame.Name}"
+                    Text="{Binding CurrentRobotGame.Name}"
                     VerticalAlignment="Center" />
 
                 <ScrollViewer
@@ -89,18 +90,17 @@
             </Grid>
 
             <controls:MapControl
-                x:Name="GameMap"
-                Grid.Row="1"
-                Height="300"
                 BackLaggyPath="{Binding ZaggyBackLaggyPath}"
                 BackPath="{Binding ZaggyBackPath}"
                 CoinPath="{Binding CoinAssetPath}"
                 FixedCellSize="0"
                 FrontLaggyPath="{Binding ZaggyFrontLaggyPath}"
                 FrontPath="{Binding ZaggyFrontPath}"
+                Grid.Row="1"
+                Height="300"
                 LeftLaggyPath="{Binding ZaggyLeftLaggyPath}"
                 LeftPath="{Binding ZaggyLeftPath}"
-                Map="{Binding CurrentMap}"
+                Map="{Binding CurrentRobotMap}"
                 MarginUnits="1,1,1,1"
                 MoveStepSeconds="{Binding MoveStepSeconds}"
                 PaintedBrush="{DynamicResource MapPaintedCellBrush}"
@@ -108,25 +108,26 @@
                 RightPath="{Binding ZaggyRightPath}"
                 SadPath="{Binding ZaggySadPath}"
                 SadSeconds="{Binding SadSeconds}"
-                SeaBrush="{DynamicResource MapBackgroundBrush}" />
+                SeaBrush="{DynamicResource MapBackgroundBrush}"
+                x:Name="GameMap" />
 
             <Expander
-                x:Name="DescriptionExpander"
                 Grid.Row="2"
                 HorizontalAlignment="Stretch"
                 IsExpanded="False"
-                Margin="8,8,8,0">
+                Margin="8,8,8,0"
+                x:Name="DescriptionExpander">
                 <Expander.Header>
                     <StackPanel Orientation="Horizontal" Spacing="6">
                         <materialIcons:MaterialIcon
-                            Width="18"
                             Height="18"
                             Kind="BookOpenVariant"
-                            VerticalAlignment="Center" />
+                            VerticalAlignment="Center"
+                            Width="18" />
                         <TextBlock Text="Описание" VerticalAlignment="Center" />
                     </StackPanel>
                 </Expander.Header>
-                <md:MarkdownScrollViewer Markdown="{Binding CurrentGame.Description}">
+                <md:MarkdownScrollViewer Markdown="{Binding CurrentRobotGame.Description}">
                     <md:MarkdownScrollViewer.Styles>
                         <Style Selector="ctxt|CCode">
                             <Setter Property="MonospaceFontFamily" Value="Noto Sans Mono,DejaVu Sans Mono,Liberation Mono,Cascadia Code,Consolas,Menlo,Monaco,Monospace" />

@@ -18,7 +18,8 @@
     xmlns:converters="clr-namespace:ZaggyCode.Avalonia.Views.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:dataEnums="clr-namespace:ZaggyCode.Core.Data.Enums;assembly=ZaggyCode.Core"
-    xmlns:enums="clr-namespace:ZaggyCode.Core.GamesRuntime.Enums;assembly=ZaggyCode.Core"
+    xmlns:enums="clr-namespace:ZaggyCode.Core.GamesCore.Enums;assembly=ZaggyCode.Core"
+    xmlns:languageRuntime="clr-namespace:ZaggyCode.Core.LanguageRuntime.Enums;assembly=ZaggyCode.Core"
     xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:records="clr-namespace:ZaggyCode.Avalonia.ViewModels.Records"
@@ -137,7 +138,7 @@
                                 Background="{DynamicResource CardBackgroundBrush}"
                                 CornerRadius="{DynamicResource SmallCornerRadius}"
                                 Padding="4">
-                                <ItemsControl ItemsSource="{Binding Source={x:Type enums:ExecutionSpeed}, Converter={converters:EnumValuesConverter}}">
+                                <ItemsControl ItemsSource="{Binding Source={x:Type languageRuntime:ExecutionSpeed}, Converter={converters:EnumValuesConverter}}">
                                     <ItemsControl.ItemsPanel>
                                         <ItemsPanelTemplate>
                                             <StackPanel Orientation="Horizontal" />
@@ -209,12 +210,12 @@
                             <MenuItem
                                 Header="Скорость"
                                 Icon="{materialIcons:MaterialIconExt Kind=Speedometer}"
-                                ItemsSource="{Binding Source={x:Type enums:ExecutionSpeed}, Converter={converters:EnumValuesConverter}}">
+                                ItemsSource="{Binding Source={x:Type languageRuntime:ExecutionSpeed}, Converter={converters:EnumValuesConverter}}">
                                 <MenuItem.ItemContainerTheme>
                                     <ControlTheme
                                         BasedOn="{StaticResource {x:Type MenuItem}}"
                                         TargetType="MenuItem"
-                                        x:DataType="enums:ExecutionSpeed">
+                                        x:DataType="languageRuntime:ExecutionSpeed">
                                         <Setter Property="Header" Value="{Binding ., Mode=OneWay}" />
                                         <Setter Property="Command" Value="{Binding DataContext.ChangeExecutionSpeedCommand, ElementName=ThisWindow}" />
                                         <Setter Property="CommandParameter" Value="{Binding .}" />
@@ -373,12 +374,12 @@
                                 <MenuItem
                                     Header="Скорость"
                                     Icon="{materialIcons:MaterialIconExt Kind=Speedometer}"
-                                    ItemsSource="{Binding Source={x:Type enums:ExecutionSpeed}, Converter={converters:EnumValuesConverter}}">
+                                    ItemsSource="{Binding Source={x:Type languageRuntime:ExecutionSpeed}, Converter={converters:EnumValuesConverter}}">
                                     <MenuItem.ItemContainerTheme>
                                         <ControlTheme
                                             BasedOn="{StaticResource {x:Type MenuItem}}"
                                             TargetType="MenuItem"
-                                            x:DataType="enums:ExecutionSpeed">
+                                            x:DataType="languageRuntime:ExecutionSpeed">
                                             <Setter Property="Header" Value="{Binding ., Mode=OneWay}" />
                                             <Setter Property="Command" Value="{Binding DataContext.ChangeExecutionSpeedCommand, ElementName=ThisWindow}" />
                                             <Setter Property="CommandParameter" Value="{Binding .}" />
@@ -626,7 +627,7 @@
                                         Background="{DynamicResource CardBackgroundBrush}"
                                         CornerRadius="{DynamicResource SmallCornerRadius}"
                                         Padding="4">
-                                        <ItemsControl ItemsSource="{Binding Source={x:Type enums:ExecutionSpeed}, Converter={converters:EnumValuesConverter}}">
+                                        <ItemsControl ItemsSource="{Binding Source={x:Type languageRuntime:ExecutionSpeed}, Converter={converters:EnumValuesConverter}}">
                                             <ItemsControl.ItemsPanel>
                                                 <ItemsPanelTemplate>
                                                     <StackPanel Orientation="Horizontal" />

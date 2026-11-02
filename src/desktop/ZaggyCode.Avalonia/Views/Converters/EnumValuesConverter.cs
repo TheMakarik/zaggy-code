@@ -1,3 +1,5 @@
+using ZaggyCode.Core.LanguageRuntime.Attributes;
+
 namespace ZaggyCode.Avalonia.Views.Converters;
 
 public class EnumValuesConverter : MarkupExtension, IValueConverter
