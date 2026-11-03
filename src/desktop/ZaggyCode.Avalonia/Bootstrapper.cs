@@ -1,4 +1,5 @@
 using ZaggyCode.Core.LanguageRuntime.Attributes;
+using ZaggyCode.Core.LanguageRuntime.Interfaces;
 
 namespace ZaggyCode.Avalonia;
 
@@ -30,11 +31,11 @@ public sealed class Bootstrapper
             .AsSelf()
             .WithSingletonLifetime()
 
-            .AddClasses(c => c.AssignableTo<IDisposable>())
+            .AddClasses(c => c.AssignableTo<IDisposable>().Where(t => !typeof(ILanguageRunner).IsAssignableFrom(t)))
             .AsImplementedInterfaces()
             .WithScopedLifetime()
 
-            .AddClasses(c => c.AssignableTo<IAsyncDisposable>())
+            .AddClasses(c => c.AssignableTo<IAsyncDisposable>().Where(t => !typeof(ILanguageRunner).IsAssignableFrom(t)))
             .AsImplementedInterfaces()
             .WithScopedLifetime()
 

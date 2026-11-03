@@ -49,6 +49,9 @@ global using IPythonSettingsStorage = ZaggyCode.Core.Data.Interfaces.IObservable
 global using ZaggyCode.Core.GamesCore.Enums;
 global using ZaggyCode.Core.LanguageRuntime.Attributes;
 global using ZaggyCode.Core.LanguageRuntime.Enums;
+global using ZaggyCode.Core.LanguageRuntime.Dto;
+global using ZaggyCode.Core.LanguageRuntime.Factories;
+global using ZaggyCode.Core.LanguageRuntime.Interfaces;
 global using ZaggyCode.Core.RobotGameCore.Enums;
 global using ZaggyCode.Core.Theming.Interfaces;
 global using ZaggyCode.Modules.Archiving.Options;
