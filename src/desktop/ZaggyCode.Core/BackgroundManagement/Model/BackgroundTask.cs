@@ -1,6 +1,6 @@
 namespace ZaggyCode.Core.BackgroundManagement.Model;
 
-public sealed record BackgroundTask
+public class BackgroundTask
 {
     public required Task Task { get; init; }
     public required string Name { get; init; }
