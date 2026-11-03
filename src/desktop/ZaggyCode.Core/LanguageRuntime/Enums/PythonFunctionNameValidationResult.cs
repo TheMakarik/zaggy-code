@@ -1,4 +1,4 @@
-namespace ZaggyCode.Core.LanguageRuntime.Validation;
+namespace ZaggyCode.Core.LanguageRuntime.Enums;
 
 public enum PythonFunctionNameValidationResult
 {
