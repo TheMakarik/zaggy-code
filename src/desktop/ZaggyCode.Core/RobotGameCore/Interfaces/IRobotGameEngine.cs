@@ -8,6 +8,5 @@ public interface IRobotGameEngine
 {
     public RobotGameState State { get; }
     public void Init(RobotGameEngineInitDto dto);
-    
     public Task<RobotGameResult> ExecuteAsync(string code,  CancellationToken cancellationToken = default, ExecutionType executionType = ExecutionType.ExecuteWithProxies);
 }

@@ -170,6 +170,30 @@ public sealed class UserService
 }
 ```
 
+### Интерфейсы
+
+- В интерфейсах члены объявляются подряд, без пустых строк между методами, свойствами, событиями и другими объявлениями.
+
+```csharp
+// Хорошо
+public interface IRobotController
+{
+    IRobotExecutor Executor { get; set; }
+    void MoveUp();
+    bool IsWallFromUp();
+}
+
+// Плохо
+public interface IRobotController
+{
+    IRobotExecutor Executor { get; set; }
+
+    void MoveUp();
+
+    bool IsWallFromUp();
+}
+```
+
 ---
 
 ## Дополнительные соглашения
