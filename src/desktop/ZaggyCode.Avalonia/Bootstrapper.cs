@@ -91,7 +91,7 @@ public sealed class Bootstrapper
             .AddOptions<PythonValidationOptions>()
             .AddOptions<ThemeOptions>()
             .AddOptions<ThemeColorDisplayNameOptions>()
-            .AddOptions<AboutAvaloniaOptions>()
+            .AddOptions<AboutOptions>()
             .AddOptions<LoadingOptions>();
 
         

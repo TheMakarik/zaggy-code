@@ -9,7 +9,7 @@ public class BoolToWindowDecorationsConverter : MarkupExtension, IValueConverter
         if (value is true)
             return WindowDecorations.Full;
 
-        return WindowDecorations.BorderOnly;
+        return WindowDecorations.None;
     }
 
     public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)

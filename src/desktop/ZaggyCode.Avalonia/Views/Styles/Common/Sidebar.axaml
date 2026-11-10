@@ -13,17 +13,17 @@
 
     <!--  Кнопки уменьшены вместе с панелью  -->
     <Style Selector="Border.sidebar Button.icon-button">
-        <Setter Property="Width" Value="24" />
-        <Setter Property="Height" Value="24" />
-        <Setter Property="Padding" Value="4" />
+        <Setter Property="Width" Value="28" />
+        <Setter Property="Height" Value="28" />
+        <Setter Property="Padding" Value="5" />
     </Style>
 
     <Style Selector="Border.sidebar Button.icon-button materialIcons|MaterialIcon">
-        <Setter Property="Width" Value="14" />
-        <Setter Property="Height" Value="14" />
+        <Setter Property="Width" Value="16" />
+        <Setter Property="Height" Value="16" />
     </Style>
 
     <Style Selector="Border.sidebar Button.icon-button TextBlock">
-        <Setter Property="FontSize" Value="11" />
+        <Setter Property="FontSize" Value="13" />
     </Style>
 </Styles>

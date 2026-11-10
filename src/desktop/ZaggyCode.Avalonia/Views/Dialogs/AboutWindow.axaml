@@ -4,17 +4,70 @@
     BorderThickness="1"
     CanResize="False"
     Foreground="{DynamicResource TextPrimaryBrush}"
-    Height="506"
+    Height="560"
     ShowInTaskbar="False"
     Title="О приложении"
-    Width="330"
+    Width="760"
+    WindowDecorations="{Binding UseOsDecoration, Converter={converters:BoolToWindowDecorationsConverter}}"
     WindowStartupLocation="CenterOwner"
     x:Class="ZaggyCode.Avalonia.Views.Dialogs.AboutWindow"
     x:DataType="vm:AboutViewModel"
     xmlns="https://github.com/avaloniaui"
     xmlns:controls="clr-namespace:ZaggyCode.Avalonia.Views.Controls"
+    xmlns:converters="clr-namespace:ZaggyCode.Avalonia.Views.Converters"
+    xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+    xmlns:records="using:ZaggyCode.Avalonia.ViewModels.Records"
     xmlns:vm="using:ZaggyCode.Avalonia.ViewModels"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Window.Styles>
+        <Style Selector="TabControl.about-tabs">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+
+        <Style Selector="TabControl.about-tabs /template/ ItemsPresenter#PART_ItemsPresenter">
+            <Setter Property="Margin" Value="44,0,0,0" />
+        </Style>
+
+        <Style Selector="TabControl.about-tabs &gt; TabItem">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="Padding" Value="14,8" />
+        </Style>
+
+        <Style Selector="TabControl.about-tabs &gt; TabItem:selected">
+            <Setter Property="Background" Value="{DynamicResource CardBackgroundBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource AccentHoverBrush}" />
+        </Style>
+
+        <Style Selector="Button.component-link">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="CornerRadius" Value="{DynamicResource ButtonCornerRadius}" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
+            <Setter Property="Height" Value="28" />
+            <Setter Property="Padding" Value="5" />
+            <Setter Property="Width" Value="28" />
+        </Style>
+
+        <Style Selector="Button.component-link:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource HoverBackgroundBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource AccentHoverBrush}" />
+        </Style>
+
+        <Style Selector="Button.component-link materialIcons|MaterialIcon">
+            <Setter Property="Height" Value="16" />
+            <Setter Property="Width" Value="16" />
+        </Style>
+
+        <Style Selector="Border.component-card">
+            <Setter Property="Background" Value="{DynamicResource CardBackgroundBrush}" />
+            <Setter Property="CornerRadius" Value="{DynamicResource SmallCornerRadius}" />
+            <Setter Property="Padding" Value="10" />
+        </Style>
+    </Window.Styles>
 
     <Design.DataContext>
         <vm:AboutViewModel />
@@ -26,55 +79,183 @@
             Name="CustomTitleBar"
             Title="О приложении" />
 
-        <StackPanel
+        <Grid
             Grid.Row="1"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Center"
-            Spacing="10">
-
-            <controls:SvgFromContent
-                Height="120"
+            Margin="24,20,24,24"
+            RowDefinitions="Auto,*">
+            <StackPanel
+                Grid.Row="0"
                 HorizontalAlignment="Center"
-                Margin="0,0,0,16"
-                Path="{Binding LogoPath}"
-                Width="120" />
-
-            <TextBlock
-                FontSize="24"
-                FontWeight="Bold"
-                HorizontalAlignment="Center"
-                Text="{Binding AppName}" />
-
-            <TextBlock
-                FontSize="13"
-                HorizontalAlignment="Center"
-                Opacity="0.7"
-                Text="{Binding Version}" />
-
-            <Separator Margin="24,14,24,14" />
-
-            <TextBlock
-                FontSize="14"
-                HorizontalAlignment="Center"
-                LineHeight="20"
-                MaxWidth="270"
-                Text="{Binding Description}"
-                TextAlignment="Center"
-                TextWrapping="Wrap" />
-
-            <StackPanel HorizontalAlignment="Center" Margin="0,18,0,0" Spacing="4">
+                Spacing="2">
+                <StackPanel
+                    HorizontalAlignment="Center"
+                    Orientation="Horizontal"
+                    Spacing="12">
+                    <controls:SvgFromContent
+                        Height="48"
+                        Path="{Binding LogoPath}"
+                        Width="48" />
+                    <TextBlock
+                        FontSize="24"
+                        FontWeight="Bold"
+                        Text="{Binding AppName}"
+                        VerticalAlignment="Center" />
+                </StackPanel>
                 <TextBlock
-                    FontSize="12"
+                    FontSize="13"
                     Foreground="{DynamicResource TextMutedBrush}"
                     HorizontalAlignment="Center"
-                    Text="Разработчики:" />
-                <TextBlock
-                    FontSize="14"
-                    FontWeight="SemiBold"
-                    HorizontalAlignment="Center"
-                    Text="{Binding Developers}"
-                    TextAlignment="Center" />
+                    Text="{Binding Author}" />
             </StackPanel>
-        </StackPanel>
+
+            <Grid
+                Grid.Row="1"
+                Margin="0,20,0,0">
+                <TabControl
+                    Classes="about-tabs"
+                    TabStripPlacement="Top">
+                    <TabItem>
+                        <TabItem.Header>
+                            <StackPanel
+                                Orientation="Horizontal"
+                                Spacing="6">
+                                <materialIcons:MaterialIcon
+                                    Height="16"
+                                    Kind="InfoOutline"
+                                    VerticalAlignment="Center"
+                                    Width="16" />
+                                <TextBlock Text="О приложении" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </TabItem.Header>
+                        <ScrollViewer Margin="0,12,0,0">
+                            <TextBlock
+                                FontSize="14"
+                                LineHeight="20"
+                                Text="{Binding Description}"
+                                TextWrapping="Wrap" />
+                        </ScrollViewer>
+                    </TabItem>
+
+                    <TabItem>
+                        <TabItem.Header>
+                            <StackPanel
+                                Orientation="Horizontal"
+                                Spacing="6">
+                                <materialIcons:MaterialIcon
+                                    Height="16"
+                                    Kind="PuzzleOutline"
+                                    VerticalAlignment="Center"
+                                    Width="16" />
+                                <TextBlock Text="Компоненты" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </TabItem.Header>
+                        <ScrollViewer Margin="0,12,0,0">
+                            <ItemsControl ItemsSource="{Binding Components}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="records:AboutComponentItem">
+                                        <Border
+                                            Classes="component-card"
+                                            Margin="0,0,0,8">
+                                            <Grid ColumnDefinitions="Auto,*,Auto">
+                                                <Image
+                                                    Grid.Column="0"
+                                                    Height="32"
+                                                    Source="{Binding IconPath, Converter={converters:ImagePathConverter}}"
+                                                    VerticalAlignment="Top"
+                                                    Width="32" />
+                                                <StackPanel
+                                                    Grid.Column="1"
+                                                    Margin="12,0"
+                                                    Spacing="2"
+                                                    VerticalAlignment="Center">
+                                                    <StackPanel
+                                                        Orientation="Horizontal"
+                                                        Spacing="6">
+                                                        <TextBlock
+                                                            FontSize="14"
+                                                            FontWeight="SemiBold"
+                                                            Text="{Binding Name}" />
+                                                        <TextBlock
+                                                            FontSize="13"
+                                                            Foreground="{DynamicResource TextMutedBrush}"
+                                                            Text="{Binding Version, StringFormat='— {0}'}"
+                                                            VerticalAlignment="Center" />
+                                                    </StackPanel>
+                                                    <TextBlock
+                                                        FontSize="12"
+                                                        Foreground="{DynamicResource TextMutedBrush}"
+                                                        Text="{Binding Description}"
+                                                        TextWrapping="Wrap" />
+                                                </StackPanel>
+                                                <StackPanel
+                                                    Grid.Column="2"
+                                                    Orientation="Horizontal"
+                                                    Spacing="2"
+                                                    VerticalAlignment="Center">
+                                                    <Button
+                                                        Classes="component-link"
+                                                        Command="{Binding $parent[ItemsControl].((vm:AboutViewModel)DataContext).OpenUrlCommand}"
+                                                        CommandParameter="{Binding WebsiteUrl}"
+                                                        IsVisible="{Binding HasWebsite}"
+                                                        ToolTip.Tip="{Binding WebsiteUrl}">
+                                                        <materialIcons:MaterialIcon Kind="Web" />
+                                                    </Button>
+                                                    <Button
+                                                        Classes="component-link"
+                                                        Command="{Binding $parent[ItemsControl].((vm:AboutViewModel)DataContext).OpenUrlCommand}"
+                                                        CommandParameter="{Binding GitHubUrl}"
+                                                        IsVisible="{Binding HasGitHub}"
+                                                        ToolTip.Tip="{Binding GitHubUrl}">
+                                                        <materialIcons:MaterialIcon Kind="SourceRepository" />
+                                                    </Button>
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </TabItem>
+
+                    <TabItem>
+                        <TabItem.Header>
+                            <StackPanel
+                                Orientation="Horizontal"
+                                Spacing="6">
+                                <materialIcons:MaterialIcon
+                                    Height="16"
+                                    Kind="HeartOutline"
+                                    VerticalAlignment="Center"
+                                    Width="16" />
+                                <TextBlock Text="Благодарности" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </TabItem.Header>
+                        <ScrollViewer Margin="0,12,0,0">
+                            <TextBlock
+                                FontSize="14"
+                                LineHeight="20"
+                                Text="{Binding Acknowledgements}"
+                                TextWrapping="Wrap" />
+                        </ScrollViewer>
+                    </TabItem>
+                </TabControl>
+
+                <controls:SvgFromContent
+                    Height="30"
+                    HorizontalAlignment="Left"
+                    Margin="0,3,0,0"
+                    Path="{Binding ZaggyLovePath}"
+                    VerticalAlignment="Top"
+                    Width="30" />
+
+                <Border
+                    Background="{DynamicResource BorderBrush}"
+                    Height="30"
+                    HorizontalAlignment="Left"
+                    Margin="36,3,0,0"
+                    VerticalAlignment="Top"
+                    Width="1" />
+            </Grid>
+        </Grid>
     </Grid>
 </Window>

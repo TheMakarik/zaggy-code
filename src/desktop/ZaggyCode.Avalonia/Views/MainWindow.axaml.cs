@@ -133,17 +133,8 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
 
         ViewModel.OpenAbout.RegisterHandler(async context =>
         {
-            var aboutWindow = new AboutWindow
-            {
-                WindowDecorations = ViewModel.UseOsDecoration ? WindowDecorations.Full : WindowDecorations.BorderOnly
-            };
+            var aboutWindow = new AboutWindow();
             await aboutWindow.ShowDialog(this);
-            context.SetOutput(Unit.Default);
-        });
-
-        ViewModel.OpenAboutAvalonia.RegisterHandler(async context =>
-        {
-            await new Views.Dialogs.AboutAvaloniaWindow().ShowDialog(this);
             context.SetOutput(Unit.Default);
         });
 

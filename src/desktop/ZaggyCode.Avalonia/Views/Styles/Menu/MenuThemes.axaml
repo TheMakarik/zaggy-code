@@ -9,8 +9,8 @@
             <StreamGeometry x:Key="MenuItemChevronPathData">M 1,0 10,10 l -9,10 -1,-1 L 8,10 -0,1 Z</StreamGeometry>
 
             <ControlTheme TargetType="ContentControl" x:Key="ZaggyMenuItemIconTheme">
-                <Setter Property="Width" Value="15" />
-                <Setter Property="Height" Value="15" />
+                <Setter Property="Width" Value="17" />
+                <Setter Property="Height" Value="17" />
                 <Setter Property="Template">
                     <ControlTemplate>
                         <Viewbox
@@ -27,8 +27,8 @@
             <ControlTheme TargetType="MenuItem" x:Key="{x:Type MenuItem}">
                 <Setter Property="Background" Value="Transparent" />
                 <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
-                <Setter Property="FontSize" Value="12" />
-                <Setter Property="Padding" Value="8,6" />
+                <Setter Property="FontSize" Value="14" />
+                <Setter Property="Padding" Value="9,7" />
                 <Setter Property="CornerRadius" Value="{DynamicResource ButtonCornerRadius}" />
                 <Setter Property="Template">
                     <ControlTemplate>
@@ -43,7 +43,7 @@
                                         Content="{TemplateBinding Icon}"
                                         Grid.Column="0"
                                         IsVisible="False"
-                                        Margin="0,0,10,0"
+                                        Margin="0,0,12,0"
                                         Name="PART_IconPresenter"
                                         Theme="{StaticResource ZaggyMenuItemIconTheme}" />
                                     <ContentPresenter
@@ -57,7 +57,7 @@
                                         Foreground="{DynamicResource TextMutedBrush}"
                                         Grid.Column="2"
                                         HorizontalAlignment="Right"
-                                        Margin="12,0,0,0"
+                                        Margin="14,0,0,0"
                                         Name="PART_InputGestureText"
                                         Text="{TemplateBinding InputGesture,
                                                                Converter={StaticResource KeyGestureConverter}}"
@@ -66,12 +66,12 @@
                                         Data="{StaticResource MenuItemChevronPathData}"
                                         Fill="{DynamicResource TextMutedBrush}"
                                         Grid.Column="3"
-                                        Height="8"
-                                        Margin="8,0,0,0"
+                                        Height="9"
+                                        Margin="9,0,0,0"
                                         Name="PART_ChevronPath"
                                         Stretch="Uniform"
                                         VerticalAlignment="Center"
-                                        Width="6" />
+                                        Width="7" />
                                 </Grid>
                             </Border>
                             <Popup
@@ -152,8 +152,8 @@
             <ControlTheme TargetType="MenuItem" x:Key="ZaggyTopLevelMenuItem">
                 <Setter Property="Background" Value="Transparent" />
                 <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
-                <Setter Property="FontSize" Value="11" />
-                <Setter Property="Padding" Value="8,6" />
+                <Setter Property="FontSize" Value="13" />
+                <Setter Property="Padding" Value="9,7" />
                 <Setter Property="CornerRadius" Value="{DynamicResource ButtonCornerRadius}" />
                 <Setter Property="Template">
                     <ControlTemplate>
@@ -167,7 +167,7 @@
                                         Content="{TemplateBinding Icon}"
                                         Grid.Column="0"
                                         IsVisible="False"
-                                        Margin="0,0,8,0"
+                                        Margin="0,0,9,0"
                                         Name="PART_IconPresenter"
                                         Theme="{StaticResource ZaggyMenuItemIconTheme}" />
                                     <ContentPresenter
@@ -251,22 +251,22 @@
                                 <Grid ColumnDefinitions="Auto Auto ,Auto,*,Auto,Auto">
                                     <Viewbox
                                         Grid.Column="0"
-                                        Height="18"
+                                        Height="21"
                                         Margin="0,0,0,0"
                                         VerticalAlignment="Center"
-                                        Width="18">
+                                        Width="21">
                                         <CheckBox IsChecked="{TemplateBinding IsChecked}" IsHitTestVisible="False" />
                                     </Viewbox>
                                     <Border
                                         BorderBrush="{DynamicResource BorderBrush}"
                                         BorderThickness="2"
                                         Grid.Column="1"
-                                        Margin="0,0,4,0" />
+                                        Margin="0,0,5,0" />
                                     <Border
                                         BorderBrush="{DynamicResource BorderBrush}"
                                         CornerRadius="4"
                                         Grid.Column="2"
-                                        Margin="0,0,8,0"
+                                        Margin="0,0,9,0"
                                         Padding="2">
                                         <ContentControl Content="{TemplateBinding Icon}" Theme="{StaticResource ZaggyMenuItemIconTheme}" />
                                     </Border>
@@ -281,7 +281,7 @@
                                         Foreground="{DynamicResource TextMutedBrush}"
                                         Grid.Column="4"
                                         HorizontalAlignment="Right"
-                                        Margin="12,0,0,0"
+                                        Margin="14,0,0,0"
                                         Name="PART_InputGestureText"
                                         Text="{TemplateBinding InputGesture,
                                                                Converter={StaticResource KeyGestureConverter}}"
@@ -290,12 +290,12 @@
                                         Data="{StaticResource MenuItemChevronPathData}"
                                         Fill="{DynamicResource TextMutedBrush}"
                                         Grid.Column="5"
-                                        Height="8"
-                                        Margin="8,0,0,0"
+                                        Height="9"
+                                        Margin="9,0,0,0"
                                         Name="PART_ChevronPath"
                                         Stretch="Uniform"
                                         VerticalAlignment="Center"
-                                        Width="6" />
+                                        Width="7" />
                                 </Grid>
                             </Border>
                             <Popup
