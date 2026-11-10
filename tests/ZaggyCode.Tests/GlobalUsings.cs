@@ -35,4 +35,3 @@ global using ZaggyCode.Modules.LanguageRuntime.Options;
 global using ZaggyCode.Modules.Theming;
 global using ZaggyCode.Modules.Theming.Options;
 global using ZaggyCode.Tests.Infrastructure;
-global using ZaggyCode.Tests.Languages.Base;

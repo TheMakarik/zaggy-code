@@ -53,6 +53,8 @@ global using ZaggyCode.Core.LanguageRuntime.Dto;
 global using ZaggyCode.Core.LanguageRuntime.Factories;
 global using ZaggyCode.Core.LanguageRuntime.Interfaces;
 global using ZaggyCode.Core.RobotGameCore.Enums;
+global using ZaggyCode.Core.RobotGameCore.Interfaces;
+global using ZaggyCode.Core.RobotGameCore.Model;
 global using ZaggyCode.Core.Theming.Interfaces;
 global using ZaggyCode.Modules.Archiving.Options;
 global using ZaggyCode.Modules.BackgroundManagement.Extensions;

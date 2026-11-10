@@ -1,3 +1,4 @@
+using Avalonia.VisualTree;
 using ZaggyCode.Avalonia.Views.Records;
 using ZaggyCode.Avalonia.Views.StateMachines;
 using ZaggyCode.Core.GamesCore.Enums;
@@ -29,6 +30,7 @@ public sealed class MapControl : Control
     private readonly Rectangle _flashOverlay = new() { Fill = FlashBrush, IsVisible = false };
 
     private PointControl[,] _cells = new PointControl[0, 0];
+    private readonly Dictionary<PointControl, Image> _coinImages = [];
 
     private IImage? _front;
     private IImage? _back;
@@ -256,6 +258,8 @@ public sealed class MapControl : Control
             LogicalChildren.Remove(cell);
         }
 
+        _coinImages.Clear();
+
         var columns = _stateMachine.ColumnCount;
         var rows = _stateMachine.RowCount;
         var cells = new PointControl[columns, rows];
@@ -314,6 +318,7 @@ public sealed class MapControl : Control
         _isDead = false;
         _isLaggy = false;
         _stateMachine.Reset();
+        RefreshCoinVisibility();
         ResetRenderPosition();
         UpdateRobotSprite();
         InvalidateVisual();
@@ -324,6 +329,7 @@ public sealed class MapControl : Control
         if (_isDead)
             return;
 
+        _stateMachine.SetLogicalCell(column, row);
         StartMoveAnimation(column, row);
     }
 
@@ -335,6 +341,45 @@ public sealed class MapControl : Control
 
     public void SetCellDrawn(int column, int row, bool drawn) =>
         RunOnUiThread(() => _stateMachine.SetDrawn(column, row, drawn));
+
+    public void SetCellCollected(int column, int row, bool collected) =>
+        RunOnUiThread(() => SetCellCollectedCore(column, row, collected));
+
+    // Единственная точка применения состояния робота: UI ничего не решает сам,
+    // а проигрывает действия, пришедшие из исполнителя.
+    public void ApplyStateUpdate(RobotStateUpdate update)
+    {
+        if (update.Actions is null)
+            return;
+
+        RunOnUiThread(() =>
+        {
+            foreach (var action in update.Actions)
+            {
+                if (action.Direction is { } direction)
+                    _stateMachine.SetDirection(direction);
+
+                if (action.CollectedCoin is { } coin)
+                    SetCellCollectedCore(coin.X, coin.Y, true);
+
+                if (action.DrawnPoint is { } drawnPoint)
+                    _stateMachine.SetDrawn(drawnPoint.X, drawnPoint.Y, true);
+
+                if (action.DeadType is not null)
+                {
+                    PlayCollisionAnimation(action.Direction);
+                    continue;
+                }
+
+                if (action.Direction is not null)
+                    MoveRobotTo(action.Position.X, action.Position.Y);
+                else
+                    _stateMachine.SetLogicalCell(action.Position.X, action.Position.Y);
+            }
+
+            UpdateRobotSprite();
+        });
+    }
 
     public void FlashCell(int column, int row)
     {
@@ -765,6 +810,47 @@ public sealed class MapControl : Control
         RobotDirection.Right => _rightLaggy,
         _ => _frontLaggy
     };
+
+    private void SetCellCollectedCore(int column, int row, bool collected)
+    {
+        _stateMachine.SetCollected(column, row, collected);
+        UpdateCoinVisibility(column, row);
+    }
+
+    private void UpdateCoinVisibility(int column, int row)
+    {
+        if (column < 0 || row < 0 || column >= _cells.GetLength(0) || row >= _cells.GetLength(1))
+            return;
+
+        var cell = _cells[column, row];
+        var point = _stateMachine.GetCell(column, row);
+        var coinImage = GetCoinImage(cell);
+
+        if (coinImage is not null)
+            coinImage.IsVisible = point?.HasCoin == true && !_stateMachine.IsCollected(column, row);
+    }
+
+    // В PointControl единственный Image — это монета, отдельного имени у него нет.
+    private Image? GetCoinImage(PointControl cell)
+    {
+        if (_coinImages.TryGetValue(cell, out var image))
+            return image;
+
+        image = cell.GetVisualDescendants().OfType<Image>().FirstOrDefault();
+        if (image is not null)
+            _coinImages[cell] = image;
+
+        return image;
+    }
+
+    private void RefreshCoinVisibility()
+    {
+        for (var column = 0; column < _cells.GetLength(0); column++)
+        {
+            for (var row = 0; row < _cells.GetLength(1); row++)
+                UpdateCoinVisibility(column, row);
+        }
+    }
 
     private void OnStateChanged(object? sender, EventArgs e)
     {

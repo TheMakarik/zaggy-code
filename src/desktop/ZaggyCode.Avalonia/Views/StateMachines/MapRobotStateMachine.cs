@@ -6,22 +6,19 @@ namespace ZaggyCode.Avalonia.Views.StateMachines;
 
 public sealed class MapRobotStateMachine
 {
-    private readonly Lock _stateLock = new();
-    private readonly HashSet<System.Drawing.Point> _drawn = [];
-    private readonly HashSet<Cell> _collected = [];
+    private RobotGameMapState _robotState = new(default);
 
     private RobotMap? _map;
     private GamePoint?[,] _cells = new GamePoint?[0, 0];
     private MapSize _mapSize;
 
-    private Cell _logicalCell;
     private Cell _spawnCell;
     private RobotDirection _robotDirection = RobotDirection.Down;
 
     public int ColumnCount => _mapSize.Columns;
     public int RowCount => _mapSize.Rows;
-    public int LogicalColumn => _logicalCell.Column;
-    public int LogicalRow => _logicalCell.Row;
+    public int LogicalColumn => _robotState.Position.X;
+    public int LogicalRow => _robotState.Position.Y;
     public RobotDirection RobotDirection => _robotDirection;
 
     public event EventHandler? StateChanged;
@@ -48,14 +45,8 @@ public sealed class MapRobotStateMachine
 
     public void Reset()
     {
-        _logicalCell = _spawnCell;
         _robotDirection = RobotDirection.Down;
-
-        lock (_stateLock)
-        {
-            _drawn.Clear();
-            _collected.Clear();
-        }
+        _robotState.Reset(new System.Drawing.Point(_spawnCell.Column, _spawnCell.Row));
 
         StateChanged?.Invoke(this, EventArgs.Empty);
     }
@@ -66,7 +57,7 @@ public sealed class MapRobotStateMachine
         if (!IsWithinBounds(cell))
             return;
 
-        _logicalCell = cell;
+        _robotState.MoveTo(new System.Drawing.Point(cell.Column, cell.Row));
         StateChanged?.Invoke(this, EventArgs.Empty);
     }
 
@@ -77,16 +68,10 @@ public sealed class MapRobotStateMachine
     }
 
     public bool IsDrawn(int column, int row)
-    {
-        lock (_stateLock)
-            return _drawn.Contains(new System.Drawing.Point(column, row));
-    }
+        => _robotState.IsDrawn(new System.Drawing.Point(column, row));
 
     public bool IsCollected(int column, int row)
-    {
-        lock (_stateLock)
-            return _collected.Contains(new Cell(column, row));
-    }
+        => _robotState.IsCoinCollected(new System.Drawing.Point(column, row));
 
     public void SetWall(int column, int row, RobotWallType robotWallType)
     {
@@ -95,7 +80,7 @@ public sealed class MapRobotStateMachine
             return;
 
         var point = GetOrCreatePoint(cell);
-        point.WallType = robotWallType;
+        point.RobotWallType = robotWallType;
         StateChanged?.Invoke(this, EventArgs.Empty);
     }
 
@@ -165,9 +150,7 @@ public sealed class MapRobotStateMachine
 
     public void ClearDrawn()
     {
-        lock (_stateLock)
-            _drawn.Clear();
-
+        _robotState.ClearDrawn();
         StateChanged?.Invoke(this, EventArgs.Empty);
     }
 
@@ -177,22 +160,18 @@ public sealed class MapRobotStateMachine
         if (!IsWithinBounds(cell))
             return;
 
-        lock (_stateLock)
-        {
-            if (drawn)
-                _drawn.Add(new System.Drawing.Point(column, row));
-            else
-                _drawn.Remove(new System.Drawing.Point(column, row));
-        }
+        var point = new System.Drawing.Point(cell.Column, cell.Row);
+        if (drawn)
+            _robotState.MarkDrawn(point);
+        else
+            _robotState.UnmarkDrawn(point);
 
         StateChanged?.Invoke(this, EventArgs.Empty);
     }
 
     public void ClearCollected()
     {
-        lock (_stateLock)
-            _collected.Clear();
-
+        _robotState.ClearCollected();
         StateChanged?.Invoke(this, EventArgs.Empty);
     }
 
@@ -202,13 +181,11 @@ public sealed class MapRobotStateMachine
         if (!IsWithinBounds(cell))
             return;
 
-        lock (_stateLock)
-        {
-            if (collected)
-                _collected.Add(cell);
-            else
-                _collected.Remove(cell);
-        }
+        var point = new System.Drawing.Point(cell.Column, cell.Row);
+        if (collected)
+            _robotState.CollectCoin(point);
+        else
+            _robotState.UncollectCoin(point);
 
         StateChanged?.Invoke(this, EventArgs.Empty);
     }
@@ -227,16 +204,14 @@ public sealed class MapRobotStateMachine
 
     private void Rebuild()
     {
-        _drawn.Clear();
-        _collected.Clear();
-
         var map = _map;
         if (map is null)
         {
             _mapSize = new MapSize(0, 0);
             _cells = new GamePoint?[0, 0];
-            _logicalCell = new Cell(0, 0);
             _spawnCell = new Cell(0, 0);
+            _robotState = new RobotGameMapState(new System.Drawing.Point(0, 0));
+            _robotDirection = RobotDirection.Down;
 
             StateChanged?.Invoke(this, EventArgs.Empty);
             return;
@@ -260,7 +235,7 @@ public sealed class MapRobotStateMachine
         }
 
         _spawnCell = new Cell(spawn?.X ?? 0, spawn?.Y ?? 0);
-        _logicalCell = _spawnCell;
+        _robotState = new RobotGameMapState(new System.Drawing.Point(_spawnCell.Column, _spawnCell.Row));
         _robotDirection = RobotDirection.Down;
 
         StateChanged?.Invoke(this, EventArgs.Empty);
