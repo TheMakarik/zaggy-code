@@ -60,6 +60,10 @@ public sealed class Bootstrapper
             .AddViewSettingsStorage()
             .AddThemeSettingsStorage();
 
+        // UpdateStorageWaiter хранит версии изменений в полях экземпляра,
+        // поэтому каждому хранилищу нужен собственный наблюдатель.
+        builder.Services.AddTransient<IUpdateStorageWaiter, UpdateStorageWaiter>();
+
         builder.Logging
             .ClearProviders()
             .AddSerilog(Log.Logger, dispose: true);
