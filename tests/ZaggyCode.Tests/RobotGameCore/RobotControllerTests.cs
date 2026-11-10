@@ -10,7 +10,7 @@ public class RobotControllerTests
     {
         // Arrange
         var executor = A.Fake<IRobotExecutor>();
-        var systemUnderTests = new RobotController(executor);
+        var systemUnderTests = new RobotController { Executor = executor };
 
         // Act
         systemUnderTests.MoveUp();
@@ -31,7 +31,7 @@ public class RobotControllerTests
         // Arrange
         var executor = A.Fake<IRobotExecutor>();
         A.CallTo(() => executor.CheckWall(RobotDirection.Up)).Returns(true);
-        var systemUnderTests = new RobotController(executor);
+        var systemUnderTests = new RobotController { Executor = executor };
 
         // Act
         var hasWallFromUp = systemUnderTests.IsWallFromUp();
@@ -55,7 +55,7 @@ public class RobotControllerTests
     {
         // Arrange
         var executor = A.Fake<IRobotExecutor>();
-        var systemUnderTests = new RobotController(executor);
+        var systemUnderTests = new RobotController { Executor = executor };
 
         // Act
         systemUnderTests.FillCell();
@@ -70,7 +70,7 @@ public class RobotControllerTests
         // Arrange
         var executor = A.Fake<IRobotExecutor>();
         A.CallTo(() => executor.IsCellFilled()).Returns(true);
-        var systemUnderTests = new RobotController(executor);
+        var systemUnderTests = new RobotController { Executor = executor };
 
         // Act
         var isFilled = systemUnderTests.IsCellFilled();
@@ -86,7 +86,7 @@ public class RobotControllerTests
         // Arrange
         var firstExecutor = A.Fake<IRobotExecutor>();
         var secondExecutor = A.Fake<IRobotExecutor>();
-        var systemUnderTests = new RobotController(firstExecutor);
+        var systemUnderTests = new RobotController { Executor = firstExecutor };
         systemUnderTests.Executor = secondExecutor;
 
         // Act
@@ -95,5 +95,18 @@ public class RobotControllerTests
         // Assert
         A.CallTo(() => firstExecutor.Move(A<RobotDirection>._)).MustNotHaveHappened();
         A.CallTo(() => secondExecutor.Move(RobotDirection.Left)).MustHaveHappenedOnceExactly();
+    }
+
+    [Fact]
+    public void Move_WhenExecutorIsNull_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var systemUnderTests = new RobotController();
+
+        // Act
+        var action = () => systemUnderTests.MoveUp();
+
+        // Assert
+        action.Should().Throw<InvalidOperationException>();
     }
 }
