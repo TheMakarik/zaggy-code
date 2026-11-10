@@ -1,4 +1,4 @@
-namespace ZaggyCode.Avalonia.ProxyImplementation;
+namespace ZaggyCode.Avalonia.Proxies;
 
 public sealed class RobotGameEditorProxy : IRobotGameEditorProxy
 {

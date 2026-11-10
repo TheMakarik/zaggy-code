@@ -99,6 +99,8 @@ public sealed class Bootstrapper
         builder.Services.AddSingleton<IRobotGameEditorProxy>(provider => provider.GetRequiredService<RobotGameEditorProxy>());
         builder.Services.AddSingleton<RobotGameTerminalProxy>();
         builder.Services.AddSingleton<IRobotGameTerminalProxy>(provider => provider.GetRequiredService<RobotGameTerminalProxy>());
+        builder.Services.AddSingleton<RobotGameMapProxy>();
+        builder.Services.AddSingleton<IRobotGameMapProxy>(provider => provider.GetRequiredService<RobotGameMapProxy>());
 
         Log.Information("Зарегистрированно {количество} сервисов", builder.Services.Count);
         var app = builder.Build();

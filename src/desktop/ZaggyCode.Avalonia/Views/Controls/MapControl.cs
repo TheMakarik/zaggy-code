@@ -1,14 +1,11 @@
 using Avalonia.VisualTree;
 using ZaggyCode.Avalonia.Views.Records;
-using ZaggyCode.Avalonia.Views.StateMachines;
-using ZaggyCode.Core.GamesCore.Enums;
-using ZaggyCode.Core.RobotGameCore.Enums;
 using ZaggyCode.Core.RobotGameCore.Model;
 
 namespace ZaggyCode.Avalonia.Views.Controls;
 
-// Игровое поле: сетка прозрачных PointControl (бордер/стены/цель/монета), поверх — спрайт робота
-// с анимацией движения и реакции на столкновение. Состояние хранит MapRobotStateMachine.
+// Игровое поле только рисует данные карты и анимации. Логическое состояние робота
+// живёт в исполнителе, сюда оно приходит через IRobotGameMapProxy.
 public sealed class MapControl : Control
 {
     private static readonly IBrush FlashBrush = new SolidColorBrush(Color.FromArgb(200, 0xFF, 0xFF, 0xFF));
@@ -25,12 +22,16 @@ public sealed class MapControl : Control
     private const int BumpDurationMilliseconds = 200;
     private const int FlashDurationMilliseconds = 200;
 
-    private readonly MapRobotStateMachine _stateMachine = new();
     private readonly Image _robotImage = new() { Stretch = Stretch.Uniform, IsVisible = false };
     private readonly Rectangle _flashOverlay = new() { Fill = FlashBrush, IsVisible = false };
+    private readonly Dictionary<(int X, int Y), GamePoint> _points = [];
+    private readonly HashSet<(int X, int Y)> _drawnPoints = [];
+    private readonly HashSet<(int X, int Y)> _hiddenCoins = [];
+    private readonly Dictionary<PointControl, Image> _coinImages = [];
 
     private PointControl[,] _cells = new PointControl[0, 0];
-    private readonly Dictionary<PointControl, Image> _coinImages = [];
+    private RobotMap? _map;
+    private RobotDirection _robotDirection = RobotDirection.Down;
 
     private IImage? _front;
     private IImage? _back;
@@ -208,8 +209,6 @@ public sealed class MapControl : Control
     {
         Focusable = true;
 
-        _stateMachine.StateChanged += OnStateChanged;
-
         VisualChildren.Add(_robotImage);
         VisualChildren.Add(_flashOverlay);
     }
@@ -220,9 +219,9 @@ public sealed class MapControl : Control
 
         if (change.Property == MapProperty)
         {
-            _stateMachine.SetMap(change.NewValue as RobotMap);
+            SetMap(change.NewValue as RobotMap);
             RebuildCells();
-            ResetRenderPosition();
+            Reset();
             InvalidateMeasure();
             InvalidateVisual();
         }
@@ -250,6 +249,18 @@ public sealed class MapControl : Control
         }
     }
 
+    private void SetMap(RobotMap? map)
+    {
+        _map = map;
+        _points.Clear();
+
+        if (map is null)
+            return;
+
+        foreach (var point in map.Points)
+            _points[(point.X, point.Y)] = point;
+    }
+
     private void RebuildCells()
     {
         foreach (var cell in _cells)
@@ -260,15 +271,16 @@ public sealed class MapControl : Control
 
         _coinImages.Clear();
 
-        var columns = _stateMachine.ColumnCount;
-        var rows = _stateMachine.RowCount;
+        var columns = _map?.Width ?? 0;
+        var rows = _map?.Height ?? 0;
         var cells = new PointControl[columns, rows];
 
         for (var x = 0; x < columns; x++)
         {
             for (var y = 0; y < rows; y++)
             {
-                var cell = new PointControl { DataContext = _stateMachine.GetOrCreateCell(x, y) };
+                _points.TryGetValue((x, y), out var point);
+                var cell = new PointControl { DataContext = point };
                 MapAssetPaths.SetCoinPath(cell, CoinPath);
                 cells[x, y] = cell;
                 VisualChildren.Add(cell);
@@ -317,67 +329,66 @@ public sealed class MapControl : Control
 
         _isDead = false;
         _isLaggy = false;
-        _stateMachine.Reset();
+        _drawnPoints.Clear();
+        _hiddenCoins.Clear();
+        _robotDirection = RobotDirection.Down;
+
+        var spawn = _points.Values.FirstOrDefault(point => point.IsSpawn);
+        var column = spawn?.X ?? 0;
+        var row = spawn?.Y ?? 0;
+
+        _renderPosition = new RenderPosition(column, row);
+        _animationTarget = new Cell(column, row);
+        _robotImage.RenderTransform = null;
+        _robotImage.IsVisible = true;
+
         RefreshCoinVisibility();
-        ResetRenderPosition();
         UpdateRobotSprite();
+        ArrangeRobot(Bounds.Size);
         InvalidateVisual();
     }
 
-    public void MoveRobotTo(int column, int row)
+    public void SetRobotPosition(int column, int row, RobotDirection direction)
     {
+        if (!Dispatcher.UIThread.CheckAccess())
+        {
+            Dispatcher.UIThread.Post(() => SetRobotPosition(column, row, direction));
+            return;
+        }
+
+        _robotDirection = direction;
+
         if (_isDead)
             return;
 
-        _stateMachine.SetLogicalCell(column, row);
         StartMoveAnimation(column, row);
     }
 
-    public void SetRobotDirection(RobotDirection robotDirection)
+    public void SetCellDrawn(int column, int row, bool drawn)
     {
-        _stateMachine.SetDirection(robotDirection);
-        UpdateRobotSprite();
-    }
-
-    public void SetCellDrawn(int column, int row, bool drawn) =>
-        RunOnUiThread(() => _stateMachine.SetDrawn(column, row, drawn));
-
-    public void SetCellCollected(int column, int row, bool collected) =>
-        RunOnUiThread(() => SetCellCollectedCore(column, row, collected));
-
-    // Единственная точка применения состояния робота: UI ничего не решает сам,
-    // а проигрывает действия, пришедшие из исполнителя.
-    public void ApplyStateUpdate(RobotStateUpdate update)
-    {
-        if (update.Actions is null)
-            return;
-
         RunOnUiThread(() =>
         {
-            foreach (var action in update.Actions)
+            if (drawn)
+                _drawnPoints.Add((column, row));
+            else
+                _drawnPoints.Remove((column, row));
+        });
+    }
+
+    public void SetCellCollected(int column, int row, bool collected)
+    {
+        RunOnUiThread(() =>
+        {
+            if (collected)
             {
-                if (action.Direction is { } direction)
-                    _stateMachine.SetDirection(direction);
-
-                if (action.CollectedCoin is { } coin)
-                    SetCellCollectedCore(coin.X, coin.Y, true);
-
-                if (action.DrawnPoint is { } drawnPoint)
-                    _stateMachine.SetDrawn(drawnPoint.X, drawnPoint.Y, true);
-
-                if (action.DeadType is not null)
-                {
-                    PlayCollisionAnimation(action.Direction);
-                    continue;
-                }
-
-                if (action.Direction is not null)
-                    MoveRobotTo(action.Position.X, action.Position.Y);
-                else
-                    _stateMachine.SetLogicalCell(action.Position.X, action.Position.Y);
+                _hiddenCoins.Add((column, row));
+                UpdateCoinVisibility(column, row);
             }
-
-            UpdateRobotSprite();
+            else
+            {
+                _hiddenCoins.Remove((column, row));
+                UpdateCoinVisibility(column, row);
+            }
         });
     }
 
@@ -417,12 +428,11 @@ public sealed class MapControl : Control
         _ = RunFlashAnimationAsync(animation, _flashCancellation.Token);
     }
 
-    // Реакция на столкновение/выход за край: попытка движения, грустный смайл, возврат, laggy-ассет.
-    public void PlayCollisionAnimation(RobotDirection? attemptedDirection)
+    public void PlayCollisionAnimation(RobotDirection? attemptedDirection, int column, int row)
     {
         if (!Dispatcher.UIThread.CheckAccess())
         {
-            Dispatcher.UIThread.Post(() => PlayCollisionAnimation(attemptedDirection));
+            Dispatcher.UIThread.Post(() => PlayCollisionAnimation(attemptedDirection, column, row));
             return;
         }
 
@@ -435,10 +445,8 @@ public sealed class MapControl : Control
         _robotImage.Source = _sad;
         _robotImage.IsVisible = true;
 
-        _ = RunCollisionAnimationAsync(attemptedDirection, _stateMachine.LogicalColumn, _stateMachine.LogicalRow);
+        _ = RunCollisionAnimationAsync(attemptedDirection, column, row);
     }
-
-    public void PlayDeathAnimation(RobotDirection? attemptedDirection) => PlayCollisionAnimation(attemptedDirection);
 
     private async Task RunCollisionAnimationAsync(RobotDirection? attemptedDirection, int column, int row)
     {
@@ -603,8 +611,8 @@ public sealed class MapControl : Control
 
     protected override Size MeasureOverride(Size availableSize)
     {
-        var columns = _stateMachine.ColumnCount;
-        var rows = _stateMachine.RowCount;
+        var columns = _map?.Width ?? 0;
+        var rows = _map?.Height ?? 0;
         if (columns == 0 || rows == 0)
             return default;
 
@@ -651,8 +659,8 @@ public sealed class MapControl : Control
         var size = Bounds.Size;
         context.DrawRectangle(SeaBrush ?? Brush("MapBackgroundBrush"), null, new Rect(size));
 
-        var columns = _stateMachine.ColumnCount;
-        var rows = _stateMachine.RowCount;
+        var columns = _map?.Width ?? 0;
+        var rows = _map?.Height ?? 0;
         if (columns == 0 || rows == 0)
             return;
 
@@ -668,10 +676,10 @@ public sealed class MapControl : Control
         {
             for (var column = 0; column < columns; column++)
             {
-                if (!_stateMachine.IsDrawn(column, row))
+                if (!_drawnPoints.Contains((column, row)))
                     continue;
 
-                var point = _stateMachine.GetCell(column, row);
+                _points.TryGetValue((column, row), out var point);
                 var brush = BrushFromHex(point?.CustomCoreDrewPointHex) ?? defaultBrush;
                 var opacity = point?.RequireDrawCustomOpacity ?? DefaultDrawnOpacity;
                 var rect = new Rect(offset.X + column * cell, offset.Y + row * cell, cell, cell);
@@ -747,8 +755,8 @@ public sealed class MapControl : Control
 
     private MapLayout CalculateLayout(Size size)
     {
-        var columns = _stateMachine.ColumnCount;
-        var rows = _stateMachine.RowCount;
+        var columns = _map?.Width ?? 0;
+        var rows = _map?.Height ?? 0;
         if (columns == 0 || rows == 0)
             return new MapLayout(new PixelOffset(0, 0), 0);
 
@@ -768,27 +776,14 @@ public sealed class MapControl : Control
         return new MapLayout(new PixelOffset(offsetX, offsetY), cell);
     }
 
-    private void ResetRenderPosition()
-    {
-        _isLaggy = false;
-        _isDead = false;
-        _renderPosition = new RenderPosition(_stateMachine.LogicalColumn, _stateMachine.LogicalRow);
-        _animationTarget = new Cell(_stateMachine.LogicalColumn, _stateMachine.LogicalRow);
-        _robotImage.RenderTransform = null;
-        _robotImage.IsVisible = true;
-        UpdateRobotSprite();
-        ArrangeRobot(Bounds.Size);
-    }
-
     private void UpdateRobotSprite()
     {
         if (_isDead)
             return;
 
-        var direction = _stateMachine.RobotDirection;
         _robotImage.Source = _isLaggy
-            ? LaggyFor(direction)
-            : SpriteFor(direction);
+            ? LaggyFor(_robotDirection)
+            : SpriteFor(_robotDirection);
 
         _robotImage.IsVisible = true;
     }
@@ -811,23 +806,17 @@ public sealed class MapControl : Control
         _ => _frontLaggy
     };
 
-    private void SetCellCollectedCore(int column, int row, bool collected)
-    {
-        _stateMachine.SetCollected(column, row, collected);
-        UpdateCoinVisibility(column, row);
-    }
-
     private void UpdateCoinVisibility(int column, int row)
     {
         if (column < 0 || row < 0 || column >= _cells.GetLength(0) || row >= _cells.GetLength(1))
             return;
 
         var cell = _cells[column, row];
-        var point = _stateMachine.GetCell(column, row);
+        _points.TryGetValue((column, row), out var point);
         var coinImage = GetCoinImage(cell);
 
         if (coinImage is not null)
-            coinImage.IsVisible = point?.HasCoin == true && !_stateMachine.IsCollected(column, row);
+            coinImage.IsVisible = point?.HasCoin == true && !_hiddenCoins.Contains((column, row));
     }
 
     // В PointControl единственный Image — это монета, отдельного имени у него нет.
@@ -850,17 +839,6 @@ public sealed class MapControl : Control
             for (var row = 0; row < _cells.GetLength(1); row++)
                 UpdateCoinVisibility(column, row);
         }
-    }
-
-    private void OnStateChanged(object? sender, EventArgs e)
-    {
-        if (!Dispatcher.UIThread.CheckAccess())
-        {
-            Dispatcher.UIThread.Post(() => OnStateChanged(sender, e));
-            return;
-        }
-
-        InvalidateVisual();
     }
 
     private void RunOnUiThread(System.Action action)

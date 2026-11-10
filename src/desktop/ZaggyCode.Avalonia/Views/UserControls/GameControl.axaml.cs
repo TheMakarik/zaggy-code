@@ -8,5 +8,7 @@ public partial class GameControl : ReactiveUserControl<MainWindowViewModel>
         DescriptionExpander.IsExpanded = false;
     }
 
+    public MapControl Map => GameMap;
+
     public void Reset() => GameMap.Reset();
 }

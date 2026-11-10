@@ -11,6 +11,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
     private readonly ScriptCommandLineSession _terminalSession = new ScriptCommandLineSession();
     private RobotGameEditorProxy? _editorProxy;
     private RobotGameTerminalProxy? _terminalProxy;
+    private RobotGameMapProxy? _mapProxy;
     private TextMate.Installation? _textMateInstallation;
     private DispatcherTimer? _fontSizeToastTimer;
     private DispatcherTimer? _fontSizeToastFadeOutTimer;
@@ -92,7 +93,9 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
 
         _terminalProxy = App.Services.GetRequiredService<RobotGameTerminalProxy>();
         _terminalProxy.Attach(_terminalSession);
-        
+
+        _mapProxy = App.Services.GetRequiredService<RobotGameMapProxy>();
+        _mapProxy.Attach(GameMapView.Map);
     }
 
     private async Task ApplyAppThemeAsync(string themeName)
@@ -181,13 +184,6 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         ViewModel.ClearTerminalContent.RegisterHandler(context =>
         {
             Terminal.Clear();
-            context.SetOutput(Unit.Default);
-        });
-
-        ViewModel.UpdateCodeLine.RegisterHandler(context =>
-        {
-            Debug.Assert(_editorProxy is not null);
-            _editorProxy!.SetCurrentExecutionLine(context.Input);
             context.SetOutput(Unit.Default);
         });
 
@@ -295,9 +291,6 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         base.OnLoaded(e);
 
         InstallCodeHighlighting();
-
-        if (ViewModel is not null)
-            _ = ViewModel.InitializeGameEngineAsync();
     }
 
     private void InstallCodeHighlighting()

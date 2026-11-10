@@ -67,7 +67,6 @@ public partial class MainWindowViewModel : ViewModelBase
     public readonly Interaction<Unit, string> GetSelectedCode = new();
     public readonly Interaction<Unit, (TextReader Input, TextWriter Output)> GetTerminalStreams = new();
     //public readonly Interaction<Unit, Map?> GetGameMap = new();
-    public readonly Interaction<int, Unit> UpdateCodeLine = new();
     public readonly Interaction<Unit, Unit> StopCodeExecution = new();
     public readonly Interaction<Unit, Unit> ResetMap = new();
     public readonly Interaction<Unit, Unit> ConcludeRun = new();
@@ -81,7 +80,8 @@ public partial class MainWindowViewModel : ViewModelBase
 
     #region Services
 
-    private readonly IRobotGameEngine _robotGameEngine;
+    private readonly IRobotGameEngineFactory _robotGameEngineFactory;
+    private readonly IRobotGameTerminalProxy _robotGameTerminalProxy;
     private readonly IObservableStorage<StateSettings> _stateSettingsStorage;
     private readonly IObservableStorage<ViewSettings> _viewSettingsStorage;
     private readonly IObservableStorage<ThemeSettings> _themeSettingsStorage;
@@ -116,7 +116,8 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public MainWindowViewModel(
         ILogger<MainWindowViewModel> logger,
-        IRobotGameEngine robotGameEngine,
+        IRobotGameEngineFactory robotGameEngineFactory,
+        IRobotGameTerminalProxy robotGameTerminalProxy,
         IOptions<ZaggyAssetsOptions> zaggyAssets,
         IObservableStorage<StateSettings> stateSettingsStorage,
         IObservableStorage<ViewSettings> viewSettingsStorage,
@@ -144,7 +145,8 @@ public partial class MainWindowViewModel : ViewModelBase
         IOptions<MapAnimationOptions> animationOptions,
         ILoggerFactory loggerFactory)
     {
-        _robotGameEngine = robotGameEngine;
+        _robotGameEngineFactory = robotGameEngineFactory;
+        _robotGameTerminalProxy = robotGameTerminalProxy;
         ZaggyAssets = zaggyAssets;
         _logger = logger;
         _fontSizeOptions = textFontSize;
@@ -195,7 +197,6 @@ public partial class MainWindowViewModel : ViewModelBase
         InitializeAvailableLanguages();
         InitializeLanguageSelection();
         InitializeStorageSynchronization();
-        InitializeGameEngine();
 
 #pragma warning disable AsyncVoidMethod
         this.WhenAnyValue(vm => vm.IsTerminalVisible)
@@ -416,74 +417,6 @@ public partial class MainWindowViewModel : ViewModelBase
         this.RaisePropertyChanged(nameof(SidebarRow));
     }
 
-    private void InitializeGameEngine()
-    {
-        this.WhenAnyValue(vm => vm.SelectedLanguage)
-            .Skip(1)
-            .Subscribe(language =>
-            {
-                if (!IsRunning)
-                    SwitchEngineLanguage(language);
-            });
-
-        this.WhenAnyValue(vm => vm.ExecutionSpeed)
-            .Skip(1)
-            .Subscribe(speed =>
-            {
-                if (!IsRunning)
-                    SetEngineSpeed(speed);
-            });
-    }
-
-    private void SwitchEngineLanguage(Language language)
-    {
-        try
-        {
-            _robotGameEngine.Language = language;
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "Не удалось переключить язык игрового движка на {Language}", language);
-        }
-    }
-
-    private void SetEngineSpeed(ExecutionSpeed speed)
-    {
-        try
-        {
-            _robotGameEngine.Speed = speed;
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "Не удалось установить скорость игрового движка: {Speed}", speed);
-        }
-    }
-
-    public async Task InitializeGameEngineAsync()
-    {
-        try
-        {
-            await Task.Run(() =>
-            {
-                _robotGameEngine.Language = SelectedLanguage;
-                _robotGameEngine.Speed = ExecutionSpeed;
-            });
-
-            //var map = await GetGameMap.Handle(Unit.Default);
-            var map = CurrentRobotMap;
-
-            if (map is not null)
-                _robotGameEngine.CurrentMap = map;
-
-            var (input, output) = await GetTerminalStreams.Handle(Unit.Default);
-            _robotGameEngine.SetIo(output, input);
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "Не удалось выполнить прогрев игрового движка");
-        }
-    }
-
     #endregion
 
     #region Reactive commands
@@ -511,7 +444,7 @@ public partial class MainWindowViewModel : ViewModelBase
             return;
 
         await PrepareExecution();
-        await RunCode(code);
+        await RunCode(code, ExecutionType.AnalyzeOnly);
         await FinalizeExecution();
     }
 
@@ -693,30 +626,38 @@ public partial class MainWindowViewModel : ViewModelBase
         await StopCodeExecution.Handle(Unit.Default);
     }
 
-    private async Task RunCode(string? codeOverride = null)
+    private async Task RunCode(string? codeOverride = null, ExecutionType executionType = ExecutionType.ExecuteWithProxies)
     {
         try
         {
             _logger.LogDebug("Запрошено выполнение кода");
             var code = codeOverride ?? await GetCodeToExecute.Handle(Unit.Default);
             var (input, output) = await GetTerminalStreams.Handle(Unit.Default);
-            //var map = await GetGameMap.Handle(Unit.Default);
-            var map = CurrentRobotMap;
 
-#if DEBUG
-            SelectedLanguage = Language.Python;
-#endif
-            _robotGameEngine.Language = SelectedLanguage;
-            _robotGameEngine.Speed = ExecutionSpeed;
-            _robotGameEngine.SetIo(output, input);
-
-            if (map is not null)
-                _robotGameEngine.CurrentMap = map;
-
+            Debug.Assert(CurrentRobotMap is not null);
             Debug.Assert(_cancellationTokenSource is not null);
-            await _robotGameEngine.RunCodeAsync(code, _cancellationTokenSource.Token);
+
+            var engineDto = new RobotGameEngineInitDto
+            {
+                Input = input,
+                Output = output,
+                Language = SelectedLanguage,
+                Speed = ExecutionSpeed,
+                Game = CurrentRobotGame
+            };
+
+            var cancellationToken = _cancellationTokenSource.Token;
+            var engine = await _robotGameEngineFactory.CreateAsync(engineDto, cancellationToken);
+            var result = await engine.ExecuteAsync(code, cancellationToken, executionType);
+
+            if (result.Error is { } error && !string.IsNullOrWhiteSpace(error.ErrorMessage))
+                _robotGameTerminalProxy.WriteError(error.ErrorMessage);
 
             await ConcludeRun.Handle(Unit.Default);
+        }
+        catch (OperationCanceledException)
+        {
+            _logger.LogDebug("Выполнение кода отменено");
         }
         catch (Exception e)
         {
@@ -735,17 +676,6 @@ public partial class MainWindowViewModel : ViewModelBase
 
         await StopCodeExecution.Handle(Unit.Default);
         await ResetMap.Handle(Unit.Default);
-    }
-#pragma warning disable AsyncVoidEventHandlerMethod
-    private async void OnDebugLineUpdated(object? sender, DebugLineUpdatedEventArgs args)
-#pragma warning restore AsyncVoidEventHandlerMethod
-    {
-        await UpdateCodeLine.Handle(args.LineNumber);
-    }
-
-    private void OnCodeErrorOccurred(object? sender, CodeErrorOccurredEventArgs args)
-    {
-        _logger.LogWarning("Ошибка в коде: {Text}", args.Text);
     }
 
     #endregion
