@@ -14,7 +14,10 @@ public sealed class LanguageRunnerFactory(IServiceProvider serviceProvider) : IL
         using var scope = _lock.EnterScope();
 
         if (_runners.TryGetValue(dto.Language, out var existingRunner))
+        {
+            existingRunner.Configure(dto);
             return existingRunner;
+        }
 
         var runner = CreateRunner(dto);
         _runners[dto.Language] = runner;
