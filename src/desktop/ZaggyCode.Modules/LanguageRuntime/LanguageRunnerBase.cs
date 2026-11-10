@@ -1,4 +1,5 @@
 using ZaggyCode.Core.LanguageRuntime.Model;
+using ZaggyCode.Core.RobotGameCore.Interfaces;
 
 namespace ZaggyCode.Modules.LanguageRuntime;
 
@@ -8,6 +9,7 @@ public abstract class LanguageRunnerBase(LanguageRunnerDto dto, IOptions<SpeedMi
 
     protected TextReader Input { get; } = dto.Input;
     protected TextWriter Output { get; } = dto.Output;
+    protected IRobotController RobotController { get; } = dto.RobotController;
 
     public ExecutionSpeed Speed
     {

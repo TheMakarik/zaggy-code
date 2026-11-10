@@ -27,7 +27,7 @@ public sealed class RobotExecutor : IRobotExecutor
 
     public event EventHandler<RobotStateUpdate>? StateUpdated;
 
-    private void Move(RobotDirection direction)
+    public void Move(RobotDirection direction)
     {
         var (deltaX, deltaY) = GetDirectionDelta(direction);
         var currentPosition = State.Position;
@@ -59,14 +59,6 @@ public sealed class RobotExecutor : IRobotExecutor
             DeadType: null));
     }
 
-    public void MoveUp() => Move(RobotDirection.Up);
-
-    public void MoveRight() => Move(RobotDirection.Right);
-
-    public void MoveDown() => Move(RobotDirection.Down);
-
-    public void MoveLeft() => Move(RobotDirection.Left);
-
     public void FillCell()
     {
         var position = State.Position;
@@ -96,13 +88,7 @@ public sealed class RobotExecutor : IRobotExecutor
 
     public bool IsCellFilled() => State.IsDrawn(State.Position);
 
-    public bool IsWallFromUp() => HasWallInDirection(RobotDirection.Up);
-
-    public bool IsWallFromDown() => HasWallInDirection(RobotDirection.Down);
-
-    public bool IsWallFromLeft() => HasWallInDirection(RobotDirection.Left);
-
-    public bool IsWallFromRight() => HasWallInDirection(RobotDirection.Right);
+    public bool CheckWall(RobotDirection direction) => HasWallInDirection(direction);
 
     private bool HasWallInDirection(RobotDirection direction)
     {

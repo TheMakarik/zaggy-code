@@ -8,7 +8,7 @@ namespace ZaggyCode.Tests.RobotGameCore;
 public class RobotExecutorTests
 {
     [Fact]
-    public void MoveUp_WhenNoWalls_MovesRobotAndRaisesSingleStateUpdate()
+    public void Move_WhenNoWalls_MovesRobotAndRaisesSingleStateUpdate()
     {
         // Arrange
         var map = CreateMap();
@@ -17,7 +17,7 @@ public class RobotExecutorTests
         systemUnderTests.StateUpdated += (_, update) => updates.Add(update);
 
         // Act
-        systemUnderTests.MoveUp();
+        systemUnderTests.Move(RobotDirection.Up);
 
         // Assert
         updates.Should().ContainSingle();
@@ -39,7 +39,7 @@ public class RobotExecutorTests
         systemUnderTests.StateUpdated += (_, update) => updates.Add(update);
 
         // Act
-        systemUnderTests.MoveUp();
+        systemUnderTests.Move(RobotDirection.Up);
 
         // Assert
         var expectedCoin = new Point(2, 1);
@@ -58,11 +58,11 @@ public class RobotExecutorTests
         var systemUnderTests = new RobotExecutor(map);
         var updates = new List<RobotStateUpdate>();
         systemUnderTests.StateUpdated += (_, update) => updates.Add(update);
-        systemUnderTests.MoveUp();
-        systemUnderTests.MoveDown();
+        systemUnderTests.Move(RobotDirection.Up);
+        systemUnderTests.Move(RobotDirection.Down);
 
         // Act
-        systemUnderTests.MoveUp();
+        systemUnderTests.Move(RobotDirection.Up);
 
         // Assert
         updates.Should().HaveCount(3);
@@ -130,7 +130,7 @@ public class RobotExecutorTests
     }
 
     [Fact]
-    public void MoveUp_WhenCurrentPointHasTopWall_SendsWallDeathAndDoesNotMove()
+    public void Move_WhenCurrentPointHasTopWall_SendsWallDeathAndDoesNotMove()
     {
         // Arrange
         var map = CreateMap();
@@ -140,7 +140,7 @@ public class RobotExecutorTests
         systemUnderTests.StateUpdated += (_, update) => updates.Add(update);
 
         // Act
-        systemUnderTests.MoveUp();
+        systemUnderTests.Move(RobotDirection.Up);
 
         // Assert
         var action = updates.Should().ContainSingle().Subject.Actions.Should().ContainSingle().Subject;
@@ -150,7 +150,7 @@ public class RobotExecutorTests
     }
 
     [Fact]
-    public void MoveRight_WhenTargetIsBeyondMap_SendsEndOfTheMapDeath()
+    public void Move_WhenTargetIsBeyondMap_SendsEndOfTheMapDeath()
     {
         // Arrange
         var map = CreateMap(spawnX: 3);
@@ -159,7 +159,7 @@ public class RobotExecutorTests
         systemUnderTests.StateUpdated += (_, update) => updates.Add(update);
 
         // Act
-        systemUnderTests.MoveRight();
+        systemUnderTests.Move(RobotDirection.Right);
 
         // Assert
         var action = updates.Should().ContainSingle().Subject.Actions.Should().ContainSingle().Subject;
@@ -168,21 +168,21 @@ public class RobotExecutorTests
     }
 
     [Fact]
-    public void IsWallFromRight_WhenTargetIsBeyondMap_ReturnsTrue()
+    public void CheckWall_WhenTargetIsBeyondMap_ReturnsTrue()
     {
         // Arrange
         var map = CreateMap(spawnX: 3);
         var systemUnderTests = new RobotExecutor(map);
 
         // Act
-        var hasWall = systemUnderTests.IsWallFromRight();
+        var hasWall = systemUnderTests.CheckWall(RobotDirection.Right);
 
         // Assert
         hasWall.Should().BeTrue();
     }
 
     [Fact]
-    public void IsWallFromDown_WhenTargetPointHasTopWall_ReturnsTrue()
+    public void CheckWall_WhenTargetPointHasTopWall_ReturnsTrue()
     {
         // Arrange
         var map = CreateMap();
@@ -190,21 +190,21 @@ public class RobotExecutorTests
         var systemUnderTests = new RobotExecutor(map);
 
         // Act
-        var hasWall = systemUnderTests.IsWallFromDown();
+        var hasWall = systemUnderTests.CheckWall(RobotDirection.Down);
 
         // Assert
         hasWall.Should().BeTrue();
     }
 
     [Fact]
-    public void IsWallFromLeft_WhenNoWalls_ReturnsFalse()
+    public void CheckWall_WhenNoWalls_ReturnsFalse()
     {
         // Arrange
         var map = CreateMap();
         var systemUnderTests = new RobotExecutor(map);
 
         // Act
-        var hasWall = systemUnderTests.IsWallFromLeft();
+        var hasWall = systemUnderTests.CheckWall(RobotDirection.Left);
 
         // Assert
         hasWall.Should().BeFalse();
