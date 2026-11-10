@@ -250,6 +250,8 @@ public sealed class RobotGameEngine(
             {
                 deadType = type;
                 dead = true;
+                // После смерти робота остальные действия из той же пачки уже не выполнялись.
+                break;
             }
         }
 

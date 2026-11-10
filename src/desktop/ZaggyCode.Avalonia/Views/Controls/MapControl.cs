@@ -546,6 +546,9 @@ public sealed class MapControl : Control
 
         _renderPosition = new RenderPosition(_animationTarget.Column, _animationTarget.Row);
         _animationTarget = new Cell(toColumn, toRow);
+        // Несколько действий в одной строке приходят пачкой: ставим картинку
+        // в начало нового перехода, иначе она прыгнет из прежней позиции.
+        ArrangeRobot(Bounds.Size);
 
         var fromX = offset.X + _renderPosition.Column * cell;
         var fromY = offset.Y + _renderPosition.Row * cell;
