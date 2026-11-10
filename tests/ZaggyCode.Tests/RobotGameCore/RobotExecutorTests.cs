@@ -134,7 +134,7 @@ public class RobotExecutorTests
     {
         // Arrange
         var map = CreateMap();
-        GetPoint(map, 2, 2).RobotWallType = RobotWallType.Top;
+        GetPoint(map, 2, 2).WallType = RobotWallType.Top;
         var systemUnderTests = new RobotExecutor(map);
         var updates = new List<RobotStateUpdate>();
         systemUnderTests.StateUpdated += (_, update) => updates.Add(update);
@@ -186,7 +186,7 @@ public class RobotExecutorTests
     {
         // Arrange
         var map = CreateMap();
-        GetPoint(map, 2, 3).RobotWallType = RobotWallType.Top;
+        GetPoint(map, 2, 3).WallType = RobotWallType.Top;
         var systemUnderTests = new RobotExecutor(map);
 
         // Act

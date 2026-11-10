@@ -48,7 +48,7 @@
                 <Rectangle
                     Classes="wall-segment"
                     Fill="{DynamicResource MapWallBrush}"
-                    IsVisible="{Binding RobotWallType, Converter={converters:WallEdgeVisibilityConverter}, ConverterParameter=Full}"
+                    IsVisible="{Binding WallType, Converter={converters:WallEdgeVisibilityConverter}, ConverterParameter=Full}"
                     Opacity="{Binding CustomWallOpacity, Converter={converters:NullableDoubleConverter}}"
                     Stroke="{Binding CustomWallBorderOnPointHex, Converter={converters:HexStringToBrushConverter}}" />
 
@@ -57,7 +57,7 @@
                     Fill="{DynamicResource MapWallBrush}"
                     Height="{Binding $parent[UserControl].Bounds.Height, Converter={converters:PercentOfValueConverter}, ConverterParameter=0.15}"
                     HorizontalAlignment="Stretch"
-                    IsVisible="{Binding RobotWallType, Converter={converters:WallEdgeVisibilityConverter}, ConverterParameter=Top}"
+                    IsVisible="{Binding WallType, Converter={converters:WallEdgeVisibilityConverter}, ConverterParameter=Top}"
                     Opacity="{Binding CustomWallOpacity, Converter={converters:NullableDoubleConverter}}"
                     Stroke="{Binding CustomWallBorderOnPointHex, Converter={converters:HexStringToBrushConverter}}"
                     VerticalAlignment="Top" />
@@ -67,7 +67,7 @@
                     Fill="{DynamicResource MapWallBrush}"
                     Height="{Binding $parent[UserControl].Bounds.Height, Converter={converters:PercentOfValueConverter}, ConverterParameter=0.15}"
                     HorizontalAlignment="Stretch"
-                    IsVisible="{Binding RobotWallType, Converter={converters:WallEdgeVisibilityConverter}, ConverterParameter=Bottom}"
+                    IsVisible="{Binding WallType, Converter={converters:WallEdgeVisibilityConverter}, ConverterParameter=Bottom}"
                     Opacity="{Binding CustomWallOpacity, Converter={converters:NullableDoubleConverter}}"
                     Stroke="{Binding CustomWallBorderOnPointHex, Converter={converters:HexStringToBrushConverter}}"
                     VerticalAlignment="Bottom" />
@@ -76,7 +76,7 @@
                     Classes="wall-segment"
                     Fill="{DynamicResource MapWallBrush}"
                     HorizontalAlignment="Left"
-                    IsVisible="{Binding RobotWallType, Converter={converters:WallEdgeVisibilityConverter}, ConverterParameter=Left}"
+                    IsVisible="{Binding WallType, Converter={converters:WallEdgeVisibilityConverter}, ConverterParameter=Left}"
                     Opacity="{Binding CustomWallOpacity, Converter={converters:NullableDoubleConverter}}"
                     Stroke="{Binding CustomWallBorderOnPointHex, Converter={converters:HexStringToBrushConverter}}"
                     VerticalAlignment="Stretch"
@@ -86,7 +86,7 @@
                     Classes="wall-segment"
                     Fill="{DynamicResource MapWallBrush}"
                     HorizontalAlignment="Right"
-                    IsVisible="{Binding RobotWallType, Converter={converters:WallEdgeVisibilityConverter}, ConverterParameter=Right}"
+                    IsVisible="{Binding WallType, Converter={converters:WallEdgeVisibilityConverter}, ConverterParameter=Right}"
                     Opacity="{Binding CustomWallOpacity, Converter={converters:NullableDoubleConverter}}"
                     Stroke="{Binding CustomWallBorderOnPointHex, Converter={converters:HexStringToBrushConverter}}"
                     VerticalAlignment="Stretch"

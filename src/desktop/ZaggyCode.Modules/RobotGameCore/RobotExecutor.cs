@@ -108,23 +108,23 @@ public sealed class RobotExecutor : IRobotExecutor
             || !_points.TryGetValue(targetPosition, out var target))
             return true;
 
-        if (target.RobotWallType == RobotWallType.Full)
+        if (target.WallType == RobotWallType.Full)
             return true;
 
         var deltaX = targetPosition.X - currentPosition.X;
         var deltaY = targetPosition.Y - currentPosition.Y;
 
         if (deltaX == 1)
-            return HasWallOnRight(current.RobotWallType) || HasWallOnLeft(target.RobotWallType);
+            return HasWallOnRight(current.WallType) || HasWallOnLeft(target.WallType);
 
         if (deltaX == -1)
-            return HasWallOnLeft(current.RobotWallType) || HasWallOnRight(target.RobotWallType);
+            return HasWallOnLeft(current.WallType) || HasWallOnRight(target.WallType);
 
         if (deltaY == 1)
-            return HasWallOnBottom(current.RobotWallType) || HasWallOnTop(target.RobotWallType);
+            return HasWallOnBottom(current.WallType) || HasWallOnTop(target.WallType);
 
         if (deltaY == -1)
-            return HasWallOnTop(current.RobotWallType) || HasWallOnBottom(target.RobotWallType);
+            return HasWallOnTop(current.WallType) || HasWallOnBottom(target.WallType);
 
         return false;
     }

@@ -127,7 +127,7 @@ public class RobotGamePoint : INotifyPropertyChanged
     #region Wall
 
     [XmlAttribute("WALL.type", Namespace = "objects")]
-    public RobotWallType RobotWallType { get; set => SetField(ref field, value); }
+    public RobotWallType WallType { get; set => SetField(ref field, value); }
     
     [XmlAttribute("WALL.hex", Namespace = "objects")]
     [DefaultValue(null)]
