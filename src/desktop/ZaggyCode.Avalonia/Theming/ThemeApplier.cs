@@ -4,7 +4,7 @@ public sealed class ThemeApplier(
     ILogger<ThemeApplier> logger,
     IThemeCatalog themeCatalog,
     IThemeSetterProxy themeSetterProxy,
-    IObservableStorage<UserData> userStorage,
+    IObservableStorage<ViewSettings> viewStorage,
     IObservableStorage<ThemeSettings> themeSettingsStorage) : IThemeApplier
 {
     private const string FallbackThemeName = "Primus";
@@ -64,7 +64,7 @@ public sealed class ThemeApplier(
 
             var dialog = new ThemeNotFoundWindow(missingThemeName)
             {
-                WindowDecorations = userStorage.Current.UseSystemTitleBar
+                WindowDecorations = viewStorage.Current.UseSystemTitleBar
                     ? WindowDecorations.Full
                     : WindowDecorations.BorderOnly
             };

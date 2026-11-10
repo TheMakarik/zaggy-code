@@ -2,7 +2,7 @@ namespace ZaggyCode.Modules.Data;
 
 //#:NO_AI
 public sealed class GameCodeStorage(
-    IUserStorage userStorage,
+    IStateSettingsStorage stateSettingsStorage,
     ILogger<GameCodeStorage> logger,
     IOptions<StorageOptions> options) : IGameCodeStorage
 {
@@ -19,10 +19,10 @@ public sealed class GameCodeStorage(
 
     public Task LoadAsync()
     {
-        if (string.IsNullOrWhiteSpace(userStorage.Current.LastGamePath))
+        if (string.IsNullOrWhiteSpace(stateSettingsStorage.Current.LastGamePath))
             return Task.CompletedTask;
 
-        return LoadLastGameCodeAsync(userStorage.Current.LastGamePath, userStorage.Current.LastLanguage);
+        return LoadLastGameCodeAsync(stateSettingsStorage.Current.LastGamePath, stateSettingsStorage.Current.LastLanguage);
     }
 
 

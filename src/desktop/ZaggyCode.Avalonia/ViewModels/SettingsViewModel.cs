@@ -12,7 +12,7 @@ public sealed partial class SettingsViewModel : ViewModelBase
 
     #endregion
 
-    private readonly IObservableStorage<UserData> _userStorage;
+    private readonly IObservableStorage<ViewSettings> _viewStorage;
     private readonly IObservableStorage<PythonSettings> _pythonSettingsStorage;
     private readonly IObservableStorage<CSharpSettings> _csharpSettingsStorage;
     private readonly ILogger<SettingsViewModel> _logger;
@@ -24,11 +24,11 @@ public sealed partial class SettingsViewModel : ViewModelBase
     public Interaction<Unit, Unit> CloseSettingsInteraction { get; } = new();
 
     public SettingsViewModel(
-        IObservableStorage<UserData> userStorage,
+        IObservableStorage<ViewSettings> viewStorage,
         IObservableStorage<ThemeSettings> themeSettingsStorage,
         IObservableStorage<PythonSettings> pythonSettingsStorage,
         IObservableStorage<CSharpSettings> csharpSettingsStorage,
-        IOptions<DefaultUser> defaultUserOptions,
+        IOptions<DefaultViewSettings> defaultViewSettingsOptions,
         IOptions<DefaultThemeSettings> defaultThemeSettingsOptions,
         IOptions<PythonDefaultSettingsOptions> pythonDefaultSettingsOptions,
         IOptions<CSharpDefaultSettingsOptions> csharpDefaultSettingsOptions,
@@ -45,15 +45,15 @@ public sealed partial class SettingsViewModel : ViewModelBase
         IPythonFunctionNameValidator pythonFunctionNameValidator,
         ILoggerFactory loggerFactory)
     {
-        _userStorage = userStorage;
+        _viewStorage = viewStorage;
         _pythonSettingsStorage = pythonSettingsStorage;
         _csharpSettingsStorage = csharpSettingsStorage;
         _logger = loggerFactory.CreateLogger<SettingsViewModel>();
 
         AppearanceSettings = new AppearanceSettingsViewModel(
-            userStorage,
+            viewStorage,
             themeSettingsStorage,
-            defaultUserOptions,
+            defaultViewSettingsOptions,
             defaultThemeSettingsOptions,
             codeExamplePathOptions,
             fontSizeOptions,
@@ -100,7 +100,7 @@ public sealed partial class SettingsViewModel : ViewModelBase
     {
         _logger.LogInformation("Сохранение настроек");
 
-        var current = _userStorage.Current;
+        var current = _viewStorage.Current;
         var codeFontSizeChanged = current.CodeFontSize != AppearanceSettings.CodeFontSize;
         var terminalFontSizeChanged = current.TerminalFontSize != AppearanceSettings.TerminalFontSize;
         current.CodeFontSize = AppearanceSettings.CodeFontSize;

@@ -44,7 +44,7 @@ global using ZaggyCode.Core.Common.Utils;
 global using ZaggyCode.Core.Data.Interfaces;
 global using ZaggyCode.Core.Data.Model;
 global using ZaggyCode.Core.Theming.Model;
-global using IUserStorage = ZaggyCode.Core.Data.Interfaces.IObservableStorage<ZaggyCode.Core.Data.Model.UserData>;
+global using IStateSettingsStorage = ZaggyCode.Core.Data.Interfaces.IObservableStorage<ZaggyCode.Core.Data.Model.StateSettings>;
 global using IPythonSettingsStorage = ZaggyCode.Core.Data.Interfaces.IObservableStorage<ZaggyCode.Core.Data.Model.PythonSettings>;
 global using ZaggyCode.Core.GamesCore.Enums;
 global using ZaggyCode.Core.LanguageRuntime.Attributes;

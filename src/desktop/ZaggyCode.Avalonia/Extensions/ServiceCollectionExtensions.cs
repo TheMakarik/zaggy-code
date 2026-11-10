@@ -28,7 +28,7 @@ public static class ServiceCollectionExtensions
             return new ObservableStorage<TData>(
                 logger,
                 fullPath,
-                TimeSpan.FromSeconds(storageOptions.Value.WaitUserDataUpdateSeconds),
+                TimeSpan.FromSeconds(storageOptions.Value.WaitSettingsUpdateSeconds),
                 jsonTypeInfo,
                 updateWaiter,
                 () => defaultValueFactory(provider));
@@ -50,12 +50,20 @@ public static class ServiceCollectionExtensions
             jsonTypeInfo);
     }
 
-    public static IServiceCollection AddUserDataStorage(this IServiceCollection services)
+    public static IServiceCollection AddStateSettingsStorage(this IServiceCollection services)
     {
-        return services.AddObservableStorage<UserData>(
-            options => options.DataFilePath,
-            provider => provider.GetRequiredService<IOptions<DefaultUser>>().Value.User,
-            Modules.Data.Json.UserDataSerializerContext.Default.UserData);
+        return services.AddObservableStorage<StateSettings>(
+            options => options.StateSettingsPath,
+            provider => provider.GetRequiredService<IOptions<DefaultStateSettings>>().Value.Settings,
+            Modules.Data.Json.StateSettingsSerializerContext.Default.StateSettings);
+    }
+
+    public static IServiceCollection AddViewSettingsStorage(this IServiceCollection services)
+    {
+        return services.AddObservableStorage<ViewSettings>(
+            options => options.ViewSettingsPath,
+            provider => provider.GetRequiredService<IOptions<DefaultViewSettings>>().Value.Settings,
+            Modules.Data.Json.ViewSettingsSerializerContext.Default.ViewSettings);
     }
 
     public static IServiceCollection AddPythonSettingsStorage(this IServiceCollection services)

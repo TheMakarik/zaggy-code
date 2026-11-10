@@ -82,13 +82,14 @@ public partial class MainWindowViewModel : ViewModelBase
     #region Services
 
     private readonly IRobotGameEngine _robotGameEngine;
-    private readonly IObservableStorage<UserData> _userStorage;
+    private readonly IObservableStorage<StateSettings> _stateSettingsStorage;
+    private readonly IObservableStorage<ViewSettings> _viewSettingsStorage;
     private readonly IObservableStorage<ThemeSettings> _themeSettingsStorage;
     private readonly IObservableStorage<PythonSettings> _pythonSettingsStorage;
     private readonly IObservableStorage<CSharpSettings> _csharpSettingsStorage;
     private readonly IThemeCatalog _themeCatalog;
     private readonly IOptions<LoadingOptions> _loadingOptions;
-    private readonly IOptions<DefaultUser> _defaultUserOptions;
+    private readonly IOptions<DefaultViewSettings> _defaultViewSettingsOptions;
     private readonly IOptions<DefaultThemeSettings> _defaultThemeSettingsOptions;
     private readonly IOptions<PythonDefaultSettingsOptions> _pythonDefaultSettingsOptions;
     private readonly IOptions<CSharpDefaultSettingsOptions> _csharpDefaultSettingsOptions;
@@ -117,7 +118,8 @@ public partial class MainWindowViewModel : ViewModelBase
         ILogger<MainWindowViewModel> logger,
         IRobotGameEngine robotGameEngine,
         IOptions<ZaggyAssetsOptions> zaggyAssets,
-        IObservableStorage<UserData> userStorage,
+        IObservableStorage<StateSettings> stateSettingsStorage,
+        IObservableStorage<ViewSettings> viewSettingsStorage,
         IObservableStorage<ThemeSettings> themeSettingsStorage,
         IObservableStorage<PythonSettings> pythonSettingsStorage,
         IObservableStorage<CSharpSettings> csharpSettingsStorage,
@@ -128,7 +130,7 @@ public partial class MainWindowViewModel : ViewModelBase
         IThemeCreator themeCreator,
         IOptions<ThemeOptions> themeOptions,
         IOptions<LoadingOptions> loadingOptions,
-        IOptions<DefaultUser> defaultUserOptions,
+        IOptions<DefaultViewSettings> defaultViewSettingsOptions,
         IOptions<DefaultThemeSettings> defaultThemeSettingsOptions,
         IOptions<PythonDefaultSettingsOptions> pythonDefaultSettingsOptions,
         IOptions<CodeExamplePathOptions> codeExamplePathOptions,
@@ -146,7 +148,8 @@ public partial class MainWindowViewModel : ViewModelBase
         ZaggyAssets = zaggyAssets;
         _logger = logger;
         _fontSizeOptions = textFontSize;
-        _userStorage = userStorage;
+        _stateSettingsStorage = stateSettingsStorage;
+        _viewSettingsStorage = viewSettingsStorage;
         _themeSettingsStorage = themeSettingsStorage;
         _pythonSettingsStorage = pythonSettingsStorage;
         _csharpSettingsStorage = csharpSettingsStorage;
@@ -156,7 +159,7 @@ public partial class MainWindowViewModel : ViewModelBase
         _themeCreator = themeCreator;
         _themeOptions = themeOptions;
         _loadingOptions = loadingOptions;
-        _defaultUserOptions = defaultUserOptions;
+        _defaultViewSettingsOptions = defaultViewSettingsOptions;
         _defaultThemeSettingsOptions = defaultThemeSettingsOptions;
         _pythonDefaultSettingsOptions = pythonDefaultSettingsOptions;
         _csharpDefaultSettingsOptions = csharpDefaultSettingsOptions;
@@ -168,13 +171,13 @@ public partial class MainWindowViewModel : ViewModelBase
         _mapAssetsOptions = mapAssetsOptions;
         _animationOptions = animationOptions;
         _loggerFactory = loggerFactory;
-        _executionSpeed = userStorage.Current.LastSpeed;
-        _selectedLanguage = userStorage.Current.LastLanguage;
-        _textEditorFontSize = userStorage.Current.CodeFontSize;
-        _terminalFontSize = userStorage.Current.TerminalFontSize;
-        _useOsDecoration = userStorage.Current.UseSystemTitleBar;
-        _sidebarPosition = userStorage.Current.SidebarPosition;
-        CodeTheme = userStorage.Current.CodeTheme;
+        _executionSpeed = stateSettingsStorage.Current.LastSpeed;
+        _selectedLanguage = stateSettingsStorage.Current.LastLanguage;
+        _textEditorFontSize = viewSettingsStorage.Current.CodeFontSize;
+        _terminalFontSize = viewSettingsStorage.Current.TerminalFontSize;
+        _useOsDecoration = viewSettingsStorage.Current.UseSystemTitleBar;
+        _sidebarPosition = viewSettingsStorage.Current.SidebarPosition;
+        CodeTheme = viewSettingsStorage.Current.CodeTheme;
         PopupOptions = popupOptions.Value;
         MaxFontSize = _fontSizeOptions.Value.MaxFontSize;
         MinFontSize = _fontSizeOptions.Value.MinFontSize;
@@ -360,7 +363,7 @@ public partial class MainWindowViewModel : ViewModelBase
         MessageBus.Current.Listen<CodeThemeChangedMessage>()
             .Subscribe(async void (message) =>
             {
-                _userStorage.Current.CodeTheme = message.ThemeName;
+                _viewSettingsStorage.Current.CodeTheme = message.ThemeName;
                 CodeTheme = message.ThemeName;
                 await ApplyCodeTheme.Handle(message.ThemeName);
             });
@@ -373,33 +376,33 @@ public partial class MainWindowViewModel : ViewModelBase
     private void InitializeStorageSynchronization()
     {
         this.WhenAnyValue(vm => vm.TextEditorFontSize)
-            .Where(size => size != _userStorage.Current.CodeFontSize)
-            .Subscribe(_ => _userStorage.Current.CodeFontSize = _textEditorFontSize);
+            .Where(size => size != _viewSettingsStorage.Current.CodeFontSize)
+            .Subscribe(_ => _viewSettingsStorage.Current.CodeFontSize = _textEditorFontSize);
 
         this.WhenAnyValue(vm => vm.TerminalFontSize)
-            .Where(size => size != _userStorage.Current.TerminalFontSize)
-            .Subscribe(_ => _userStorage.Current.TerminalFontSize = _terminalFontSize);
+            .Where(size => size != _viewSettingsStorage.Current.TerminalFontSize)
+            .Subscribe(_ => _viewSettingsStorage.Current.TerminalFontSize = _terminalFontSize);
 
         this.WhenAnyValue(vm => vm.UseOsDecoration)
-            .Where(useOsDecoration => useOsDecoration != _userStorage.Current.UseSystemTitleBar)
-            .Subscribe(_ => _userStorage.Current.UseSystemTitleBar = _useOsDecoration);
+            .Where(useOsDecoration => useOsDecoration != _viewSettingsStorage.Current.UseSystemTitleBar)
+            .Subscribe(_ => _viewSettingsStorage.Current.UseSystemTitleBar = _useOsDecoration);
 
         this.WhenAnyValue(vm => vm.SidebarPosition)
             .Subscribe(position =>
             {
-                if (position != _userStorage.Current.SidebarPosition)
-                    _userStorage.Current.SidebarPosition = position;
+                if (position != _viewSettingsStorage.Current.SidebarPosition)
+                    _viewSettingsStorage.Current.SidebarPosition = position;
 
                 RaiseSidebarLayoutChanged();
             });
 
         this.WhenAnyValue(vm => vm.ExecutionSpeed)
-            .Where(speed => speed != _userStorage.Current.LastSpeed)
-            .Subscribe(_ => _userStorage.Current.LastSpeed = _executionSpeed);
+            .Where(speed => speed != _stateSettingsStorage.Current.LastSpeed)
+            .Subscribe(_ => _stateSettingsStorage.Current.LastSpeed = _executionSpeed);
 
         this.WhenAnyValue(vm => vm.SelectedLanguage)
-            .Where(language => language != _userStorage.Current.LastLanguage)
-            .Subscribe(_ => _userStorage.Current.LastLanguage = _selectedLanguage);
+            .Where(language => language != _stateSettingsStorage.Current.LastLanguage)
+            .Subscribe(_ => _stateSettingsStorage.Current.LastLanguage = _selectedLanguage);
     }
 
     private void RaiseSidebarLayoutChanged()
@@ -621,7 +624,7 @@ public partial class MainWindowViewModel : ViewModelBase
     [ReactiveCommand]
     private void SelectCodeTheme(string themeName)
     {
-        _userStorage.Current.CodeTheme = themeName;
+        _viewSettingsStorage.Current.CodeTheme = themeName;
         MessageBus.Current.SendMessage(new CodeThemeChangedMessage(themeName));
     }
 
@@ -637,11 +640,11 @@ public partial class MainWindowViewModel : ViewModelBase
     private async Task OpenSettingsAsync()
     {
         var settingsViewModel = new SettingsViewModel(
-            _userStorage,
+            _viewSettingsStorage,
             _themeSettingsStorage,
             _pythonSettingsStorage,
             _csharpSettingsStorage,
-            _defaultUserOptions,
+            _defaultViewSettingsOptions,
             _defaultThemeSettingsOptions,
             _pythonDefaultSettingsOptions,
             _csharpDefaultSettingsOptions,

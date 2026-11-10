@@ -1,17 +1,14 @@
-using ZaggyCode.Core.LanguageRuntime.Enums;
+using ZaggyCode.Core.Data.Enums;
 
 namespace ZaggyCode.Core.Data.Model;
 
-public sealed class UserData : INotifyPropertyChanged
+public sealed class ViewSettings : INotifyPropertyChanged
 {
     public bool UseSystemTitleBar { get; set => SetField(ref field, value); }
     public SidebarPosition SidebarPosition { get; set => SetField(ref field, value); }
     public int CodeFontSize { get; set => SetField(ref field, value); }
+    public int TerminalFontSize { get; set => SetField(ref field, value); }
     public required string CodeTheme { get; set => SetField(ref field, value); }
-    public required Language LastLanguage { get; set => SetField(ref field, value); }
-    public required string? LastGamePath { get; set => SetField(ref field, value); }
-    public required ExecutionSpeed LastSpeed { get; set => SetField(ref field, value); }
-    public required int TerminalFontSize { get; set => SetField(ref field, value); }
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -22,7 +19,9 @@ public sealed class UserData : INotifyPropertyChanged
 
     private bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
     {
-        if (EqualityComparer<T>.Default.Equals(field, value)) return false;
+        if (EqualityComparer<T>.Default.Equals(field, value))
+            return false;
+
         field = value;
         OnPropertyChanged(propertyName);
         return true;

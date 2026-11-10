@@ -21,8 +21,8 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
     #endregion
 
     private readonly FontSizeOptions _fontSizeOptions;
-    private readonly UserData _defaultUserData;
-    private readonly IObservableStorage<UserData> _userStorage;
+    private readonly ViewSettings _defaultViewSettings;
+    private readonly IObservableStorage<ViewSettings> _viewStorage;
     private readonly IObservableStorage<ThemeSettings> _themeSettingsStorage;
     private readonly ThemeSettings _defaultThemeSettings;
     private readonly IThemeCatalog _themeCatalog;
@@ -56,9 +56,9 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
     public string PythonExamplePath { get; }
 
     public AppearanceSettingsViewModel(
-        IObservableStorage<UserData> userStorage,
+        IObservableStorage<ViewSettings> viewStorage,
         IObservableStorage<ThemeSettings> themeSettingsStorage,
-        IOptions<DefaultUser> defaultUserOptions,
+        IOptions<DefaultViewSettings> defaultViewSettingsOptions,
         IOptions<DefaultThemeSettings> defaultThemeSettingsOptions,
         IOptions<CodeExamplePathOptions> codeExamplePathOptions,
         IOptions<FontSizeOptions> fontSizeOptions,
@@ -73,8 +73,8 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
         ILogger<AppearanceSettingsViewModel> logger)
     {
         _fontSizeOptions = fontSizeOptions.Value;
-        _defaultUserData = defaultUserOptions.Value.User;
-        _userStorage = userStorage;
+        _defaultViewSettings = defaultViewSettingsOptions.Value.Settings;
+        _viewStorage = viewStorage;
         _themeSettingsStorage = themeSettingsStorage;
         _defaultThemeSettings = defaultThemeSettingsOptions.Value.Settings;
         _themeCatalog = themeCatalog;
@@ -89,7 +89,7 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
         CSharpExamplePath = codeExamplePathOptions.Value.CSharpExamplePath;
         PythonExamplePath = codeExamplePathOptions.Value.PythonExamplePath;
 
-        var current = userStorage.Current;
+        var current = viewStorage.Current;
         _originalCodeFontSize = current.CodeFontSize;
         _originalTerminalFontSize = current.TerminalFontSize;
         _originalUseSystemTitleBar = current.UseSystemTitleBar;
@@ -102,7 +102,7 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
         _ = InitializeAvailableAppThemesAsync();
 #pragma warning restore AsyncVoidMethod
 
-        LoadFromUserData(current);
+        LoadFromViewSettings(current);
         ThemeCreationBehavior = themeSettingsStorage.Current.OnCreateBehavior;
         HasChanges = false;
 
@@ -140,11 +140,11 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
 
     public void ResetToDefaults()
     {
-        CodeFontSize = _defaultUserData.CodeFontSize;
-        TerminalFontSize = _defaultUserData.TerminalFontSize;
-        UseSystemTitleBar = _defaultUserData.UseSystemTitleBar;
-        SidebarPosition = _defaultUserData.SidebarPosition;
-        SelectedCodeTheme = _defaultUserData.CodeTheme;
+        CodeFontSize = _defaultViewSettings.CodeFontSize;
+        TerminalFontSize = _defaultViewSettings.TerminalFontSize;
+        UseSystemTitleBar = _defaultViewSettings.UseSystemTitleBar;
+        SidebarPosition = _defaultViewSettings.SidebarPosition;
+        SelectedCodeTheme = _defaultViewSettings.CodeTheme;
         ThemeCreationBehavior = _defaultThemeSettings.OnCreateBehavior;
 
         ApplyAppThemeSelection(_defaultThemeSettings.CurrentTheme);
@@ -166,13 +166,13 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
         HasChanges = false;
     }
 
-    private void LoadFromUserData(UserData userData)
+    private void LoadFromViewSettings(ViewSettings viewSettings)
     {
-        CodeFontSize = userData.CodeFontSize;
-        TerminalFontSize = userData.TerminalFontSize;
-        UseSystemTitleBar = userData.UseSystemTitleBar;
-        SidebarPosition = userData.SidebarPosition;
-        SelectedCodeTheme = userData.CodeTheme;
+        CodeFontSize = viewSettings.CodeFontSize;
+        TerminalFontSize = viewSettings.TerminalFontSize;
+        UseSystemTitleBar = viewSettings.UseSystemTitleBar;
+        SidebarPosition = viewSettings.SidebarPosition;
+        SelectedCodeTheme = viewSettings.CodeTheme;
     }
 
     private void UpdateHasChanges()

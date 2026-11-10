@@ -17,7 +17,7 @@ public sealed class Bootstrapper
 
         Assembly[] assemblies =
         [
-            typeof(UserData).Assembly,
+            typeof(StateSettings).Assembly,
             typeof(GameCodeStorage).Assembly,
             typeof(Bootstrapper).Assembly
         ];
@@ -56,7 +56,8 @@ public sealed class Bootstrapper
         builder.Services
             .AddPythonSettingsStorage()
             .AddCSharpSettingsStorage()
-            .AddUserDataStorage()
+            .AddStateSettingsStorage()
+            .AddViewSettingsStorage()
             .AddThemeSettingsStorage();
 
         builder.Logging
@@ -69,7 +70,8 @@ public sealed class Bootstrapper
             .AddOptions<CodeThemeDisplayNameOptions>()
             .AddOptions<CodeThemeIconOptions>()
             .AddOptions<PopupOptions>()
-            .AddOptions<DefaultUser>()
+            .AddOptions<DefaultStateSettings>()
+            .AddOptions<DefaultViewSettings>()
             .AddOptions<DefaultThemeSettings>()
             .AddOptions<StorageOptions>()
             .AddOptions<SpeedMillisecondsOptions>()

@@ -27,7 +27,7 @@ public class StorageOptions
 ```
 
 ## Правила
-- В `appsettings.json` пути пишутся через переменные: `%ZAGGY_CONFIG%/data.json`
+- В `appsettings.json` пути пишутся через переменные: `%ZAGGY_CONFIG%/state-settings.json`
 - `Bootstrapper.SetEnvironmentVariables()` создаёт недостающие директории перед биндингом
 - Всегда используй `Path.Join` для склеивания сегментов пути в опциях
 

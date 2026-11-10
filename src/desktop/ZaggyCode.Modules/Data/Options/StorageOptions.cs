@@ -8,13 +8,19 @@ public sealed class StorageOptions
         set => field = Environment.ExpandEnvironmentVariables(value);
     }
 
-    public required string DataFilePath
+    public required string StateSettingsPath
     {
         get => field;
         set => field = Environment.ExpandEnvironmentVariables(value);
     }
 
-    public required int WaitUserDataUpdateSeconds
+    public required string ViewSettingsPath
+    {
+        get => field;
+        set => field = Environment.ExpandEnvironmentVariables(value);
+    }
+
+    public required int WaitSettingsUpdateSeconds
     {
         get => field;
         set => field = value;

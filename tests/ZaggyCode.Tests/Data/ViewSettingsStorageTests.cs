@@ -1,53 +1,49 @@
-using ZaggyCode.Core.LanguageRuntime.Enums;
 using ZaggyCode.Modules.Data.Json;
 
 namespace ZaggyCode.Tests.Data;
 
-public class UserStorageTests : IDisposable
+public class ViewSettingsStorageTests : IDisposable
 {
     private readonly TestFileSystem _fileSystem;
     private readonly string _jsonPath;
     private readonly string _stubDirectoryPath;
-    private readonly IOptions<DefaultUser> _userDefaultMock;
+    private readonly IOptions<DefaultViewSettings> _viewDefaultMock;
 
-    public UserStorageTests()
+    public ViewSettingsStorageTests()
     {
         _fileSystem = new TestFileSystem();
         _jsonPath = _fileSystem.CreateFile(".json");
         _stubDirectoryPath = _fileSystem.CreateDirectory();
 
-        _userDefaultMock = A.Fake<IOptions<DefaultUser>>();
-        A.CallTo(() => _userDefaultMock.Value).Returns(new DefaultUser()
+        _viewDefaultMock = A.Fake<IOptions<DefaultViewSettings>>();
+        A.CallTo(() => _viewDefaultMock.Value).Returns(new DefaultViewSettings
         {
-            User = new UserData()
+            Settings = new ViewSettings
             {
                 SidebarPosition = SidebarPosition.Right,
                 CodeFontSize = 14,
                 CodeTheme = "Light",
-                LastLanguage = Language.CSharp,
-                LastGamePath = null,
-                LastSpeed = ExecutionSpeed.X2,
                 TerminalFontSize = 17
             }
         });
     }
 
-    private ObservableStorage<UserData> CreateSystemUnderTests(int waitUserDataUpdateSeconds = 3)
+    private ObservableStorage<ViewSettings> CreateSystemUnderTests(int waitSettingsUpdateSeconds = 3)
     {
-        var logger = A.Dummy<ILogger<ObservableStorage<UserData>>>();
+        var logger = A.Dummy<ILogger<ObservableStorage<ViewSettings>>>();
         var updateWaiter = new UpdateStorageWaiter(A.Dummy<ILogger<UpdateStorageWaiter>>());
 
-        return new ObservableStorage<UserData>(
+        return new ObservableStorage<ViewSettings>(
             logger,
             _jsonPath,
-            TimeSpan.FromSeconds(waitUserDataUpdateSeconds),
-            UserDataSerializerContext.Default.UserData,
+            TimeSpan.FromSeconds(waitSettingsUpdateSeconds),
+            ViewSettingsSerializerContext.Default.ViewSettings,
             updateWaiter,
-            () => _userDefaultMock.Value.User);
+            () => _viewDefaultMock.Value.Settings);
     }
 
     [Fact]
-    public async Task UserProperty_AfterFlush_UpdateUserDataForce()
+    public async Task ViewProperty_AfterFlush_UpdateViewSettingsForce()
     {
         //Arrange
         var systemUnderTests = CreateSystemUnderTests();
@@ -69,7 +65,7 @@ public class UserStorageTests : IDisposable
         // Arrange
         await File.WriteAllTextAsync(_jsonPath, "{ invalid: json }");
         var corruptedContent = await File.ReadAllTextAsync(_jsonPath);
-        var expectedUser = _userDefaultMock.Value.User;
+        var expectedViewSettings = _viewDefaultMock.Value.Settings;
 
         var systemUnderTests = CreateSystemUnderTests();
 
@@ -78,8 +74,8 @@ public class UserStorageTests : IDisposable
 
         // Assert
         var actualContent = await File.ReadAllTextAsync(_jsonPath);
-        actualContent.Should().Contain(expectedUser.CodeFontSize.ToString());
-        actualContent.Should().Contain(expectedUser.CodeTheme);
+        actualContent.Should().Contain(expectedViewSettings.CodeFontSize.ToString());
+        actualContent.Should().Contain(expectedViewSettings.CodeTheme);
         actualContent.Should().NotBe(corruptedContent);
     }
 
@@ -115,7 +111,7 @@ public class UserStorageTests : IDisposable
         await systemUnderTests.LoadAsync();
 
         var firstContent = await File.ReadAllTextAsync(_jsonPath);
-        var newFontSize = _userDefaultMock.Value.User.CodeFontSize + 10;
+        var newFontSize = _viewDefaultMock.Value.Settings.CodeFontSize + 10;
 
         // Act 
         await systemUnderTests.LoadAsync();
