@@ -73,6 +73,7 @@ public sealed class RobotGameEngineFactory(
                 languageRunner,
                 mapProxy,
                 editorProxy,
+                backgroundTaskHelper,
                 speedOptions,
                 logger);
 

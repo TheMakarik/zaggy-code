@@ -1,3 +1,5 @@
+using ZaggyCode.Core.BackgroundManagement.Dto;
+using ZaggyCode.Core.BackgroundManagement.Enums;
 using ZaggyCode.Core.LanguageRuntime.Model;
 using ZaggyCode.Core.Proxies.Interfaces;
 using ZaggyCode.Modules.LanguageRuntime;
@@ -10,15 +12,51 @@ public sealed class RobotGameEngine(
     ILanguageRunner languageRunner,
     IRobotGameMapProxy mapProxy,
     IRobotGameEditorProxy editorProxy,
+    IBackgroundTaskHelper backgroundTaskHelper,
     IOptions<SpeedMillisecondsOptions> speedOptions,
     ILogger<RobotGameEngine> logger) : IRobotGameEngine
 {
     public RobotGameState State { get; } = state;
 
-    public async Task<RobotGameResult> ExecuteAsync(
+    public Task<RobotGameResult> ExecuteAsync(
         string code,
         CancellationToken cancellationToken = default,
         ExecutionType executionType = ExecutionType.ExecuteWithProxies)
+    {
+        var completion = new TaskCompletionSource<RobotGameResult>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        backgroundTaskHelper.StartBackground(new BackgroundTaskStartDto
+        {
+            Kind = BackgroundTaskKind.LanguageExecution,
+            HasNoProgress = true,
+            DelegateToStart = _ =>
+            {
+                try
+                {
+                    var result = ExecuteCoreAsync(code, cancellationToken, executionType)
+                        .GetAwaiter()
+                        .GetResult();
+
+                    completion.TrySetResult(result);
+                }
+                catch (OperationCanceledException)
+                {
+                    completion.TrySetCanceled(cancellationToken);
+                }
+                catch (Exception exception)
+                {
+                    completion.TrySetException(exception);
+                }
+            }
+        });
+
+        return completion.Task;
+    }
+
+    private async Task<RobotGameResult> ExecuteCoreAsync(
+        string code,
+        CancellationToken cancellationToken,
+        ExecutionType executionType)
     {
         var useProxies = executionType == ExecutionType.ExecuteWithProxies;
 
