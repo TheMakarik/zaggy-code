@@ -108,5 +108,13 @@
     <ItemGroup>
         <Folder Include="Themes\" />
     </ItemGroup>
+    <!-- Avalonia.Markup.Declarative приходит транзитивно через AgentTools.
+         Его source generator собран под более новый Roslyn, чем компилятор текущего SDK,
+         а декларативный C#-markup в проекте не используется. -->
+    <Target Name="RemoveUnsupportedDeclarativeAnalyzer" BeforeTargets="CoreCompile">
+        <ItemGroup>
+            <Analyzer Remove="$(NuGetPackageRoot)avalonia.markup.declarative/**/Avalonia.Markup.Declarative.SourceGenerator.dll" />
+        </ItemGroup>
+    </Target>
     
 </Project>
