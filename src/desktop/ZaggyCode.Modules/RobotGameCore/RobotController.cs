@@ -3,27 +3,32 @@ using ZaggyCode.Core.RobotGameCore.Interfaces;
 
 namespace ZaggyCode.Modules.RobotGameCore;
 
-public sealed class RobotController(IRobotExecutor executor) : IRobotController
+public sealed class RobotController : IRobotController
 {
-    public IRobotExecutor Executor { get; set; } = executor;
+    private const string ExecutorMissingMessage = "Исполнитель робота не установлен.";
 
-    public void MoveUp() => Executor.Move(RobotDirection.Up);
+    public IRobotExecutor? Executor { get; set; }
 
-    public void MoveRight() => Executor.Move(RobotDirection.Right);
+    private IRobotExecutor RequiredExecutor => Executor
+        ?? throw new InvalidOperationException(ExecutorMissingMessage);
 
-    public void MoveDown() => Executor.Move(RobotDirection.Down);
+    public void MoveUp() => RequiredExecutor.Move(RobotDirection.Up);
 
-    public void MoveLeft() => Executor.Move(RobotDirection.Left);
+    public void MoveRight() => RequiredExecutor.Move(RobotDirection.Right);
 
-    public void FillCell() => Executor.FillCell();
+    public void MoveDown() => RequiredExecutor.Move(RobotDirection.Down);
 
-    public bool IsCellFilled() => Executor.IsCellFilled();
+    public void MoveLeft() => RequiredExecutor.Move(RobotDirection.Left);
 
-    public bool IsWallFromUp() => Executor.CheckWall(RobotDirection.Up);
+    public void FillCell() => RequiredExecutor.FillCell();
 
-    public bool IsWallFromDown() => Executor.CheckWall(RobotDirection.Down);
+    public bool IsCellFilled() => RequiredExecutor.IsCellFilled();
 
-    public bool IsWallFromLeft() => Executor.CheckWall(RobotDirection.Left);
+    public bool IsWallFromUp() => RequiredExecutor.CheckWall(RobotDirection.Up);
 
-    public bool IsWallFromRight() => Executor.CheckWall(RobotDirection.Right);
+    public bool IsWallFromDown() => RequiredExecutor.CheckWall(RobotDirection.Down);
+
+    public bool IsWallFromLeft() => RequiredExecutor.CheckWall(RobotDirection.Left);
+
+    public bool IsWallFromRight() => RequiredExecutor.CheckWall(RobotDirection.Right);
 }

@@ -1,9 +1,8 @@
 using ZaggyCode.Core.LanguageRuntime.Model;
-using ZaggyCode.Core.RobotGameCore.Interfaces;
 
 namespace ZaggyCode.Modules.LanguageRuntime;
 
-public abstract class LanguageRunnerBase(LanguageRunnerDto dto, IOptions<SpeedMillisecondsOptions> speedOptions) : ILanguageRunner
+public abstract class LanguageRunnerBase(LanguageRunnerDto dto) : ILanguageRunner
 {
     private volatile ExecutionSpeed _speed = dto.Speed;
 
@@ -20,9 +19,6 @@ public abstract class LanguageRunnerBase(LanguageRunnerDto dto, IOptions<SpeedMi
     public abstract IAsyncEnumerable<ComputedLineOfCode> ExecuteAsync(
         string code,
         CancellationToken cancellationToken = default);
-
-    protected Task PaceAsync(CancellationToken cancellationToken)
-        => Task.Delay(Speed.GetActual(speedOptions.Value), cancellationToken);
 
     public virtual ValueTask DisposeAsync() => ValueTask.CompletedTask;
 }
