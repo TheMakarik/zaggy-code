@@ -2,7 +2,7 @@ namespace ZaggyCode.Core.RobotGameCore.Interfaces;
 
 public interface IRobotController
 {
-    IRobotExecutor Executor { get; set; }
+    IRobotExecutor? Executor { get; set; }
     void MoveUp();
     void MoveRight();
     void MoveDown();
