@@ -28,7 +28,7 @@ public sealed class ThemeCatalog(
 
                 metadata.IsSystemTheme = isSystem;
                 metadata.Path = file;
-                themes[metadata.Name] = metadata;
+                themes.TryAdd(metadata.Name, metadata);
             }
         }
 
@@ -84,11 +84,13 @@ public sealed class ThemeCatalog(
         return null;
     }
 
+    // Внешние темы приоритетнее системных: пользователь может переопределить системную тему
+    // тем же именем, и такая тема должна открываться и применяться из внешнего каталога.
     private List<string> GetExistingDirectories()
     {
         List<string> directories = [];
-        AddIfExists(directories, themeOptions.Value.SystemThemesFolder);
         AddIfExists(directories, themeOptions.Value.ExternThemesFolder);
+        AddIfExists(directories, themeOptions.Value.SystemThemesFolder);
         return directories;
     }
 
