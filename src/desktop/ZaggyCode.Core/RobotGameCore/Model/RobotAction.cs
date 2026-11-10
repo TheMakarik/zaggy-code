@@ -1,3 +1,13 @@
+using System.Drawing;
+using ZaggyCode.Core.RobotGameCore.Enums;
+
 namespace ZaggyCode.Core.RobotGameCore.Model;
 
-public record RobotAction(RobotDirection Direction, bool CoinCollected, bool PointDrew, RobotDeadType? DeadType);
+// Одно действие робота. Position — состояние робота после действия,
+// Direction — попытка движения (null для закраски), DeadType — причина смерти.
+public readonly record struct RobotAction(
+    RobotDirection? Direction,
+    Point Position,
+    Point? CollectedCoin,
+    Point? DrawnPoint,
+    RobotDeadType? DeadType);
