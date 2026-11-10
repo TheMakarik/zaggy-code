@@ -22,6 +22,7 @@ public class BackgroundTaskHelperTests
         var dto = new BackgroundTaskStartDto
         {
             Kind = _fixture.Create<BackgroundTaskKind>(),
+            HasNoProgress = true,
             DelegateToStart = _ =>
             {
                 started.SetResult();
@@ -42,6 +43,7 @@ public class BackgroundTaskHelperTests
             var entry = systemUnderTests.BackgroundTasks.Single();
             entry.Key.Should().Be(dto.Kind);
             entry.Value.Kind.Should().Be(dto.Kind);
+            entry.Value.HasNoProgress.Should().BeTrue();
         }
         finally
         {

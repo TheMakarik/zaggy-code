@@ -7,4 +7,5 @@ public sealed class BackgroundTaskStartDto
 {
     public required Action<Progress<BackgroundProgressMove>> DelegateToStart { get; init; }
     public BackgroundTaskKind Kind { get; init; }
+    public bool HasNoProgress { get; init; }
 }

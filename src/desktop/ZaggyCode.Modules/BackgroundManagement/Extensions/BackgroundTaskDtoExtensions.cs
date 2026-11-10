@@ -13,6 +13,7 @@ public static class BackgroundTaskDtoExtensions
         {
             Kind = dto.Kind,
             Task = task,
+            HasNoProgress = dto.HasNoProgress,
             Progress = progress
         };
     }
