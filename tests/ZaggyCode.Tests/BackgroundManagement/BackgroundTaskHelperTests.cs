@@ -1,5 +1,6 @@
 using ZaggyCode.Core.BackgroundManagement;
 using ZaggyCode.Core.BackgroundManagement.Dto;
+using ZaggyCode.Core.BackgroundManagement.Enums;
 using ZaggyCode.Core.BackgroundManagement.Model;
 using ZaggyCode.Modules.BackgroundManagement;
 
@@ -20,8 +21,7 @@ public class BackgroundTaskHelperTests
         var started = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var dto = new BackgroundTaskStartDto
         {
-            Name = _fixture.Create<string>(),
-            Description = _fixture.Create<string>(),
+            Kind = _fixture.Create<BackgroundTaskKind>(),
             DelegateToStart = _ =>
             {
                 started.SetResult();
@@ -40,9 +40,8 @@ public class BackgroundTaskHelperTests
             systemUnderTests.BackgroundTasks.Should().ContainSingle();
 
             var entry = systemUnderTests.BackgroundTasks.Single();
-            entry.Key.Should().Be(entry.Value.Task.Id);
-            entry.Value.Name.Should().Be(dto.Name);
-            entry.Value.Description.Should().Be(dto.Description);
+            entry.Key.Should().Be(dto.Kind);
+            entry.Value.Kind.Should().Be(dto.Kind);
         }
         finally
         {
@@ -56,10 +55,10 @@ public class BackgroundTaskHelperTests
         // Arrange
         using var release = new ManualResetEventSlim();
         var started = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-        Progress<double>? receivedProgress = null;
+        Progress<BackgroundProgressMove>? receivedProgress = null;
         var dto = new BackgroundTaskStartDto
         {
-            Name = _fixture.Create<string>(),
+            Kind = _fixture.Create<BackgroundTaskKind>(),
             DelegateToStart = progress =>
             {
                 receivedProgress = progress;
@@ -93,7 +92,7 @@ public class BackgroundTaskHelperTests
         // Arrange
         var dto = new BackgroundTaskStartDto
         {
-            Name = _fixture.Create<string>(),
+            Kind = _fixture.Create<BackgroundTaskKind>(),
             DelegateToStart = _ => { }
         };
         var systemUnderTests = new BackgroundTaskHelper(_logger);
@@ -107,22 +106,26 @@ public class BackgroundTaskHelperTests
     }
 
     [Fact]
-    public async Task StartBackground_WhenDelegateReportsProgress_RaisesProgressChangedWithReportedValue()
+    public async Task StartBackground_WhenDelegateReportsProgress_RaisesProgressChangedWithReportedMove()
     {
         // Arrange
         using var release = new ManualResetEventSlim();
         using var reportAllowed = new ManualResetEventSlim();
-        var started = new TaskCompletionSource<Progress<double>>(TaskCreationOptions.RunContinuationsAsynchronously);
-        var progressReported = new TaskCompletionSource<double>(TaskCreationOptions.RunContinuationsAsynchronously);
-        const double expectedProgress = 42.5;
+        var started = new TaskCompletionSource<Progress<BackgroundProgressMove>>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var progressReported = new TaskCompletionSource<BackgroundProgressMove>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var kind = _fixture.Create<BackgroundTaskKind>();
+        var expectedMove = new BackgroundProgressMove(
+            42.5,
+            kind,
+            _fixture.Create<string>());
         var dto = new BackgroundTaskStartDto
         {
-            Name = _fixture.Create<string>(),
+            Kind = kind,
             DelegateToStart = progress =>
             {
                 started.SetResult(progress);
                 reportAllowed.Wait();
-                ((IProgress<double>)progress).Report(expectedProgress);
+                ((IProgress<BackgroundProgressMove>)progress).Report(expectedMove);
                 release.Wait();
             }
         };
@@ -135,17 +138,18 @@ public class BackgroundTaskHelperTests
 
             var delegateProgress = await started.Task.WaitAsync(WaitTimeout);
             var backgroundTask = systemUnderTests.BackgroundTasks.Single().Value;
-            backgroundTask.Progress.Should().BeOfType<Progress<double>>();
+            backgroundTask.Progress.Should().BeOfType<Progress<BackgroundProgressMove>>();
 
-            var progress = (Progress<double>)backgroundTask.Progress;
+            var progress = (Progress<BackgroundProgressMove>)backgroundTask.Progress;
             progress.Should().BeSameAs(delegateProgress);
-            progress.ProgressChanged += (_, value) => progressReported.TrySetResult(value);
+            progress.ProgressChanged += (_, move) => progressReported.TrySetResult(move);
 
             reportAllowed.Set();
 
             // Assert
-            var actualProgress = await progressReported.Task.WaitAsync(WaitTimeout);
-            actualProgress.Should().Be(expectedProgress);
+            var actualMove = await progressReported.Task.WaitAsync(WaitTimeout);
+            actualMove.Should().Be(expectedMove);
+            backgroundTask.Description.Should().Be(expectedMove.DescriptionOfNextMove);
         }
         finally
         {

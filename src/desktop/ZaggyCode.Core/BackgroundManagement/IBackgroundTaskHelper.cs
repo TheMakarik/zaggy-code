@@ -7,6 +7,6 @@ namespace ZaggyCode.Core.BackgroundManagement;
 
 public interface IBackgroundTaskHelper
 {
-    public ObservableDictionary<BackgroundTaskKind, BackgroundTask> BackgroundTasks { get;}
+    public IReadOnlyObservableDictionary<BackgroundTaskKind, BackgroundTask> BackgroundTasks { get; }
     public void StartBackground(BackgroundTaskStartDto startDto);
 }
