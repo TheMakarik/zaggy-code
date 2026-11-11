@@ -63,7 +63,6 @@ public partial class SettingsWindow : ReactiveWindow<SettingsViewModel>
     {
         var confirmationWindow = new ConfirmSaveSettingsChangesWindow
         {
-            WindowDecorations = WindowDecorations,
             DataContext = new ConfirmSaveSettingsChangesViewModel()
         };
         var result = await confirmationWindow.ShowDialog<bool?>(this);

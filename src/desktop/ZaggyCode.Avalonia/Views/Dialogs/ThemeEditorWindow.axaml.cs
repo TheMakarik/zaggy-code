@@ -64,7 +64,6 @@ public partial class ThemeEditorWindow : Window
     {
         var dialog = new ConfirmThemeSaveWindow
         {
-            WindowDecorations = WindowDecorations,
             DataContext = new ConfirmThemeSaveViewModel(viewModel.ThemeName)
         };
 

@@ -1,14 +1,21 @@
+using Avalonia.Data;
+using ZaggyCode.Avalonia.Views.Converters;
+
 namespace ZaggyCode.Avalonia.Views.Dialogs.Extensions;
 
 internal static class DialogWindowExtensions
 {
     public static void ApplyThemeDecorations(this Window window)
     {
-        var useSystemTitleBar = App.Services.GetRequiredService<IObservableStorage<ViewSettings>>().Current.UseSystemTitleBar;
+        var viewSettings = App.Services.GetRequiredService<IObservableStorage<ViewSettings>>();
 
-        window.WindowDecorations = useSystemTitleBar
-            ? global::Avalonia.Controls.WindowDecorations.Full
-            : global::Avalonia.Controls.WindowDecorations.BorderOnly;
+        window.Bind(
+            Window.WindowDecorationsProperty,
+            new Binding($"{nameof(IObservableStorage<ViewSettings>.Current)}.{nameof(ViewSettings.UseSystemTitleBar)}")
+            {
+                Source = viewSettings,
+                Converter = new BoolToWindowDecorationsConverter()
+            });
     }
 
     public static void ApplyZaggyIcon(this Window window)

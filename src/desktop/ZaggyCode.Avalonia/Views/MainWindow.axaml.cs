@@ -139,10 +139,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
 
         ViewModel.NotImplementedOccurred.RegisterHandler(async context =>
         {
-            var notImplementedWindow = new NotImplementedWindow
-            {
-                WindowDecorations = ViewModel.UseOsDecoration ? WindowDecorations.Full : WindowDecorations.BorderOnly
-            };
+            var notImplementedWindow = new NotImplementedWindow();
             await notImplementedWindow.ShowDialog(this);
             context.SetOutput(Unit.Default);
         });
