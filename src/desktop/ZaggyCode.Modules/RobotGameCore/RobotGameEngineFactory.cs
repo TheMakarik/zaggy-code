@@ -47,8 +47,7 @@ public sealed class RobotGameEngineFactory(
             IProgress<BackgroundProgressMove> reporter = progress;
 
             reporter.Report(new BackgroundProgressMove(0, LoadingTaskKind, "Выбор карты"));
-            var map = dto.Game.Maps.FirstOrDefault()
-                ?? throw new InvalidOperationException("В игре нет ни одной карты.");
+            var map = dto.Map;
 
             reporter.Report(new BackgroundProgressMove(25, LoadingTaskKind, "Создание исполнителя робота"));
             var executor = executorFactory.Create(map);

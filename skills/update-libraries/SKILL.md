@@ -53,11 +53,25 @@ src/desktop/ZaggyCode.Avalonia/appsettings.json → "AboutOptions" → "Componen
 | .NET | платформа | `dotnet.svg` |
 | AvaloniaUI | `Avalonia` | `avalonia.png` |
 | ReactiveUI | `ReactiveUI.Avalonia` | `reactiveui.png` |
+| System.Reactive | `System.Reactive` | `systemreactive.png` |
+| DynamicData | `DynamicData` | `dynamicdata.png` |
+| ObservableCollections | `ObservableCollections` | `observablecollections.png` |
 | IronPython | `IronPython` | `ironpython.png` |
+| DynamicLanguageRuntime | `DynamicLanguageRuntime` | `nuget.svg` |
 | Microsoft.Extensions.Hosting | `Microsoft.Extensions.Hosting` | `dotnet.svg` |
 | Serilog | `Serilog` | `serilog.png` |
 | Microsoft.CodeAnalysis.Scripting | `Microsoft.CodeAnalysis.Scripting` | `dotnet.svg` |
 | Scrutor | `Scrutor` | `nuget.svg` |
+| SharpCompress | `SharpCompress` | `nuget.svg` |
 | AvalonEdit | `Avalonia.AvaloniaEdit` | `avaloniaedit.png` |
+| AvaloniaEdit.TextMate | `AvaloniaEdit.TextMate` | `avaloniaedittextmate.png` |
+| Svg.Controls.Skia.Avalonia | `Svg.Controls.Skia.Avalonia` | `nuget.svg` |
+| Markdown.Avalonia | `Markdown.Avalonia` | `nuget.svg` |
+| Xaml.Behaviors.Interactivity | `Xaml.Behaviors.Interactivity` | `xamlbehaviors.png` |
 | VirtualTerminal | `VirtualTerminal.Avalonia` | `nuget.svg` |
 | Material.Icons.Avalonia | `Material.Icons.Avalonia` | `materialdesignicons.svg` |
+
+Пакеты одного семейства не дублируются отдельными строками: `Avalonia.*` покрывает `AvaloniaUI`,
+`Microsoft.Extensions.*` — `Microsoft.Extensions.Hosting`, `Serilog.*` — `Serilog`.
+Сборочные генераторы и dev-инструменты (`ReactiveUI.SourceGenerators`, `AvaloniaUI.DiagnosticsSupport`)
+в список компонентов не входят.

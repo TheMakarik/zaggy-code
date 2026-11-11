@@ -15,7 +15,7 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:controls="clr-namespace:ZaggyCode.Avalonia.Views.Controls"
     xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
-    xmlns:vm="using:ZaggyCode.Avalonia.ViewModels"
+    xmlns:vm="using:ZaggyCode.Avalonia.ViewModels.Settings"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <Grid RowDefinitions="Auto,*">

@@ -4,30 +4,11 @@
     x:TypeArguments="vm:MainWindowViewModel"
     xmlns="https://github.com/avaloniaui"
     xmlns:controls="clr-namespace:ZaggyCode.Avalonia.Views.Controls"
-    xmlns:ctxt="clr-namespace:ColorTextBlock.Avalonia;assembly=ColorTextBlock.Avalonia"
     xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
-    xmlns:md="clr-namespace:Markdown.Avalonia.Full;assembly=Markdown.Avalonia.Full"
-    xmlns:records="clr-namespace:ZaggyCode.Avalonia.ViewModels.Records"
+    xmlns:records="clr-namespace:ZaggyCode.Avalonia.ViewModels.Common.Records"
     xmlns:rxui="http://reactiveui.net"
-    xmlns:vm="using:ZaggyCode.Avalonia.ViewModels"
+    xmlns:vm="using:ZaggyCode.Avalonia.ViewModels.Main"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-
-    <rxui:ReactiveUserControl.Resources>
-        <SolidColorBrush Color="Transparent" x:Key="ExpanderHeaderBackground" />
-        <SolidColorBrush Color="Transparent" x:Key="ExpanderHeaderBackgroundPointerOver" />
-        <SolidColorBrush Color="Transparent" x:Key="ExpanderHeaderBackgroundPressed" />
-        <SolidColorBrush Color="Transparent" x:Key="ExpanderHeaderBorderBrush" />
-        <SolidColorBrush Color="Transparent" x:Key="ExpanderHeaderBorderBrushPointerOver" />
-        <SolidColorBrush Color="Transparent" x:Key="ExpanderHeaderBorderBrushPressed" />
-        <SolidColorBrush Color="Transparent" x:Key="ExpanderChevronBackground" />
-        <SolidColorBrush Color="Transparent" x:Key="ExpanderChevronBackgroundPointerOver" />
-        <SolidColorBrush Color="Transparent" x:Key="ExpanderChevronBackgroundPressed" />
-        <SolidColorBrush Color="Transparent" x:Key="ExpanderChevronBorderBrush" />
-        <SolidColorBrush Color="Transparent" x:Key="ExpanderChevronBorderBrushPointerOver" />
-        <SolidColorBrush Color="Transparent" x:Key="ExpanderChevronBorderBrushPressed" />
-        <SolidColorBrush Color="Transparent" x:Key="ExpanderContentBackground" />
-        <SolidColorBrush Color="Transparent" x:Key="ExpanderContentBorderBrush" />
-    </rxui:ReactiveUserControl.Resources>
 
     <rxui:ReactiveUserControl.Styles>
         <Style Selector="Button.map-number">
@@ -51,21 +32,37 @@
     </rxui:ReactiveUserControl.Styles>
 
     <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-        <Grid RowDefinitions="Auto,Auto,Auto">
+        <Grid RowDefinitions="Auto,Auto">
             <Grid
-                ColumnDefinitions="Auto,*"
+                ColumnDefinitions="Auto,Auto,*"
                 Grid.Row="0"
                 Margin="8,0,8,4">
+                <Button
+                    Background="Transparent"
+                    Classes="icon-button"
+                    Command="{Binding ToggleDescriptionCommand}"
+                    Grid.Column="0"
+                    Height="28"
+                    Margin="0,0,8,0"
+                    Padding="0"
+                    ToolTip.Tip="{Binding DescriptionToggleToolTip}"
+                    Width="28">
+                    <materialIcons:MaterialIcon
+                        Height="16"
+                        Kind="{Binding DescriptionToggleIcon}"
+                        Width="16" />
+                </Button>
+
                 <TextBlock
                     FontSize="12"
                     FontWeight="SemiBold"
-                    Grid.Column="0"
+                    Grid.Column="1"
                     Margin="0,0,16,0"
                     Text="{Binding CurrentRobotGame.Name}"
                     VerticalAlignment="Center" />
 
                 <ScrollViewer
-                    Grid.Column="1"
+                    Grid.Column="2"
                     HorizontalScrollBarVisibility="Auto"
                     VerticalScrollBarVisibility="Disabled">
                     <ItemsControl ItemsSource="{Binding MapNumbers}">
@@ -110,34 +107,6 @@
                 SadSeconds="{Binding SadSeconds}"
                 SeaBrush="{DynamicResource MapBackgroundBrush}"
                 x:Name="GameMap" />
-
-            <Expander
-                Grid.Row="2"
-                HorizontalAlignment="Stretch"
-                IsExpanded="False"
-                Margin="8,8,8,0"
-                x:Name="DescriptionExpander">
-                <Expander.Header>
-                    <StackPanel Orientation="Horizontal" Spacing="6">
-                        <materialIcons:MaterialIcon
-                            Height="18"
-                            Kind="BookOpenVariant"
-                            VerticalAlignment="Center"
-                            Width="18" />
-                        <TextBlock Text="Описание" VerticalAlignment="Center" />
-                    </StackPanel>
-                </Expander.Header>
-                <md:MarkdownScrollViewer Markdown="{Binding CurrentRobotGame.Description}">
-                    <md:MarkdownScrollViewer.Styles>
-                        <Style Selector="ctxt|CCode">
-                            <Setter Property="MonospaceFontFamily" Value="Noto Sans Mono,DejaVu Sans Mono,Liberation Mono,Cascadia Code,Consolas,Menlo,Monaco,Monospace" />
-                        </Style>
-                        <Style Selector=".Markdown_Avalonia_MarkdownViewer TextBlock.CodeBlock">
-                            <Setter Property="FontFamily" Value="Noto Sans Mono,DejaVu Sans Mono,Liberation Mono,Cascadia Code,Consolas,Menlo,Monaco,Monospace" />
-                        </Style>
-                    </md:MarkdownScrollViewer.Styles>
-                </md:MarkdownScrollViewer>
-            </Expander>
         </Grid>
     </ScrollViewer>
 </rxui:ReactiveUserControl>

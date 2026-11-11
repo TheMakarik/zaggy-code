@@ -8,6 +8,7 @@ public sealed class ViewSettings : INotifyPropertyChanged
     public SidebarPosition SidebarPosition { get; set => SetField(ref field, value); }
     public int CodeFontSize { get; set => SetField(ref field, value); }
     public int TerminalFontSize { get; set => SetField(ref field, value); }
+    public int DescriptionFontSize { get; set => SetField(ref field, value); }
     public required string CodeTheme { get; set => SetField(ref field, value); }
 
     public event PropertyChangedEventHandler? PropertyChanged;

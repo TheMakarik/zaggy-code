@@ -27,7 +27,7 @@ public sealed class Bootstrapper
 
         builder.Services.Scan(selector => selector
             .FromAssemblies(assemblies)
-            .AddClasses(c => c.AssignableTo<ViewModelBase>())
+            .AddClasses(c => c.AssignableTo<ViewModelBase>().Where(t => t != typeof(SettingsViewModel)))
             .AsSelf()
             .WithSingletonLifetime()
 
@@ -52,6 +52,10 @@ public sealed class Bootstrapper
             .AsImplementedInterfaces()
             .WithSingletonLifetime()
         );
+
+        // Настройки должны перечитывать текущие значения при каждом открытии,
+        // поэтому регистрируем их как transient, а не singleton из Scan.
+        builder.Services.AddTransient<SettingsViewModel>();
 
         builder.Services
             .AddPythonSettingsStorage()
@@ -88,6 +92,7 @@ public sealed class Bootstrapper
             .AddOptions<MapAssetsOptions>()
             .AddOptions<ZaggyAssetsOptions>()
             .AddOptions<MapAnimationOptions>()
+            .AddOptions<MapOptions>()
             .AddOptions<PythonValidationOptions>()
             .AddOptions<ThemeOptions>()
             .AddOptions<ThemeColorDisplayNameOptions>()
@@ -105,7 +110,7 @@ public sealed class Bootstrapper
         builder.Services.AddSingleton<IRobotGameTerminalProxy>(provider => provider.GetRequiredService<RobotGameTerminalProxy>());
         builder.Services.AddSingleton<RobotGameMapProxy>();
         builder.Services.AddSingleton<IRobotGameMapProxy>(provider => provider.GetRequiredService<RobotGameMapProxy>());
-
+        
         Log.Information("Зарегистрированно {количество} сервисов", builder.Services.Count);
         var app = builder.Build();
 

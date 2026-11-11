@@ -16,16 +16,18 @@
     xmlns:behaviors="clr-namespace:ZaggyCode.Avalonia.Views.Behaviors"
     xmlns:controls="clr-namespace:ZaggyCode.Avalonia.Views.Controls"
     xmlns:converters="clr-namespace:ZaggyCode.Avalonia.Views.Converters"
+    xmlns:ctxt="clr-namespace:ColorTextBlock.Avalonia;assembly=ColorTextBlock.Avalonia"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:dataEnums="clr-namespace:ZaggyCode.Core.Data.Enums;assembly=ZaggyCode.Core"
     xmlns:enums="clr-namespace:ZaggyCode.Core.GamesCore.Enums;assembly=ZaggyCode.Core"
     xmlns:languageRuntime="clr-namespace:ZaggyCode.Core.LanguageRuntime.Enums;assembly=ZaggyCode.Core"
     xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:records="clr-namespace:ZaggyCode.Avalonia.ViewModels.Records"
+    xmlns:md="clr-namespace:Markdown.Avalonia.Full;assembly=Markdown.Avalonia.Full"
+    xmlns:records="clr-namespace:ZaggyCode.Avalonia.ViewModels.Common.Records"
     xmlns:rxui="http://reactiveui.net"
     xmlns:userControls="clr-namespace:ZaggyCode.Avalonia.Views.UserControls"
-    xmlns:vm="using:ZaggyCode.Avalonia.ViewModels"
+    xmlns:vm="using:ZaggyCode.Avalonia.ViewModels.Main"
     xmlns:vt="using:VirtualTerminal"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
@@ -480,11 +482,23 @@
                                     <MenuItem
                                         Command="{Binding IncrementEditorFontSizeCommand}"
                                         Header="Увеличить размер текста редактора"
-                                        Icon="{materialIcons:MaterialIconExt Kind=FormatFontSizeIncrease}" />
+                                        Icon="{materialIcons:MaterialIconExt Kind=FormatFontSizeIncrease}"
+                                        IsVisible="{Binding IsCodeVisible}" />
                                     <MenuItem
                                         Command="{Binding DecrementEditorFontSizeCommand}"
                                         Header="Уменьшить размер текста редактора"
-                                        Icon="{materialIcons:MaterialIconExt Kind=FormatFontSizeDecrease}" />
+                                        Icon="{materialIcons:MaterialIconExt Kind=FormatFontSizeDecrease}"
+                                        IsVisible="{Binding IsCodeVisible}" />
+                                    <MenuItem
+                                        Command="{Binding IncrementDescriptionFontSizeCommand}"
+                                        Header="Увеличить размер текста описания"
+                                        Icon="{materialIcons:MaterialIconExt Kind=FormatFontSizeIncrease}"
+                                        IsVisible="{Binding IsDescriptionVisible}" />
+                                    <MenuItem
+                                        Command="{Binding DecrementDescriptionFontSizeCommand}"
+                                        Header="Уменьшить размер текста описания"
+                                        Icon="{materialIcons:MaterialIconExt Kind=FormatFontSizeDecrease}"
+                                        IsVisible="{Binding IsDescriptionVisible}" />
                                     <MenuItem
                                         Command="{Binding IncrementTerminalFontSizeCommand}"
                                         Header="Увеличить размер текста терминала"
@@ -680,56 +694,86 @@
 
                 <Grid Grid.Row="1" Name="GameAndCodeGrid">
                     <Grid ColumnDefinitions="1.15*,Auto,0.85*">
-                        <Border
-                            Classes="card"
-                            Grid.Column="0"
-                            Margin="12,12,6,12">
-                            <avaloniaEdit:TextEditor
-                                Background="{DynamicResource EditorBackgroundBrush}"
-                                FontSize="{Binding TextEditorFontSize}"
-                                Foreground="{DynamicResource EditorForegroundBrush}"
-                                LineNumbersForeground="{DynamicResource EditorLineNumberBrush}"
-                                Name="Editor"
-                                ShowLineNumbers="True">
-                                <Interaction.Behaviors>
-                                    <behaviors:TextEditorZoomBehavior
-                                        MaxFontSize="{Binding MaxFontSize, Mode=OneTime}"
-                                        MinFontSize="{Binding MinFontSize, Mode=OneTime}"
-                                        UpdateFontSizeCommand="{Binding UpdateFontSizeCommand}"
-                                        ZoomStep="1" />
-                                </Interaction.Behaviors>
-                                <avaloniaEdit:TextEditor.ContextMenu>
-                                    <ContextMenu>
-                                        <MenuItem
-                                            Click="EditorCut_Click"
-                                            Header="Вырезать"
-                                            Icon="{materialIcons:MaterialIconExt Kind=ContentCut}"
-                                            InputGesture="Ctrl+X" />
-                                        <MenuItem
-                                            Click="EditorCopy_Click"
-                                            Header="Копировать"
-                                            Icon="{materialIcons:MaterialIconExt Kind=ContentCopy}"
-                                            InputGesture="Ctrl+C" />
-                                        <MenuItem
-                                            Click="EditorPaste_Click"
-                                            Header="Вставить"
-                                            Icon="{materialIcons:MaterialIconExt Kind=ContentPaste}"
-                                            InputGesture="Ctrl+V" />
-                                        <Separator />
-                                        <MenuItem
-                                            Command="{Binding RunSelectedCodeCommand}"
-                                            Header="Запустить выделенное"
-                                            Icon="{materialIcons:MaterialIconExt Kind=PlayArrow}"
-                                            InputGesture="Ctrl+Alt+R" />
-                                        <MenuItem
-                                            Click="EditorDeleteSelection_Click"
-                                            Header="Удалить выделенное"
-                                            Icon="{materialIcons:MaterialIconExt Kind=TrashCan}"
-                                            Name="EditorDeleteContextMenuItem" />
-                                    </ContextMenu>
-                                </avaloniaEdit:TextEditor.ContextMenu>
-                            </avaloniaEdit:TextEditor>
-                        </Border>
+                        <Grid Grid.Column="0">
+                            <Border
+                                Classes="card"
+                                IsVisible="{Binding IsCodeVisible}"
+                                Margin="12,12,6,12">
+                                <avaloniaEdit:TextEditor
+                                    Background="{DynamicResource EditorBackgroundBrush}"
+                                    FontSize="{Binding TextEditorFontSize}"
+                                    Foreground="{DynamicResource EditorForegroundBrush}"
+                                    LineNumbersForeground="{DynamicResource EditorLineNumberBrush}"
+                                    Name="Editor"
+                                    ShowLineNumbers="True">
+                                    <Interaction.Behaviors>
+                                        <behaviors:TextEditorZoomBehavior
+                                            MaxFontSize="{Binding MaxFontSize, Mode=OneTime}"
+                                            MinFontSize="{Binding MinFontSize, Mode=OneTime}"
+                                            UpdateFontSizeCommand="{Binding UpdateFontSizeCommand}"
+                                            ZoomStep="1" />
+                                    </Interaction.Behaviors>
+                                    <avaloniaEdit:TextEditor.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem
+                                                Click="EditorCut_Click"
+                                                Header="Вырезать"
+                                                Icon="{materialIcons:MaterialIconExt Kind=ContentCut}"
+                                                InputGesture="Ctrl+X" />
+                                            <MenuItem
+                                                Click="EditorCopy_Click"
+                                                Header="Копировать"
+                                                Icon="{materialIcons:MaterialIconExt Kind=ContentCopy}"
+                                                InputGesture="Ctrl+C" />
+                                            <MenuItem
+                                                Click="EditorPaste_Click"
+                                                Header="Вставить"
+                                                Icon="{materialIcons:MaterialIconExt Kind=ContentPaste}"
+                                                InputGesture="Ctrl+V" />
+                                            <Separator />
+                                            <MenuItem
+                                                Command="{Binding RunSelectedCodeCommand}"
+                                                Header="Запустить выделенное"
+                                                Icon="{materialIcons:MaterialIconExt Kind=PlayArrow}"
+                                                InputGesture="Ctrl+Alt+R" />
+                                            <MenuItem
+                                                Click="EditorDeleteSelection_Click"
+                                                Header="Удалить выделенное"
+                                                Icon="{materialIcons:MaterialIconExt Kind=TrashCan}"
+                                                Name="EditorDeleteContextMenuItem" />
+                                        </ContextMenu>
+                                    </avaloniaEdit:TextEditor.ContextMenu>
+                                </avaloniaEdit:TextEditor>
+                            </Border>
+
+                            <Border
+                                Classes="card"
+                                IsVisible="{Binding IsDescriptionVisible}"
+                                Margin="12,12,6,12"
+                                Padding="16">
+                                <md:MarkdownScrollViewer
+                                    Focusable="True"
+                                    Markdown="{Binding CurrentRobotGame.Description}">
+                                    <Interaction.Behaviors>
+                                        <behaviors:MarkdownZoomBehavior
+                                            DefaultFontSize="14"
+                                            FontSize="{Binding DescriptionFontSize}"
+                                            MaxFontSize="{Binding MaxFontSize, Mode=OneTime}"
+                                            MinFontSize="{Binding MinFontSize, Mode=OneTime}"
+                                            UpdateFontSizeCommand="{Binding UpdateDescriptionFontSizeCommand}"
+                                            ZoomStep="1" />
+                                    </Interaction.Behaviors>
+                                    <md:MarkdownScrollViewer.Styles>
+                                        <Style Selector="ctxt|CCode">
+                                            <Setter Property="MonospaceFontFamily" Value="Noto Sans Mono,DejaVu Sans Mono,Liberation Mono,Cascadia Code,Consolas,Menlo,Monaco,Monospace" />
+                                        </Style>
+                                        <Style Selector=".Markdown_Avalonia_MarkdownViewer TextBlock.CodeBlock">
+                                            <Setter Property="FontFamily" Value="Noto Sans Mono,DejaVu Sans Mono,Liberation Mono,Cascadia Code,Consolas,Menlo,Monaco,Monospace" />
+                                        </Style>
+                                    </md:MarkdownScrollViewer.Styles>
+                                </md:MarkdownScrollViewer>
+                            </Border>
+                        </Grid>
 
                         <GridSplitter Classes="subtle" Grid.Column="1" />
 

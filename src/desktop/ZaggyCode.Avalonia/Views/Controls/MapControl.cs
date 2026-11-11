@@ -43,8 +43,11 @@ public sealed class MapControl : Control
     private IImage? _rightLaggy;
     private IImage? _sad;
 
-    private CancellationTokenSource? _moveCancellation;
+    private CancellationTokenSource? _pumpCancellation;
     private CancellationTokenSource? _flashCancellation;
+    private readonly Queue<(Cell Target, RobotDirection Direction)> _pendingMoves = [];
+    private int _pumpGeneration;
+    private bool _isPumpRunning;
     private bool _isDead;
     private bool _isLaggy;
 
@@ -324,7 +327,7 @@ public sealed class MapControl : Control
             return;
         }
 
-        _moveCancellation?.Cancel();
+        StopMoves();
         _flashCancellation?.Cancel();
 
         _isDead = false;
@@ -339,7 +342,6 @@ public sealed class MapControl : Control
 
         _renderPosition = new RenderPosition(column, row);
         _animationTarget = new Cell(column, row);
-        _robotImage.RenderTransform = null;
         _robotImage.IsVisible = true;
 
         RefreshCoinVisibility();
@@ -356,12 +358,10 @@ public sealed class MapControl : Control
             return;
         }
 
-        _robotDirection = direction;
-
         if (_isDead)
             return;
 
-        StartMoveAnimation(column, row);
+        EnqueueMove(new Cell(column, row), direction);
     }
 
     public void SetCellDrawn(int column, int row, bool drawn)
@@ -440,7 +440,11 @@ public sealed class MapControl : Control
             return;
 
         _isDead = true;
-        _moveCancellation?.Cancel();
+        StopMoves();
+
+        _renderPosition = new RenderPosition(column, row);
+        _animationTarget = new Cell(column, row);
+        ArrangeRobot(Bounds.Size);
 
         _robotImage.Source = _sad;
         _robotImage.IsVisible = true;
@@ -525,35 +529,71 @@ public sealed class MapControl : Control
         UpdateRobotSprite();
     }
 
-    private void StartMoveAnimation(int toColumn, int toRow)
+    private void EnqueueMove(Cell target, RobotDirection direction)
     {
-        _moveCancellation?.Cancel();
-        _moveCancellation = new CancellationTokenSource();
+        _pendingMoves.Enqueue((target, direction));
+
+        if (_isPumpRunning)
+            return;
+
+        _pumpCancellation?.Dispose();
+        _pumpCancellation = new CancellationTokenSource();
+        _isPumpRunning = true;
+
+        var generation = ++_pumpGeneration;
+        _ = PlayPendingMovesAsync(generation, _pumpCancellation.Token);
+    }
+
+    // Ходы проигрываются строго по одному: иначе следующая анимация начинается
+    // с середины предыдущей и робот «срезает» угол по диагонали.
+    private async Task PlayPendingMovesAsync(int generation, CancellationToken cancellationToken)
+    {
+        try
+        {
+            while (_pendingMoves.Count > 0)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                var (target, direction) = _pendingMoves.Dequeue();
+                _robotDirection = direction;
+                _isLaggy = false;
+                UpdateRobotSprite();
+
+                await AnimateMoveAsync(target, cancellationToken);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+        }
+        finally
+        {
+            if (generation == _pumpGeneration)
+                _isPumpRunning = false;
+        }
+    }
+
+    private async Task AnimateMoveAsync(Cell target, CancellationToken cancellationToken)
+    {
+        var from = _animationTarget;
+        _renderPosition = new RenderPosition(from.Column, from.Row);
+        _animationTarget = target;
 
         var layout = CalculateLayout(Bounds.Size);
         if (layout.CellSize <= 0)
         {
-            var target = new Cell(toColumn, toRow);
             _renderPosition = new RenderPosition(target.Column, target.Row);
-            _animationTarget = target;
             ArrangeRobot(Bounds.Size);
             return;
         }
 
-        _isLaggy = false;
-        var offset = layout.Offset;
-        var cell = layout.CellSize;
-
-        _renderPosition = new RenderPosition(_animationTarget.Column, _animationTarget.Row);
-        _animationTarget = new Cell(toColumn, toRow);
-        // Несколько действий в одной строке приходят пачкой: ставим картинку
-        // в начало нового перехода, иначе она прыгнет из прежней позиции.
         ArrangeRobot(Bounds.Size);
 
-        var fromX = offset.X + _renderPosition.Column * cell;
-        var fromY = offset.Y + _renderPosition.Row * cell;
-        var toX = offset.X + toColumn * cell;
-        var toY = offset.Y + toRow * cell;
+        var offset = layout.Offset;
+        var cell = layout.CellSize;
+        var fromX = offset.X + from.Column * cell;
+        var fromY = offset.Y + from.Row * cell;
+        var toX = offset.X + target.Column * cell;
+        var toY = offset.Y + target.Row * cell;
 
         var transform = new TranslateTransform();
         _robotImage.RenderTransform = transform;
@@ -586,30 +626,33 @@ public sealed class MapControl : Control
             }
         };
 
-        _ = RunMoveAnimationAsync(animation, toColumn, toRow, _moveCancellation.Token);
-    }
-
-    private async Task RunMoveAnimationAsync(Animation animation, int toColumn, int toRow, CancellationToken cancellationToken)
-    {
         try
         {
             await animation.RunAsync(_robotImage, cancellationToken);
-        }
-        catch (OperationCanceledException)
-        {
         }
         finally
         {
             if (!cancellationToken.IsCancellationRequested)
             {
-                var target = new Cell(toColumn, toRow);
                 _renderPosition = new RenderPosition(target.Column, target.Row);
                 _animationTarget = target;
                 _robotImage.RenderTransform = null;
                 ArrangeRobot(Bounds.Size);
-                UpdateRobotSprite();
             }
         }
+    }
+
+    private void StopMoves()
+    {
+        _pumpGeneration++;
+        _pendingMoves.Clear();
+
+        _pumpCancellation?.Cancel();
+        _pumpCancellation?.Dispose();
+        _pumpCancellation = null;
+        _isPumpRunning = false;
+
+        _robotImage.RenderTransform = null;
     }
 
     protected override Size MeasureOverride(Size availableSize)

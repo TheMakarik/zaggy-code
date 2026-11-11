@@ -9,5 +9,5 @@ public sealed class RobotGameEngineInitDto
     public required TextWriter Output { get; init; }
     public required Language Language { get; init; }
     public required ExecutionSpeed Speed { get; init; }
-    public required RobotGame Game { get; init; }
+    public required RobotMap Map { get; init; }
 }

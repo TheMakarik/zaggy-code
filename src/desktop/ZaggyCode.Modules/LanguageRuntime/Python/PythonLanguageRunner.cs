@@ -9,11 +9,12 @@ public sealed class PythonLanguageRunner : LanguageRunnerBase
 {
     private const string NotSupportedText = "is not supported due to your application settings";
 
-    // Источник пользовательского кода задаётся в Execute через CreateScriptSourceFromString(code, UserCodeFileName);
-    // фреймы IronPython importlib тоже имеют co_filename "<string>", поэтому фильтруем ещё и по co_name.
+    // Источник пользовательского кода задаётся в Execute через CreateScriptSourceFromString(code, UserCodeFileName).
+    // Фреймы importlib тоже могут иметь co_filename "<string>", поэтому пользовательские фреймы
+    // дополнительно помечаются переменной в globals области выполнения.
     private const string UserCodeFileName = "<string>";
-    private const string ModuleName = "<module>";
     private const string LineUpdateTraceEventName = "line";
+    private const string UserCodeMarkerVariable = "__zaggy_user_code__";
 
     private const string ClrOutput = "clr_output";
     private const string ClrInput = "clr_input";
@@ -24,7 +25,10 @@ public sealed class PythonLanguageRunner : LanguageRunnerBase
     private readonly IPythonSettingsStorage _pythonSettingsStorage;
     private readonly ScriptEngine _engine;
     private readonly ScriptScope _scope;
+    private readonly Lock _actionsLock = new();
+    private readonly List<RobotAction> _pendingActions = [];
     private ChannelWriter<ComputedLineOfCode>? _writer;
+    private int _previousLineNumber;
 
     public PythonLanguageRunner(
         LanguageRunnerDto dto,
@@ -38,6 +42,7 @@ public sealed class PythonLanguageRunner : LanguageRunnerBase
 
         _engine = IronPython.Hosting.Python.CreateEngine();
         _scope = _engine.CreateScope();
+        _scope.SetVariable(UserCodeMarkerVariable, true);
 
         var options = pythonOptions.Value;
         Debug.Assert(Directory.Exists(options.StandardLibraryPath));
@@ -64,6 +69,8 @@ public sealed class PythonLanguageRunner : LanguageRunnerBase
             TaskCreationOptions.LongRunning,
             TaskScheduler.Default);
 
+        // Отмену обрабатывает производитель: он завершает writer, а читатель
+        // просто дочитывает канал. Токен здесь прервал бы enumeration исключением.
         await foreach (var line in channel.Reader.ReadAllAsync())
             yield return line;
 
@@ -73,6 +80,13 @@ public sealed class PythonLanguageRunner : LanguageRunnerBase
     private void ExecuteCore(string code, ChannelWriter<ComputedLineOfCode> writer, CancellationToken cancellationToken)
     {
         _writer = writer;
+        _previousLineNumber = 0;
+        ClearPendingActions();
+
+        var executor = RobotController.Executor;
+        if (executor is not null)
+            executor.StateUpdated += OnExecutorStateUpdated;
+
         try
         {
             ValidatePythonEnvironment();
@@ -103,6 +117,11 @@ public sealed class PythonLanguageRunner : LanguageRunnerBase
         finally
         {
             _engine.SetTrace(null);
+
+            if (executor is not null)
+                executor.StateUpdated -= OnExecutorStateUpdated;
+
+            FlushPendingLine(writer);
             _writer = null;
             writer.TryComplete();
         }
@@ -137,15 +156,65 @@ public sealed class PythonLanguageRunner : LanguageRunnerBase
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            if (traceEvent == LineUpdateTraceEventName
-                && frame.f_code.co_filename == UserCodeFileName
-                && frame.f_code.co_name == ModuleName)
-                writer.TryWrite(new ComputedLineOfCode(Convert.ToInt32(frame.f_lineno), default));
+            if (traceEvent == LineUpdateTraceEventName && IsUserCodeFrame(frame))
+            {
+                var lineNumber = Convert.ToInt32(frame.f_lineno);
+                var actions = TakePendingActions();
+
+                // Трассировка "line" срабатывает перед выполнением строки, поэтому действия
+                // робота уже относятся к предыдущей строке — отдаём её потребителю вместе с ними.
+                if (_previousLineNumber > 0)
+                    writer.TryWrite(new ComputedLineOfCode(_previousLineNumber, new RobotStateUpdate(actions)));
+
+                _previousLineNumber = lineNumber;
+            }
 
             return OnUserCodeLine;
         }
 
         return OnUserCodeLine;
+    }
+
+    private static bool IsUserCodeFrame(TraceBackFrame frame)
+        => frame.f_code.co_filename == UserCodeFileName
+            && frame.f_globals.ContainsKey(UserCodeMarkerVariable);
+
+    private void OnExecutorStateUpdated(object? sender, RobotStateUpdate update)
+    {
+        if (update.Actions is null)
+            return;
+
+        using var scope = _actionsLock.EnterScope();
+        _pendingActions.AddRange(update.Actions);
+    }
+
+    private List<RobotAction> TakePendingActions()
+    {
+        using var scope = _actionsLock.EnterScope();
+
+        if (_pendingActions.Count == 0)
+            return [];
+
+        List<RobotAction> actions = [.. _pendingActions];
+        _pendingActions.Clear();
+        return actions;
+    }
+
+    private void ClearPendingActions()
+    {
+        using var scope = _actionsLock.EnterScope();
+        _pendingActions.Clear();
+    }
+
+    private void FlushPendingLine(ChannelWriter<ComputedLineOfCode> writer)
+    {
+        var actions = TakePendingActions();
+
+        if (_previousLineNumber <= 0 && actions.Count == 0)
+            return;
+
+        writer.TryWrite(new ComputedLineOfCode(_previousLineNumber, new RobotStateUpdate(actions)));
+        _previousLineNumber = 0;
     }
 
     private Action<string> CreateOutputHandler()
@@ -176,7 +245,7 @@ public sealed class PythonLanguageRunner : LanguageRunnerBase
         };
     }
 
-    private void WriteError(ChannelWriter<ComputedLineOfCode> writer, CodeErrorType codeErrorType, string message)
+    private static void WriteError(ChannelWriter<ComputedLineOfCode> writer, CodeErrorType codeErrorType, string message)
         => writer.TryWrite(new ComputedLineOfCode(0, default, new CodeError(codeErrorType, message)));
 
     private void WriteError(CodeErrorType codeErrorType, string message)

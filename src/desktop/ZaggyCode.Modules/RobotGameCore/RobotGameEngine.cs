@@ -66,20 +66,6 @@ public sealed class RobotGameEngine(
         if (useProxies)
             mapProxy.Reset();
 
-        var pendingActions = new List<RobotAction>();
-        var pendingLock = new Lock();
-
-        void OnStateUpdated(object? sender, RobotStateUpdate update)
-        {
-            if (update.Actions is null)
-                return;
-
-            using var scope = pendingLock.EnterScope();
-            pendingActions.AddRange(update.Actions);
-        }
-
-        executor.StateUpdated += OnStateUpdated;
-
         using var linkedCancellation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
         var totalLines = 0UL;
@@ -105,7 +91,7 @@ public sealed class RobotGameEngine(
                         editorProxy.SetCurrentExecutionLine(line.LineNumber);
                 }
 
-                var actions = TakePendingActions(pendingActions, pendingLock);
+                var actions = line.Update.Actions ?? [];
 
                 if (useProxies)
                     ApplyActions(actions);
@@ -118,15 +104,10 @@ public sealed class RobotGameEngine(
                     break;
                 }
 
-                await DelayAsync(linkedCancellation.Token);
+                // В режиме анализа UI не обновляется, поэтому и выдерживать темп показа не нужно.
+                if (useProxies)
+                    await DelayAsync(linkedCancellation.Token);
             }
-
-            var tailActions = TakePendingActions(pendingActions, pendingLock);
-
-            if (useProxies)
-                ApplyActions(tailActions);
-
-            Accumulate(tailActions, ref pointsDrew, ref pointsWalked, ref coinsCollected, ref deadType);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
@@ -134,8 +115,6 @@ public sealed class RobotGameEngine(
         }
         finally
         {
-            executor.StateUpdated -= OnStateUpdated;
-
             if (useProxies)
                 editorProxy.SetCurrentExecutionLine(0);
 
@@ -191,18 +170,6 @@ public sealed class RobotGameEngine(
             coinsTotal,
             deadType,
             error);
-    }
-
-    private static List<RobotAction> TakePendingActions(List<RobotAction> pendingActions, Lock pendingLock)
-    {
-        using var scope = pendingLock.EnterScope();
-
-        if (pendingActions.Count == 0)
-            return [];
-
-        List<RobotAction> actions = [.. pendingActions];
-        pendingActions.Clear();
-        return actions;
     }
 
     private void ApplyActions(IReadOnlyCollection<RobotAction> actions)

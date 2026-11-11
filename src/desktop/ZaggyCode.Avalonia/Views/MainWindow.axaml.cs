@@ -324,9 +324,11 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         var displaySeconds = popupOptions?.PopupDisplaySeconds ?? 1.5;
         var fadeOutSeconds = popupOptions?.PopupFadeOutSeconds ?? 0.5;
 
+        // Плашка подтверждает действие, а не требует прочтения: держим её
+        // на 30% меньше базового времени, чтобы она не мешала работе.
         _fontSizeToastTimer = new DispatcherTimer
         {
-            Interval = TimeSpan.FromSeconds(displaySeconds)
+            Interval = TimeSpan.FromSeconds(displaySeconds * 0.7)
         };
 
         _fontSizeToastTimer.Tick += (_, _) =>

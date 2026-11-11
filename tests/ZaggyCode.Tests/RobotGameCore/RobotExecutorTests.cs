@@ -150,6 +150,26 @@ public class RobotExecutorTests
     }
 
     [Fact]
+    public void Move_WhenTargetPointIsFullWall_SendsWallDeathAndDoesNotMove()
+    {
+        // Arrange
+        var map = CreateMap();
+        GetPoint(map, 2, 1).WallType = RobotWallType.Full;
+        var systemUnderTests = new RobotExecutor(map);
+        var updates = new List<RobotStateUpdate>();
+        systemUnderTests.StateUpdated += (_, update) => updates.Add(update);
+
+        // Act
+        systemUnderTests.Move(RobotDirection.Up);
+
+        // Assert
+        var action = updates.Should().ContainSingle().Subject.Actions.Should().ContainSingle().Subject;
+        action.DeadType.Should().Be(RobotDeadType.Wall);
+        action.Direction.Should().Be(RobotDirection.Up);
+        systemUnderTests.State.Position.Should().Be(new Point(2, 2));
+    }
+
+    [Fact]
     public void Move_WhenTargetIsBeyondMap_SendsEndOfTheMapDeath()
     {
         // Arrange

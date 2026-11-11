@@ -18,7 +18,7 @@
     xmlns:converters="clr-namespace:ZaggyCode.Avalonia.Views.Converters"
     xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
     xmlns:theming="clr-namespace:ZaggyCode.Core.Theming.Model;assembly=ZaggyCode.Core"
-    xmlns:vm="using:ZaggyCode.Avalonia.ViewModels"
+    xmlns:vm="using:ZaggyCode.Avalonia.ViewModels.Themes"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <Window.Styles>

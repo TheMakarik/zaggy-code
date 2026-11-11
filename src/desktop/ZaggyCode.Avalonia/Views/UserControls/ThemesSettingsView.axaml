@@ -9,10 +9,10 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:records="clr-namespace:ZaggyCode.Avalonia.ViewModels.Records"
+    xmlns:records="clr-namespace:ZaggyCode.Avalonia.ViewModels.Common.Records"
     xmlns:rxui="http://reactiveui.net"
     xmlns:userControls="clr-namespace:ZaggyCode.Avalonia.Views.UserControls"
-    xmlns:vm="using:ZaggyCode.Avalonia.ViewModels"
+    xmlns:vm="using:ZaggyCode.Avalonia.ViewModels.Settings"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <ScrollViewer>
