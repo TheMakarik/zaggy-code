@@ -21,7 +21,7 @@
     <ScrollViewer>
         <StackPanel Margin="20" Spacing="20">
             <userControls:SettingsSectionHeader
-                Description="Настройки внешнего вида приложения: шрифты редактора и терминала, оформление окна и тема подсветки синтаксиса."
+                Description="Настройки внешнего вида приложения: шрифты редактора, терминала и описания, оформление окна и тема подсветки синтаксиса."
                 IconKind="Eye"
                 Title="Вид" />
 
@@ -83,6 +83,37 @@
                     </Button>
                     <TextBlock
                         Text="{Binding TerminalFontSize}"
+                        TextAlignment="Center"
+                        VerticalAlignment="Center"
+                        Width="28" />
+                </StackPanel>
+            </Grid>
+
+            <Grid ColumnDefinitions="*,Auto">
+                <TextBlock
+                    Grid.Column="0"
+                    Text="Размер шрифта описания"
+                    VerticalAlignment="Center" />
+                <StackPanel
+                    Grid.Column="1"
+                    Orientation="Horizontal"
+                    Spacing="4">
+                    <Button
+                        Classes="settings-font-button"
+                        Command="{Binding ChangeDescriptionFontSizeCommand}"
+                        CommandParameter="-1"
+                        IsEnabled="{Binding CanDecreaseDescriptionFontSize}">
+                        <materialIcons:MaterialIcon Kind="ChevronDown" />
+                    </Button>
+                    <Button
+                        Classes="settings-font-button"
+                        Command="{Binding ChangeDescriptionFontSizeCommand}"
+                        CommandParameter="1"
+                        IsEnabled="{Binding CanIncreaseDescriptionFontSize}">
+                        <materialIcons:MaterialIcon Kind="ChevronUp" />
+                    </Button>
+                    <TextBlock
+                        Text="{Binding DescriptionFontSize}"
                         TextAlignment="Center"
                         VerticalAlignment="Center"
                         Width="28" />

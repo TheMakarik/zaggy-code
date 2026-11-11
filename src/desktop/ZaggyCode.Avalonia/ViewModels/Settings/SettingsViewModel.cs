@@ -103,8 +103,10 @@ public sealed partial class SettingsViewModel : ViewModelBase
         var current = _viewStorage.Current;
         var codeFontSizeChanged = current.CodeFontSize != AppearanceSettings.CodeFontSize;
         var terminalFontSizeChanged = current.TerminalFontSize != AppearanceSettings.TerminalFontSize;
+        var descriptionFontSizeChanged = current.DescriptionFontSize != AppearanceSettings.DescriptionFontSize;
         current.CodeFontSize = AppearanceSettings.CodeFontSize;
         current.TerminalFontSize = AppearanceSettings.TerminalFontSize;
+        current.DescriptionFontSize = AppearanceSettings.DescriptionFontSize;
         current.UseSystemTitleBar = AppearanceSettings.UseSystemTitleBar;
         current.SidebarPosition = AppearanceSettings.SidebarPosition;
         current.CodeTheme = AppearanceSettings.SelectedCodeTheme;
@@ -121,6 +123,7 @@ public sealed partial class SettingsViewModel : ViewModelBase
 
         MessageBus.Current.SendMessage(new CodeFontSizeChangedMessage(AppearanceSettings.CodeFontSize));
         MessageBus.Current.SendMessage(new TerminalFontSizeChangedMessage(AppearanceSettings.TerminalFontSize));
+        MessageBus.Current.SendMessage(new DescriptionFontSizeChangedMessage(AppearanceSettings.DescriptionFontSize));
         MessageBus.Current.SendMessage(new UseSystemTitleBarChangedMessage(AppearanceSettings.UseSystemTitleBar));
         MessageBus.Current.SendMessage(new SidebarPositionChangedMessage(AppearanceSettings.SidebarPosition));
         MessageBus.Current.SendMessage(new CodeThemeChangedMessage(AppearanceSettings.SelectedCodeTheme));
@@ -129,6 +132,8 @@ public sealed partial class SettingsViewModel : ViewModelBase
             MessageBus.Current.SendMessage(new FontSizeToastMessage("редактора", AppearanceSettings.CodeFontSize));
         if (terminalFontSizeChanged)
             MessageBus.Current.SendMessage(new FontSizeToastMessage("терминала", AppearanceSettings.TerminalFontSize));
+        if (descriptionFontSizeChanged)
+            MessageBus.Current.SendMessage(new FontSizeToastMessage("описания", AppearanceSettings.DescriptionFontSize));
 
         AppearanceSettings.AcceptChanges();
         PythonSettings.AcceptChanges();

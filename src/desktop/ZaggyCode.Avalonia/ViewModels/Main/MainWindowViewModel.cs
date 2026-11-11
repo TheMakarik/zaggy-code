@@ -148,9 +148,7 @@ public partial class MainWindowViewModel : ViewModelBase
         _selectedLanguage = stateSettingsStorage.Current.LastLanguage;
         _textEditorFontSize = viewSettingsStorage.Current.CodeFontSize;
         _terminalFontSize = viewSettingsStorage.Current.TerminalFontSize;
-        // В settings.json старых версий поля нет — 0 означает «не задано».
-        var descriptionFontSize = viewSettingsStorage.Current.DescriptionFontSize;
-        _descriptionFontSize = descriptionFontSize <= 0 ? 14 : descriptionFontSize;
+        _descriptionFontSize = viewSettingsStorage.Current.DescriptionFontSize;
         _useOsDecoration = viewSettingsStorage.Current.UseSystemTitleBar;
         _sidebarPosition = viewSettingsStorage.Current.SidebarPosition;
         CodeTheme = viewSettingsStorage.Current.CodeTheme;
@@ -334,6 +332,9 @@ public partial class MainWindowViewModel : ViewModelBase
 
         MessageBus.Current.Listen<TerminalFontSizeChangedMessage>()
             .Subscribe(message => TerminalFontSize = message.FontSize);
+
+        MessageBus.Current.Listen<DescriptionFontSizeChangedMessage>()
+            .Subscribe(message => DescriptionFontSize = message.FontSize);
 
         MessageBus.Current.Listen<UseSystemTitleBarChangedMessage>()
             .Subscribe(message => UseOsDecoration = message.UseSystemTitleBar);
