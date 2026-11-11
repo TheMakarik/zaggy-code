@@ -94,10 +94,22 @@ public sealed partial class SettingsViewModel : ViewModelBase
     }
 
     [ReactiveCommand]
-    private async Task SaveSettingsAsync()
+    private void SaveSettings()
     {
         _logger.LogInformation("Сохранение настроек");
 
+        if (AppearanceSettings.HasChanges)
+            SaveAppearanceSettings();
+
+        if (PythonSettings.HasChanges)
+            SavePythonSettings();
+
+        if (CSharpSettings.HasChanges)
+            SaveCSharpSettings();
+    }
+
+    private void SaveAppearanceSettings()
+    {
         var current = _viewStorage.Current;
         var codeFontSizeChanged = current.CodeFontSize != AppearanceSettings.CodeFontSize;
         var terminalFontSizeChanged = current.TerminalFontSize != AppearanceSettings.TerminalFontSize;
@@ -109,15 +121,7 @@ public sealed partial class SettingsViewModel : ViewModelBase
         current.SidebarPosition = AppearanceSettings.SidebarPosition;
         current.CodeTheme = AppearanceSettings.SelectedCodeTheme;
 
-        var pythonCurrent = _pythonSettingsStorage.Current;
-        pythonCurrent.UseEntryFunction = PythonSettings.UseEntryFunction;
-        pythonCurrent.EntryFunctionName = PythonSettings.EntryFunctionName;
-        pythonCurrent.SupressIo = PythonSettings.SupressIo;
-
-        var csharpCurrent = _csharpSettingsStorage.Current;
-        csharpCurrent.UseTopLevelStatements = CSharpSettings.UseTopLevelStatements;
-        csharpCurrent.EnableImplicitUsings = CSharpSettings.EnableImplicitUsings;
-        csharpCurrent.BlockIo = CSharpSettings.BlockIo;
+        AppearanceSettings.AcceptChanges();
 
         MessageBus.Current.SendMessage(new CodeFontSizeChangedMessage(AppearanceSettings.CodeFontSize));
         MessageBus.Current.SendMessage(new TerminalFontSizeChangedMessage(AppearanceSettings.TerminalFontSize));
@@ -132,9 +136,25 @@ public sealed partial class SettingsViewModel : ViewModelBase
             MessageBus.Current.SendMessage(new FontSizeToastMessage("терминала", AppearanceSettings.TerminalFontSize));
         if (descriptionFontSizeChanged)
             MessageBus.Current.SendMessage(new FontSizeToastMessage("описания", AppearanceSettings.DescriptionFontSize));
+    }
 
-        AppearanceSettings.AcceptChanges();
+    private void SavePythonSettings()
+    {
+        var current = _pythonSettingsStorage.Current;
+        current.UseEntryFunction = PythonSettings.UseEntryFunction;
+        current.EntryFunctionName = PythonSettings.EntryFunctionName;
+        current.SupressIo = PythonSettings.SupressIo;
+
         PythonSettings.AcceptChanges();
+    }
+
+    private void SaveCSharpSettings()
+    {
+        var current = _csharpSettingsStorage.Current;
+        current.UseTopLevelStatements = CSharpSettings.UseTopLevelStatements;
+        current.EnableImplicitUsings = CSharpSettings.EnableImplicitUsings;
+        current.BlockIo = CSharpSettings.BlockIo;
+
         CSharpSettings.AcceptChanges();
     }
 
