@@ -39,7 +39,7 @@ public class RobotGameEngineFactoryTests
         var backgroundTaskHelper = A.Fake<IBackgroundTaskHelper>();
         A.CallTo(() => backgroundTaskHelper.StartBackground(A<BackgroundTaskStartDto>._))
             .Invokes((BackgroundTaskStartDto startDto) =>
-                startDto.DelegateToStart(new Progress<BackgroundProgressMove>()));
+                startDto.DelegateToStart(new Progress<BackgroundProgressMove>()).GetAwaiter().GetResult());
 
         var systemUnderTests = new RobotGameEngineFactory(
             executorFactory,

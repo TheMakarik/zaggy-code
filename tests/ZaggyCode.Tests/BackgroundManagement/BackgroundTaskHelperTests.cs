@@ -17,16 +17,16 @@ public class BackgroundTaskHelperTests
     public async Task StartBackground_WhenCalled_AddsTaskToCollection()
     {
         // Arrange
-        using var release = new ManualResetEventSlim();
+        var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var started = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var dto = new BackgroundTaskStartDto
         {
             Kind = _fixture.Create<BackgroundTaskKind>(),
             HasNoProgress = true,
-            DelegateToStart = _ =>
+            DelegateToStart = async _ =>
             {
                 started.SetResult();
-                release.Wait();
+                await release.Task;
             }
         };
         var systemUnderTests = new BackgroundTaskHelper(_logger);
@@ -47,7 +47,7 @@ public class BackgroundTaskHelperTests
         }
         finally
         {
-            release.Set();
+            release.SetResult();
         }
     }
 
@@ -55,17 +55,17 @@ public class BackgroundTaskHelperTests
     public async Task StartBackground_WhenCalled_PassesProgressToDelegate()
     {
         // Arrange
-        using var release = new ManualResetEventSlim();
+        var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var started = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         Progress<BackgroundProgressMove>? receivedProgress = null;
         var dto = new BackgroundTaskStartDto
         {
             Kind = _fixture.Create<BackgroundTaskKind>(),
-            DelegateToStart = progress =>
+            DelegateToStart = async progress =>
             {
                 receivedProgress = progress;
                 started.SetResult();
-                release.Wait();
+                await release.Task;
             }
         };
         var systemUnderTests = new BackgroundTaskHelper(_logger);
@@ -84,7 +84,7 @@ public class BackgroundTaskHelperTests
         }
         finally
         {
-            release.Set();
+            release.SetResult();
         }
     }
 
@@ -95,7 +95,7 @@ public class BackgroundTaskHelperTests
         var dto = new BackgroundTaskStartDto
         {
             Kind = _fixture.Create<BackgroundTaskKind>(),
-            DelegateToStart = _ => { }
+            DelegateToStart = _ => Task.CompletedTask
         };
         var systemUnderTests = new BackgroundTaskHelper(_logger);
 
@@ -111,8 +111,8 @@ public class BackgroundTaskHelperTests
     public async Task StartBackground_WhenDelegateReportsProgress_RaisesProgressChangedWithReportedMove()
     {
         // Arrange
-        using var release = new ManualResetEventSlim();
-        using var reportAllowed = new ManualResetEventSlim();
+        var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var reportAllowed = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var started = new TaskCompletionSource<Progress<BackgroundProgressMove>>(TaskCreationOptions.RunContinuationsAsynchronously);
         var progressReported = new TaskCompletionSource<BackgroundProgressMove>(TaskCreationOptions.RunContinuationsAsynchronously);
         var kind = _fixture.Create<BackgroundTaskKind>();
@@ -123,12 +123,12 @@ public class BackgroundTaskHelperTests
         var dto = new BackgroundTaskStartDto
         {
             Kind = kind,
-            DelegateToStart = progress =>
+            DelegateToStart = async progress =>
             {
                 started.SetResult(progress);
-                reportAllowed.Wait();
+                await reportAllowed.Task;
                 ((IProgress<BackgroundProgressMove>)progress).Report(expectedMove);
-                release.Wait();
+                await release.Task;
             }
         };
         var systemUnderTests = new BackgroundTaskHelper(_logger);
@@ -146,7 +146,7 @@ public class BackgroundTaskHelperTests
             progress.Should().BeSameAs(delegateProgress);
             progress.ProgressChanged += (_, move) => progressReported.TrySetResult(move);
 
-            reportAllowed.Set();
+            reportAllowed.SetResult();
 
             // Assert
             var actualMove = await progressReported.Task.WaitAsync(WaitTimeout);
@@ -155,7 +155,7 @@ public class BackgroundTaskHelperTests
         }
         finally
         {
-            release.Set();
+            release.SetResult();
         }
     }
 

@@ -29,15 +29,11 @@ public sealed class RobotGameEngine(
         {
             Kind = BackgroundTaskKind.LanguageExecution,
             HasNoProgress = true,
-            DelegateToStart = _ =>
+            DelegateToStart = async _ =>
             {
                 try
                 {
-                    var result = ExecuteCoreAsync(code, cancellationToken, executionType)
-                        .GetAwaiter()
-                        .GetResult();
-
-                    completion.TrySetResult(result);
+                    completion.TrySetResult(await ExecuteCoreAsync(code, cancellationToken, executionType));
                 }
                 catch (OperationCanceledException)
                 {

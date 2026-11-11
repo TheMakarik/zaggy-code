@@ -28,7 +28,11 @@ public sealed class RobotGameEngineFactory(
         backgroundTaskHelper.StartBackground(new BackgroundTaskStartDto
         {
             Kind = LoadingTaskKind,
-            DelegateToStart = progress => CreateEngine(dto, cancellationToken, progress, completion)
+            DelegateToStart = progress =>
+            {
+                CreateEngine(dto, cancellationToken, progress, completion);
+                return Task.CompletedTask;
+            }
         });
 
         return completion.Task;

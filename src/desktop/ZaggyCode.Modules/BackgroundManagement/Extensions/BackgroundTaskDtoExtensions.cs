@@ -8,7 +8,7 @@ public static class BackgroundTaskDtoExtensions
     public static BackgroundTask StartAsBackgroundTask(this BackgroundTaskStartDto dto)
     {
         var progress = new Progress<BackgroundProgressMove>();
-        var task = Task.Factory.StartNew(() => dto.DelegateToStart(progress), TaskCreationOptions.LongRunning);
+        var task = Task.Run(() => dto.DelegateToStart(progress));
         return new BackgroundTask
         {
             Kind = dto.Kind,
