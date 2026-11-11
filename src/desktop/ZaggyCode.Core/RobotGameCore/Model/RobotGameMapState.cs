@@ -1,5 +1,4 @@
 using System.Collections.Immutable;
-using System.Drawing;
 
 namespace ZaggyCode.Core.RobotGameCore.Model;
 

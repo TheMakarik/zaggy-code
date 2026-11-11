@@ -1,4 +1,3 @@
-using Material.Icons;
 using Material.Icons.Avalonia;
 
 namespace ZaggyCode.Avalonia.Views.Controls;

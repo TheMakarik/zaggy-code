@@ -1,6 +1,3 @@
-using System.Collections;
-using System.ComponentModel;
-
 namespace ZaggyCode.Avalonia.ViewModels.Themes;
 
 public sealed partial class AddThemeViewModel : ViewModelBase, INotifyDataErrorInfo

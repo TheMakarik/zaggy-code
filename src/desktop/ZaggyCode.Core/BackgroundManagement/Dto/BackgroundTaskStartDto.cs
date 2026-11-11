@@ -1,6 +1,3 @@
-using ZaggyCode.Core.BackgroundManagement.Enums;
-using ZaggyCode.Core.BackgroundManagement.Model;
-
 namespace ZaggyCode.Core.BackgroundManagement.Dto;
 
 public sealed class BackgroundTaskStartDto

@@ -1,5 +1,3 @@
-using ZaggyCode.Core.BackgroundManagement.Enums;
-
 namespace ZaggyCode.Core.BackgroundManagement.Model;
 
 public class BackgroundTask

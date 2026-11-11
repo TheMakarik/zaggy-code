@@ -1,5 +1,3 @@
-using ZaggyCode.Core.GamesCore.Enums.Metadata;
-
 namespace ZaggyCode.Core.RobotGameCore.Model;
 
 [XmlRoot("game")]

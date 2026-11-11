@@ -1,5 +1,3 @@
-using ZaggyCode.Core.RobotGameCore.Enums;
-
 namespace ZaggyCode.Avalonia.Views.Converters;
 
 public sealed class WallEdgeVisibilityConverter : MarkupExtension, IValueConverter

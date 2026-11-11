@@ -1,5 +1,3 @@
-using ILogger = Serilog.ILogger;
-
 namespace ZaggyCode.Avalonia.Proxies;
 
 public sealed class ThemeSetterProxy(ILogger<ThemeSetterProxy> logger) : IThemeSetterProxy

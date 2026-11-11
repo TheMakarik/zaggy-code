@@ -1,6 +1,3 @@
-using System.Globalization;
-using System.Collections;
-
 namespace ZaggyCode.Avalonia.Views.Converters;
 
 public sealed class IsEqualConverter : MarkupExtension, IMultiValueConverter

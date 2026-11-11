@@ -1,5 +1,3 @@
-using System.Text.Json.Serialization;
-
 namespace ZaggyCode.Core.Archiving.Model;
 
 public class ArchiveMetadata

@@ -1,5 +1,3 @@
-using Avalonia.VisualTree;
-
 namespace ZaggyCode.Avalonia.Views.UserControls;
 
 public partial class AppearanceSettingsView : ReactiveUserControl<AppearanceSettingsViewModel>

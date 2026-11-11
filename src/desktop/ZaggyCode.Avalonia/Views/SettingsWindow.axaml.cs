@@ -1,5 +1,3 @@
-using RxVoid = ReactiveUI.Primitives.RxVoid;
-
 namespace ZaggyCode.Avalonia.Views;
 
 public partial class SettingsWindow : ReactiveWindow<SettingsViewModel>

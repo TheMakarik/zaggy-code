@@ -1,7 +1,5 @@
 using ZaggyCode.Core.LanguageRuntime.Enums;
 using ZaggyCode.Core.GamesCore.Enums.Metadata;
-using ZaggyCode.Core.RobotGameCore.Enums;
-using ZaggyCode.Core.RobotGameCore.Model;
 
 namespace ZaggyCode.Avalonia.ViewModels.Main;
 

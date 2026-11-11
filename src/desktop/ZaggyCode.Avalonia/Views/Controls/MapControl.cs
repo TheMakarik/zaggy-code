@@ -1,6 +1,4 @@
-using Avalonia.VisualTree;
 using ZaggyCode.Avalonia.Views.Records;
-using ZaggyCode.Core.RobotGameCore.Model;
 
 namespace ZaggyCode.Avalonia.Views.Controls;
 

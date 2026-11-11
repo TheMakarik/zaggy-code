@@ -1,5 +1,3 @@
-using ZaggyCode.Core.RobotGameCore.Enums;
-
 namespace ZaggyCode.Core.Proxies.Interfaces;
 
 // Обновляет отдельную точку карты: положение робота, собранную монету и закраску.

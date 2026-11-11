@@ -1,5 +1,3 @@
-using System.Text.Json.Serialization;
-
 namespace ZaggyCode.Core.Theming.Model;
 
 public sealed class ThemeMetadata : ArchiveMetadata

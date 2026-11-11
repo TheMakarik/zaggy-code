@@ -1,6 +1,3 @@
-using System.Drawing;
-using ZaggyCode.Core.RobotGameCore.Enums;
-
 namespace ZaggyCode.Core.RobotGameCore.Model;
 
 // Одно действие робота. Position — состояние робота после действия,

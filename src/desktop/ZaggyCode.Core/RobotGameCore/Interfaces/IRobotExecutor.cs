@@ -1,6 +1,3 @@
-using ZaggyCode.Core.RobotGameCore.Enums;
-using ZaggyCode.Core.RobotGameCore.Model;
-
 namespace ZaggyCode.Core.RobotGameCore.Interfaces;
 
 public interface IRobotExecutor

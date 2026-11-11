@@ -1,5 +1,3 @@
-using ZaggyCode.Core.LanguageRuntime.Model;
-
 namespace ZaggyCode.Core.RobotGameCore.Model;
 
 public record RobotGameResult(

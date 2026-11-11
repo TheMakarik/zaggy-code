@@ -1,5 +1,4 @@
 namespace ZaggyCode.Core.Theming.Model;
-using System.Xml.Serialization;
 
 [XmlRoot("theme")]
 public sealed class Theme
