@@ -14,7 +14,7 @@ public class TarBZip2ArchiveReaderTests : IDisposable
     public TarBZip2ArchiveReaderTests()
     {
         var logger = A.Dummy<ILogger<TarBZip2ArchiveReader>>();
-        var metadataParser = new MetadataParser(CreateMetadataOptions());
+        var metadataParser = new MetadataParser(CreateMetadataOptions(), A.Dummy<ILogger<MetadataParser>>());
         var tempOptions = CreateTempOptions();
         _systemUnderTests = new TarBZip2ArchiveReader(logger, metadataParser, tempOptions);
     }

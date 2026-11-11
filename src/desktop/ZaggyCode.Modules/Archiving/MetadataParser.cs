@@ -1,12 +1,13 @@
 namespace ZaggyCode.Modules.Archiving;
 
-public sealed class MetadataParser(IOptions<MetadataOptions> options) : IMetadataParser
+public sealed class MetadataParser(IOptions<MetadataOptions> options, ILogger<MetadataParser> logger) : IMetadataParser
 {
     public T Parse<T>(Stream stream) where T : ArchiveMetadata
     {
         var metadata = JsonSerializer.Deserialize<T>(stream)
                        ?? throw new InvalidOperationException("Failed to deserialize theme metadata");
 
+        logger.LogDebug("Прочитан мета файл: {metadata}", JsonSerializer.Serialize(metadata));
         return metadata;
     }
 
@@ -15,7 +16,7 @@ public sealed class MetadataParser(IOptions<MetadataOptions> options) : IMetadat
         var metadataFile = await files.FirstOrDefaultAsync(file =>
             file == options.Value.MetadataFile ||
             file.EndsWith($"/{options.Value.MetadataFile}", StringComparison.Ordinal));
-
+        
         return metadataFile ?? throw new FileNotFoundException($"Archive does not contain {options.Value.MetadataFile}");
     }
 }
