@@ -1,12 +1,15 @@
 namespace ZaggyCode.Modules.LanguageRuntime;
 
-public abstract class LanguageRunnerBase(LanguageRunnerDto dto) : ILanguageRunner
+public abstract class LanguageRunnerBase : ILanguageRunner
 {
-    private volatile ExecutionSpeed _speed = dto.Speed;
+    private volatile ExecutionSpeed _speed = ExecutionSpeed.X1;
 
-    protected TextReader Input { get; private set; } = dto.Input;
-    protected TextWriter Output { get; private set; } = dto.Output;
-    protected IRobotController RobotController { get; private set; } = dto.RobotController;
+    protected TextReader Input { get; private set; } = TextReader.Null;
+    protected TextWriter Output { get; private set; } = TextWriter.Null;
+
+    // Контроллер приходит только через Configure перед запуском, поэтому до него
+    // обращаться к свойству некому; null! избавляет от лишних проверок в наследниках.
+    protected IRobotController RobotController { get; private set; } = null!;
 
     public ExecutionSpeed Speed
     {

@@ -41,7 +41,9 @@ public sealed class Bootstrapper
             .AddClasses(c => c.WithAttribute<LanguageAttribute>())
             .AsImplementedInterfaces()
             .WithServiceKey(type => type.GetCustomAttribute<LanguageAttribute>()!.Language)
-            .WithScopedLifetime()
+            // Раннеры живут весь сеанс и кэшируются фабрикой, поэтому scoped
+            // здесь только мешал бы резолву из корневого провайдера.
+            .WithSingletonLifetime()
 
             .AddClasses(c => c.Where(t =>
                 !t.IsAssignableTo(typeof(IDisposable)) &&

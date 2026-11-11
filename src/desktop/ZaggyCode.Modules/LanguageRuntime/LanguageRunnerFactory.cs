@@ -11,20 +11,13 @@ public sealed class LanguageRunnerFactory(IServiceProvider serviceProvider) : IL
     {
         using var scope = _lock.EnterScope();
 
-        if (_runners.TryGetValue(dto.Language, out var existingRunner))
+        if (!_runners.TryGetValue(dto.Language, out var runner))
         {
-            existingRunner.Configure(dto);
-            return existingRunner;
+            runner = serviceProvider.GetRequiredKeyedService<ILanguageRunner>(dto.Language);
+            _runners[dto.Language] = runner;
         }
 
-        var runner = CreateRunner(dto);
-        _runners[dto.Language] = runner;
+        runner.Configure(dto);
         return runner;
     }
-
-    private ILanguageRunner CreateRunner(LanguageRunnerDto dto) => dto.Language switch
-    {
-        Language.Python => ActivatorUtilities.CreateInstance<PythonLanguageRunner>(serviceProvider, dto),
-        _ => throw new NotSupportedException($"Язык {dto.Language} пока не поддерживается.")
-    };
 }

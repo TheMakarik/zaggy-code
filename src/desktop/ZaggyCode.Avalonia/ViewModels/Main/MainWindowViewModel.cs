@@ -36,6 +36,8 @@ public partial class MainWindowViewModel : ViewModelBase
     public int SidebarColumn => IsSidebarRight ? 2 : 0;
     public int SidebarRow => IsSidebarTop ? 2 : 4;
     public string CodeTheme { get; private set; }
+    public PythonSettings PythonSettings => _pythonSettingsStorage.Current;
+    public CSharpSettings CSharpSettings => _csharpSettingsStorage.Current;
     public PopupOptions PopupOptions { get; }
     public ObservableCollection<CodeThemeItem> AvailableCodeThemes { get; } = [];
     public ObservableCollection<LanguageItem> AvailableLanguages { get; } = [];
@@ -96,6 +98,8 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly IServiceProvider _serviceProvider;
     private readonly IObservableStorage<StateSettings> _stateSettingsStorage;
     private readonly IObservableStorage<ViewSettings> _viewSettingsStorage;
+    private readonly IObservableStorage<PythonSettings> _pythonSettingsStorage;
+    private readonly IObservableStorage<CSharpSettings> _csharpSettingsStorage;
     private readonly IOptions<FontSizeOptions> _fontSizeOptions;
     private readonly IOptions<CodeThemeDisplayNameOptions> _displayNameOptions;
     private readonly IOptions<CodeThemeIconOptions> _iconOptions;
@@ -119,6 +123,8 @@ public partial class MainWindowViewModel : ViewModelBase
         IOptions<ZaggyAssetsOptions> zaggyAssets,
         IObservableStorage<StateSettings> stateSettingsStorage,
         IObservableStorage<ViewSettings> viewSettingsStorage,
+        IObservableStorage<PythonSettings> pythonSettingsStorage,
+        IObservableStorage<CSharpSettings> csharpSettingsStorage,
         IOptions<PopupOptions> popupOptions,
         IOptions<FontSizeOptions> textFontSize,
         IOptions<CodeThemeDisplayNameOptions> displayNameOptions,
@@ -136,6 +142,8 @@ public partial class MainWindowViewModel : ViewModelBase
         _fontSizeOptions = textFontSize;
         _stateSettingsStorage = stateSettingsStorage;
         _viewSettingsStorage = viewSettingsStorage;
+        _pythonSettingsStorage = pythonSettingsStorage;
+        _csharpSettingsStorage = csharpSettingsStorage;
         _displayNameOptions = displayNameOptions;
         _iconOptions = iconOptions;
         _mapAssetsOptions = mapAssetsOptions;

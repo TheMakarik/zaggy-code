@@ -27,11 +27,9 @@ public sealed class PythonLanguageRunner : LanguageRunnerBase
     private int _previousLineNumber;
 
     public PythonLanguageRunner(
-        LanguageRunnerDto dto,
         ILogger<PythonLanguageRunner> logger,
         IOptions<PythonScriptsOptions> pythonOptions,
         IPythonSettingsStorage pythonSettingsStorage)
-        : base(dto)
     {
         _logger = logger;
         _pythonSettingsStorage = pythonSettingsStorage;
@@ -66,11 +64,29 @@ public sealed class PythonLanguageRunner : LanguageRunnerBase
             TaskScheduler.Default);
 
         // Отмену обрабатывает производитель: он завершает writer, а читатель
-        // просто дочитывает канал. Токен здесь прервал бы enumeration исключением.
-        await foreach (var line in channel.Reader.ReadAllAsync())
-            yield return line;
+        // просто дочитывает канал. Токен нужен, чтобы читатель не ждал строк,
+        // которые уже не появятся, но его отмена не должна всплывать наружу.
+        while (await WaitForLineAsync(channel.Reader, cancellationToken))
+        {
+            if (channel.Reader.TryRead(out var line))
+                yield return line;
+        }
 
         await execution;
+    }
+
+    private static async ValueTask<bool> WaitForLineAsync(
+        ChannelReader<ComputedLineOfCode> reader,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            return await reader.WaitToReadAsync(cancellationToken);
+        }
+        catch (OperationCanceledException)
+        {
+            return false;
+        }
     }
 
     private void ExecuteCore(string code, ChannelWriter<ComputedLineOfCode> writer, CancellationToken cancellationToken)

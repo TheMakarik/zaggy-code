@@ -36,18 +36,23 @@ public class PythonLanguageRunnerTests : LanguageRunnerTests
     protected override string CodeDirectory => "Languages/PythonCode";
 
     protected override ILanguageRunner CreateRunner(IRobotController controller, TextReader input, TextWriter output)
-        => new PythonLanguageRunner(
-            new LanguageRunnerDto
-            {
-                Language = Language.Python,
-                Input = input,
-                Output = output,
-                Speed = ExecutionSpeed.X20,
-                RobotController = controller
-            },
+    {
+        var runner = new PythonLanguageRunner(
             A.Dummy<ILogger<PythonLanguageRunner>>(),
             _pythonOptions,
             _pythonSettingsStorage);
+
+        runner.Configure(new LanguageRunnerDto
+        {
+            Language = Language.Python,
+            Input = input,
+            Output = output,
+            Speed = ExecutionSpeed.X20,
+            RobotController = controller
+        });
+
+        return runner;
+    }
 
     protected override string GetCode(string propertyName)
     {

@@ -38,7 +38,7 @@
 
             <TextBlock Classes="settings-section-title" Text="Ввод-вывод" />
             <CheckBox
-                Content="Заблокировать ввод-вывод"
+                Content="Подавлять ввод и вывод"
                 IsChecked="{Binding BlockIo}"
                 ToolTip.Tip="Запрещает чтение и запись в стандартные потоки" />
             <TextBlock

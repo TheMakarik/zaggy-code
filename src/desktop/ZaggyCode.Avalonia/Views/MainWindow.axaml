@@ -266,13 +266,20 @@
                                         BasedOn="{StaticResource {x:Type MenuItem}}"
                                         TargetType="MenuItem"
                                         x:DataType="records:CodeThemeItem">
-                                        <Setter Property="Header" Value="{Binding DisplayName, Mode=OneWay}" />
+                                        <Setter Property="Header" Value="{Binding .}" />
                                         <Setter Property="Command" Value="{Binding DataContext.SelectCodeThemeCommand, ElementName=ThisWindow}" />
                                         <Setter Property="CommandParameter" Value="{Binding ThemeName}" />
-                                        <Setter Property="Icon">
+                                        <Setter Property="HeaderTemplate">
                                             <Setter.Value>
                                                 <DataTemplate x:DataType="records:CodeThemeItem">
-                                                    <materialIcons:MaterialIcon Kind="{Binding IconKind}" />
+                                                    <StackPanel Orientation="Horizontal" Spacing="12">
+                                                        <materialIcons:MaterialIcon
+                                                            Height="17"
+                                                            Kind="{Binding IconKind}"
+                                                            VerticalAlignment="Center"
+                                                            Width="17" />
+                                                        <TextBlock Text="{Binding DisplayName}" VerticalAlignment="Center" />
+                                                    </StackPanel>
                                                 </DataTemplate>
                                             </Setter.Value>
                                         </Setter>
@@ -293,17 +300,24 @@
                                     <ControlTheme
                                         BasedOn="{StaticResource {x:Type MenuItem}}"
                                         TargetType="MenuItem"
-                                        x:DataType="dataEnums:SidebarPosition">
-                                        <Setter Property="Header" Value="{Binding ., Converter={converters:SidebarPositionToTextConverter}}" />
-                                        <Setter Property="Icon">
+                                        x:DataType="x:String">
+                                        <Setter Property="Header" Value="{Binding .}" />
+                                        <Setter Property="Command" Value="{Binding DataContext.ChangeSidebarPositionCommand, ElementName=ThisWindow}" />
+                                        <Setter Property="CommandParameter" Value="{Binding .}" />
+                                        <Setter Property="HeaderTemplate">
                                             <Setter.Value>
-                                                <DataTemplate x:DataType="dataEnums:SidebarPosition">
-                                                    <materialIcons:MaterialIcon Kind="{Binding ., Converter={converters:SidebarPositionToIconConverter}}" />
+                                                <DataTemplate x:DataType="x:String">
+                                                    <StackPanel Orientation="Horizontal" Spacing="12">
+                                                        <materialIcons:MaterialIcon
+                                                            Height="17"
+                                                            Kind="{Binding ., Converter={converters:SidebarPositionToIconConverter}}"
+                                                            VerticalAlignment="Center"
+                                                            Width="17" />
+                                                        <TextBlock Text="{Binding ., Converter={converters:SidebarPositionToTextConverter}}" VerticalAlignment="Center" />
+                                                    </StackPanel>
                                                 </DataTemplate>
                                             </Setter.Value>
                                         </Setter>
-                                        <Setter Property="Command" Value="{Binding DataContext.ChangeSidebarPositionCommand, ElementName=ThisWindow}" />
-                                        <Setter Property="CommandParameter" Value="{Binding .}" />
                                         <Setter Property="IsEnabled">
                                             <MultiBinding Converter="{converters:IsNotEqualConverter}">
                                                 <Binding Path="." />
@@ -319,6 +333,42 @@
                                 Icon="{materialIcons:MaterialIconExt Kind=WindowMaximize}"
                                 IsChecked="{Binding DataContext.UseOsDecoration, ElementName=ThisWindow}"
                                 Theme="{StaticResource ZaggyToggleMenuItem}" />
+                            <MenuItem
+                                Command="{Binding DataContext.ChangeTerminalVisibilityCommand, ElementName=ThisWindow}"
+                                Header="Терминал"
+                                Icon="{materialIcons:MaterialIconExt Kind=Terminal}"
+                                IsChecked="{Binding DataContext.IsTerminalVisible, ElementName=ThisWindow}"
+                                Theme="{StaticResource ZaggyToggleMenuItem}" />
+                            <MenuItem Header="Текст" Icon="{materialIcons:MaterialIconExt Kind=FontSize}">
+                                <MenuItem
+                                    Command="{Binding IncrementEditorFontSizeCommand}"
+                                    Header="Увеличить размер текста редактора"
+                                    Icon="{materialIcons:MaterialIconExt Kind=FormatFontSizeIncrease}"
+                                    IsVisible="{Binding IsCodeVisible}" />
+                                <MenuItem
+                                    Command="{Binding DecrementEditorFontSizeCommand}"
+                                    Header="Уменьшить размер текста редактора"
+                                    Icon="{materialIcons:MaterialIconExt Kind=FormatFontSizeDecrease}"
+                                    IsVisible="{Binding IsCodeVisible}" />
+                                <MenuItem
+                                    Command="{Binding IncrementDescriptionFontSizeCommand}"
+                                    Header="Увеличить размер текста описания"
+                                    Icon="{materialIcons:MaterialIconExt Kind=FormatFontSizeIncrease}"
+                                    IsVisible="{Binding IsDescriptionVisible}" />
+                                <MenuItem
+                                    Command="{Binding DecrementDescriptionFontSizeCommand}"
+                                    Header="Уменьшить размер текста описания"
+                                    Icon="{materialIcons:MaterialIconExt Kind=FormatFontSizeDecrease}"
+                                    IsVisible="{Binding IsDescriptionVisible}" />
+                                <MenuItem
+                                    Command="{Binding IncrementTerminalFontSizeCommand}"
+                                    Header="Увеличить размер текста терминала"
+                                    Icon="{materialIcons:MaterialIconExt Kind=FormatFontSizeIncrease}" />
+                                <MenuItem
+                                    Command="{Binding DecrementTerminalFontSizeCommand}"
+                                    Header="Уменьшить размер текста терминала"
+                                    Icon="{materialIcons:MaterialIconExt Kind=FormatFontSizeDecrease}" />
+                            </MenuItem>
                         </MenuItem>
 
                         <MenuItem Header="Сервис" Icon="{materialIcons:MaterialIconExt Kind=Settings}">
@@ -330,12 +380,35 @@
                                 Command="{Binding ThrowNotImplementedCommand}"
                                 Header="Управление горячими клавишами"
                                 Icon="{materialIcons:MaterialIconExt Kind=KeyboardSettings}" />
-                            <MenuItem
-                                Command="{Binding DataContext.ChangeTerminalVisibilityCommand, ElementName=ThisWindow}"
-                                Header="Терминал"
-                                Icon="{materialIcons:MaterialIconExt Kind=Terminal}"
-                                IsChecked="{Binding DataContext.IsTerminalVisible, ElementName=ThisWindow}"
-                                Theme="{StaticResource ZaggyToggleMenuItem}" />
+                            <MenuItem Header="Python" Icon="{materialIcons:MaterialIconExt Kind=LanguagePython}">
+                                <MenuItem
+                                    Header="Подавлять ввод и вывод"
+                                    Icon="{materialIcons:MaterialIconExt Kind=ConsoleLine}"
+                                    IsChecked="{Binding DataContext.PythonSettings.SupressIo, ElementName=ThisWindow, Mode=TwoWay}"
+                                    Theme="{StaticResource ZaggyToggleMenuItem}" />
+                                <MenuItem
+                                    Header="Использовать явную точку входа"
+                                    Icon="{materialIcons:MaterialIconExt Kind=Console}"
+                                    IsChecked="{Binding DataContext.PythonSettings.UseEntryFunction, ElementName=ThisWindow, Mode=TwoWay}"
+                                    Theme="{StaticResource ZaggyToggleMenuItem}" />
+                            </MenuItem>
+                            <MenuItem Header="C#" Icon="{materialIcons:MaterialIconExt Kind=LanguageCsharp}">
+                                <MenuItem
+                                    Header="Использовать операторы верхнего уровня"
+                                    Icon="{materialIcons:MaterialIconExt Kind=FormatListNumbered}"
+                                    IsChecked="{Binding DataContext.CSharpSettings.UseTopLevelStatements, ElementName=ThisWindow, Mode=TwoWay}"
+                                    Theme="{StaticResource ZaggyToggleMenuItem}" />
+                                <MenuItem
+                                    Header="Использовать неявные using"
+                                    Icon="{materialIcons:MaterialIconExt Kind=Import}"
+                                    IsChecked="{Binding DataContext.CSharpSettings.EnableImplicitUsings, ElementName=ThisWindow, Mode=TwoWay}"
+                                    Theme="{StaticResource ZaggyToggleMenuItem}" />
+                                <MenuItem
+                                    Header="Подавлять ввод и вывод"
+                                    Icon="{materialIcons:MaterialIconExt Kind=ConsoleLine}"
+                                    IsChecked="{Binding DataContext.CSharpSettings.BlockIo, ElementName=ThisWindow, Mode=TwoWay}"
+                                    Theme="{StaticResource ZaggyToggleMenuItem}" />
+                            </MenuItem>
                         </MenuItem>
 
                         <MenuItem Header="Справка" Icon="{materialIcons:MaterialIconExt Kind=HelpBox}">
@@ -425,13 +498,20 @@
                                             BasedOn="{StaticResource {x:Type MenuItem}}"
                                             TargetType="MenuItem"
                                             x:DataType="records:CodeThemeItem">
-                                            <Setter Property="Header" Value="{Binding DisplayName, Mode=OneWay}" />
+                                            <Setter Property="Header" Value="{Binding .}" />
                                             <Setter Property="Command" Value="{Binding DataContext.SelectCodeThemeCommand, ElementName=ThisWindow}" />
                                             <Setter Property="CommandParameter" Value="{Binding ThemeName}" />
-                                            <Setter Property="Icon">
+                                            <Setter Property="HeaderTemplate">
                                                 <Setter.Value>
                                                     <DataTemplate x:DataType="records:CodeThemeItem">
-                                                        <materialIcons:MaterialIcon Kind="{Binding IconKind}" />
+                                                        <StackPanel Orientation="Horizontal" Spacing="12">
+                                                            <materialIcons:MaterialIcon
+                                                                Height="17"
+                                                                Kind="{Binding IconKind}"
+                                                                VerticalAlignment="Center"
+                                                                Width="17" />
+                                                            <TextBlock Text="{Binding DisplayName}" VerticalAlignment="Center" />
+                                                        </StackPanel>
                                                     </DataTemplate>
                                                 </Setter.Value>
                                             </Setter>
@@ -452,17 +532,24 @@
                                         <ControlTheme
                                             BasedOn="{StaticResource {x:Type MenuItem}}"
                                             TargetType="MenuItem"
-                                            x:DataType="dataEnums:SidebarPosition">
-                                            <Setter Property="Header" Value="{Binding ., Converter={converters:SidebarPositionToTextConverter}}" />
-                                            <Setter Property="Icon">
+                                            x:DataType="x:String">
+                                            <Setter Property="Header" Value="{Binding .}" />
+                                            <Setter Property="Command" Value="{Binding DataContext.ChangeSidebarPositionCommand, ElementName=ThisWindow}" />
+                                            <Setter Property="CommandParameter" Value="{Binding .}" />
+                                            <Setter Property="HeaderTemplate">
                                                 <Setter.Value>
-                                                    <DataTemplate x:DataType="dataEnums:SidebarPosition">
-                                                        <materialIcons:MaterialIcon Kind="{Binding ., Converter={converters:SidebarPositionToIconConverter}}" />
+                                                    <DataTemplate x:DataType="x:String">
+                                                        <StackPanel Orientation="Horizontal" Spacing="12">
+                                                            <materialIcons:MaterialIcon
+                                                                Height="17"
+                                                                Kind="{Binding ., Converter={converters:SidebarPositionToIconConverter}}"
+                                                                VerticalAlignment="Center"
+                                                                Width="17" />
+                                                            <TextBlock Text="{Binding ., Converter={converters:SidebarPositionToTextConverter}}" VerticalAlignment="Center" />
+                                                        </StackPanel>
                                                     </DataTemplate>
                                                 </Setter.Value>
                                             </Setter>
-                                            <Setter Property="Command" Value="{Binding DataContext.ChangeSidebarPositionCommand, ElementName=ThisWindow}" />
-                                            <Setter Property="CommandParameter" Value="{Binding .}" />
                                             <Setter Property="IsEnabled">
                                                 <MultiBinding Converter="{converters:IsNotEqualConverter}">
                                                     <Binding Path="." />
@@ -477,6 +564,12 @@
                                     Header="Использовать системную рамку окна"
                                     Icon="{materialIcons:MaterialIconExt Kind=WindowMaximize}"
                                     IsChecked="{Binding DataContext.UseOsDecoration, ElementName=ThisWindow}"
+                                    Theme="{StaticResource ZaggyToggleMenuItem}" />
+                                <MenuItem
+                                    Command="{Binding DataContext.ChangeTerminalVisibilityCommand, ElementName=ThisWindow}"
+                                    Header="Терминал"
+                                    Icon="{materialIcons:MaterialIconExt Kind=Terminal}"
+                                    IsChecked="{Binding DataContext.IsTerminalVisible, ElementName=ThisWindow}"
                                     Theme="{StaticResource ZaggyToggleMenuItem}" />
                                 <MenuItem Header="Текст" Icon="{materialIcons:MaterialIconExt Kind=FontSize}">
                                     <MenuItem
@@ -519,12 +612,35 @@
                                     Command="{Binding ThrowNotImplementedCommand}"
                                     Header="Управление горячими клавишами"
                                     Icon="{materialIcons:MaterialIconExt Kind=KeyboardSettings}" />
-                                <MenuItem
-                                    Command="{Binding DataContext.ChangeTerminalVisibilityCommand, ElementName=ThisWindow}"
-                                    Header="Терминал"
-                                    Icon="{materialIcons:MaterialIconExt Kind=Terminal}"
-                                    IsChecked="{Binding DataContext.IsTerminalVisible, ElementName=ThisWindow}"
-                                    Theme="{StaticResource ZaggyToggleMenuItem}" />
+                                <MenuItem Header="Python" Icon="{materialIcons:MaterialIconExt Kind=LanguagePython}">
+                                    <MenuItem
+                                        Header="Подавлять ввод и вывод"
+                                        Icon="{materialIcons:MaterialIconExt Kind=ConsoleLine}"
+                                        IsChecked="{Binding DataContext.PythonSettings.SupressIo, ElementName=ThisWindow, Mode=TwoWay}"
+                                        Theme="{StaticResource ZaggyToggleMenuItem}" />
+                                    <MenuItem
+                                        Header="Использовать явную точку входа"
+                                        Icon="{materialIcons:MaterialIconExt Kind=Console}"
+                                        IsChecked="{Binding DataContext.PythonSettings.UseEntryFunction, ElementName=ThisWindow, Mode=TwoWay}"
+                                        Theme="{StaticResource ZaggyToggleMenuItem}" />
+                                </MenuItem>
+                                <MenuItem Header="C#" Icon="{materialIcons:MaterialIconExt Kind=LanguageCsharp}">
+                                    <MenuItem
+                                        Header="Использовать операторы верхнего уровня"
+                                        Icon="{materialIcons:MaterialIconExt Kind=FormatListNumbered}"
+                                        IsChecked="{Binding DataContext.CSharpSettings.UseTopLevelStatements, ElementName=ThisWindow, Mode=TwoWay}"
+                                        Theme="{StaticResource ZaggyToggleMenuItem}" />
+                                    <MenuItem
+                                        Header="Использовать неявные using"
+                                        Icon="{materialIcons:MaterialIconExt Kind=Import}"
+                                        IsChecked="{Binding DataContext.CSharpSettings.EnableImplicitUsings, ElementName=ThisWindow, Mode=TwoWay}"
+                                        Theme="{StaticResource ZaggyToggleMenuItem}" />
+                                    <MenuItem
+                                        Header="Подавлять ввод и вывод"
+                                        Icon="{materialIcons:MaterialIconExt Kind=ConsoleLine}"
+                                        IsChecked="{Binding DataContext.CSharpSettings.BlockIo, ElementName=ThisWindow, Mode=TwoWay}"
+                                        Theme="{StaticResource ZaggyToggleMenuItem}" />
+                                </MenuItem>
                             </MenuItem>
 
                             <MenuItem Header="Справка" Icon="{materialIcons:MaterialIconExt Kind=HelpBox}">
