@@ -29,7 +29,7 @@ public class ThemeCopierTests : IDisposable
         _tempOptions = CreateTempOptions();
         _reader = new TarBZip2ArchiveReader(
             A.Dummy<ILogger<TarBZip2ArchiveReader>>(),
-            new MetadataParser(_metadataOptions),
+            new MetadataParser(_metadataOptions, A.Dummy<ILogger<MetadataParser>>()),
             _tempOptions);
         _compressor = new TarBZip2ArchiveCompressor(
             A.Dummy<ILogger<TarBZip2ArchiveCompressor>>(),

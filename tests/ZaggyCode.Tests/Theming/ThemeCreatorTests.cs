@@ -27,7 +27,7 @@ public class ThemeCreatorTests : IDisposable
             new XmlSerializer<Theme>());
         _reader = new TarBZip2ArchiveReader(
             A.Dummy<ILogger<TarBZip2ArchiveReader>>(),
-            new MetadataParser(fakeOptions),
+            new MetadataParser(fakeOptions, A.Dummy<ILogger<MetadataParser>>()),
             tempOptions);
 
         _theme = CreateTheme();

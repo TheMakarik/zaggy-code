@@ -20,7 +20,7 @@ public class ThemeEditorServiceTests : IDisposable
         var tempOptions = CreateTempOptions();
         var reader = new TarBZip2ArchiveReader(
             A.Dummy<ILogger<TarBZip2ArchiveReader>>(),
-            new MetadataParser(metadataOptions),
+            new MetadataParser(metadataOptions, A.Dummy<ILogger<MetadataParser>>()),
             tempOptions);
 
         _catalog = new ThemeCatalog(
