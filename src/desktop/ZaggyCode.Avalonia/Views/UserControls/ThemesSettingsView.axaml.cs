@@ -79,6 +79,26 @@ public partial class ThemesSettingsView : ReactiveUserControl<AppearanceSettings
                 context.SetOutput(Unit.Default);
             });
         };
+
+        InitializeSearchBorderHighlight();
+    }
+
+    // Иконка поиска привязана к BorderBrush текстового поля, поэтому на фокусе
+    // меняем сам бордер поля — иконка следует за ним автоматически.
+    private void InitializeSearchBorderHighlight()
+    {
+        if (this.FindControl<TextBox>("ThemeSearchBox") is not { } searchBox)
+            return;
+
+        SetSearchBorderBrush(searchBox, "BorderBrush");
+        searchBox.GotFocus += (_, _) => SetSearchBorderBrush(searchBox, "BorderHighlightBrush");
+        searchBox.LostFocus += (_, _) => SetSearchBorderBrush(searchBox, "BorderBrush");
+    }
+
+    private static void SetSearchBorderBrush(TextBox searchBox, string resourceKey)
+    {
+        if (searchBox.TryFindResource(resourceKey, out var resource) && resource is IBrush brush)
+            searchBox.BorderBrush = brush;
     }
 
     private void OnThemeCardPointerEntered(object? sender, PointerEventArgs e)
