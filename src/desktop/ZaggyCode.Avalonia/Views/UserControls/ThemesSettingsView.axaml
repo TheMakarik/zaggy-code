@@ -18,10 +18,11 @@
     <ScrollViewer>
         <StackPanel Margin="20" Spacing="16">
             <StackPanel.ContextMenu>
-                <ContextMenu>
+                <ContextMenu x:Name="RootContextMenu">
                     <MenuItem
                         Header="Создать новую тему"
                         Icon="{materialIcons:MaterialIconExt Kind=Plus}"
+                        x:Name="CreateThemeMenuItem"
                         Command="{Binding AddNewThemeCommand}" />
                 </ContextMenu>
             </StackPanel.ContextMenu>
@@ -33,11 +34,13 @@
 
             <StackPanel Orientation="Horizontal" Spacing="8">
                 <materialIcons:MaterialIcon
-                    Foreground="{Binding #ThemeSearchBox.BorderBrush}"
+                    Foreground="{DynamicResource BorderBrush}"
                     Kind="Search"
+                    x:Name="ThemeSearchIcon"
                     VerticalAlignment="Center" />
                 <TextBox
                     CornerRadius="8"
+                    HorizontalAlignment="Stretch"
                     Watermark="Поиск тем…"
                     x:Name="ThemeSearchBox"
                     Text="{Binding ThemeSearchText, Mode=TwoWay}" />

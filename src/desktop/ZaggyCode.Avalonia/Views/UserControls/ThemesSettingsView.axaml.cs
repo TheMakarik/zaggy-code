@@ -1,5 +1,6 @@
 using Avalonia.Input.Platform;
 using Avalonia.Platform.Storage;
+using Material.Icons.Avalonia;
 
 namespace ZaggyCode.Avalonia.Views.UserControls;
 
@@ -13,6 +14,11 @@ public partial class ThemesSettingsView : ReactiveUserControl<AppearanceSettings
         {
             if (DataContext is not AppearanceSettingsViewModel viewModel)
                 return;
+
+            // Биндинг команды из ContextMenu не подхватывает DataContext корневой панели,
+            // из-за чего пункт меню остаётся задизейбленым — выставляем команду вручную.
+            if (this.FindControl<MenuItem>("CreateThemeMenuItem") is { } createThemeMenuItem)
+                createThemeMenuItem.Command = viewModel.AddNewThemeCommand;
 
             viewModel.OpenThemeEditor.RegisterHandler(async context =>
             {
@@ -83,22 +89,27 @@ public partial class ThemesSettingsView : ReactiveUserControl<AppearanceSettings
         InitializeSearchBorderHighlight();
     }
 
-    // Иконка поиска привязана к BorderBrush текстового поля, поэтому на фокусе
-    // меняем сам бордер поля — иконка следует за ним автоматически.
+    // Иконка поиска меняет цвет вместе с бордером поля, поэтому при фокусе
+    // меняем оба через события: биндинг на BorderBrush внутри шаблона иконки не подхватывается.
     private void InitializeSearchBorderHighlight()
     {
         if (this.FindControl<TextBox>("ThemeSearchBox") is not { } searchBox)
             return;
 
-        SetSearchBorderBrush(searchBox, "BorderBrush");
-        searchBox.GotFocus += (_, _) => SetSearchBorderBrush(searchBox, "BorderHighlightBrush");
-        searchBox.LostFocus += (_, _) => SetSearchBorderBrush(searchBox, "BorderBrush");
+        var icon = this.FindControl<MaterialIcon>("ThemeSearchIcon");
+        SetSearchBorderBrush(searchBox, "BorderBrush", icon);
+        searchBox.GotFocus += (_, _) => SetSearchBorderBrush(searchBox, "BorderHighlightBrush", icon);
+        searchBox.LostFocus += (_, _) => SetSearchBorderBrush(searchBox, "BorderBrush", icon);
     }
 
-    private static void SetSearchBorderBrush(TextBox searchBox, string resourceKey)
+    private static void SetSearchBorderBrush(TextBox searchBox, string resourceKey, MaterialIcon? icon)
     {
         if (searchBox.TryFindResource(resourceKey, out var resource) && resource is IBrush brush)
+        {
             searchBox.BorderBrush = brush;
+            if (icon is not null)
+                icon.Foreground = brush;
+        }
     }
 
     private void OnThemeCardPointerEntered(object? sender, PointerEventArgs e)
