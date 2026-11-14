@@ -89,20 +89,31 @@ public partial class ThemesSettingsView : ReactiveUserControl<AppearanceSettings
         InitializeSearchBorderHighlight();
     }
 
-    // Иконка поиска меняет цвет вместе с бордером поля, поэтому при фокусе
-    // меняем оба через события: биндинг на BorderBrush внутри шаблона иконки не подхватывается.
+    // Цвет иконки поиска синхронизирован с бордером поля: обычный, при ховере и при
+    // фокусе — подсвеченный. Меняем напрямую в событиях TextBox, биндинги не подхватываются.
     private void InitializeSearchBorderHighlight()
     {
         if (this.FindControl<TextBox>("ThemeSearchBox") is not { } searchBox)
             return;
 
         var icon = this.FindControl<MaterialIcon>("ThemeSearchIcon");
-        SetSearchBorderBrush(searchBox, "BorderBrush", icon);
-        searchBox.GotFocus += (_, _) => SetSearchBorderBrush(searchBox, "BorderHighlightBrush", icon);
-        searchBox.LostFocus += (_, _) => SetSearchBorderBrush(searchBox, "BorderBrush", icon);
+        ApplySearchBrush(searchBox, icon, "BorderBrush");
+
+        searchBox.PointerEntered += (_, _) => ApplySearchBrush(searchBox, icon, "BorderHighlightBrush");
+        searchBox.PointerExited += (_, _) =>
+        {
+            if (!searchBox.IsFocused)
+                ApplySearchBrush(searchBox, icon, "BorderBrush");
+        };
+        searchBox.GotFocus += (_, _) => ApplySearchBrush(searchBox, icon, "BorderHighlightBrush");
+        searchBox.LostFocus += (_, _) =>
+        {
+            if (!searchBox.IsPointerOver)
+                ApplySearchBrush(searchBox, icon, "BorderBrush");
+        };
     }
 
-    private static void SetSearchBorderBrush(TextBox searchBox, string resourceKey, MaterialIcon? icon)
+    private static void ApplySearchBrush(TextBox searchBox, MaterialIcon? icon, string resourceKey)
     {
         if (searchBox.TryFindResource(resourceKey, out var resource) && resource is IBrush brush)
         {
