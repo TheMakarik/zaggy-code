@@ -18,6 +18,8 @@ public sealed record ThemeMetadataItem(
     public ICommand? CopyCommand { get; init; }
     public ICommand? DeleteCommand { get; init; }
     public ICommand? EditCommand { get; init; }
+    public ICommand? ShowFileCommand { get; init; }
+    public ICommand? CopyFileCommand { get; init; }
 
     public static ThemeMetadataItem From(ThemeMetadata metadata) => new(
         metadata.Name,

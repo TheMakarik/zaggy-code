@@ -12,6 +12,7 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
     [Reactive] private string _selectedAppTheme = string.Empty;
     [Reactive] private ThemeCreationBehavior _themeCreationBehavior;
     [Reactive] private bool _isLoadingThemes = true;
+    [Reactive] private string _themeSearchText = string.Empty;
     [Reactive] private bool _hasChanges;
     [Reactive] private bool _canDecreaseCodeFontSize;
     [Reactive] private bool _canIncreaseCodeFontSize;
@@ -30,6 +31,7 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
     private readonly IThemeDeleter _themeDeleter;
     private readonly IThemeEditorService _themeEditor;
     private readonly IThemeCreator _themeCreator;
+    private readonly IThemeSearchService _themeSearchService;
     private readonly ThemeOptions _themeOptions;
     private readonly string _zaggyQuestionPath;
     private readonly ILogger<AppearanceSettingsViewModel> _logger;
@@ -47,11 +49,14 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
 
     public ObservableCollection<CodeThemeItem> AvailableCodeThemes { get; } = [];
     public ObservableCollection<ThemeMetadataItem> AvailableAppThemes { get; } = [];
+    public ObservableCollection<ThemeMetadataItem> FilteredAppThemes { get; } = [];
     public IReadOnlyList<ThemeCreationBehavior> ThemeCreationBehaviorValues { get; } = Enum.GetValues<ThemeCreationBehavior>();
     public IReadOnlyList<SidebarPosition> SidebarPositionValues { get; } = Enum.GetValues<SidebarPosition>();
     public Interaction<string, string> ApplyCodeThemeInteraction { get; } = new();
     public Interaction<ThemeEditorViewModel, Unit> OpenThemeEditor { get; } = new();
     public Interaction<AddThemeViewModel, string?> OpenAddTheme { get; } = new();
+    public Interaction<string, Unit> ShowThemeFileInteraction { get; } = new();
+    public Interaction<string, Unit> CopyThemeFileInteraction { get; } = new();
     public string CSharpExamplePath { get; }
     public string PythonExamplePath { get; }
 
@@ -68,6 +73,7 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
         IThemeDeleter themeDeleter,
         IThemeEditorService themeEditor,
         IThemeCreator themeCreator,
+        IThemeSearchService themeSearchService,
         IOptions<ThemeOptions> themeOptions,
         IOptions<ZaggyAssetsOptions> zaggyAssets,
         ILogger<AppearanceSettingsViewModel> logger)
@@ -82,6 +88,7 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
         _themeDeleter = themeDeleter;
         _themeEditor = themeEditor;
         _themeCreator = themeCreator;
+        _themeSearchService = themeSearchService;
         _themeOptions = themeOptions.Value;
         _zaggyQuestionPath = zaggyAssets.Value.EmotionQuestion;
         _logger = logger;
@@ -129,6 +136,9 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
                 CanDecreaseCodeFontSize = CodeFontSize > MinFontSize;
                 CanIncreaseCodeFontSize = CodeFontSize < MaxFontSize;
             });
+
+        this.WhenAnyValue(viewModel => viewModel.ThemeSearchText)
+            .Subscribe(_ => ApplyThemeFilter());
 
         this.WhenAnyValue(viewModel => viewModel.TerminalFontSize)
             .Subscribe(_ =>
@@ -271,16 +281,30 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
             {
                 CopyCommand = CopyThemeCommand,
                 DeleteCommand = DeleteThemeCommand,
-                EditCommand = EditThemeCommand
+                EditCommand = EditThemeCommand,
+                ShowFileCommand = ShowThemeFileCommand,
+                CopyFileCommand = CopyThemeFileCommand
             };
             AvailableAppThemes.Add(item);
         }
+
+        ApplyThemeFilter();
 
         var saved = _themeSettingsStorage.Current.CurrentTheme;
         var selected = AvailableAppThemes.Any(theme => theme.Name == saved) ? saved : string.Empty;
 
         if (SelectedAppTheme != selected)
             SelectedAppTheme = selected;
+    }
+
+    private void ApplyThemeFilter()
+    {
+        var itemByMetadata = AvailableAppThemes.ToDictionary(item => item.Source);
+        var filtered = _themeSearchService.Search([.. itemByMetadata.Keys], ThemeSearchText);
+
+        FilteredAppThemes.Clear();
+        foreach (var metadata in filtered)
+            FilteredAppThemes.Add(itemByMetadata[metadata]);
     }
 
     [ReactiveCommand]
@@ -363,6 +387,30 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
         {
             _logger.LogError(e, "Не удалось создать новую тему");
         }
+    }
+
+    [ReactiveCommand]
+    private async Task ShowThemeFile(ThemeMetadataItem item)
+    {
+        if (item.Source.Path is not { } path)
+        {
+            _logger.LogWarning("Тема «{name}» не имеет файла на диске", item.Name);
+            return;
+        }
+
+        await ShowThemeFileInteraction.Handle(path);
+    }
+
+    [ReactiveCommand]
+    private async Task CopyThemeFile(ThemeMetadataItem item)
+    {
+        if (item.Source.Path is not { } path)
+        {
+            _logger.LogWarning("Тема «{name}» не имеет файла на диске", item.Name);
+            return;
+        }
+
+        await CopyThemeFileInteraction.Handle(path);
     }
 
     private async Task CreateThemeAsync(string name)

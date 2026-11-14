@@ -1,3 +1,6 @@
+using Avalonia.Input.Platform;
+using Avalonia.Platform.Storage;
+
 namespace ZaggyCode.Avalonia.Views.UserControls;
 
 public partial class ThemesSettingsView : ReactiveUserControl<AppearanceSettingsViewModel>
@@ -44,6 +47,22 @@ public partial class ThemesSettingsView : ReactiveUserControl<AppearanceSettings
                 };
 
                 context.SetOutput(await window.ShowDialog<string?>(owner));
+            });
+
+            viewModel.ShowThemeFileInteraction.RegisterHandler(async context =>
+            {
+                if (TopLevel.GetTopLevel(this)?.Launcher is { } launcher)
+                    await launcher.LaunchFileInfoAsync(new FileInfo(context.Input));
+
+                context.SetOutput(Unit.Default);
+            });
+
+            viewModel.CopyThemeFileInteraction.RegisterHandler(async context =>
+            {
+                if (TopLevel.GetTopLevel(this)?.Clipboard is { } clipboard)
+                    await clipboard.SetTextAsync(context.Input);
+
+                context.SetOutput(Unit.Default);
             });
         };
     }

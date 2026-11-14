@@ -38,6 +38,7 @@ public sealed partial class SettingsViewModel : ViewModelBase
         IThemeDeleter themeDeleter,
         IThemeEditorService themeEditor,
         IThemeCreator themeCreator,
+        IThemeSearchService themeSearchService,
         IOptions<ThemeOptions> themeOptions,
         IOptions<ZaggyAssetsOptions> zaggyAssets,
         IPythonFunctionNameValidator pythonFunctionNameValidator,
@@ -61,6 +62,7 @@ public sealed partial class SettingsViewModel : ViewModelBase
             themeDeleter,
             themeEditor,
             themeCreator,
+            themeSearchService,
             themeOptions,
             zaggyAssets,
             loggerFactory.CreateLogger<AppearanceSettingsViewModel>());
