@@ -51,16 +51,30 @@ public partial class ThemesSettingsView : ReactiveUserControl<AppearanceSettings
 
             viewModel.ShowThemeFileInteraction.RegisterHandler(async context =>
             {
-                if (TopLevel.GetTopLevel(this)?.Launcher is { } launcher)
-                    await launcher.LaunchFileInfoAsync(new FileInfo(context.Input));
+                if (TopLevel.GetTopLevel(this)?.Launcher is not { } launcher)
+                {
+                    context.SetOutput(Unit.Default);
+                    return;
+                }
+
+                // Показываем папку с темой: выделение файла средствами лаунчера не поддерживается.
+                var directory = Path.GetDirectoryName(context.Input);
+                if (directory is not null)
+                    await launcher.LaunchDirectoryInfoAsync(new DirectoryInfo(directory));
 
                 context.SetOutput(Unit.Default);
             });
 
             viewModel.CopyThemeFileInteraction.RegisterHandler(async context =>
             {
-                if (TopLevel.GetTopLevel(this)?.Clipboard is { } clipboard)
-                    await clipboard.SetTextAsync(context.Input);
+                if (TopLevel.GetTopLevel(this) is not { } topLevel)
+                {
+                    context.SetOutput(Unit.Default);
+                    return;
+                }
+
+                if (await topLevel.StorageProvider.TryGetFileFromPathAsync(context.Input) is { } file && topLevel.Clipboard is { } clipboard)
+                    await clipboard.SetFileAsync(file);
 
                 context.SetOutput(Unit.Default);
             });
