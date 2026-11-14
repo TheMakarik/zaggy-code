@@ -40,7 +40,7 @@
 
     <!--  Игровое поле  -->
     <Color x:Key="MapBackgroundColor">#161616</Color>
-    <Color x:Key="MapWallColor">#3D3D3D</Color>
+    <Color x:Key="MapWallColor">#8A9A7A</Color>
     <Color x:Key="MapPaintedCellColor">#73F2C14E</Color>
     <Color x:Key="MapPointBorderColor">#8A9A7A</Color>
     <Color x:Key="MapRequireDrawColor">#8A9A7A</Color>
