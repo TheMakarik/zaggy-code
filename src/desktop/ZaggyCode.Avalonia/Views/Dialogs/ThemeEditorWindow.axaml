@@ -15,7 +15,7 @@
     x:DataType="vm:ThemeEditorViewModel"
     xmlns="https://github.com/avaloniaui"
     xmlns:controls="clr-namespace:ZaggyCode.Avalonia.Views.Controls"
-    xmlns:converters="clr-namespace:ZaggyCode.Avalonia.Views.Converters"
+    xmlns:converters="clr-namespace:ZaggyCode.Avalonia.Views.Converters.Common"
     xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
     xmlns:theming="clr-namespace:ZaggyCode.Core.Theming.Model;assembly=ZaggyCode.Core"
     xmlns:vm="using:ZaggyCode.Avalonia.ViewModels.Themes"

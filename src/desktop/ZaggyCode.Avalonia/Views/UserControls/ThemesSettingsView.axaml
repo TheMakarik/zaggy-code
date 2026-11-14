@@ -5,7 +5,7 @@
     x:TypeArguments="vm:AppearanceSettingsViewModel"
     xmlns="https://github.com/avaloniaui"
     xmlns:controls="clr-namespace:ZaggyCode.Avalonia.Views.Controls"
-    xmlns:converters="clr-namespace:ZaggyCode.Avalonia.Views.Converters"
+    xmlns:converters="clr-namespace:ZaggyCode.Avalonia.Views.Converters.Common" xmlns:themeConverters="clr-namespace:ZaggyCode.Avalonia.Views.Converters.Themes"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -17,6 +17,14 @@
 
     <ScrollViewer>
         <StackPanel Margin="20" Spacing="16">
+            <StackPanel.ContextMenu>
+                <ContextMenu>
+                    <MenuItem
+                        Header="Создать новую тему"
+                        Icon="{materialIcons:MaterialIconExt Kind=Plus}"
+                        Command="{Binding AddNewThemeCommand}" />
+                </ContextMenu>
+            </StackPanel.ContextMenu>
 
             <userControls:SettingsSectionHeader
                 Description="Оформление приложения: цвет фона, поверхностей, рамок и подсветки."
@@ -30,15 +38,24 @@
                     SelectedItem="{Binding ThemeCreationBehavior}">
                     <ComboBox.ItemTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding Converter={converters:ThemeCreationBehaviorToTextConverter}}" />
+                            <TextBlock Text="{Binding Converter={themeConverters:ThemeCreationBehaviorToTextConverter}}" />
                         </DataTemplate>
                     </ComboBox.ItemTemplate>
                 </ComboBox>
             </StackPanel>
 
-            <TextBox
-                Watermark="Поиск тем…"
-                Text="{Binding ThemeSearchText, Mode=TwoWay}" />
+            <Panel>
+                <TextBox
+                    Watermark="Поиск тем…"
+                    Text="{Binding ThemeSearchText, Mode=TwoWay}" />
+                <materialIcons:MaterialIcon
+                    Foreground="{DynamicResource BorderBrush}"
+                    HorizontalAlignment="Right"
+                    IsHitTestVisible="False"
+                    Kind="Search"
+                    Margin="0,0,12,0"
+                    VerticalAlignment="Center" />
+            </Panel>
 
             <StackPanel
                 HorizontalAlignment="Center"

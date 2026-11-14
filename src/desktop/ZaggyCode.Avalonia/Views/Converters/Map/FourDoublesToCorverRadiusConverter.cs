@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Avalonia.Data.Converters;
 
-namespace ZaggyCode.Avalonia.Views.Converters;
+namespace ZaggyCode.Avalonia.Views.Converters.Map;
 
 public class FourDoublesToCorverRadiusConverter : MarkupExtension, IMultiValueConverter
 {

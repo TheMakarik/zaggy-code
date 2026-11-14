@@ -1,4 +1,4 @@
-namespace ZaggyCode.Avalonia.Views.Converters;
+namespace ZaggyCode.Avalonia.Views.Converters.Common;
 
 public sealed class NullableDoubleConverter : MarkupExtension, IValueConverter
 {

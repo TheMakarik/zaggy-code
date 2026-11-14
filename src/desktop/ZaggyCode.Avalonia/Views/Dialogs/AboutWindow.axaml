@@ -14,7 +14,7 @@
     x:DataType="vm:AboutViewModel"
     xmlns="https://github.com/avaloniaui"
     xmlns:controls="clr-namespace:ZaggyCode.Avalonia.Views.Controls"
-    xmlns:converters="clr-namespace:ZaggyCode.Avalonia.Views.Converters"
+    xmlns:converters="clr-namespace:ZaggyCode.Avalonia.Views.Converters.Common"
     xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
     xmlns:records="using:ZaggyCode.Avalonia.ViewModels.Common.Records"
     xmlns:vm="using:ZaggyCode.Avalonia.ViewModels.About"

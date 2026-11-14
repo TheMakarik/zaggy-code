@@ -15,7 +15,7 @@
     xmlns:avaloniaEdit="https://github.com/avaloniaui/avaloniaedit"
     xmlns:behaviors="clr-namespace:ZaggyCode.Avalonia.Views.Behaviors"
     xmlns:controls="clr-namespace:ZaggyCode.Avalonia.Views.Controls"
-    xmlns:converters="clr-namespace:ZaggyCode.Avalonia.Views.Converters"
+    xmlns:converters="clr-namespace:ZaggyCode.Avalonia.Views.Converters.Common"
     xmlns:ctxt="clr-namespace:ColorTextBlock.Avalonia;assembly=ColorTextBlock.Avalonia"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:dataEnums="clr-namespace:ZaggyCode.Core.Data.Enums;assembly=ZaggyCode.Core"

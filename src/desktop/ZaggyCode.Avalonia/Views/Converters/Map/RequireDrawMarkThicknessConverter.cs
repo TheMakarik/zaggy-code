@@ -1,4 +1,4 @@
-namespace ZaggyCode.Avalonia.Views.Converters;
+namespace ZaggyCode.Avalonia.Views.Converters.Map;
 
 public sealed class RequireDrawMarkThicknessConverter : MarkupExtension, IMultiValueConverter
 {

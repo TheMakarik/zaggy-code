@@ -1,25 +1,22 @@
-namespace ZaggyCode.Avalonia.Views.Converters;
+namespace ZaggyCode.Avalonia.Views.Converters.Common;
 
-public sealed class FalseToZeroOrTrueToParameterConverter  : MarkupExtension, IValueConverter
+//#:NO_AI
+public class HexStringToBrushConverter : MarkupExtension, IValueConverter
 {
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
-        return value switch
-        {
-            false => 0d,
-            true => (double)(parameter ?? throw new ArgumentNullException(nameof(parameter))),
-            _ => null
-        };
+        return value is not string hex 
+            ? null 
+            : Brush.Parse(hex);
     }
 
     public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
         throw new NotSupportedException();
     }
-    
+
     public override object ProvideValue(IServiceProvider serviceProvider)
     {
         return this;
     }
-
 }

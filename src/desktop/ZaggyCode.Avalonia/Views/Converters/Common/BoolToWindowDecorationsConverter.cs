@@ -1,4 +1,4 @@
-namespace ZaggyCode.Avalonia.Views.Converters;
+namespace ZaggyCode.Avalonia.Views.Converters.Common;
 
 public class BoolToWindowDecorationsConverter : MarkupExtension, IValueConverter
 {

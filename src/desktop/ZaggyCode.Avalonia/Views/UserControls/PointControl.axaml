@@ -6,7 +6,7 @@
     x:DataType="robot:RobotGamePoint"
     xmlns="https://github.com/avaloniaui"
     xmlns:controls="clr-namespace:ZaggyCode.Avalonia.Views.Controls"
-    xmlns:converters="clr-namespace:ZaggyCode.Avalonia.Views.Converters"
+    xmlns:converters="clr-namespace:ZaggyCode.Avalonia.Views.Converters.Common" xmlns:mapConverters="clr-namespace:ZaggyCode.Avalonia.Views.Converters.Map"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:robot="clr-namespace:ZaggyCode.Core.RobotGameCore.Model;assembly=ZaggyCode.Core"
@@ -25,7 +25,7 @@
         BorderThickness="1"
         ClipToBounds="True">
         <Border.CornerRadius>
-            <MultiBinding Converter="{converters:FourDoublesToCorverRadiusConverter}">
+            <MultiBinding Converter="{mapConverters:FourDoublesToCorverRadiusConverter}">
                 <Binding Path="CustomBorderRadiusLeftTop" />
                 <Binding Path="CustomBorderRadiusLeftBottom" />
                 <Binding Path="CustomBorderRadiusRightTop" />
@@ -33,7 +33,7 @@
             </MultiBinding>
         </Border.CornerRadius>
         <Border.Margin>
-            <MultiBinding Converter="{converters:FourDoublesToThicknessConverter}">
+            <MultiBinding Converter="{mapConverters:FourDoublesToThicknessConverter}">
                 <Binding Path="CustomBorderMarginLeft" />
                 <Binding Path="CustomBorderMarginTop" />
                 <Binding Path="CustomBorderMarginRight" />
@@ -48,7 +48,7 @@
                 <Rectangle
                     Classes="wall-segment"
                     Fill="{DynamicResource MapWallBrush}"
-                    IsVisible="{Binding WallType, Converter={converters:WallEdgeVisibilityConverter}, ConverterParameter=Full}"
+                    IsVisible="{Binding WallType, Converter={mapConverters:WallEdgeVisibilityConverter}, ConverterParameter=Full}"
                     Opacity="{Binding CustomWallOpacity, Converter={converters:NullableDoubleConverter}}"
                     Stroke="{Binding CustomWallBorderOnPointHex, Converter={converters:HexStringToBrushConverter}}" />
 
@@ -57,7 +57,7 @@
                     Fill="{DynamicResource MapWallBrush}"
                     Height="{Binding $parent[UserControl].Bounds.Height, Converter={converters:PercentOfValueConverter}, ConverterParameter=0.15}"
                     HorizontalAlignment="Stretch"
-                    IsVisible="{Binding WallType, Converter={converters:WallEdgeVisibilityConverter}, ConverterParameter=Top}"
+                    IsVisible="{Binding WallType, Converter={mapConverters:WallEdgeVisibilityConverter}, ConverterParameter=Top}"
                     Opacity="{Binding CustomWallOpacity, Converter={converters:NullableDoubleConverter}}"
                     Stroke="{Binding CustomWallBorderOnPointHex, Converter={converters:HexStringToBrushConverter}}"
                     VerticalAlignment="Top" />
@@ -67,7 +67,7 @@
                     Fill="{DynamicResource MapWallBrush}"
                     Height="{Binding $parent[UserControl].Bounds.Height, Converter={converters:PercentOfValueConverter}, ConverterParameter=0.15}"
                     HorizontalAlignment="Stretch"
-                    IsVisible="{Binding WallType, Converter={converters:WallEdgeVisibilityConverter}, ConverterParameter=Bottom}"
+                    IsVisible="{Binding WallType, Converter={mapConverters:WallEdgeVisibilityConverter}, ConverterParameter=Bottom}"
                     Opacity="{Binding CustomWallOpacity, Converter={converters:NullableDoubleConverter}}"
                     Stroke="{Binding CustomWallBorderOnPointHex, Converter={converters:HexStringToBrushConverter}}"
                     VerticalAlignment="Bottom" />
@@ -76,7 +76,7 @@
                     Classes="wall-segment"
                     Fill="{DynamicResource MapWallBrush}"
                     HorizontalAlignment="Left"
-                    IsVisible="{Binding WallType, Converter={converters:WallEdgeVisibilityConverter}, ConverterParameter=Left}"
+                    IsVisible="{Binding WallType, Converter={mapConverters:WallEdgeVisibilityConverter}, ConverterParameter=Left}"
                     Opacity="{Binding CustomWallOpacity, Converter={converters:NullableDoubleConverter}}"
                     Stroke="{Binding CustomWallBorderOnPointHex, Converter={converters:HexStringToBrushConverter}}"
                     VerticalAlignment="Stretch"
@@ -86,7 +86,7 @@
                     Classes="wall-segment"
                     Fill="{DynamicResource MapWallBrush}"
                     HorizontalAlignment="Right"
-                    IsVisible="{Binding WallType, Converter={converters:WallEdgeVisibilityConverter}, ConverterParameter=Right}"
+                    IsVisible="{Binding WallType, Converter={mapConverters:WallEdgeVisibilityConverter}, ConverterParameter=Right}"
                     Opacity="{Binding CustomWallOpacity, Converter={converters:NullableDoubleConverter}}"
                     Stroke="{Binding CustomWallBorderOnPointHex, Converter={converters:HexStringToBrushConverter}}"
                     VerticalAlignment="Stretch"
@@ -100,13 +100,13 @@
                 VerticalAlignment="Center"
                 ZIndex="2">
                 <Viewbox.Height>
-                    <MultiBinding Converter="{converters:PointRelativeSizeConverter}" ConverterParameter="0.25">
+                    <MultiBinding Converter="{mapConverters:PointRelativeSizeConverter}" ConverterParameter="0.25">
                         <Binding Path="$parent[UserControl].Bounds.Height" />
                         <Binding Path="RequireDrawMarkHeight" />
                     </MultiBinding>
                 </Viewbox.Height>
                 <Viewbox.Width>
-                    <MultiBinding Converter="{converters:PointRelativeSizeConverter}" ConverterParameter="0.25">
+                    <MultiBinding Converter="{mapConverters:PointRelativeSizeConverter}" ConverterParameter="0.25">
                         <Binding Path="$parent[UserControl].Bounds.Width" />
                         <Binding Path="RequireDrawMarkWidth" />
                     </MultiBinding>
@@ -117,7 +117,7 @@
                         Stroke="{DynamicResource MapRequireDrawBrush}"
                         StrokeLineCap="Round">
                         <Path.StrokeThickness>
-                            <MultiBinding Converter="{converters:RequireDrawMarkThicknessConverter}">
+                            <MultiBinding Converter="{mapConverters:RequireDrawMarkThicknessConverter}">
                                 <Binding Path="RequireDrawMarkThickness" />
                                 <Binding Path="MakeRequireDrawOnGoalBold" />
                             </MultiBinding>

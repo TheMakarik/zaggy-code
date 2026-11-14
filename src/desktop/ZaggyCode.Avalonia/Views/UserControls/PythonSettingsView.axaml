@@ -3,7 +3,7 @@
     x:DataType="vm:PythonSettingsViewModel"
     x:TypeArguments="vm:PythonSettingsViewModel"
     xmlns="https://github.com/avaloniaui"
-    xmlns:converters="clr-namespace:ZaggyCode.Avalonia.Views.Converters"
+    xmlns:converters="clr-namespace:ZaggyCode.Avalonia.Views.Converters.Common"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:rxui="http://reactiveui.net"

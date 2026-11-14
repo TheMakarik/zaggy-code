@@ -1,4 +1,4 @@
-namespace ZaggyCode.Avalonia.Views.Converters;
+namespace ZaggyCode.Avalonia.Views.Converters.Themes;
 
 public sealed class ThemeCreationBehaviorToTextConverter : MarkupExtension, IValueConverter
 {

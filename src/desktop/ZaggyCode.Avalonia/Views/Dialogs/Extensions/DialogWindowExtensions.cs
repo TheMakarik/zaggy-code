@@ -1,5 +1,5 @@
 using Avalonia.Data;
-using ZaggyCode.Avalonia.Views.Converters;
+using ZaggyCode.Avalonia.Views.Converters.Common;
 
 namespace ZaggyCode.Avalonia.Views.Dialogs.Extensions;
 
