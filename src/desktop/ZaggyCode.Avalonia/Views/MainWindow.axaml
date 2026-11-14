@@ -342,24 +342,12 @@
                             <MenuItem Header="Текст" Icon="{materialIcons:MaterialIconExt Kind=FontSize}">
                                 <MenuItem
                                     Command="{Binding IncrementEditorFontSizeCommand}"
-                                    Header="Увеличить размер текста редактора"
-                                    Icon="{materialIcons:MaterialIconExt Kind=FormatFontSizeIncrease}"
-                                    IsVisible="{Binding IsCodeVisible}" />
+                                    Header="Увеличить размер текста редактора и описания"
+                                    Icon="{materialIcons:MaterialIconExt Kind=FormatFontSizeIncrease}" />
                                 <MenuItem
                                     Command="{Binding DecrementEditorFontSizeCommand}"
-                                    Header="Уменьшить размер текста редактора"
-                                    Icon="{materialIcons:MaterialIconExt Kind=FormatFontSizeDecrease}"
-                                    IsVisible="{Binding IsCodeVisible}" />
-                                <MenuItem
-                                    Command="{Binding IncrementDescriptionFontSizeCommand}"
-                                    Header="Увеличить размер текста описания"
-                                    Icon="{materialIcons:MaterialIconExt Kind=FormatFontSizeIncrease}"
-                                    IsVisible="{Binding IsDescriptionVisible}" />
-                                <MenuItem
-                                    Command="{Binding DecrementDescriptionFontSizeCommand}"
-                                    Header="Уменьшить размер текста описания"
-                                    Icon="{materialIcons:MaterialIconExt Kind=FormatFontSizeDecrease}"
-                                    IsVisible="{Binding IsDescriptionVisible}" />
+                                    Header="Уменьшить размер текста редактора и описания"
+                                    Icon="{materialIcons:MaterialIconExt Kind=FormatFontSizeDecrease}" />
                                 <MenuItem
                                     Command="{Binding IncrementTerminalFontSizeCommand}"
                                     Header="Увеличить размер текста терминала"
@@ -574,24 +562,12 @@
                                 <MenuItem Header="Текст" Icon="{materialIcons:MaterialIconExt Kind=FontSize}">
                                     <MenuItem
                                         Command="{Binding IncrementEditorFontSizeCommand}"
-                                        Header="Увеличить размер текста редактора"
-                                        Icon="{materialIcons:MaterialIconExt Kind=FormatFontSizeIncrease}"
-                                        IsVisible="{Binding IsCodeVisible}" />
+                                        Header="Увеличить размер текста редактора и описания"
+                                        Icon="{materialIcons:MaterialIconExt Kind=FormatFontSizeIncrease}" />
                                     <MenuItem
                                         Command="{Binding DecrementEditorFontSizeCommand}"
-                                        Header="Уменьшить размер текста редактора"
-                                        Icon="{materialIcons:MaterialIconExt Kind=FormatFontSizeDecrease}"
-                                        IsVisible="{Binding IsCodeVisible}" />
-                                    <MenuItem
-                                        Command="{Binding IncrementDescriptionFontSizeCommand}"
-                                        Header="Увеличить размер текста описания"
-                                        Icon="{materialIcons:MaterialIconExt Kind=FormatFontSizeIncrease}"
-                                        IsVisible="{Binding IsDescriptionVisible}" />
-                                    <MenuItem
-                                        Command="{Binding DecrementDescriptionFontSizeCommand}"
-                                        Header="Уменьшить размер текста описания"
-                                        Icon="{materialIcons:MaterialIconExt Kind=FormatFontSizeDecrease}"
-                                        IsVisible="{Binding IsDescriptionVisible}" />
+                                        Header="Уменьшить размер текста редактора и описания"
+                                        Icon="{materialIcons:MaterialIconExt Kind=FormatFontSizeDecrease}" />
                                     <MenuItem
                                         Command="{Binding IncrementTerminalFontSizeCommand}"
                                         Header="Увеличить размер текста терминала"
@@ -873,10 +849,10 @@
                                     <Interaction.Behaviors>
                                         <behaviors:MarkdownZoomBehavior
                                             DefaultFontSize="14"
-                                            FontSize="{Binding DescriptionFontSize}"
+                                            FontSize="{Binding TextEditorFontSize}"
                                             MaxFontSize="{Binding MaxFontSize, Mode=OneTime}"
                                             MinFontSize="{Binding MinFontSize, Mode=OneTime}"
-                                            UpdateFontSizeCommand="{Binding UpdateDescriptionFontSizeCommand}"
+                                            UpdateFontSizeCommand="{Binding UpdateFontSizeCommand}"
                                             ZoomStep="1" />
                                     </Interaction.Behaviors>
                                     <md:MarkdownScrollViewer.Styles>

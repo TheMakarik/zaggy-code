@@ -19,7 +19,6 @@ public partial class MainWindowViewModel : ViewModelBase
     [Reactive] private RobotMap _currentRobotMap;
     [Reactive] private int _textEditorFontSize;
     [Reactive] private int _terminalFontSize;
-    [Reactive] private int _descriptionFontSize;
     [Reactive] private bool _isDescriptionVisible;
 
     #endregion
@@ -154,7 +153,6 @@ public partial class MainWindowViewModel : ViewModelBase
         _selectedLanguage = stateSettingsStorage.Current.LastLanguage;
         _textEditorFontSize = viewSettingsStorage.Current.CodeFontSize;
         _terminalFontSize = viewSettingsStorage.Current.TerminalFontSize;
-        _descriptionFontSize = viewSettingsStorage.Current.DescriptionFontSize;
         _useOsDecoration = viewSettingsStorage.Current.UseSystemTitleBar;
         _sidebarPosition = viewSettingsStorage.Current.SidebarPosition;
         CodeTheme = viewSettingsStorage.Current.CodeTheme;
@@ -339,9 +337,6 @@ public partial class MainWindowViewModel : ViewModelBase
         MessageBus.Current.Listen<TerminalFontSizeChangedMessage>()
             .Subscribe(message => TerminalFontSize = message.FontSize);
 
-        MessageBus.Current.Listen<DescriptionFontSizeChangedMessage>()
-            .Subscribe(message => DescriptionFontSize = message.FontSize);
-
         MessageBus.Current.Listen<UseSystemTitleBarChangedMessage>()
             .Subscribe(message => UseOsDecoration = message.UseSystemTitleBar);
 
@@ -371,10 +366,6 @@ public partial class MainWindowViewModel : ViewModelBase
         this.WhenAnyValue(vm => vm.TerminalFontSize)
             .Where(size => size != _viewSettingsStorage.Current.TerminalFontSize)
             .Subscribe(_ => _viewSettingsStorage.Current.TerminalFontSize = _terminalFontSize);
-
-        this.WhenAnyValue(vm => vm.DescriptionFontSize)
-            .Where(size => size != _viewSettingsStorage.Current.DescriptionFontSize)
-            .Subscribe(_ => _viewSettingsStorage.Current.DescriptionFontSize = _descriptionFontSize);
 
         this.WhenAnyValue(vm => vm.UseOsDecoration)
             .Where(useOsDecoration => useOsDecoration != _viewSettingsStorage.Current.UseSystemTitleBar)
@@ -537,38 +528,8 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     [ReactiveCommand]
-    private async Task UpdateDescriptionFontSize(int fontSize)
-    {
-        if (DescriptionFontSize == fontSize)
-            return;
-
-        DescriptionFontSize = fontSize;
-        await ShowDescriptionFontSizeToast();
-    }
-
-    [ReactiveCommand]
     private void ToggleDescription()
         => IsDescriptionVisible = !IsDescriptionVisible;
-
-    [ReactiveCommand]
-    private async Task IncrementDescriptionFontSize()
-    {
-        if (DescriptionFontSize >= _fontSizeOptions.Value.MaxFontSize)
-            return;
-
-        DescriptionFontSize += 1;
-        await ShowDescriptionFontSizeToast();
-    }
-
-    [ReactiveCommand]
-    private async Task DecrementDescriptionFontSize()
-    {
-        if (DescriptionFontSize <= _fontSizeOptions.Value.MinFontSize)
-            return;
-
-        DescriptionFontSize -= 1;
-        await ShowDescriptionFontSizeToast();
-    }
 
     [ReactiveCommand]
     private void ChangeSidebarPosition(string? position)
@@ -606,13 +567,10 @@ public partial class MainWindowViewModel : ViewModelBase
     #region Private methods
 
     private async Task ShowEditorFontSizeToast()
-        => await ShowToast.Handle($"Размер шрифта редактора изменён на {TextEditorFontSize}");
+        => await ShowToast.Handle($"Размер шрифта редактора и описания изменён на {TextEditorFontSize}");
 
     private async Task ShowTerminalFontSizeToast()
         => await ShowToast.Handle($"Размер шрифта терминала изменён на {TerminalFontSize}");
-
-    private async Task ShowDescriptionFontSizeToast()
-        => await ShowToast.Handle($"Размер шрифта описания изменён на {DescriptionFontSize}");
 
     private async Task PrepareExecution()
     {

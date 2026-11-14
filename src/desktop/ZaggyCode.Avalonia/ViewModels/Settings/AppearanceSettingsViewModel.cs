@@ -6,7 +6,6 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
 
     [Reactive] private int _codeFontSize;
     [Reactive] private int _terminalFontSize;
-    [Reactive] private int _descriptionFontSize;
     [Reactive] private bool _useSystemTitleBar;
     [Reactive] private SidebarPosition _sidebarPosition = SidebarPosition.Left;
     [Reactive] private string _selectedCodeTheme = string.Empty;
@@ -18,8 +17,6 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
     [Reactive] private bool _canIncreaseCodeFontSize;
     [Reactive] private bool _canDecreaseTerminalFontSize;
     [Reactive] private bool _canIncreaseTerminalFontSize;
-    [Reactive] private bool _canDecreaseDescriptionFontSize;
-    [Reactive] private bool _canIncreaseDescriptionFontSize;
 
     #endregion
 
@@ -38,7 +35,6 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
     private readonly ILogger<AppearanceSettingsViewModel> _logger;
     private int _originalCodeFontSize;
     private int _originalTerminalFontSize;
-    private int _originalDescriptionFontSize;
     private bool _originalUseSystemTitleBar;
     private SidebarPosition _originalSidebarPosition;
     private string _originalCodeTheme = string.Empty;
@@ -96,7 +92,6 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
         var current = viewStorage.Current;
         _originalCodeFontSize = current.CodeFontSize;
         _originalTerminalFontSize = current.TerminalFontSize;
-        _originalDescriptionFontSize = current.DescriptionFontSize;
         _originalUseSystemTitleBar = current.UseSystemTitleBar;
         _originalSidebarPosition = current.SidebarPosition;
         _originalCodeTheme = current.CodeTheme;
@@ -116,7 +111,6 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
         this.WhenAnyPropertyChanged(
                 nameof(CodeFontSize),
                 nameof(TerminalFontSize),
-                nameof(DescriptionFontSize),
                 nameof(UseSystemTitleBar),
                 nameof(SidebarPosition),
                 nameof(SelectedCodeTheme),
@@ -142,20 +136,12 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
                 CanDecreaseTerminalFontSize = TerminalFontSize > MinFontSize;
                 CanIncreaseTerminalFontSize = TerminalFontSize < MaxFontSize;
             });
-
-        this.WhenAnyValue(viewModel => viewModel.DescriptionFontSize)
-            .Subscribe(_ =>
-            {
-                CanDecreaseDescriptionFontSize = DescriptionFontSize > MinFontSize;
-                CanIncreaseDescriptionFontSize = DescriptionFontSize < MaxFontSize;
-            });
     }
 
     public void ResetToDefaults()
     {
         CodeFontSize = _defaultViewSettings.CodeFontSize;
         TerminalFontSize = _defaultViewSettings.TerminalFontSize;
-        DescriptionFontSize = _defaultViewSettings.DescriptionFontSize;
         UseSystemTitleBar = _defaultViewSettings.UseSystemTitleBar;
         SidebarPosition = _defaultViewSettings.SidebarPosition;
         SelectedCodeTheme = _defaultViewSettings.CodeTheme;
@@ -168,7 +154,6 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
     {
         _originalCodeFontSize = CodeFontSize;
         _originalTerminalFontSize = TerminalFontSize;
-        _originalDescriptionFontSize = DescriptionFontSize;
         _originalUseSystemTitleBar = UseSystemTitleBar;
         _originalSidebarPosition = SidebarPosition;
         _originalCodeTheme = SelectedCodeTheme;
@@ -185,7 +170,6 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
     {
         CodeFontSize = viewSettings.CodeFontSize;
         TerminalFontSize = viewSettings.TerminalFontSize;
-        DescriptionFontSize = viewSettings.DescriptionFontSize;
         UseSystemTitleBar = viewSettings.UseSystemTitleBar;
         SidebarPosition = viewSettings.SidebarPosition;
         SelectedCodeTheme = viewSettings.CodeTheme;
@@ -196,7 +180,6 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
         HasChanges =
             CodeFontSize != _originalCodeFontSize ||
             TerminalFontSize != _originalTerminalFontSize ||
-            DescriptionFontSize != _originalDescriptionFontSize ||
             UseSystemTitleBar != _originalUseSystemTitleBar ||
             SidebarPosition != _originalSidebarPosition ||
             SelectedCodeTheme != _originalCodeTheme ||
@@ -428,17 +411,5 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
         }
 
         TerminalFontSize = Math.Clamp(TerminalFontSize + delta, _fontSizeOptions.MinFontSize, _fontSizeOptions.MaxFontSize);
-    }
-
-    [ReactiveCommand]
-    private void ChangeDescriptionFontSize(string? deltaText)
-    {
-        if (!int.TryParse(deltaText, out var delta))
-        {
-            _logger.LogWarning("Не удалось разобрать изменение размера шрифта описания: {DeltaText}", deltaText);
-            return;
-        }
-
-        DescriptionFontSize = Math.Clamp(DescriptionFontSize + delta, _fontSizeOptions.MinFontSize, _fontSizeOptions.MaxFontSize);
     }
 }
