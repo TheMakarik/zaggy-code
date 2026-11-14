@@ -235,6 +235,7 @@ public sealed class PythonLanguageRunner : LanguageRunnerBase
         {
             if (_pythonSettingsStorage.Current.SupressIo)
             {
+                _logger.LogWarning("Попытка вывода через print() заблокирована настройкой подачи ввода-вывода.");
                 WriteError(CodeErrorType.IoBlocked, $"print() {NotSupportedText}");
                 return;
             }
@@ -249,6 +250,7 @@ public sealed class PythonLanguageRunner : LanguageRunnerBase
         {
             if (_pythonSettingsStorage.Current.SupressIo)
             {
+                _logger.LogWarning("Попытка ввода через input() заблокирована настройкой подачи ввода-вывода.");
                 WriteError(CodeErrorType.IoBlocked, $"input() {NotSupportedText}");
                 return string.Empty;
             }

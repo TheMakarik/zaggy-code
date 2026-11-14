@@ -839,7 +839,7 @@
                             </Border>
 
                             <Border
-                                Classes="card"
+                                Background="{DynamicResource HeaderBackgroundBrush}"
                                 IsVisible="{Binding IsDescriptionVisible}"
                                 Margin="12,12,6,12"
                                 Padding="16">

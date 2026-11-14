@@ -728,8 +728,14 @@ public sealed class MapControl : Control
                 var opacity = point?.RequireDrawCustomOpacity ?? DefaultDrawnOpacity;
                 var rect = new Rect(offset.X + column * cell, offset.Y + row * cell, cell, cell);
 
+                var cornerRadius = new CornerRadius(
+                    point?.CustomBorderRadiusLeftTop ?? 0,
+                    point?.CustomBorderRadiusRightTop ?? 0,
+                    point?.CustomBorderRadiusRightBottom ?? 0,
+                    point?.CustomBorderRadiusLeftBottom ?? 0);
+
                 using (context.PushOpacity(opacity))
-                    context.DrawRectangle(brush, null, rect);
+                    context.DrawRectangle(brush, null, new RoundedRect(rect, cornerRadius));
             }
         }
     }
