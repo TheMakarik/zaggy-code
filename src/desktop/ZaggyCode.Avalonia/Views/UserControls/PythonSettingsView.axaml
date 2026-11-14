@@ -24,6 +24,9 @@
                 Content="Подавлять ввод и вывод"
                 IsChecked="{Binding SupressIo}"
                 ToolTip.Tip="Запрещает использование print() и input() в коде Python" />
+            <TextBlock
+                Classes="settings-hint"
+                Text="Запрещает использование print() и input() в коде Python. Если включено, попытки ввода-вывода блокируются и выводятся как ошибка в терминал." />
 
             <TextBlock Classes="settings-section-title" Text="Точка входа" />
             <CheckBox
