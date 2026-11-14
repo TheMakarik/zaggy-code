@@ -99,13 +99,13 @@ public partial class ThemesSettingsView : ReactiveUserControl<AppearanceSettings
         var icon = this.FindControl<MaterialIcon>("ThemeSearchIcon");
         ApplySearchBrush(searchBox, icon, "BorderBrush");
 
-        searchBox.PointerEntered += (_, _) => ApplySearchBrush(searchBox, icon, "BorderHighlightBrush");
+        searchBox.PointerEntered += (_, _) => ApplySearchBrush(searchBox, icon, "TextPrimaryBrush");
         searchBox.PointerExited += (_, _) =>
         {
             if (!searchBox.IsFocused)
                 ApplySearchBrush(searchBox, icon, "BorderBrush");
         };
-        searchBox.GotFocus += (_, _) => ApplySearchBrush(searchBox, icon, "BorderHighlightBrush");
+        searchBox.GotFocus += (_, _) => ApplySearchBrush(searchBox, icon, "AccentBrush");
         searchBox.LostFocus += (_, _) =>
         {
             if (!searchBox.IsPointerOver)
