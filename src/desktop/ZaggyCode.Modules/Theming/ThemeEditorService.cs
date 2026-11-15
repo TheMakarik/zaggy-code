@@ -1,6 +1,13 @@
 namespace ZaggyCode.Modules.Theming;
 
-public sealed class ThemeEditorService : IThemeEditorService
+public sealed class ThemeEditorService(
+    ILogger<ThemeEditorService> logger,
+    IThemeCatalog catalog,
+    IThemeCreator creator,
+    IThemeSetterProxy setter,
+    IOptions<ThemeOptions> themeOptions,
+    IOptions<ThemeColorDisplayNameOptions> displayNames)
+    : IThemeEditorService
 {
     private const string ColorSuffix = "Color";
 
@@ -9,32 +16,12 @@ public sealed class ThemeEditorService : IThemeEditorService
         .Where(property => property.PropertyType == typeof(string))
         .ToArray();
 
-    private readonly ILogger<ThemeEditorService> _logger;
-    private readonly IThemeCatalog _catalog;
-    private readonly IThemeCreator _creator;
-    private readonly IThemeSetterProxy _setter;
-    private readonly ThemeOptions _themeOptions;
-    private readonly Dictionary<string, string> _displayNames;
+    private readonly ThemeOptions _themeOptions = themeOptions.Value;
+    private readonly Dictionary<string, string> _displayNames = displayNames.Value.Names;
 
     private readonly List<ThemeColorEntry> _colors = [];
     private Theme? _theme;
     private ThemeMetadata? _metadata;
-
-    public ThemeEditorService(
-        ILogger<ThemeEditorService> logger,
-        IThemeCatalog catalog,
-        IThemeCreator creator,
-        IThemeSetterProxy setter,
-        IOptions<ThemeOptions> themeOptions,
-        IOptions<ThemeColorDisplayNameOptions> displayNames)
-    {
-        _logger = logger;
-        _catalog = catalog;
-        _creator = creator;
-        _setter = setter;
-        _themeOptions = themeOptions.Value;
-        _displayNames = displayNames.Value.Names;
-    }
 
     public string? ThemeName => _metadata?.Name;
 
@@ -46,14 +33,14 @@ public sealed class ThemeEditorService : IThemeEditorService
 
     public async Task BeginEditAsync(string themeName, CancellationToken token = default)
     {
-        var metadata = (await _catalog.GetAvailableThemesAsync(token))
+        var metadata = (await catalog.GetAvailableThemesAsync(token))
             .FirstOrDefault(theme => theme.Name == themeName)
             ?? throw new InvalidOperationException($"Theme '{themeName}' was not found");
 
         if (metadata.IsSystemTheme)
             throw new InvalidOperationException($"System theme '{themeName}' cannot be edited");
 
-        var theme = await _catalog.LoadThemeAsync(themeName, token)
+        var theme = await catalog.LoadThemeAsync(themeName, token)
             ?? throw new InvalidOperationException($"Theme '{themeName}' could not be loaded");
 
         _metadata = metadata;
@@ -86,7 +73,7 @@ public sealed class ThemeEditorService : IThemeEditorService
 
         entry.Value = hex;
         typeof(Theme).GetProperty(propertyName)?.SetValue(_theme, hex);
-        _setter.SetColor(entry.ResourceName, hex);
+        setter.SetColor(entry.ResourceName, hex);
         Notify(nameof(IsDirty));
     }
 
@@ -105,7 +92,7 @@ public sealed class ThemeEditorService : IThemeEditorService
         {
             entry.Value = entry.OriginalValue;
             typeof(Theme).GetProperty(entry.PropertyName)?.SetValue(_theme, entry.OriginalValue);
-            _setter.SetColor(entry.ResourceName, entry.OriginalValue);
+            setter.SetColor(entry.ResourceName, entry.OriginalValue);
         }
 
         Notify(nameof(IsDirty));
@@ -117,19 +104,19 @@ public sealed class ThemeEditorService : IThemeEditorService
             return;
 
         Directory.CreateDirectory(_themeOptions.ExternThemesFolder);
-        await _creator.CreateAsync(_theme, BuildMetadata(), _themeOptions.ExternThemesFolder);
+        await creator.CreateAsync(_theme, BuildMetadata(), _themeOptions.ExternThemesFolder);
 
         foreach (var entry in _colors)
             entry.MarkSaved();
 
-        _logger.LogInformation("Сохранена изменённая тема «{name}»", _metadata.Name);
+        logger.LogInformation("Сохранена изменённая тема «{name}»", _metadata.Name);
         Notify(nameof(IsDirty));
     }
 
     private void ApplyAll()
     {
         foreach (var entry in _colors)
-            _setter.SetColor(entry.ResourceName, entry.Value);
+            setter.SetColor(entry.ResourceName, entry.Value);
     }
 
     private ThemeMetadata BuildMetadata()

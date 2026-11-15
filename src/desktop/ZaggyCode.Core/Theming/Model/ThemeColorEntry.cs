@@ -1,22 +1,14 @@
 namespace ZaggyCode.Core.Theming.Model;
 
-public sealed class ThemeColorEntry : INotifyPropertyChanged
+public sealed class ThemeColorEntry(string propertyName, string resourceName, string displayName, string value)
+    : INotifyPropertyChanged
 {
-    public ThemeColorEntry(string propertyName, string resourceName, string displayName, string value)
-    {
-        PropertyName = propertyName;
-        ResourceName = resourceName;
-        DisplayName = displayName;
-        OriginalValue = value;
-        _value = value;
-    }
+    public string PropertyName { get; } = propertyName;
+    public string ResourceName { get; } = resourceName;
+    public string DisplayName { get; } = displayName;
+    public string OriginalValue { get; private set; } = value;
 
-    public string PropertyName { get; }
-    public string ResourceName { get; }
-    public string DisplayName { get; }
-    public string OriginalValue { get; private set; }
-
-    private string _value;
+    private string _value = value;
 
     public string Value
     {

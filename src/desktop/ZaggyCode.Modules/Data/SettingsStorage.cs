@@ -3,16 +3,18 @@ using System.Text.Json.Serialization.Metadata;
 namespace ZaggyCode.Modules.Data;
 
 //#:NO_AI
-public sealed class SettingsStorage<T> : ISettingsStorage<T>
+public sealed class SettingsStorage<T>(
+    ILogger<SettingsStorage<T>> logger,
+    string filePath,
+    IBackgroundTaskHelper backgroundTaskHelper,
+    BackgroundTaskKind backgroundKind,
+    TimeSpan waitBeforeFlashInterval,
+    JsonTypeInfo<T> jsonTypeInfo,
+    Func<T> createDefault)
+    : ISettingsStorage<T>
     where T : class, INotifyPropertyChanged
 {
-    private readonly ILogger logger;
-    private readonly string filePath;
-    private readonly JsonTypeInfo<T> jsonTypeInfo;
-    private readonly Func<T> createDefault;
-    private readonly IBackgroundTaskHelper backgroundTaskHelper;
-    private readonly BackgroundTaskKind backgroundKind;
-    private readonly TimeSpan waitBeforeFlashInterval;
+    private readonly ILogger logger = logger;
     private readonly Lock stateLock = new();
     private readonly Lock flashLock = new();
     private readonly SemaphoreSlim flushGate = new(1, 1);
@@ -20,24 +22,6 @@ public sealed class SettingsStorage<T> : ISettingsStorage<T>
     private T? _value;
     private string _persistedJson = string.Empty;
     private CancellationTokenSource? _pendingFlash;
-
-    public SettingsStorage(
-        ILogger<SettingsStorage<T>> logger,
-        string filePath,
-        IBackgroundTaskHelper backgroundTaskHelper,
-        BackgroundTaskKind backgroundKind,
-        TimeSpan waitBeforeFlashInterval,
-        JsonTypeInfo<T> jsonTypeInfo,
-        Func<T> createDefault)
-    {
-        this.logger = logger;
-        this.filePath = filePath;
-        this.backgroundTaskHelper = backgroundTaskHelper;
-        this.backgroundKind = backgroundKind;
-        this.waitBeforeFlashInterval = waitBeforeFlashInterval;
-        this.jsonTypeInfo = jsonTypeInfo;
-        this.createDefault = createDefault;
-    }
 
     public T Value => _value ?? throw new InvalidOperationException($"Не удалось загрузить {typeof(T).Name}: значение отсутствует.");
 
