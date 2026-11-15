@@ -13,13 +13,13 @@ public sealed class SettingStorageFacade(
     public Task FlashAllAtBackground()
         => StartBackground(
             BackgroundTaskKind.FlushingAllSettings,
-            "Сохранение",
+            "Сохранение настроек",
             [
-                new(nameof(StateSettings), BackgroundTaskKind.FlushingStateSettings, stateSettingsStorage.FlushAsync),
-                new(nameof(ViewSettings), BackgroundTaskKind.FlushingViewSettings, viewSettingsStorage.FlushAsync),
-                new(nameof(ThemeSettings), BackgroundTaskKind.FlushingThemeSettings, themeSettingsStorage.FlushAsync),
-                new(nameof(PythonSettings), BackgroundTaskKind.FlushingPythonSettings, pythonSettingsStorage.FlushAsync),
-                new(nameof(CSharpSettings), BackgroundTaskKind.FlushingCSharpSettings, csharpSettingsStorage.FlushAsync)
+                new("Сохранение состояния приложения", BackgroundTaskKind.FlushingStateSettings, stateSettingsStorage.FlushAsync),
+                new("Сохранение настроек внешнего вида", BackgroundTaskKind.FlushingViewSettings, viewSettingsStorage.FlushAsync),
+                new("Сохранение настроек темы", BackgroundTaskKind.FlushingThemeSettings, themeSettingsStorage.FlushAsync),
+                new("Сохранение настроек Python", BackgroundTaskKind.FlushingPythonSettings, pythonSettingsStorage.FlushAsync),
+                new("Сохранение настроек C#", BackgroundTaskKind.FlushingCSharpSettings, csharpSettingsStorage.FlushAsync)
             ]);
 
     public Task RevertAllAtBackground()
@@ -27,23 +27,23 @@ public sealed class SettingStorageFacade(
             BackgroundTaskKind.RevertingAllSettings,
             "Отмена изменений",
             [
-                new(nameof(StateSettings), BackgroundTaskKind.RevertingStateSettings, Revert(stateSettingsStorage)),
-                new(nameof(ViewSettings), BackgroundTaskKind.RevertingViewSettings, Revert(viewSettingsStorage)),
-                new(nameof(ThemeSettings), BackgroundTaskKind.RevertingThemeSettings, Revert(themeSettingsStorage)),
-                new(nameof(PythonSettings), BackgroundTaskKind.RevertingPythonSettings, Revert(pythonSettingsStorage)),
-                new(nameof(CSharpSettings), BackgroundTaskKind.RevertingCSharpSettings, Revert(csharpSettingsStorage))
+                new("Отмена изменений состояния приложения", BackgroundTaskKind.RevertingStateSettings, Revert(stateSettingsStorage)),
+                new("Отмена изменений настроек внешнего вида", BackgroundTaskKind.RevertingViewSettings, Revert(viewSettingsStorage)),
+                new("Отмена изменений настроек темы", BackgroundTaskKind.RevertingThemeSettings, Revert(themeSettingsStorage)),
+                new("Отмена изменений настроек Python", BackgroundTaskKind.RevertingPythonSettings, Revert(pythonSettingsStorage)),
+                new("Отмена изменений настроек C#", BackgroundTaskKind.RevertingCSharpSettings, Revert(csharpSettingsStorage))
             ]);
 
     public Task ToDefaultAllAtBackground()
         => StartBackground(
             BackgroundTaskKind.ToDefaultAllSettings,
-            "Сброс к значениям по умолчанию",
+            "Сброс настроек к значениям по умолчанию",
             [
-                new(nameof(StateSettings), BackgroundTaskKind.ToDefaultStateSettings, stateSettingsStorage.ToDefaultAsync),
-                new(nameof(ViewSettings), BackgroundTaskKind.ToDefaultViewSettings, viewSettingsStorage.ToDefaultAsync),
-                new(nameof(ThemeSettings), BackgroundTaskKind.ToDefaultThemeSettings, themeSettingsStorage.ToDefaultAsync),
-                new(nameof(PythonSettings), BackgroundTaskKind.ToDefaultPythonSettings, pythonSettingsStorage.ToDefaultAsync),
-                new(nameof(CSharpSettings), BackgroundTaskKind.ToDefaultCSharpSettings, csharpSettingsStorage.ToDefaultAsync)
+                new("Сброс состояния приложения к значениям по умолчанию", BackgroundTaskKind.ToDefaultStateSettings, stateSettingsStorage.ToDefaultAsync),
+                new("Сброс настроек внешнего вида к значениям по умолчанию", BackgroundTaskKind.ToDefaultViewSettings, viewSettingsStorage.ToDefaultAsync),
+                new("Сброс настроек темы к значениям по умолчанию", BackgroundTaskKind.ToDefaultThemeSettings, themeSettingsStorage.ToDefaultAsync),
+                new("Сброс настроек Python к значениям по умолчанию", BackgroundTaskKind.ToDefaultPythonSettings, pythonSettingsStorage.ToDefaultAsync),
+                new("Сброс настроек C# к значениям по умолчанию", BackgroundTaskKind.ToDefaultCSharpSettings, csharpSettingsStorage.ToDefaultAsync)
             ]);
 
     private Task StartBackground(
@@ -72,27 +72,17 @@ public sealed class SettingStorageFacade(
             progress.Report(new BackgroundProgressMove(
                 GetPercent(index, steps.Count),
                 step.OperationKind,
-                $"{operation}: {step.Name}, шаг {completed} из {steps.Count}"));
+                step.Description));
 
-            logger.LogDebug("Фоновая операция «{operation}»: начало шага {completed}/{count} — {name}",
-                operation,
-                completed,
-                steps.Count,
-                step.Name);
+            logger.LogDebug("{description}", step.Description);
 
             await RunStepAsync(step, operation);
-
-            logger.LogDebug("Фоновая операция «{operation}»: шаг {completed}/{count} завершён — {name}",
-                operation,
-                completed,
-                steps.Count,
-                step.Name);
         }
 
         progress.Report(new BackgroundProgressMove(
             GetPercent(steps.Count, steps.Count),
             steps[^1].OperationKind,
-            $"{operation}: готово ({steps.Count} из {steps.Count})"));
+            "Готово"));
 
         logger.LogInformation("Фоновая операция «{operation}»: завершена", operation);
     }
@@ -105,7 +95,7 @@ public sealed class SettingStorageFacade(
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Ошибка при выполнении операции «{operation}» для {name}", operation, step.Name);
+            logger.LogError(e, "Ошибка при выполнении операции «{operation}»: {description}", operation, step.Description);
         }
     }
 
