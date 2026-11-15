@@ -1,4 +1,4 @@
-namespace ZaggyCode.Avalonia.Theming;
+namespace ZaggyCode.Modules.Theming;
 
 public interface IThemeApplier
 {

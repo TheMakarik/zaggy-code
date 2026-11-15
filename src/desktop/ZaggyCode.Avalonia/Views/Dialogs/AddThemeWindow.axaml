@@ -6,13 +6,14 @@
     Foreground="{DynamicResource TextPrimaryBrush}"
     ShowInTaskbar="False"
     SizeToContent="Height"
-    Title="Новая тема"
+            Title="Новая тема"
     Width="400"
     WindowStartupLocation="CenterOwner"
     x:Class="ZaggyCode.Avalonia.Views.Dialogs.AddThemeWindow"
     x:DataType="vm:AddThemeViewModel"
     xmlns="https://github.com/avaloniaui"
     xmlns:controls="clr-namespace:ZaggyCode.Avalonia.Views.Controls"
+    xmlns:iconKinds="using:Material.Icons"
     xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
     xmlns:vm="using:ZaggyCode.Avalonia.ViewModels.Themes"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
@@ -21,6 +22,7 @@
         <controls:DialogTitleBar
             Grid.Row="0"
             Name="CustomTitleBar"
+            IconKind="{x:Static iconKinds:MaterialIconKind.Palette}"
             Title="Новая тема" />
 
         <StackPanel

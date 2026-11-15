@@ -14,7 +14,6 @@ public sealed class ThemeSearchService : IThemeSearchService
             .Where(theme => (theme.Description ?? string.Empty).Contains(query, comparison))
             .ToList();
 
-        // Сначала совпадения по названию, затем по описанию.
         return [.. nameMatches, .. descriptionMatches];
     }
 }

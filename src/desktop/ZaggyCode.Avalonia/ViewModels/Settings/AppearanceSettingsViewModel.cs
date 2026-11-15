@@ -283,7 +283,9 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
                 DeleteCommand = DeleteThemeCommand,
                 EditCommand = EditThemeCommand,
                 ShowFileCommand = ShowThemeFileCommand,
-                CopyFileCommand = CopyThemeFileCommand
+                CopyFileCommand = CopyThemeFileCommand,
+                SelectCommand = SelectAppThemeCommand,
+                CreateNewCommand = AddNewThemeCommand
             };
             AvailableAppThemes.Add(item);
         }

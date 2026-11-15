@@ -6,7 +6,7 @@
     Foreground="{DynamicResource TextPrimaryBrush}"
     Height="560"
     ShowInTaskbar="False"
-    Title="О приложении"
+            Title="О приложении"
     Width="760"
     WindowDecorations="{Binding UseOsDecoration, Converter={converters:BoolToWindowDecorationsConverter}}"
     WindowStartupLocation="CenterOwner"
@@ -15,6 +15,7 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:controls="clr-namespace:ZaggyCode.Avalonia.Views.Controls"
     xmlns:converters="clr-namespace:ZaggyCode.Avalonia.Views.Converters.Common"
+    xmlns:iconKinds="using:Material.Icons"
     xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
     xmlns:records="using:ZaggyCode.Avalonia.ViewModels.Common.Records"
     xmlns:vm="using:ZaggyCode.Avalonia.ViewModels.About"
@@ -77,6 +78,7 @@
         <controls:DialogTitleBar
             Grid.Row="0"
             Name="CustomTitleBar"
+            IconKind="{x:Static iconKinds:MaterialIconKind.Information}"
             Title="О приложении" />
 
         <Grid

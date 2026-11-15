@@ -24,7 +24,7 @@ sealed class Program
             // "Your current subscription tier does not include access to this tool".
             // Поэтому для агентов используется бесплатный UseAgentInspector (loopback MCP на 127.0.0.1:5599).
             .WithDeveloperTools()
-            .UseAgentInspector()
+            .UseAgentInspector(o => o.EnableInteraction = true)
 #endif
             .WithInterFont()
             .LogToTrace()

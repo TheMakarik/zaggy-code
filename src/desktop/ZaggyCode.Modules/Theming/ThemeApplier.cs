@@ -1,9 +1,10 @@
-namespace ZaggyCode.Avalonia.Theming;
+namespace ZaggyCode.Modules.Theming;
 
 public sealed class ThemeApplier(
     ILogger<ThemeApplier> logger,
     IThemeCatalog themeCatalog,
     IThemeSetterProxy themeSetterProxy,
+    IThemeDialogProxy themeDialogProxy,
     IObservableStorage<ThemeSettings> themeSettingsStorage) : IThemeApplier
 {
     private const string FallbackThemeName = "Primus";
@@ -48,30 +49,15 @@ public sealed class ThemeApplier(
         logger.LogWarning("Тема {name} не найдена, используется резервная тема {fallback}", name, FallbackThemeName);
 
         themeSettingsStorage.Current.CurrentTheme = FallbackThemeName;
-        await ShowThemeNotFoundDialogAsync(name);
-
-        return await themeCatalog.LoadThemeAsync(FallbackThemeName);
-    }
-
-    private async Task ShowThemeNotFoundDialogAsync(string missingThemeName)
-    {
         try
         {
-            var owner = GetOwnerWindow();
-            if (owner is null)
-                return;
-
-            var dialog = new ThemeNotFoundWindow(missingThemeName);
-            await dialog.ShowDialog(owner);
+            await themeDialogProxy.ShowThemeNotFoundDialogAsync(name);
         }
         catch (Exception e)
         {
             logger.LogError(e, "Не удалось показать диалог «Тема не найдена»");
         }
-    }
 
-    private static Window? GetOwnerWindow()
-        => Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop
-            ? desktop.MainWindow
-            : null;
+        return await themeCatalog.LoadThemeAsync(FallbackThemeName);
+    }
 }

@@ -8,11 +8,12 @@
     MaxWidth="500"
     ShowInTaskbar="False"
     SizeToContent="Width"
-    Title="Тема не найдена"
+            Title="Тема не найдена"
     WindowStartupLocation="CenterOwner"
     x:Class="ZaggyCode.Avalonia.Views.Dialogs.ThemeNotFoundWindow"
     xmlns="https://github.com/avaloniaui"
     xmlns:controls="clr-namespace:ZaggyCode.Avalonia.Views.Controls"
+    xmlns:iconKinds="using:Material.Icons"
     xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
@@ -20,6 +21,7 @@
         <controls:DialogTitleBar
             Grid.Row="0"
             Name="CustomTitleBar"
+            IconKind="{x:Static iconKinds:MaterialIconKind.AlertCircle}"
             Title="Тема не найдена" />
 
         <Grid

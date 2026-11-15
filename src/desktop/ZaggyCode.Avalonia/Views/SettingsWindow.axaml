@@ -100,8 +100,13 @@
                         <StackPanel
                             Grid.Column="0"
                             Orientation="Horizontal"
-                            Spacing="12"
+                            Spacing="8"
                             VerticalAlignment="Center">
+                            <materialIcons:MaterialIcon
+                                Kind="Cog"
+                                VerticalAlignment="Center"
+                                Width="18"
+                                Height="18" />
                             <TextBlock Text="Настройки" VerticalAlignment="Center" />
                         </StackPanel>
 

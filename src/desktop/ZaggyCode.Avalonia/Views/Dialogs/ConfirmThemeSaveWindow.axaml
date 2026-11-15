@@ -7,13 +7,14 @@
     MaxWidth="460"
     ShowInTaskbar="False"
     SizeToContent="Height"
-    Title="Сохранение темы"
+            Title="Сохранение темы"
     Width="420"
     WindowStartupLocation="CenterOwner"
     x:Class="ZaggyCode.Avalonia.Views.Dialogs.ConfirmThemeSaveWindow"
     x:DataType="vm:ConfirmThemeSaveViewModel"
     xmlns="https://github.com/avaloniaui"
     xmlns:controls="clr-namespace:ZaggyCode.Avalonia.Views.Controls"
+    xmlns:iconKinds="using:Material.Icons"
     xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
     xmlns:vm="using:ZaggyCode.Avalonia.ViewModels.Themes"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
@@ -22,6 +23,7 @@
         <controls:DialogTitleBar
             Grid.Row="0"
             Name="CustomTitleBar"
+            IconKind="{x:Static iconKinds:MaterialIconKind.ContentSave}"
             Title="Сохранение темы" />
 
         <StackPanel

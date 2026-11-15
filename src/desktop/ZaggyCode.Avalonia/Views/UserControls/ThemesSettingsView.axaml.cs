@@ -1,6 +1,5 @@
 using Avalonia.Input.Platform;
 using Avalonia.Platform.Storage;
-using Material.Icons.Avalonia;
 
 namespace ZaggyCode.Avalonia.Views.UserControls;
 
@@ -15,10 +14,8 @@ public partial class ThemesSettingsView : ReactiveUserControl<AppearanceSettings
             if (DataContext is not AppearanceSettingsViewModel viewModel)
                 return;
 
-            // Биндинг команды из ContextMenu не подхватывает DataContext корневой панели,
-            // из-за чего пункт меню остаётся задизейбленым — выставляем команду вручную.
-            if (this.FindControl<MenuItem>("CreateThemeMenuItem") is { } createThemeMenuItem)
-                createThemeMenuItem.Command = viewModel.AddNewThemeCommand;
+            if (Content is ScrollViewer { Content: StackPanel rootPanel } && rootPanel.ContextMenu is { } rootMenu)
+                rootMenu.DataContext = viewModel;
 
             viewModel.OpenThemeEditor.RegisterHandler(async context =>
             {
@@ -63,7 +60,6 @@ public partial class ThemesSettingsView : ReactiveUserControl<AppearanceSettings
                     return;
                 }
 
-                // Показываем папку с темой: выделение файла средствами лаунчера не поддерживается.
                 var directory = Path.GetDirectoryName(context.Input);
                 if (directory is not null)
                     await launcher.LaunchDirectoryInfoAsync(new DirectoryInfo(directory));
@@ -85,44 +81,7 @@ public partial class ThemesSettingsView : ReactiveUserControl<AppearanceSettings
                 context.SetOutput(Unit.Default);
             });
         };
-
-        InitializeSearchBorderHighlight();
     }
-
-    // Цвет иконки поиска синхронизирован с бордером поля: обычный, при ховере и при
-    // фокусе — подсвеченный. Меняем напрямую в событиях TextBox, биндинги не подхватываются.
-    private void InitializeSearchBorderHighlight()
-    {
-        if (this.FindControl<TextBox>("ThemeSearchBox") is not { } searchBox)
-            return;
-
-        var icon = this.FindControl<MaterialIcon>("ThemeSearchIcon");
-        ApplySearchBrush(searchBox, icon, "BorderBrush");
-
-        searchBox.PointerEntered += (_, _) => ApplySearchBrush(searchBox, icon, "TextPrimaryBrush");
-        searchBox.PointerExited += (_, _) =>
-        {
-            if (!searchBox.IsFocused)
-                ApplySearchBrush(searchBox, icon, "BorderBrush");
-        };
-        searchBox.GotFocus += (_, _) => ApplySearchBrush(searchBox, icon, "AccentBrush");
-        searchBox.LostFocus += (_, _) =>
-        {
-            if (!searchBox.IsPointerOver)
-                ApplySearchBrush(searchBox, icon, "BorderBrush");
-        };
-    }
-
-    private static void ApplySearchBrush(TextBox searchBox, MaterialIcon? icon, string resourceKey)
-    {
-        if (searchBox.TryFindResource(resourceKey, out var resource) && resource is IBrush brush)
-        {
-            searchBox.BorderBrush = brush;
-            if (icon is not null)
-                icon.Foreground = brush;
-        }
-    }
-
     private void OnThemeCardPointerEntered(object? sender, PointerEventArgs e)
     {
         if (sender is Button button && button.GetVisualDescendants().OfType<Popup>().FirstOrDefault() is { } popup)

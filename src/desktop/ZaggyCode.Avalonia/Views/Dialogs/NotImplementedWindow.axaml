@@ -7,11 +7,12 @@
     Height="220"
     ShowInTaskbar="False"
     SizeToContent="Width"
-    Title="Функция временно недоступна"
+            Title="Функция временно недоступна"
     WindowStartupLocation="CenterOwner"
     x:Class="ZaggyCode.Avalonia.Views.Dialogs.NotImplementedWindow"
     xmlns="https://github.com/avaloniaui"
     xmlns:controls="clr-namespace:ZaggyCode.Avalonia.Views.Controls"
+    xmlns:iconKinds="using:Material.Icons"
     xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
@@ -19,6 +20,7 @@
         <controls:DialogTitleBar
             Grid.Row="0"
             Name="CustomTitleBar"
+            IconKind="{x:Static iconKinds:MaterialIconKind.Tools}"
             Title="Функция временно недоступна" />
 
         <Grid Grid.Row="1" Margin="24,16,24,20" RowDefinitions="*,Auto">
