@@ -332,18 +332,18 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         this.WhenAnyValue(vm => vm.TextEditorFontSize)
             .Where(size => size != _viewSettingsStorage.Value.CodeFontSize)
-            .Subscribe(_ =>
+            .Subscribe(size =>
             {
-                _viewSettingsStorage.Value.CodeFontSize = _textEditorFontSize;
-                _viewSettingsStorage.FlashAtBackground(true);
+                _viewSettingsStorage.Value.CodeFontSize = size;
+                _ = _viewSettingsStorage.FlashAtBackground(true);
             });
 
         this.WhenAnyValue(vm => vm.TerminalFontSize)
             .Where(size => size != _viewSettingsStorage.Value.TerminalFontSize)
-            .Subscribe(_ =>
+            .Subscribe(size =>
             {
-                _viewSettingsStorage.Value.TerminalFontSize = _terminalFontSize;
-                _viewSettingsStorage.FlashAtBackground(true);
+                _viewSettingsStorage.Value.TerminalFontSize = size;
+                _ = _viewSettingsStorage.FlashAtBackground(true);
             });
 
         this.WhenAnyValue(vm => vm.UseOsDecoration)
@@ -573,7 +573,7 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         // Перед открытием настроек сбрасываем накопленные в памяти изменения в файлы,
         // чтобы окно настроек и отмена работали от сохранённого состояния.
-        await _serviceProvider.GetRequiredService<ISettingStorageFacade>().FlushAllAsync();
+        await _serviceProvider.GetRequiredService<IStorageFacade>().FlushAsync();
 
         var settingsViewModel = _serviceProvider.GetRequiredService<SettingsViewModel>();
         await OpenSettings.Handle(settingsViewModel);

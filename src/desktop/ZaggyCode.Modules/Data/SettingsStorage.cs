@@ -84,6 +84,8 @@ public sealed class SettingsStorage<T> : ISettingsStorage<T>
         if (baseline.Length == 0)
             return;
 
+        logger.LogDebug("Отмена изменений {type} до сохранённого состояния", typeof(T).Name);
+
         var restored = JsonSerializer.Deserialize(baseline, jsonTypeInfo);
         if (restored is null)
             return;
@@ -122,14 +124,21 @@ public sealed class SettingsStorage<T> : ISettingsStorage<T>
         logger.LogInformation("{type} сброшены к значениям по умолчанию", typeof(T).Name);
     }
 
-    public void FlashAtBackground(bool waitBeforeFlash = false)
+    public Task FlashAtBackground(bool waitBeforeFlash = false)
     {
-        backgroundTaskHelper.StartBackground(new BackgroundTaskStartDto
+        logger.LogDebug(
+            "Фоновое сохранение {type}: ожидание перед сохранением — {wait}",
+            typeof(T).Name,
+            waitBeforeFlash);
+
+        var backgroundTask = backgroundTaskHelper.StartBackground(new BackgroundTaskStartDto
         {
             Kind = backgroundKind,
             HasNoProgress = true,
             DelegateToStart = _ => FlashCoreAsync(waitBeforeFlash)
         });
+
+        return backgroundTask.Task;
     }
 
     private async Task FlashCoreAsync(bool waitBeforeFlash)

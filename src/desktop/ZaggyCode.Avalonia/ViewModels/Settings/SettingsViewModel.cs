@@ -80,10 +80,10 @@ public sealed partial class SettingsViewModel : ViewModelBase
     }
 
     [ReactiveCommand]
-    private void SaveSettings()
+    private async Task SaveSettingsAsync()
     {
         _logger.LogInformation("Сохранение настроек");
-        _storageFacade.FlashAllAtBackground();
+        await _storageFacade.FlashAllAtBackground();
         MessageBus.Current.SendMessage(new SettingsSavedMessage());
     }
 
@@ -91,17 +91,17 @@ public sealed partial class SettingsViewModel : ViewModelBase
     private async Task CancelSettingsAsync()
     {
         _logger.LogInformation("Отмена изменений настроек");
-        RevertAllChanges();
+        await RevertAllChangesAsync();
         await CloseSettingsInteraction.Handle(Unit.Default);
     }
 
-    public void RevertAllChanges()
+    public Task RevertAllChangesAsync()
         => _storageFacade.RevertAllAtBackground();
 
     [ReactiveCommand]
-    private void ResetToDefaults()
+    private async Task ResetToDefaultsAsync()
     {
-        _storageFacade.ToDefaultAllAtBackground();
+        await _storageFacade.ToDefaultAllAtBackground();
         MessageBus.Current.SendMessage(new SettingsResetMessage());
     }
 }

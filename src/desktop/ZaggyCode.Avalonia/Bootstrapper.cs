@@ -115,7 +115,7 @@ public sealed class Bootstrapper
             try
             {
 #endif
-                var storageFacade = scope.ServiceProvider.GetRequiredService<ISettingStorageFacade>();
+                var storageFacade = scope.ServiceProvider.GetRequiredService<IStorageFacade>();
                 await storageFacade.LoadAllAsync();
 #if DEBUG
             }
