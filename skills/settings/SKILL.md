@@ -13,8 +13,8 @@
 ## Архитектура настроек
 
 ```
-StateSettings (Core) ──► IObservableStorage<StateSettings> ──► MainWindowViewModel
-ViewSettings (Core)  ──► IObservableStorage<ViewSettings>  ──► MainWindowViewModel
+StateSettings (Core) ──► ISettingsStorage<StateSettings> ──► MainWindowViewModel
+ViewSettings (Core)  ──► ISettingsStorage<ViewSettings>  ──► MainWindowViewModel
      ▲                                                              │
      │                                                              ▼
 SettingsViewModel ──► AppearanceSettingsViewModel            MessageBus
@@ -47,7 +47,7 @@ SettingsViewModel ──► AppearanceSettingsViewModel            MessageBus
 5. **Верхнее меню** — добавь `MenuItem` в оба меню (`full-menu` **и** `compact-menu`) в `MainWindow.axaml`,
    привязав к команде/свойству `MainWindowViewModel`. См. «Главное правило».
 6. **ViewModel окна** — заведи реактивное свойство в `MainWindowViewModel`, инициализируй из
-   `stateSettingsStorage.Current` или `viewSettingsStorage.Current`, подпишись на изменения и синхронизируй обратно.
+   `stateSettingsStorage.Value` или `viewSettingsStorage.Value`, подпишись на изменения и синхронизируй обратно.
 7. **MessageBus** — если настройку можно менять из нескольких мест, заведи `...ChangedMessage`
    в `ViewModels/Messages`, слушай его в `MainWindowViewModel` и отправляй из `SettingsViewModel`.
 8. **Сборка** — `dotnet build`.

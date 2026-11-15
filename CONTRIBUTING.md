@@ -73,6 +73,46 @@ if (items is not null)
 
 Не добавляй `ArgumentNullException.ThrowIfNull`, `ArgumentException.ThrowIfNullOrWhiteSpace` и подобные проверки без реальной необходимости. Проверка оправдана на публичной границе, где ошибка должна возникнуть в месте вызова, а не позже.
 
+## Условия
+
+**Сложное условие обязано быть вынесено в метод с говорящим именем.** Условие в `if`/`while`/`?:`/`when` должно читаться как утверждение о предметной области.
+
+Сложным считается условие, если выполнено хотя бы одно:
+
+- содержит `&&` или `||`;
+- содержит составной pattern matching (`is { A: ..., B: ... }`, `is X and Y`, `is X or Y`);
+- смысл нельзя понять, прочитав условие в контексте класса;
+- требуется комментарий, чтобы объяснить, что оно проверяет.
+
+```csharp
+// Плохо
+if (property is { CanRead: true, CanWrite: true } &&
+    property.GetIndexParameters().Length == 0)
+    Copy(property);
+
+// Хорошо
+foreach (var property in type.GetProperties().Where(IsCopyable))
+    Copy(property);
+
+private static bool IsCopyable(PropertyInfo property)
+{
+    if (property.GetIndexParameters().Length > 0)
+        return false;
+
+    return property is { CanRead: true, CanWrite: true };
+}
+```
+
+Границы:
+
+- одиночное сравнение (`size > 0`, `name is null`) выносить не нужно;
+- метод-предикат называй как вопрос: `Is...`, `Can...`, `Has...`, `Should...`;
+- предикат не должен иметь побочных эффектов;
+- повторяющееся условие выноси обязательно;
+- правило распространяется на `when` в `switch` и на тернарные операторы.
+
+Подробности — в скилле `simple-conditions`.
+
 ## Фигурные скобки и вложенность
 
 - Если тело `if`/`else`/`for`/`while`/`foreach` состоит из одной строки, не оборачивай его в фигурные скобки.
@@ -259,6 +299,18 @@ public interface IRobotController
 - Для коммуникации View → ViewModel используй `Interaction<TInput, TOutput>` из ReactiveUI.
 - Для коммуникации ViewModel → ViewModel используй `MessageBus` из ReactiveUI.
 - ViewModel может использовать `ICommand`, `Interaction` и сервисы, но не конкретные контролы.
+- **ViewModel не знает про иконки.** `Material.Icons` (`MaterialIconKind`, `MaterialIcon`) — это View-слой. В VM храни семантику (enum, имя иконки строкой из `IOptions`), а иконку выбирай в конвертере или контроле.
+
+```csharp
+// Плохо — VM знает про Material Icons
+public MaterialIconKind DescriptionToggleIcon => IsDescriptionVisible
+    ? MaterialIconKind.CodeTags
+    : MaterialIconKind.BookOpenVariant;
+
+// Хорошо — VM отдаёт состояние, иконку выбирает View
+<materialIcons:MaterialIcon
+    Kind="{Binding IsDescriptionVisible, Converter={converters:DescriptionToggleIconConverter}}" />
+```
 
 ## DI и IOptions
 
@@ -308,14 +360,29 @@ public sealed class StorageOptions
 ### Архитектура
 
 ```
-StateSettings (Core) ──► IObservableStorage<StateSettings> ──► MainWindowViewModel
-ViewSettings (Core)  ──► IObservableStorage<ViewSettings>  ──► MainWindowViewModel
+StateSettings (Core) ──► ISettingsStorage<StateSettings> ──► MainWindowViewModel
+ViewSettings (Core)  ──► ISettingsStorage<ViewSettings>  ──► MainWindowViewModel
      ▲                                                              │
      │                                                              ▼
 SettingsViewModel ──► AppearanceSettingsViewModel            MessageBus
      │                                                              ▲
      └──────────────────── сохраняет + шлёт сообщение ──────────────┘
 ```
+
+### Хранилища настроек
+
+`SettingsStorage<T>` (Modules) держит настройки в памяти, а файл пишет только по команде:
+
+- `Value` — живой экземпляр модели (`INotifyPropertyChanged`), его правят все окна; изменения сразу видны везде.
+- `FlushAsync()` — сериализует `Value` в JSON атомарно (временный файл + `File.Move`).
+- `Revert()` — копирует значения из последнего сохранённого снимка обратно в живой `Value` (не заменяет экземпляр, чтобы не рвать биндинги).
+- `ToDefaultAsync()` — копирует значения по умолчанию в `Value` и сразу сохраняет.
+- `FlashAtBackground(waitBeforeFlash)` — запускает сохранение фоновой задачей через `IBackgroundTaskHelper`; при `waitBeforeFlash: true` ждёт паузы в изменениях (используется для размера шрифта).
+
+`SettingStorageFacade` выполняет операции сразу над всеми файлами (`FlashAllAtBackground`, `RevertAllAtBackground`, `ToDefaultAllAtBackground`) и репортит прогресс в словарь `IBackgroundTaskHelper.BackgroundTasks` по одному `BackgroundTaskKind` на файл; общая операция идёт под `...AllSettings`.
+
+Окна подписываются на `Value.PropertyChanged` и подтягивают изменения из памяти.
+
 
 - **Модели**:
   - `src/desktop/ZaggyCode.Core/Data/Model/StateSettings.cs` — состояние пользователя: `LastLanguage`, `LastGamePath`, `LastSpeed`.
@@ -627,7 +694,7 @@ public sealed class IsNotEqualConverter : MarkupExtension, IMultiValueConverter
 
 ```csharp
 // Dummy — без настройки
-var logger = A.Dummy<ILogger<ObservableStorage<ViewSettings>>>();
+var logger = A.Dummy<ILogger<SettingsStorage<ViewSettings>>>();
 
 // Fake — с настройкой
 var options = A.Fake<IOptions<StorageOptions>>();
@@ -744,3 +811,24 @@ fix
 ```text
 Добавил IRobotController
 ```
+
+## Скиллы
+
+Скиллы лежат в `skills/<имя>/SKILL.md` и подключаются агентом по описанию задачи.
+
+| Скилл | Когда применять |
+|-------|-----------------|
+| `avalonia-converters` | Конвертеры Avalonia как `MarkupExtension` |
+| `clarifying-questions` | Сложные задачи с неоднозначностями |
+| `collections` | Выбор типа коллекции, потоки, LINQ |
+| `colors` | Цвета, темы, ресурсы |
+| `csharp-ioptions` | Работа с `IOptions<T>` |
+| `csharp-testing` | xUnit, FakeItEasy, FluentAssertions |
+| `settings` | Добавление и хранение настроек |
+| `simple-conditions` | Любое условие с `&&`/`||`/pattern matching или неочевидным смыслом — выносить в метод |
+| `skills-maintenance` | Добавление или изменение любого скилла |
+| `theming` | Темы, `.zct`, `ThemeApplier` |
+| `update-libraries` | Обновление NuGet-пакетов |
+| `xaml` | Разметка Avalonia |
+
+**Любое добавление, удаление или изменение скилла обязано сопровождаться обновлением этого раздела и затронутых правил в `CONTRIBUTING.md`** в том же изменении. Подробности — в скилле `skills-maintenance`.
