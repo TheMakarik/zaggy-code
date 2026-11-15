@@ -2,6 +2,6 @@ namespace ZaggyCode.Core.Data.Interfaces;
 
 public interface IStorage
 {
-    public ValueTask FlushUpdatesAsync();
+    public ValueTask FlushAsync();
     public Task LoadAsync();
 }

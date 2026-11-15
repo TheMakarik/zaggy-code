@@ -21,10 +21,10 @@ public sealed class ObservableStorage<T>(
     public void BeginObserve()
     {
         logger.LogInformation("Наблюдение за {type} по пути {path}", typeof(T).Name, filePath);
-        updateWaiter.BeginObserve(Current, FlushUpdatesAsync, updateInterval);
+        updateWaiter.BeginObserve(Current, FlushAsync, updateInterval);
     }
 
-    public ValueTask FlushUpdatesAsync()
+    public ValueTask FlushAsync()
     {
         return SaveAsync();
     }

@@ -52,7 +52,7 @@ public class ViewSettingsStorageTests : IDisposable
 
         //Act
         systemUnderTests.Current.CodeFontSize = 25;
-        await systemUnderTests.FlushUpdatesAsync();
+        await systemUnderTests.FlushAsync();
 
         //Assert
         var actualContent = await File.ReadAllTextAsync(_jsonPath);
@@ -116,7 +116,7 @@ public class ViewSettingsStorageTests : IDisposable
         // Act 
         await systemUnderTests.LoadAsync();
         systemUnderTests.Current.CodeFontSize = newFontSize;
-        await systemUnderTests.FlushUpdatesAsync();
+        await systemUnderTests.FlushAsync();
 
         // Assert 
         var actualContent = await File.ReadAllTextAsync(_jsonPath);
@@ -138,7 +138,7 @@ public class ViewSettingsStorageTests : IDisposable
         // Act
         systemUnderTests.Current.CodeFontSize = expectedFontSize;
         systemUnderTests.Current.CodeTheme = expectedTheme;
-        await systemUnderTests.FlushUpdatesAsync();
+        await systemUnderTests.FlushAsync();
 
         // Assert
         var actualContent = await File.ReadAllTextAsync(_jsonPath);

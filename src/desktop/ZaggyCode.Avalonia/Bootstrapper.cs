@@ -41,8 +41,6 @@ public sealed class Bootstrapper
             .AddClasses(c => c.WithAttribute<LanguageAttribute>())
             .AsImplementedInterfaces()
             .WithServiceKey(type => type.GetCustomAttribute<LanguageAttribute>()!.Language)
-            // Раннеры живут весь сеанс и кэшируются фабрикой, поэтому scoped
-            // здесь только мешал бы резолву из корневого провайдера.
             .WithSingletonLifetime()
 
             .AddClasses(c => c.Where(t =>
@@ -221,7 +219,7 @@ public sealed class Bootstrapper
     private static string GetStateDirectory()
     {
         if (OperatingSystem.IsWindows())
-            return Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "zaggy", "state");
+            return Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "zaggy");
 
         if (OperatingSystem.IsMacOS())
             return Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Library", "Logs", "zaggy");

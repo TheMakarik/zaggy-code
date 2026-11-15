@@ -9,7 +9,7 @@ public sealed class GameCodeStorage(
     private ConcurrentDictionary<string, string> _codes = new();
     private ConcurrentDictionary<string, Task> _creatingFilesTasks = new();
 
-    public async ValueTask FlushUpdatesAsync()
+    public async ValueTask FlushAsync()
     {
         if (_creatingFilesTasks.IsEmpty)
             return;

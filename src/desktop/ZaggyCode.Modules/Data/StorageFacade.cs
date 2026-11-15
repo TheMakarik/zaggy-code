@@ -20,11 +20,11 @@ public sealed class StorageFacade(
 
     public async ValueTask FlushAllAsync()
     {
-        await stateSettingsStorage.FlushUpdatesAsync();
-        await viewSettingsStorage.FlushUpdatesAsync();
-        await themeSettingsStorage.FlushUpdatesAsync();
-        await gameCodeStorage.FlushUpdatesAsync();
-        await pythonSettingsStorage.FlushUpdatesAsync();
-        await csharpSettingsStorage.FlushUpdatesAsync();
+        await stateSettingsStorage.FlushAsync();
+        await viewSettingsStorage.FlushAsync();
+        await themeSettingsStorage.FlushAsync();
+        await gameCodeStorage.FlushAsync();
+        await pythonSettingsStorage.FlushAsync();
+        await csharpSettingsStorage.FlushAsync();
     }
 }
