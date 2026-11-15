@@ -3,6 +3,8 @@
     <!--  Фоны  -->
     <Color x:Key="WindowBackgroundColor">#1A1A1A</Color>
     <Color x:Key="HeaderBackgroundColor">#242424</Color>
+    <Color x:Key="DescriptionBackgroundColor">#242424</Color>
+    <Color x:Key="SearchBackgroundColor">#242424</Color>
     <Color x:Key="CardBackgroundColor">#2E2E2E</Color>
     <Color x:Key="ElevatedBackgroundColor">#383838</Color>
     <Color x:Key="HoverBackgroundColor">#444444</Color>
@@ -50,6 +52,8 @@
     <!--  Кисти  -->
     <SolidColorBrush Color="{DynamicResource WindowBackgroundColor}" x:Key="WindowBackgroundBrush" />
     <SolidColorBrush Color="{DynamicResource HeaderBackgroundColor}" x:Key="HeaderBackgroundBrush" />
+    <SolidColorBrush Color="{DynamicResource DescriptionBackgroundColor}" x:Key="DescriptionBackgroundBrush" />
+    <SolidColorBrush Color="{DynamicResource SearchBackgroundColor}" x:Key="SearchBackgroundBrush" />
     <SolidColorBrush Color="{DynamicResource CardBackgroundColor}" x:Key="CardBackgroundBrush" />
     <SolidColorBrush Color="{DynamicResource ElevatedBackgroundColor}" x:Key="ElevatedBackgroundBrush" />
     <SolidColorBrush Color="{DynamicResource HoverBackgroundColor}" x:Key="HoverBackgroundBrush" />

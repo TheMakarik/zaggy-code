@@ -63,6 +63,8 @@ Theme CreateTheme(
 {
     WindowBackgroundColor = background,
     HeaderBackgroundColor = backgroundSecondary,
+    DescriptionBackgroundColor = backgroundSecondary,
+    SearchBackgroundColor = backgroundSecondary,
     CardBackgroundColor = surface,
     ElevatedBackgroundColor = surfaceLight,
     HoverBackgroundColor = surfaceHover,

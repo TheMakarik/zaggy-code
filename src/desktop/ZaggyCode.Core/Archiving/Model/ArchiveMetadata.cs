@@ -10,4 +10,17 @@ public class ArchiveMetadata
     
     [JsonPropertyName("created-at-version")]
     public required Version CreatedAtVersion { get; set; }
+
+    public override bool Equals(object? obj)
+    {
+        return obj is ArchiveMetadata other
+               && Name == other.Name
+               && Description == other.Description
+               && CreatedAtVersion == other.CreatedAtVersion;
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Name, Description, CreatedAtVersion);
+    }
 }

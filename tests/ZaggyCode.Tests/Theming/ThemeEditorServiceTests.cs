@@ -105,6 +105,8 @@ public class ThemeEditorServiceTests : IDisposable
     {
         WindowBackgroundColor = background,
         HeaderBackgroundColor = background,
+        DescriptionBackgroundColor = background,
+        SearchBackgroundColor = background,
         CardBackgroundColor = background,
         ElevatedBackgroundColor = background,
         HoverBackgroundColor = background,

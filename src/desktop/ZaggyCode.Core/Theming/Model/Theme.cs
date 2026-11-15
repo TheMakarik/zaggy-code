@@ -9,6 +9,12 @@ public sealed class Theme
     [XmlElement("background-secondary")]
     public required string HeaderBackgroundColor { get; set; }
 
+    [XmlElement("description-background")]
+    public required string DescriptionBackgroundColor { get; set; }
+
+    [XmlElement("search-background")]
+    public required string SearchBackgroundColor { get; set; }
+
     [XmlElement("surface")]
     public required string CardBackgroundColor { get; set; }
 

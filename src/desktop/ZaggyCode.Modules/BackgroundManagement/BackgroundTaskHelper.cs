@@ -34,6 +34,9 @@ public sealed class BackgroundTaskHelper(
         if (backgroundTask.Progress is not Progress<BackgroundProgressMove> progress)
             return null;
 
+        progress.ProgressChanged += Handler;
+        return new ProgressSubscription(progress, Handler);
+
         void Handler(object? sender, BackgroundProgressMove move)
         {
             backgroundTask.Description = move.DescriptionOfNextMove;
@@ -51,8 +54,5 @@ public sealed class BackgroundTaskHelper(
                 move.DescriptionOfNextMove,
                 move.NewPercent);
         }
-
-        progress.ProgressChanged += Handler;
-        return new ProgressSubscription(progress, Handler);
     }
 }

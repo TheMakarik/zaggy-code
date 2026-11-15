@@ -96,6 +96,8 @@ public class ThemeCreatorTests : IDisposable
     {
         WindowBackgroundColor = "#101010",
         HeaderBackgroundColor = "#202020",
+        DescriptionBackgroundColor = "#202020",
+        SearchBackgroundColor = "#202020",
         CardBackgroundColor = "#303030",
         ElevatedBackgroundColor = "#404040",
         HoverBackgroundColor = "#505050",

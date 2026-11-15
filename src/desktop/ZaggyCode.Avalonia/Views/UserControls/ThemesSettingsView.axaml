@@ -41,6 +41,7 @@
                     Kind="Search"
                     VerticalAlignment="Center" />
                 <TextBox
+                    Background="{DynamicResource SearchBackgroundBrush}"
                     CornerRadius="8"
                     Grid.Column="1"
                     Name="ThemeSearchBox"
