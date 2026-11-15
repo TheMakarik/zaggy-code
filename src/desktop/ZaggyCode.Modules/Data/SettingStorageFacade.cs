@@ -15,11 +15,11 @@ public sealed class SettingStorageFacade(
             BackgroundTaskKind.FlushingAllSettings,
             "Сохранение настроек",
             [
-                new("Сохранение состояния приложения", stateSettingsStorage.FlushAsync),
-                new("Сохранение настроек внешнего вида", viewSettingsStorage.FlushAsync),
-                new("Сохранение настроек темы", themeSettingsStorage.FlushAsync),
-                new("Сохранение настроек Python", pythonSettingsStorage.FlushAsync),
-                new("Сохранение настроек C#", csharpSettingsStorage.FlushAsync)
+                new SettingsStorageStep("Сохранение состояния приложения", stateSettingsStorage.FlushAsync),
+                new SettingsStorageStep("Сохранение настроек внешнего вида", viewSettingsStorage.FlushAsync),
+                new SettingsStorageStep("Сохранение настроек темы", themeSettingsStorage.FlushAsync),
+                new SettingsStorageStep("Сохранение настроек Python", pythonSettingsStorage.FlushAsync),
+                new SettingsStorageStep("Сохранение настроек C#", csharpSettingsStorage.FlushAsync)
             ]);
 
     public Task RevertAllAtBackground()
@@ -27,11 +27,11 @@ public sealed class SettingStorageFacade(
             BackgroundTaskKind.RevertingAllSettings,
             "Отмена изменений",
             [
-                new("Отмена изменений состояния приложения", Revert(stateSettingsStorage)),
-                new("Отмена изменений настроек внешнего вида", Revert(viewSettingsStorage)),
-                new("Отмена изменений настроек темы", Revert(themeSettingsStorage)),
-                new("Отмена изменений настроек Python", Revert(pythonSettingsStorage)),
-                new("Отмена изменений настроек C#", Revert(csharpSettingsStorage))
+                new SettingsStorageStep("Отмена изменений состояния приложения", Revert(stateSettingsStorage)),
+                new SettingsStorageStep("Отмена изменений настроек внешнего вида", Revert(viewSettingsStorage)),
+                new SettingsStorageStep("Отмена изменений настроек темы", Revert(themeSettingsStorage)),
+                new SettingsStorageStep("Отмена изменений настроек Python", Revert(pythonSettingsStorage)),
+                new SettingsStorageStep("Отмена изменений настроек C#", Revert(csharpSettingsStorage))
             ]);
 
     public Task ToDefaultAllAtBackground()
@@ -39,11 +39,11 @@ public sealed class SettingStorageFacade(
             BackgroundTaskKind.ToDefaultAllSettings,
             "Сброс настроек к значениям по умолчанию",
             [
-                new("Сброс состояния приложения к значениям по умолчанию", stateSettingsStorage.ToDefaultAsync),
-                new("Сброс настроек внешнего вида к значениям по умолчанию", viewSettingsStorage.ToDefaultAsync),
-                new("Сброс настроек темы к значениям по умолчанию", themeSettingsStorage.ToDefaultAsync),
-                new("Сброс настроек Python к значениям по умолчанию", pythonSettingsStorage.ToDefaultAsync),
-                new("Сброс настроек C# к значениям по умолчанию", csharpSettingsStorage.ToDefaultAsync)
+                new SettingsStorageStep("Сброс состояния приложения к значениям по умолчанию", stateSettingsStorage.ToDefaultAsync),
+                new SettingsStorageStep("Сброс настроек внешнего вида к значениям по умолчанию", viewSettingsStorage.ToDefaultAsync),
+                new SettingsStorageStep("Сброс настроек темы к значениям по умолчанию", themeSettingsStorage.ToDefaultAsync),
+                new SettingsStorageStep("Сброс настроек Python к значениям по умолчанию", pythonSettingsStorage.ToDefaultAsync),
+                new SettingsStorageStep("Сброс настроек C# к значениям по умолчанию", csharpSettingsStorage.ToDefaultAsync)
             ]);
 
     private Task StartBackground(
