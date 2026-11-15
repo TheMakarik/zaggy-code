@@ -590,10 +590,12 @@ public partial class MainWindowViewModel : ViewModelBase
         => _viewSettingsStorage.FlashAtBackground();
 
     private void ShowEditorFontSizeToast()
-        => _ = ShowToast.Handle(new ToastRequest($"Размер шрифта редактора и описания изменён на {TextEditorFontSize}", true));
+        => ShowToast.Handle(new ToastRequest($"Размер шрифта редактора и описания изменён на {TextEditorFontSize}", true))
+            .Subscribe();
 
     private void ShowTerminalFontSizeToast()
-        => _ = ShowToast.Handle(new ToastRequest($"Размер шрифта терминала изменён на {TerminalFontSize}", true));
+        => ShowToast.Handle(new ToastRequest($"Размер шрифта терминала изменён на {TerminalFontSize}", true))
+            .Subscribe();
 
     private async Task PrepareExecution()
     {

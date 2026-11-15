@@ -38,7 +38,18 @@ public sealed class BackgroundTaskHelper(
         {
             backgroundTask.Description = move.DescriptionOfNextMove;
 
-            logger.LogDebug("Фоновая задача «{name}»: {description}", taskNames.GetName(move.Kind), move.DescriptionOfNextMove);
+            if (backgroundTask.HasNoProgress)
+            {
+                logger.LogDebug("Фоновая задача «{name}»: {description}",
+                    taskNames.GetName(move.Kind),
+                    move.DescriptionOfNextMove);
+                return;
+            }
+
+            logger.LogDebug("Фоновая задача «{name}»: {description} — выполнено {percent:0}%",
+                taskNames.GetName(move.Kind),
+                move.DescriptionOfNextMove,
+                move.NewPercent);
         }
 
         progress.ProgressChanged += Handler;

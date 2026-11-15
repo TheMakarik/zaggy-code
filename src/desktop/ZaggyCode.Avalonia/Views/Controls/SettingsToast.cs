@@ -154,7 +154,8 @@ public sealed class SettingsToast : Border
         else
             content.Children.Add(new TextBlock { Text = action.Text, VerticalAlignment = global::Avalonia.Layout.VerticalAlignment.Center });
 
-        var button = new Button { Content = content };
+        var button = new Button { Content = content, Margin = new Thickness(9, 0, 0, 0) };
+        button.Classes.Add("toast-action");
         ToolTip.SetTip(button, action.Text);
         button.Click += (_, _) => action.Click?.Invoke();
         return button;

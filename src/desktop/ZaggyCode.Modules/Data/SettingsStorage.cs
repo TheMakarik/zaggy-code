@@ -138,10 +138,14 @@ public sealed class SettingsStorage<T>(
     private async Task<bool> WaitForChangesToSettleAsync()
     {
         CancellationTokenSource cancellation;
+
         lock (_flashLock)
         {
-            _pendingFlash?.Cancel();
-            _pendingFlash?.Dispose();
+            // Пока одно ожидание уже идёт, новые вызовы игнорируются:
+            // ожидающая задача всё равно сохранит актуальные значения.
+            if (_pendingFlash is not null)
+                return false;
+
             cancellation = new CancellationTokenSource();
             _pendingFlash = cancellation;
         }
@@ -154,6 +158,16 @@ public sealed class SettingsStorage<T>(
         catch (OperationCanceledException)
         {
             return false;
+        }
+        finally
+        {
+            lock (_flashLock)
+            {
+                if (ReferenceEquals(_pendingFlash, cancellation))
+                    _pendingFlash = null;
+            }
+
+            cancellation.Dispose();
         }
     }
 

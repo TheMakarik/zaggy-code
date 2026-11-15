@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text.Json;
 using ZaggyCode.Modules.Data.Json;
 
@@ -265,6 +266,51 @@ public class ViewSettingsStorageTests : IDisposable
         // Assert
         systemUnderTests.Value.CodeFontSize.Should().Be(_viewDefaultMock.Value.Settings.CodeFontSize);
         (await ReadFileAsync()).CodeFontSize.Should().Be(_viewDefaultMock.Value.Settings.CodeFontSize);
+    }
+
+    [Fact]
+    public async Task FlashAtBackground_WhenWaiting_DoesNotRestartTimer()
+    {
+        // Arrange
+        var systemUnderTests = CreateSystemUnderTests(1);
+        await systemUnderTests.LoadAsync();
+
+        var elapsed = Stopwatch.StartNew();
+
+        // Act
+        systemUnderTests.Value.CodeTheme = "First";
+        systemUnderTests.FlashAtBackground(true);
+
+        await Task.Delay(800);
+        systemUnderTests.Value.CodeTheme = "Second";
+        systemUnderTests.FlashAtBackground(true);
+
+        await WaitForFileContentAsync("Second");
+        elapsed.Stop();
+
+        // Assert
+        (await ReadFileAsync()).CodeTheme.Should().Be("Second");
+
+        // Если бы второй вызов перезапускал ожидание, сохранение случилось бы примерно на 1.8 с.
+        elapsed.Elapsed.Should().BeLessThan(TimeSpan.FromSeconds(1.6));
+    }
+
+    [Fact]
+    public async Task FlashAtBackground_WhenWaiting_FlushesLatestValue()
+    {
+        // Arrange
+        var systemUnderTests = CreateSystemUnderTests(0.4);
+        await systemUnderTests.LoadAsync();
+
+        // Act
+        systemUnderTests.Value.CodeTheme = "BeforeWaiting";
+        systemUnderTests.FlashAtBackground(true);
+        systemUnderTests.Value.CodeTheme = "AfterWaiting";
+
+        await WaitForFileContentAsync("AfterWaiting");
+
+        // Assert
+        (await ReadFileAsync()).CodeTheme.Should().Be("AfterWaiting");
     }
 
     [Fact]
