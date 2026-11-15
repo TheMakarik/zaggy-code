@@ -14,10 +14,10 @@ public sealed class SettingsStorage<T>(
     : ISettingsStorage<T>
     where T : class, INotifyPropertyChanged
 {
-    private readonly ILogger logger = logger;
-    private readonly Lock stateLock = new();
-    private readonly Lock flashLock = new();
-    private readonly SemaphoreSlim flushGate = new(1, 1);
+    private readonly ILogger _logger = logger;
+    private readonly Lock _stateLock = new();
+    private readonly Lock _flashLock = new();
+    private readonly SemaphoreSlim _flushGate = new(1, 1);
 
     private T? _value;
     private string _persistedJson = string.Empty;
@@ -29,14 +29,14 @@ public sealed class SettingsStorage<T>(
     {
         get
         {
-            lock (stateLock)
+            lock (_stateLock)
                 return !IsCurrentEqualToPersisted();
         }
     }
 
     public async Task LoadAsync()
     {
-        logger.LogInformation("Начало загрузки {type} из {path}", typeof(T).Name, filePath);
+        _logger.LogInformation("Начало загрузки {type} из {path}", typeof(T).Name, filePath);
 
         if (!File.Exists(filePath))
         {
@@ -53,7 +53,7 @@ public sealed class SettingsStorage<T>(
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Ошибка загрузки {type} из {path}", typeof(T).Name, filePath);
+            _logger.LogError(e, "Ошибка загрузки {type} из {path}", typeof(T).Name, filePath);
             File.Delete(filePath);
             await CreateDefaultFileAsync();
         }
@@ -62,41 +62,41 @@ public sealed class SettingsStorage<T>(
     public void Revert()
     {
         string baseline;
-        lock (stateLock)
+        lock (_stateLock)
             baseline = _persistedJson;
 
         if (baseline.Length == 0)
             return;
 
-        logger.LogDebug("Отмена изменений {type} до сохранённого состояния", typeof(T).Name);
+        _logger.LogDebug("Отмена изменений {type} до сохранённого состояния", typeof(T).Name);
 
         var restored = JsonSerializer.Deserialize(baseline, jsonTypeInfo);
         if (restored is null)
             return;
 
         SettingsCopier.Copy(restored, Value);
-        logger.LogInformation("Изменения {type} отменены до сохранённого состояния", typeof(T).Name);
+        _logger.LogInformation("Изменения {type} отменены до сохранённого состояния", typeof(T).Name);
     }
 
     public async ValueTask FlushAsync()
     {
-        await flushGate.WaitAsync();
+        await _flushGate.WaitAsync();
         try
         {
             string json;
-            lock (stateLock)
+            lock (_stateLock)
                 json = JsonSerializer.Serialize(Value, jsonTypeInfo);
 
             await WriteFileAsync(json);
 
-            lock (stateLock)
+            lock (_stateLock)
                 _persistedJson = json;
 
-            logger.LogInformation("Файл {type} успешно сохранён по пути {path}", typeof(T).Name, filePath);
+            _logger.LogInformation("Файл {type} успешно сохранён по пути {path}", typeof(T).Name, filePath);
         }
         finally
         {
-            flushGate.Release();
+            _flushGate.Release();
         }
     }
 
@@ -105,12 +105,12 @@ public sealed class SettingsStorage<T>(
         var defaults = Clone(createDefault());
         SettingsCopier.Copy(defaults, Value);
         await FlushAsync();
-        logger.LogInformation("{type} сброшены к значениям по умолчанию", typeof(T).Name);
+        _logger.LogInformation("{type} сброшены к значениям по умолчанию", typeof(T).Name);
     }
 
     public void FlashAtBackground(bool waitBeforeFlash = false)
     {
-        logger.LogDebug(
+        _logger.LogDebug(
             "Фоновое сохранение {type}: ожидание перед сохранением — {wait}",
             typeof(T).Name,
             waitBeforeFlash);
@@ -138,7 +138,7 @@ public sealed class SettingsStorage<T>(
     private async Task<bool> WaitForChangesToSettleAsync()
     {
         CancellationTokenSource cancellation;
-        lock (flashLock)
+        lock (_flashLock)
         {
             _pendingFlash?.Cancel();
             _pendingFlash?.Dispose();
@@ -165,7 +165,7 @@ public sealed class SettingsStorage<T>(
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Не удалось сохранить {type} в {path}", typeof(T).Name, filePath);
+            _logger.LogError(e, "Не удалось сохранить {type} в {path}", typeof(T).Name, filePath);
         }
     }
 
@@ -175,7 +175,7 @@ public sealed class SettingsStorage<T>(
     private void StoreLoaded(T loaded)
     {
         var json = JsonSerializer.Serialize(loaded, jsonTypeInfo);
-        lock (stateLock)
+        lock (_stateLock)
         {
             _value = loaded;
             _persistedJson = json;
@@ -188,12 +188,12 @@ public sealed class SettingsStorage<T>(
         if (ShouldCreateDirectory(directory))
             Directory.CreateDirectory(directory!);
 
-        logger.LogInformation("{type} не найден. Создание файла по умолчанию {path}", typeof(T).Name, filePath);
+        _logger.LogInformation("{type} не найден. Создание файла по умолчанию {path}", typeof(T).Name, filePath);
 
         var defaults = Clone(createDefault());
         var json = JsonSerializer.Serialize(defaults, jsonTypeInfo);
 
-        lock (stateLock)
+        lock (_stateLock)
         {
             _value = defaults;
             _persistedJson = json;

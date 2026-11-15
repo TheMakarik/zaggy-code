@@ -2,7 +2,7 @@ namespace ZaggyCode.Core.Common.Utils;
 
 public sealed class XmlSerializer<T> : XmlSerializer
 {
-    private static readonly XmlSerializer _serializer = new XmlSerializer(typeof(T));
+    private static readonly XmlSerializer Serializer = new XmlSerializer(typeof(T));
     
     public XmlSerializer() : base(typeof(T))
     {
@@ -22,66 +22,66 @@ public sealed class XmlSerializer<T> : XmlSerializer
     
     public new T? Deserialize(Stream stream)
     {
-        return (T?)_serializer.Deserialize(stream);
+        return (T?)Serializer.Deserialize(stream);
     }
     
     public new T? Deserialize(TextReader textReader)
     {
-        return (T?)_serializer.Deserialize(textReader);
+        return (T?)Serializer.Deserialize(textReader);
     }
     
     public new T? Deserialize(XmlReader xmlReader)
     {
-        return (T?)_serializer.Deserialize(xmlReader);
+        return (T?)Serializer.Deserialize(xmlReader);
     }
     
     public new T? Deserialize(XmlReader xmlReader, string encodingStyle)
     {
-        return (T?)_serializer.Deserialize(xmlReader, encodingStyle);
+        return (T?)Serializer.Deserialize(xmlReader, encodingStyle);
     }
     
     public new T? Deserialize(XmlReader xmlReader, XmlDeserializationEvents events)
     {
-        return (T?)_serializer.Deserialize(xmlReader, events);
+        return (T?)Serializer.Deserialize(xmlReader, events);
     }
     
     public new T? Deserialize(XmlReader xmlReader, string encodingStyle, XmlDeserializationEvents events)
     {
-        return (T?)_serializer.Deserialize(xmlReader, encodingStyle, events);
+        return (T?)Serializer.Deserialize(xmlReader, encodingStyle, events);
     }
     
     public void Serialize(Stream stream, T? obj)
     {
-        _serializer.Serialize(stream, obj);
+        Serializer.Serialize(stream, obj);
     }
     
     public void Serialize(TextWriter textWriter, T? obj)
     {
-        _serializer.Serialize(textWriter, obj);
+        Serializer.Serialize(textWriter, obj);
     }
     
     public void Serialize(XmlWriter xmlWriter, T? obj)
     {
-        _serializer.Serialize(xmlWriter, obj);
+        Serializer.Serialize(xmlWriter, obj);
     }
     
     public void Serialize(XmlWriter xmlWriter, T? obj, XmlSerializerNamespaces? namespaces)
     {
-        _serializer.Serialize(xmlWriter, obj, namespaces);
+        Serializer.Serialize(xmlWriter, obj, namespaces);
     }
     
     public void Serialize(XmlWriter xmlWriter, T? obj, XmlSerializerNamespaces? namespaces, string? encodingStyle)
     {
-        _serializer.Serialize(xmlWriter, obj, namespaces, encodingStyle);
+        Serializer.Serialize(xmlWriter, obj, namespaces, encodingStyle);
     }
     
     public void Serialize(Stream stream, T? obj, XmlSerializerNamespaces? namespaces)
     {
-        _serializer.Serialize(stream, obj, namespaces);
+        Serializer.Serialize(stream, obj, namespaces);
     }
     
     public void Serialize(TextWriter textWriter, T? obj, XmlSerializerNamespaces? namespaces)
     {
-        _serializer.Serialize(textWriter, obj, namespaces);
+        Serializer.Serialize(textWriter, obj, namespaces);
     }
 }
