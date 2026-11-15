@@ -137,7 +137,6 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
 
             _viewStorage.Value.CodeTheme = value;
             this.RaisePropertyChanged();
-            MessageBus.Current.SendMessage(new CodeThemeChangedMessage(value));
         }
     }
 
@@ -151,7 +150,6 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
 
             _themeSettingsStorage.Value.CurrentTheme = value;
             this.RaisePropertyChanged();
-            MessageBus.Current.SendMessage(new AppThemeChangedMessage(value));
         }
     }
 
@@ -201,7 +199,6 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
                 break;
             case nameof(ViewSettings.CodeTheme):
                 this.RaisePropertyChanged(nameof(SelectedCodeTheme));
-                MessageBus.Current.SendMessage(new CodeThemeChangedMessage(_viewStorage.Value.CodeTheme));
                 break;
         }
 
@@ -214,7 +211,6 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
         {
             case nameof(ThemeSettings.CurrentTheme):
                 this.RaisePropertyChanged(nameof(SelectedAppTheme));
-                MessageBus.Current.SendMessage(new AppThemeChangedMessage(_themeSettingsStorage.Value.CurrentTheme));
                 break;
             case nameof(ThemeSettings.OnCreateBehavior):
                 this.RaisePropertyChanged(nameof(ThemeCreationBehavior));

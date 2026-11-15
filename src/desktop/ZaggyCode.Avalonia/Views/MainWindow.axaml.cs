@@ -46,13 +46,6 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
 
         Terminal.CurrentSession = _terminalSession;
 
-        MessageBus.Current.Listen<AppThemeChangedMessage>()
-            .Subscribe(message => Dispatcher.UIThread.Post(() =>
-            {
-                _ = ApplyAppThemeAsync(message.ThemeName);
-                GameMapView.InvalidateVisual();
-            }));
-
         var backspaceGesture = new KeyGesture(Key.Back);
         DeleteSelectionMenuItem.InputGesture = backspaceGesture;
         CompactDeleteSelectionMenuItem.InputGesture = backspaceGesture;
@@ -70,6 +63,8 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
     private void OnDataContextChanged()
     {
         Debug.Assert(ViewModel is not null);
+
+        ObserveSettingsStorages();
 
         var icon = ViewModel.ZaggyAssets.Value.IconPath;
         this.Icon = new WindowIcon(new Bitmap(icon));
@@ -146,12 +141,6 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         });
 
         SettingsToast.Dismissed += (_, _) => ViewModel?.FlushViewSettings();
-
-        ViewModel.ApplyCodeTheme.RegisterHandler(context =>
-        {
-            ApplyCodeTheme(context.Input);
-            context.SetOutput(Unit.Default);
-        });
 
         ViewModel.ResetMap.RegisterHandler(context =>
         {
@@ -312,6 +301,38 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         return visual.FindAncestorOfType<MenuItem>() is not null
                || visual.FindAncestorOfType<Button>() is not null
                || visual.FindAncestorOfType<ComboBox>() is not null;
+    }
+
+    private bool _settingsStoragesObserved;
+
+    private void ObserveSettingsStorages()
+    {
+        if (_settingsStoragesObserved)
+            return;
+
+        _settingsStoragesObserved = true;
+
+        var themeSettings = App.Services.GetRequiredService<ISettingsStorage<ThemeSettings>>();
+        themeSettings.Value.PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName != nameof(ThemeSettings.CurrentTheme))
+                return;
+
+            Dispatcher.UIThread.Post(() =>
+            {
+                _ = ApplyAppThemeAsync(themeSettings.Value.CurrentTheme);
+                GameMapView.InvalidateVisual();
+            });
+        };
+
+        var viewSettings = App.Services.GetRequiredService<ISettingsStorage<ViewSettings>>();
+        viewSettings.Value.PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName != nameof(ViewSettings.CodeTheme))
+                return;
+
+            Dispatcher.UIThread.Post(() => ApplyCodeTheme(viewSettings.Value.CodeTheme));
+        };
     }
 
     private void ShowToast(ToastRequest request)

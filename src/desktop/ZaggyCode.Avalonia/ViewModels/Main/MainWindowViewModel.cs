@@ -81,7 +81,6 @@ public partial class MainWindowViewModel : ViewModelBase
     public readonly Interaction<Unit, Unit> ResetMap = new();
     public readonly Interaction<Unit, Unit> ConcludeRun = new();
     public readonly Interaction<ToastRequest, Unit> ShowToast = new();
-    public readonly Interaction<string, Unit> ApplyCodeTheme = new();
     public readonly Interaction<SettingsViewModel, Unit> OpenSettings = new();
     public readonly Interaction<Unit, Unit> OpenAbout = new();
 
@@ -320,31 +319,7 @@ public partial class MainWindowViewModel : ViewModelBase
         MessageBus.Current.Listen<CodeThemesRequestMessage>()
             .Subscribe(_ => MessageBus.Current.SendMessage(new CodeThemesResponseMessage(AvailableCodeThemes)));
 
-        MessageBus.Current.Listen<CodeFontSizeChangedMessage>()
-            .Subscribe(message => TextEditorFontSize = message.FontSize);
-
-        MessageBus.Current.Listen<TerminalFontSizeChangedMessage>()
-            .Subscribe(message => TerminalFontSize = message.FontSize);
-
-        MessageBus.Current.Listen<UseSystemTitleBarChangedMessage>()
-            .Subscribe(message => UseOsDecoration = message.UseSystemTitleBar);
-
-        MessageBus.Current.Listen<SidebarPositionChangedMessage>()
-            .Subscribe(message => SidebarPosition = message.SidebarPosition);
-
 #pragma warning disable AsyncVoidMethod
-        MessageBus.Current.Listen<CodeThemeChangedMessage>()
-            .Subscribe(async void (message) =>
-            {
-                _viewSettingsStorage.Value.CodeTheme = message.ThemeName;
-                CodeTheme = message.ThemeName;
-                await ApplyCodeTheme.Handle(message.ThemeName);
-            });
-
-        MessageBus.Current.Listen<FontSizeToastMessage>()
-            .Subscribe(async void (message) => await ShowToast.Handle(
-                new ToastRequest($"Размер шрифта {message.Source} изменён на {message.FontSize}", true)));
-
         MessageBus.Current.Listen<SettingsSavedMessage>()
             .Subscribe(async void (_) => await ShowToast.Handle(new ToastRequest("Настройки сохранены")));
 
@@ -405,9 +380,11 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             case nameof(ViewSettings.CodeFontSize):
                 TextEditorFontSize = _viewSettingsStorage.Value.CodeFontSize;
+                ShowEditorFontSizeToast();
                 break;
             case nameof(ViewSettings.TerminalFontSize):
                 TerminalFontSize = _viewSettingsStorage.Value.TerminalFontSize;
+                ShowTerminalFontSizeToast();
                 break;
             case nameof(ViewSettings.UseSystemTitleBar):
                 UseOsDecoration = _viewSettingsStorage.Value.UseSystemTitleBar;
@@ -477,23 +454,21 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     [ReactiveCommand]
-    private async Task IncrementEditorFontSize()
+    private void IncrementEditorFontSize()
     {
         if (TextEditorFontSize >= _fontSizeOptions.Value.MaxFontSize)
             return;
 
         TextEditorFontSize += 1;
-        await ShowEditorFontSizeToast();
     }
 
     [ReactiveCommand]
-    private async Task DecrementEditorFontSize()
+    private void DecrementEditorFontSize()
     {
         if (TextEditorFontSize <= _fontSizeOptions.Value.MinFontSize)
             return;
 
         TextEditorFontSize -= 1;
-        await ShowEditorFontSizeToast();
     }
 
     [ReactiveCommand]
@@ -504,43 +479,39 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     [ReactiveCommand]
-    private async Task UpdateFontSize(int fontSize)
+    private void UpdateFontSize(int fontSize)
     {
         if (TextEditorFontSize == fontSize)
             return;
 
         TextEditorFontSize = fontSize;
-        await ShowEditorFontSizeToast();
     }
 
     [ReactiveCommand]
-    private async Task IncrementTerminalFontSize()
+    private void IncrementTerminalFontSize()
     {
         if (TerminalFontSize >= _fontSizeOptions.Value.MaxFontSize)
             return;
 
         TerminalFontSize += 1;
-        await ShowTerminalFontSizeToast();
     }
 
     [ReactiveCommand]
-    private async Task DecrementTerminalFontSize()
+    private void DecrementTerminalFontSize()
     {
         if (TerminalFontSize <= _fontSizeOptions.Value.MinFontSize)
             return;
 
         TerminalFontSize -= 1;
-        await ShowTerminalFontSizeToast();
     }
 
     [ReactiveCommand]
-    private async Task UpdateTerminalFontSize(int fontSize)
+    private void UpdateTerminalFontSize(int fontSize)
     {
         if (TerminalFontSize == fontSize)
             return;
 
         TerminalFontSize = fontSize;
-        await ShowTerminalFontSizeToast();
     }
 
     [ReactiveCommand]
@@ -591,10 +562,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
     [ReactiveCommand]
     private void SelectCodeTheme(string themeName)
-    {
-        _viewSettingsStorage.Value.CodeTheme = themeName;
-        MessageBus.Current.SendMessage(new CodeThemeChangedMessage(themeName));
-    }
+        => _viewSettingsStorage.Value.CodeTheme = themeName;
 
     [ReactiveCommand]
     private async Task OpenAboutAsync()
@@ -621,11 +589,11 @@ public partial class MainWindowViewModel : ViewModelBase
     public void FlushViewSettings()
         => _viewSettingsStorage.FlashAtBackground();
 
-    private async Task ShowEditorFontSizeToast()
-        => await ShowToast.Handle(new ToastRequest($"Размер шрифта редактора и описания изменён на {TextEditorFontSize}", true));
+    private void ShowEditorFontSizeToast()
+        => _ = ShowToast.Handle(new ToastRequest($"Размер шрифта редактора и описания изменён на {TextEditorFontSize}", true));
 
-    private async Task ShowTerminalFontSizeToast()
-        => await ShowToast.Handle(new ToastRequest($"Размер шрифта терминала изменён на {TerminalFontSize}", true));
+    private void ShowTerminalFontSizeToast()
+        => _ = ShowToast.Handle(new ToastRequest($"Размер шрифта терминала изменён на {TerminalFontSize}", true));
 
     private async Task PrepareExecution()
     {

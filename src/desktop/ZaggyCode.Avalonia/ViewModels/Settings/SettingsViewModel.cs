@@ -10,7 +10,6 @@ public sealed partial class SettingsViewModel : ViewModelBase
 
     #endregion
 
-    private readonly ISettingsStorage<ThemeSettings> _themeSettingsStorage;
     private readonly ISettingStorageFacade _storageFacade;
     private readonly ILogger<SettingsViewModel> _logger;
 
@@ -40,7 +39,6 @@ public sealed partial class SettingsViewModel : ViewModelBase
         IPythonFunctionNameValidator pythonFunctionNameValidator,
         ILoggerFactory loggerFactory)
     {
-        _themeSettingsStorage = themeSettingsStorage;
         _storageFacade = storageFacade;
         _logger = loggerFactory.CreateLogger<SettingsViewModel>();
 
@@ -98,10 +96,7 @@ public sealed partial class SettingsViewModel : ViewModelBase
     }
 
     public void RevertAllChanges()
-    {
-        _storageFacade.RevertAllAtBackground();
-        MessageBus.Current.SendMessage(new AppThemeChangedMessage(_themeSettingsStorage.Value.CurrentTheme));
-    }
+        => _storageFacade.RevertAllAtBackground();
 
     [ReactiveCommand]
     private void ResetToDefaults()
