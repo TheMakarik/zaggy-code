@@ -267,6 +267,82 @@ public class ViewSettingsStorageTests : IDisposable
         (await ReadFileAsync()).CodeFontSize.Should().Be(_viewDefaultMock.Value.Settings.CodeFontSize);
     }
 
+    [Fact]
+    public async Task HasChanges_AfterPropertyChange_IsTrue()
+    {
+        // Arrange
+        var systemUnderTests = CreateSystemUnderTests();
+        await systemUnderTests.LoadAsync();
+
+        // Act
+        systemUnderTests.Value.CodeFontSize = 21;
+
+        // Assert
+        systemUnderTests.HasChanges.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task HasChanges_AfterFlush_IsFalse()
+    {
+        // Arrange
+        var systemUnderTests = CreateSystemUnderTests();
+        await systemUnderTests.LoadAsync();
+        systemUnderTests.Value.CodeFontSize = 22;
+
+        // Act
+        await systemUnderTests.FlushAsync();
+
+        // Assert
+        systemUnderTests.HasChanges.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task HasChanges_AfterRevert_IsFalse()
+    {
+        // Arrange
+        var systemUnderTests = CreateSystemUnderTests();
+        await systemUnderTests.LoadAsync();
+        systemUnderTests.Value.CodeFontSize = 23;
+
+        // Act
+        systemUnderTests.Revert();
+
+        // Assert
+        systemUnderTests.HasChanges.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task HasChanges_AfterReturningOriginalValue_IsFalse()
+    {
+        // Arrange
+        var systemUnderTests = CreateSystemUnderTests();
+        await systemUnderTests.LoadAsync();
+        var originalFontSize = systemUnderTests.Value.CodeFontSize;
+
+        // Act
+        systemUnderTests.Value.CodeFontSize = 24;
+        systemUnderTests.Value.CodeFontSize = originalFontSize;
+
+        // Assert
+        systemUnderTests.HasChanges.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task ToDefaultAsync_AfterFlush_LeavesNoChanges()
+    {
+        // Arrange
+        var systemUnderTests = CreateSystemUnderTests();
+        await systemUnderTests.LoadAsync();
+        systemUnderTests.Value.CodeFontSize = 25;
+        await systemUnderTests.FlushAsync();
+
+        // Act
+        await systemUnderTests.ToDefaultAsync();
+
+        // Assert
+        systemUnderTests.HasChanges.Should().BeFalse();
+    }
+
     private async Task<ViewSettings> ReadFileAsync()
     {
         await using var file = File.OpenRead(_jsonPath);

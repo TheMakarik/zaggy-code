@@ -5,7 +5,7 @@ public sealed class MetadataParser(IOptions<MetadataOptions> options, ILogger<Me
     public T Parse<T>(Stream stream) where T : ArchiveMetadata
     {
         var metadata = JsonSerializer.Deserialize<T>(stream)
-                       ?? throw new InvalidOperationException("Failed to deserialize theme metadata");
+                       ?? throw new InvalidOperationException("Не удалось десериализовать метаданные темы");
 
         logger.LogDebug("Прочитан мета файл: {metadata}", JsonSerializer.Serialize(metadata));
         return metadata;

@@ -2,6 +2,7 @@ namespace ZaggyCode.Core.Data.Interfaces;
 
 public interface ISettingsStorage : IStorage
 {
+    public bool HasChanges { get; }
     public void FlashAtBackground(bool waitBeforeFlash = false);
     public void Revert();
     public ValueTask ToDefaultAsync();

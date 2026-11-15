@@ -2,90 +2,43 @@ namespace ZaggyCode.Avalonia.ViewModels.Settings;
 
 public sealed partial class CSharpSettingsViewModel : ViewModelBase
 {
-    #region Reactive properties
-
-    [Reactive] private bool _useTopLevelStatements;
-    [Reactive] private bool _enableImplicitUsings;
-    [Reactive] private bool _blockIo;
-    [Reactive] private bool _hasChanges;
-
-    #endregion
-
-    private readonly CSharpSettings _defaultCSharpSettings;
     private readonly ISettingsStorage<CSharpSettings> _csharpSettingsStorage;
-    private bool _originalUseTopLevelStatements;
-    private bool _originalEnableImplicitUsings;
-    private bool _originalBlockIo;
 
-    public CSharpSettingsViewModel(
-        ISettingsStorage<CSharpSettings> csharpSettingsStorage,
-        IOptions<CSharpDefaultSettingsOptions> csharpDefaultSettingsOptions)
+    public CSharpSettingsViewModel(ISettingsStorage<CSharpSettings> csharpSettingsStorage)
     {
-        _defaultCSharpSettings = csharpDefaultSettingsOptions.Value.Settings;
         _csharpSettingsStorage = csharpSettingsStorage;
-
-        var current = csharpSettingsStorage.Value;
-        _originalUseTopLevelStatements = current.UseTopLevelStatements;
-        _originalEnableImplicitUsings = current.EnableImplicitUsings;
-        _originalBlockIo = current.BlockIo;
-
-        LoadFromCSharpSettings(current);
-        HasChanges = false;
-
-        this.WhenAnyPropertyChanged(
-                nameof(UseTopLevelStatements),
-                nameof(EnableImplicitUsings),
-                nameof(BlockIo))
-            .Subscribe(_ => UpdateHasChanges());
-
-        csharpSettingsStorage.Value.PropertyChanged += (_, args) => ApplySettingsChange(args.PropertyName);
-    }
-
-    private void ApplySettingsChange(string? propertyName)
-    {
-        var current = _csharpSettingsStorage.Value;
-
-        switch (propertyName)
+        csharpSettingsStorage.Value.PropertyChanged += (_, _) =>
         {
-            case nameof(CSharpSettings.UseTopLevelStatements):
-                UseTopLevelStatements = current.UseTopLevelStatements;
-                break;
-            case nameof(CSharpSettings.EnableImplicitUsings):
-                EnableImplicitUsings = current.EnableImplicitUsings;
-                break;
-            case nameof(CSharpSettings.BlockIo):
-                BlockIo = current.BlockIo;
-                break;
-        }
+            this.RaisePropertyChanged(nameof(HasChanges));
+            this.RaisePropertyChanged(nameof(UseTopLevelStatements));
+            this.RaisePropertyChanged(nameof(EnableImplicitUsings));
+            this.RaisePropertyChanged(nameof(BlockIo));
+        };
     }
 
-    public void ResetToDefaults()
+    public bool HasChanges => _csharpSettingsStorage.HasChanges;
+
+    public bool UseTopLevelStatements
     {
-        UseTopLevelStatements = _defaultCSharpSettings.UseTopLevelStatements;
-        EnableImplicitUsings = _defaultCSharpSettings.EnableImplicitUsings;
-        BlockIo = _defaultCSharpSettings.BlockIo;
+        get => _csharpSettingsStorage.Value.UseTopLevelStatements;
+        set => SetSetting(settings => settings.UseTopLevelStatements = value);
     }
 
-    public void AcceptChanges()
+    public bool EnableImplicitUsings
     {
-        _originalUseTopLevelStatements = UseTopLevelStatements;
-        _originalEnableImplicitUsings = EnableImplicitUsings;
-        _originalBlockIo = BlockIo;
-        HasChanges = false;
+        get => _csharpSettingsStorage.Value.EnableImplicitUsings;
+        set => SetSetting(settings => settings.EnableImplicitUsings = value);
     }
 
-    private void LoadFromCSharpSettings(CSharpSettings csharpSettings)
+    public bool BlockIo
     {
-        UseTopLevelStatements = csharpSettings.UseTopLevelStatements;
-        EnableImplicitUsings = csharpSettings.EnableImplicitUsings;
-        BlockIo = csharpSettings.BlockIo;
+        get => _csharpSettingsStorage.Value.BlockIo;
+        set => SetSetting(settings => settings.BlockIo = value);
     }
 
-    private void UpdateHasChanges()
+    private void SetSetting(Action<CSharpSettings> update, [CallerMemberName] string? propertyName = null)
     {
-        HasChanges =
-            UseTopLevelStatements != _originalUseTopLevelStatements ||
-            EnableImplicitUsings != _originalEnableImplicitUsings ||
-            BlockIo != _originalBlockIo;
+        update(_csharpSettingsStorage.Value);
+        this.RaisePropertyChanged(propertyName);
     }
 }

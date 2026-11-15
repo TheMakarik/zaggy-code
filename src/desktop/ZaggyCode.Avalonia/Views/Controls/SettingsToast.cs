@@ -45,6 +45,8 @@ public sealed class SettingsToast : Border
     public SettingsToast()
     {
         Classes.Add("settings-toast");
+        IsVisible = false;
+        Opacity = 0;
         HorizontalAlignment = global::Avalonia.Layout.HorizontalAlignment.Center;
         VerticalAlignment = global::Avalonia.Layout.VerticalAlignment.Bottom;
         Margin = new Thickness(0, 0, 0, 20);
@@ -149,10 +151,11 @@ public sealed class SettingsToast : Border
         var iconKind = GetActionIcon(action.Kind);
         if (iconKind is { } kind)
             content.Children.Add(new MaterialIcon { Kind = kind });
-
-        content.Children.Add(new TextBlock { Text = action.Text, VerticalAlignment = global::Avalonia.Layout.VerticalAlignment.Center });
+        else
+            content.Children.Add(new TextBlock { Text = action.Text, VerticalAlignment = global::Avalonia.Layout.VerticalAlignment.Center });
 
         var button = new Button { Content = content };
+        ToolTip.SetTip(button, action.Text);
         button.Click += (_, _) => action.Click?.Invoke();
         return button;
     }

@@ -4,16 +4,8 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
 {
     #region Reactive properties
 
-    [Reactive] private int _codeFontSize;
-    [Reactive] private int _terminalFontSize;
-    [Reactive] private bool _useSystemTitleBar;
-    [Reactive] private SidebarPosition _sidebarPosition = SidebarPosition.Left;
-    [Reactive] private string _selectedCodeTheme = string.Empty;
-    [Reactive] private string _selectedAppTheme = string.Empty;
-    [Reactive] private ThemeCreationBehavior _themeCreationBehavior;
     [Reactive] private bool _isLoadingThemes = true;
     [Reactive] private string _themeSearchText = string.Empty;
-    [Reactive] private bool _hasChanges;
     [Reactive] private bool _canDecreaseCodeFontSize;
     [Reactive] private bool _canIncreaseCodeFontSize;
     [Reactive] private bool _canDecreaseTerminalFontSize;
@@ -22,10 +14,8 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
     #endregion
 
     private readonly FontSizeOptions _fontSizeOptions;
-    private readonly ViewSettings _defaultViewSettings;
     private readonly ISettingsStorage<ViewSettings> _viewStorage;
     private readonly ISettingsStorage<ThemeSettings> _themeSettingsStorage;
-    private readonly ThemeSettings _defaultThemeSettings;
     private readonly IThemeCatalog _themeCatalog;
     private readonly IThemeCopier _themeCopier;
     private readonly IThemeDeleter _themeDeleter;
@@ -35,17 +25,11 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
     private readonly ThemeOptions _themeOptions;
     private readonly string _zaggyQuestionPath;
     private readonly ILogger<AppearanceSettingsViewModel> _logger;
-    private int _originalCodeFontSize;
-    private int _originalTerminalFontSize;
-    private bool _originalUseSystemTitleBar;
-    private SidebarPosition _originalSidebarPosition;
-    private string _originalCodeTheme = string.Empty;
-    private string _originalSelectedAppTheme = string.Empty;
-    private ThemeCreationBehavior _originalThemeCreationBehavior;
 
     public int MinFontSize => _fontSizeOptions.MinFontSize;
     public int MaxFontSize => _fontSizeOptions.MaxFontSize;
     public int LoadingDotsMaxCount { get; }
+    public bool HasChanges => _viewStorage.HasChanges || _themeSettingsStorage.HasChanges;
 
     public ObservableCollection<CodeThemeItem> AvailableCodeThemes { get; } = [];
     public ObservableCollection<ThemeMetadataItem> AvailableAppThemes { get; } = [];
@@ -63,8 +47,6 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
     public AppearanceSettingsViewModel(
         ISettingsStorage<ViewSettings> viewStorage,
         ISettingsStorage<ThemeSettings> themeSettingsStorage,
-        IOptions<DefaultViewSettings> defaultViewSettingsOptions,
-        IOptions<DefaultThemeSettings> defaultThemeSettingsOptions,
         IOptions<CodeExamplePathOptions> codeExamplePathOptions,
         IOptions<FontSizeOptions> fontSizeOptions,
         IOptions<LoadingOptions> loadingOptions,
@@ -78,11 +60,9 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
         IOptions<ZaggyAssetsOptions> zaggyAssets,
         ILogger<AppearanceSettingsViewModel> logger)
     {
-        _fontSizeOptions = fontSizeOptions.Value;
-        _defaultViewSettings = defaultViewSettingsOptions.Value.Settings;
         _viewStorage = viewStorage;
         _themeSettingsStorage = themeSettingsStorage;
-        _defaultThemeSettings = defaultThemeSettingsOptions.Value.Settings;
+        _fontSizeOptions = fontSizeOptions.Value;
         _themeCatalog = themeCatalog;
         _themeCopier = themeCopier;
         _themeDeleter = themeDeleter;
@@ -96,151 +76,158 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
         CSharpExamplePath = codeExamplePathOptions.Value.CSharpExamplePath;
         PythonExamplePath = codeExamplePathOptions.Value.PythonExamplePath;
 
-        var current = viewStorage.Value;
-        _originalCodeFontSize = current.CodeFontSize;
-        _originalTerminalFontSize = current.TerminalFontSize;
-        _originalUseSystemTitleBar = current.UseSystemTitleBar;
-        _originalSidebarPosition = current.SidebarPosition;
-        _originalCodeTheme = current.CodeTheme;
-        _originalSelectedAppTheme = themeSettingsStorage.Value.CurrentTheme;
-        _originalThemeCreationBehavior = themeSettingsStorage.Value.OnCreateBehavior;
-
 #pragma warning disable AsyncVoidMethod
         _ = InitializeAvailableAppThemesAsync();
 #pragma warning restore AsyncVoidMethod
 
-        LoadFromViewSettings(current);
-        ThemeCreationBehavior = themeSettingsStorage.Value.OnCreateBehavior;
-        HasChanges = false;
-
         InitializeMessageBusSubscriptions();
         ObserveSettingsStorages();
-
-        this.WhenAnyPropertyChanged(
-                nameof(CodeFontSize),
-                nameof(TerminalFontSize),
-                nameof(UseSystemTitleBar),
-                nameof(SidebarPosition),
-                nameof(SelectedCodeTheme),
-                nameof(SelectedAppTheme),
-                nameof(ThemeCreationBehavior))
-            .Subscribe(_ => UpdateHasChanges());
-
-        this.WhenAnyValue(viewModel => viewModel.SelectedCodeTheme)
-            .Skip(1)
-            .SelectMany(themeName => ApplyCodeThemeInteraction.Handle(themeName))
-            .Subscribe();
-
-        this.WhenAnyValue(viewModel => viewModel.CodeFontSize)
-            .Subscribe(_ =>
-            {
-                CanDecreaseCodeFontSize = CodeFontSize > MinFontSize;
-                CanIncreaseCodeFontSize = CodeFontSize < MaxFontSize;
-            });
-
-        this.WhenAnyValue(viewModel => viewModel.ThemeSearchText)
-            .Subscribe(_ => ApplyThemeFilter());
-
-        this.WhenAnyValue(viewModel => viewModel.TerminalFontSize)
-            .Subscribe(_ =>
-            {
-                CanDecreaseTerminalFontSize = TerminalFontSize > MinFontSize;
-                CanIncreaseTerminalFontSize = TerminalFontSize < MaxFontSize;
-            });
+        UpdateFontSizeLimits();
     }
 
-    public void ResetToDefaults()
-    {
-        CodeFontSize = _defaultViewSettings.CodeFontSize;
-        TerminalFontSize = _defaultViewSettings.TerminalFontSize;
-        UseSystemTitleBar = _defaultViewSettings.UseSystemTitleBar;
-        SidebarPosition = _defaultViewSettings.SidebarPosition;
-        SelectedCodeTheme = _defaultViewSettings.CodeTheme;
-        ThemeCreationBehavior = _defaultThemeSettings.OnCreateBehavior;
+    #region Settings proxies
 
-        ApplyAppThemeSelection(_defaultThemeSettings.CurrentTheme);
+    public int CodeFontSize
+    {
+        get => _viewStorage.Value.CodeFontSize;
+        set
+        {
+            if (value == _viewStorage.Value.CodeFontSize)
+                return;
+
+            _viewStorage.Value.CodeFontSize = value;
+            this.RaisePropertyChanged();
+            UpdateFontSizeLimits();
+        }
     }
 
-    public void AcceptChanges()
+    public int TerminalFontSize
     {
-        _originalCodeFontSize = CodeFontSize;
-        _originalTerminalFontSize = TerminalFontSize;
-        _originalUseSystemTitleBar = UseSystemTitleBar;
-        _originalSidebarPosition = SidebarPosition;
-        _originalCodeTheme = SelectedCodeTheme;
-        _originalSelectedAppTheme = SelectedAppTheme;
-        _originalThemeCreationBehavior = ThemeCreationBehavior;
+        get => _viewStorage.Value.TerminalFontSize;
+        set
+        {
+            if (value == _viewStorage.Value.TerminalFontSize)
+                return;
 
-        _themeSettingsStorage.Value.CurrentTheme = SelectedAppTheme;
-        _themeSettingsStorage.Value.OnCreateBehavior = ThemeCreationBehavior;
-
-        HasChanges = false;
+            _viewStorage.Value.TerminalFontSize = value;
+            this.RaisePropertyChanged();
+            UpdateFontSizeLimits();
+        }
     }
 
-    private void LoadFromViewSettings(ViewSettings viewSettings)
+    public bool UseSystemTitleBar
     {
-        CodeFontSize = viewSettings.CodeFontSize;
-        TerminalFontSize = viewSettings.TerminalFontSize;
-        UseSystemTitleBar = viewSettings.UseSystemTitleBar;
-        SidebarPosition = viewSettings.SidebarPosition;
-        SelectedCodeTheme = viewSettings.CodeTheme;
+        get => _viewStorage.Value.UseSystemTitleBar;
+        set => SetViewSetting(settings => settings.UseSystemTitleBar = value);
     }
 
-    private void UpdateHasChanges()
+    public SidebarPosition SidebarPosition
     {
-        HasChanges =
-            CodeFontSize != _originalCodeFontSize ||
-            TerminalFontSize != _originalTerminalFontSize ||
-            UseSystemTitleBar != _originalUseSystemTitleBar ||
-            SidebarPosition != _originalSidebarPosition ||
-            SelectedCodeTheme != _originalCodeTheme ||
-            SelectedAppTheme != _originalSelectedAppTheme ||
-            ThemeCreationBehavior != _originalThemeCreationBehavior;
+        get => _viewStorage.Value.SidebarPosition;
+        set => SetViewSetting(settings => settings.SidebarPosition = value);
+    }
+
+    public string SelectedCodeTheme
+    {
+        get => _viewStorage.Value.CodeTheme;
+        set
+        {
+            if (value == _viewStorage.Value.CodeTheme)
+                return;
+
+            _viewStorage.Value.CodeTheme = value;
+            this.RaisePropertyChanged();
+            MessageBus.Current.SendMessage(new CodeThemeChangedMessage(value));
+        }
+    }
+
+    public string SelectedAppTheme
+    {
+        get => _themeSettingsStorage.Value.CurrentTheme;
+        set
+        {
+            if (value == _themeSettingsStorage.Value.CurrentTheme)
+                return;
+
+            _themeSettingsStorage.Value.CurrentTheme = value;
+            this.RaisePropertyChanged();
+            MessageBus.Current.SendMessage(new AppThemeChangedMessage(value));
+        }
+    }
+
+    public ThemeCreationBehavior ThemeCreationBehavior
+    {
+        get => _themeSettingsStorage.Value.OnCreateBehavior;
+        set
+        {
+            if (value == _themeSettingsStorage.Value.OnCreateBehavior)
+                return;
+
+            _themeSettingsStorage.Value.OnCreateBehavior = value;
+            this.RaisePropertyChanged();
+        }
+    }
+
+    #endregion
+
+    private void SetViewSetting(Action<ViewSettings> update, [CallerMemberName] string? propertyName = null)
+    {
+        update(_viewStorage.Value);
+        this.RaisePropertyChanged(propertyName);
     }
 
     private void ObserveSettingsStorages()
     {
-        _viewStorage.Value.PropertyChanged += (_, args) => ApplyViewSettingsChange(args.PropertyName);
-        _themeSettingsStorage.Value.PropertyChanged += (_, args) => ApplyThemeSettingsChange(args.PropertyName);
+        _viewStorage.Value.PropertyChanged += (_, args) =>
+        {
+            this.RaisePropertyChanged(nameof(HasChanges));
+            ApplyViewSettingsChange(args.PropertyName);
+        };
+
+        _themeSettingsStorage.Value.PropertyChanged += (_, args) =>
+        {
+            this.RaisePropertyChanged(nameof(HasChanges));
+            ApplyThemeSettingsChange(args.PropertyName);
+        };
     }
 
     private void ApplyViewSettingsChange(string? propertyName)
     {
-        var current = _viewStorage.Value;
-
         switch (propertyName)
         {
             case nameof(ViewSettings.CodeFontSize):
-                CodeFontSize = current.CodeFontSize;
-                break;
             case nameof(ViewSettings.TerminalFontSize):
-                TerminalFontSize = current.TerminalFontSize;
-                break;
-            case nameof(ViewSettings.UseSystemTitleBar):
-                UseSystemTitleBar = current.UseSystemTitleBar;
-                break;
-            case nameof(ViewSettings.SidebarPosition):
-                SidebarPosition = current.SidebarPosition;
+                UpdateFontSizeLimits();
                 break;
             case nameof(ViewSettings.CodeTheme):
-                SelectedCodeTheme = current.CodeTheme;
+                this.RaisePropertyChanged(nameof(SelectedCodeTheme));
+                MessageBus.Current.SendMessage(new CodeThemeChangedMessage(_viewStorage.Value.CodeTheme));
                 break;
         }
+
+        this.RaisePropertyChanged(propertyName);
     }
 
     private void ApplyThemeSettingsChange(string? propertyName)
     {
-        var current = _themeSettingsStorage.Value;
-
         switch (propertyName)
         {
             case nameof(ThemeSettings.CurrentTheme):
-                SelectedAppTheme = current.CurrentTheme;
+                this.RaisePropertyChanged(nameof(SelectedAppTheme));
+                MessageBus.Current.SendMessage(new AppThemeChangedMessage(_themeSettingsStorage.Value.CurrentTheme));
                 break;
             case nameof(ThemeSettings.OnCreateBehavior):
-                ThemeCreationBehavior = current.OnCreateBehavior;
+                this.RaisePropertyChanged(nameof(ThemeCreationBehavior));
                 break;
         }
+    }
+
+    private void UpdateFontSizeLimits()
+    {
+        CanDecreaseCodeFontSize = CodeFontSize > MinFontSize;
+        CanIncreaseCodeFontSize = CodeFontSize < MaxFontSize;
+        CanDecreaseTerminalFontSize = TerminalFontSize > MinFontSize;
+        CanIncreaseTerminalFontSize = TerminalFontSize < MaxFontSize;
     }
 
     private void InitializeMessageBusSubscriptions()
@@ -253,40 +240,23 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
                     AvailableCodeThemes.Add(theme);
             });
 
+        this.WhenAnyValue(viewModel => viewModel.ThemeSearchText)
+            .Subscribe(_ => ApplyThemeFilter());
+
         MessageBus.Current.SendMessage(new CodeThemesRequestMessage());
     }
 
     [ReactiveCommand]
     private void SelectCodeTheme(string themeName)
-    {
-        SelectedCodeTheme = themeName;
-    }
+        => SelectedCodeTheme = themeName;
 
     [ReactiveCommand]
     private void SelectSidebarPosition(SidebarPosition position)
-    {
-        SidebarPosition = position;
-    }
+        => SidebarPosition = position;
 
     [ReactiveCommand]
     private void SelectAppTheme(string themeName)
-        => ApplyAppThemeSelection(themeName);
-
-    private void ApplyAppThemeSelection(string themeName)
-    {
-        if (SelectedAppTheme == themeName)
-            return;
-
-        SelectedAppTheme = themeName;
-        MessageBus.Current.SendMessage(new AppThemeChangedMessage(themeName));
-    }
-
-    public void RevertChanges()
-    {
-        MessageBus.Current.SendMessage(new AppThemeChangedMessage(_originalSelectedAppTheme));
-        SelectedAppTheme = _originalSelectedAppTheme;
-        ThemeCreationBehavior = _originalThemeCreationBehavior;
-    }
+        => SelectedAppTheme = themeName;
 
     private async Task InitializeAvailableAppThemesAsync()
     {
@@ -337,12 +307,6 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
         }
 
         ApplyThemeFilter();
-
-        var saved = _themeSettingsStorage.Value.CurrentTheme;
-        var selected = AvailableAppThemes.Any(theme => theme.Name == saved) ? saved : string.Empty;
-
-        if (SelectedAppTheme != selected)
-            SelectedAppTheme = selected;
     }
 
     private void ApplyThemeFilter()
@@ -391,7 +355,7 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
 
         try
         {
-            ApplyAppThemeSelection(item.Name);
+            SelectedAppTheme = item.Name;
 
             var editor = new ThemeEditorViewModel(_themeEditor);
             await editor.InitializeAsync(item.Name);
@@ -421,7 +385,7 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
             if (ThemeCreationBehavior == ThemeCreationBehavior.Nothing)
                 return;
 
-            ApplyAppThemeSelection(name);
+            SelectedAppTheme = name;
 
             if (ThemeCreationBehavior != ThemeCreationBehavior.OpenEditorAndApply)
                 return;
@@ -464,7 +428,7 @@ public sealed partial class AppearanceSettingsViewModel : ViewModelBase
     private async Task CreateThemeAsync(string name)
     {
         var source = await _themeCatalog.LoadThemeAsync("Primus")
-            ?? throw new InvalidOperationException("Default theme 'Primus' was not found");
+            ?? throw new InvalidOperationException("Тема по умолчанию «Primus» не найдена");
 
         var metadata = new ThemeMetadata
         {

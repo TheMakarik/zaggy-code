@@ -39,7 +39,16 @@ public sealed class SettingsStorage<T> : ISettingsStorage<T>
         this.createDefault = createDefault;
     }
 
-    public T Value => _value ?? throw new InvalidOperationException($"Cannot load null {typeof(T).Name}.");
+    public T Value => _value ?? throw new InvalidOperationException($"Не удалось загрузить {typeof(T).Name}: значение отсутствует.");
+
+    public bool HasChanges
+    {
+        get
+        {
+            lock (stateLock)
+                return !IsCurrentEqualToPersisted();
+        }
+    }
 
     public async Task LoadAsync()
     {
@@ -55,7 +64,7 @@ public sealed class SettingsStorage<T> : ISettingsStorage<T>
         {
             await using var file = File.OpenRead(filePath);
             var loaded = await JsonSerializer.DeserializeAsync(file, jsonTypeInfo)
-                         ?? throw new InvalidOperationException($"{typeof(T).Name} file corrupted");
+                         ?? throw new InvalidOperationException($"Файл {typeof(T).Name} повреждён");
             StoreLoaded(loaded);
         }
         catch (Exception e)
@@ -169,6 +178,9 @@ public sealed class SettingsStorage<T> : ISettingsStorage<T>
         }
     }
 
+    private bool IsCurrentEqualToPersisted()
+        => JsonSerializer.Serialize(Value, jsonTypeInfo) == _persistedJson;
+
     private void StoreLoaded(T loaded)
     {
         var json = JsonSerializer.Serialize(loaded, jsonTypeInfo);
@@ -203,7 +215,7 @@ public sealed class SettingsStorage<T> : ISettingsStorage<T>
     {
         var json = JsonSerializer.Serialize(source, jsonTypeInfo);
         return JsonSerializer.Deserialize(json, jsonTypeInfo)
-               ?? throw new InvalidOperationException($"Cannot clone {typeof(T).Name}.");
+               ?? throw new InvalidOperationException($"Не удалось скопировать {typeof(T).Name}.");
     }
 
     private async Task WriteFileAsync(string json)

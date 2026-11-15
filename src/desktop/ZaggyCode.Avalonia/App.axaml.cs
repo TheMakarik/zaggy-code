@@ -2,7 +2,7 @@ namespace ZaggyCode.Avalonia;
 
 public partial class App : Application
 {
-    public static IServiceProvider Services { get => field ?? throw new InvalidOperationException("Cannot get null service collection"); set; } 
+    public static IServiceProvider Services { get => field ?? throw new InvalidOperationException("Коллекция сервисов не инициализирована"); set; } 
         
     public override void Initialize()
     {
