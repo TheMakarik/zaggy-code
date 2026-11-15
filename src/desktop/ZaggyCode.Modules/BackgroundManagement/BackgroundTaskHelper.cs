@@ -1,7 +1,9 @@
 namespace ZaggyCode.Modules.BackgroundManagement;
 
 //#:NO_AI
-public sealed class BackgroundTaskHelper(ILogger<IBackgroundTaskHelper> logger) : IBackgroundTaskHelper
+public sealed class BackgroundTaskHelper(
+    IBackgroundTaskNameProvider taskNames,
+    ILogger<IBackgroundTaskHelper> logger) : IBackgroundTaskHelper
 {
     private readonly ObservableDictionary<BackgroundTaskKind, BackgroundTask> _backgroundTasks = [];
 
@@ -18,7 +20,7 @@ public sealed class BackgroundTaskHelper(ILogger<IBackgroundTaskHelper> logger) 
         {
             progressSubscription?.Dispose();
 
-            logger.LogDebug("Заканчивается выполнение фоновой задачи с типом {kind}", backgroundTask.Kind);
+            logger.LogDebug("Заканчивается выполнение фоновой задачи «{name}»", taskNames.GetName(backgroundTask.Kind));
 
             if (_backgroundTasks.TryGetValue(startDto.Kind, out var currentTask) && currentTask.Task == task)
                 _backgroundTasks.Remove(startDto.Kind);
@@ -36,7 +38,7 @@ public sealed class BackgroundTaskHelper(ILogger<IBackgroundTaskHelper> logger) 
         {
             backgroundTask.Description = move.DescriptionOfNextMove;
 
-            logger.LogDebug("Фоновая задача {kind}: {description}", move.Kind, move.DescriptionOfNextMove);
+            logger.LogDebug("Фоновая задача «{name}»: {description}", taskNames.GetName(move.Kind), move.DescriptionOfNextMove);
         }
 
         progress.ProgressChanged += Handler;

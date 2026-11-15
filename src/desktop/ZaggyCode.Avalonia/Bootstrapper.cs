@@ -77,6 +77,7 @@ public sealed class Bootstrapper
             .AddOptions<DefaultViewSettings>()
             .AddOptions<DefaultThemeSettings>()
             .AddOptions<StorageOptions>()
+            .AddOptions<BackgroundTaskNameOptions>()
             .AddOptions<SpeedMillisecondsOptions>()
             .AddOptions<MetadataOptions>()
             .AddOptions<TempOptions>()

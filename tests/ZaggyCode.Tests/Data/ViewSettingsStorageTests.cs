@@ -158,7 +158,7 @@ public class ViewSettingsStorageTests : IDisposable
 
         // Act
         systemUnderTests.Value.CodeTheme = "Dracula";
-        _ = systemUnderTests.FlashAtBackground();
+        systemUnderTests.FlashAtBackground();
         await WaitForFileContentAsync("Dracula");
 
         // Assert
@@ -174,9 +174,9 @@ public class ViewSettingsStorageTests : IDisposable
 
         // Act
         systemUnderTests.Value.CodeTheme = "First";
-        _ = systemUnderTests.FlashAtBackground(true);
+        systemUnderTests.FlashAtBackground(true);
         systemUnderTests.Value.CodeTheme = "Second";
-        _ = systemUnderTests.FlashAtBackground(true);
+        systemUnderTests.FlashAtBackground(true);
 
         await WaitForFileContentAsync("Second");
 

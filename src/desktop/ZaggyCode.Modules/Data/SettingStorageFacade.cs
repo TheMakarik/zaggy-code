@@ -15,11 +15,11 @@ public sealed class SettingStorageFacade(
             BackgroundTaskKind.FlushingAllSettings,
             "Сохранение настроек",
             [
-                new("Сохранение состояния приложения", BackgroundTaskKind.FlushingStateSettings, stateSettingsStorage.FlushAsync),
-                new("Сохранение настроек внешнего вида", BackgroundTaskKind.FlushingViewSettings, viewSettingsStorage.FlushAsync),
-                new("Сохранение настроек темы", BackgroundTaskKind.FlushingThemeSettings, themeSettingsStorage.FlushAsync),
-                new("Сохранение настроек Python", BackgroundTaskKind.FlushingPythonSettings, pythonSettingsStorage.FlushAsync),
-                new("Сохранение настроек C#", BackgroundTaskKind.FlushingCSharpSettings, csharpSettingsStorage.FlushAsync)
+                new("Сохранение состояния приложения", stateSettingsStorage.FlushAsync),
+                new("Сохранение настроек внешнего вида", viewSettingsStorage.FlushAsync),
+                new("Сохранение настроек темы", themeSettingsStorage.FlushAsync),
+                new("Сохранение настроек Python", pythonSettingsStorage.FlushAsync),
+                new("Сохранение настроек C#", csharpSettingsStorage.FlushAsync)
             ]);
 
     public Task RevertAllAtBackground()
@@ -27,11 +27,11 @@ public sealed class SettingStorageFacade(
             BackgroundTaskKind.RevertingAllSettings,
             "Отмена изменений",
             [
-                new("Отмена изменений состояния приложения", BackgroundTaskKind.RevertingStateSettings, Revert(stateSettingsStorage)),
-                new("Отмена изменений настроек внешнего вида", BackgroundTaskKind.RevertingViewSettings, Revert(viewSettingsStorage)),
-                new("Отмена изменений настроек темы", BackgroundTaskKind.RevertingThemeSettings, Revert(themeSettingsStorage)),
-                new("Отмена изменений настроек Python", BackgroundTaskKind.RevertingPythonSettings, Revert(pythonSettingsStorage)),
-                new("Отмена изменений настроек C#", BackgroundTaskKind.RevertingCSharpSettings, Revert(csharpSettingsStorage))
+                new("Отмена изменений состояния приложения", Revert(stateSettingsStorage)),
+                new("Отмена изменений настроек внешнего вида", Revert(viewSettingsStorage)),
+                new("Отмена изменений настроек темы", Revert(themeSettingsStorage)),
+                new("Отмена изменений настроек Python", Revert(pythonSettingsStorage)),
+                new("Отмена изменений настроек C#", Revert(csharpSettingsStorage))
             ]);
 
     public Task ToDefaultAllAtBackground()
@@ -39,11 +39,11 @@ public sealed class SettingStorageFacade(
             BackgroundTaskKind.ToDefaultAllSettings,
             "Сброс настроек к значениям по умолчанию",
             [
-                new("Сброс состояния приложения к значениям по умолчанию", BackgroundTaskKind.ToDefaultStateSettings, stateSettingsStorage.ToDefaultAsync),
-                new("Сброс настроек внешнего вида к значениям по умолчанию", BackgroundTaskKind.ToDefaultViewSettings, viewSettingsStorage.ToDefaultAsync),
-                new("Сброс настроек темы к значениям по умолчанию", BackgroundTaskKind.ToDefaultThemeSettings, themeSettingsStorage.ToDefaultAsync),
-                new("Сброс настроек Python к значениям по умолчанию", BackgroundTaskKind.ToDefaultPythonSettings, pythonSettingsStorage.ToDefaultAsync),
-                new("Сброс настроек C# к значениям по умолчанию", BackgroundTaskKind.ToDefaultCSharpSettings, csharpSettingsStorage.ToDefaultAsync)
+                new("Сброс состояния приложения к значениям по умолчанию", stateSettingsStorage.ToDefaultAsync),
+                new("Сброс настроек внешнего вида к значениям по умолчанию", viewSettingsStorage.ToDefaultAsync),
+                new("Сброс настроек темы к значениям по умолчанию", themeSettingsStorage.ToDefaultAsync),
+                new("Сброс настроек Python к значениям по умолчанию", pythonSettingsStorage.ToDefaultAsync),
+                new("Сброс настроек C# к значениям по умолчанию", csharpSettingsStorage.ToDefaultAsync)
             ]);
 
     private Task StartBackground(
@@ -54,11 +54,12 @@ public sealed class SettingStorageFacade(
         {
             Kind = kind,
             HasNoProgress = false,
-            DelegateToStart = progress => RunSequentiallyAsync(progress, operation, steps)
+            DelegateToStart = progress => RunSequentiallyAsync(progress, kind, operation, steps)
         }).Task;
 
     private async Task RunSequentiallyAsync(
         IProgress<BackgroundProgressMove> progress,
+        BackgroundTaskKind kind,
         string operation,
         IReadOnlyList<SettingsStorageStep> steps)
     {
@@ -67,11 +68,10 @@ public sealed class SettingStorageFacade(
         for (var index = 0; index < steps.Count; index++)
         {
             var step = steps[index];
-            var completed = index + 1;
 
             progress.Report(new BackgroundProgressMove(
                 GetPercent(index, steps.Count),
-                step.OperationKind,
+                kind,
                 step.Description));
 
             logger.LogDebug("{description}", step.Description);
@@ -81,7 +81,7 @@ public sealed class SettingStorageFacade(
 
         progress.Report(new BackgroundProgressMove(
             GetPercent(steps.Count, steps.Count),
-            steps[^1].OperationKind,
+            kind,
             "Готово"));
 
         logger.LogInformation("Фоновая операция «{operation}»: завершена", operation);
@@ -95,11 +95,14 @@ public sealed class SettingStorageFacade(
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Ошибка при выполнении операции «{operation}»: {description}", operation, step.Description);
+            logger.LogError(e, "Ошибка при выполнении операции «{operation}»: {description}",
+                operation,
+                step.Description);
         }
     }
 
-    private static Func<ValueTask> Revert(ISettingsStorage storage)
+    private static Func<ValueTask> Revert<T>(ISettingsStorage<T> storage)
+        where T : class, INotifyPropertyChanged
         => () =>
         {
             storage.Revert();

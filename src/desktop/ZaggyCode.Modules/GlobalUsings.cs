@@ -65,6 +65,7 @@ global using ZaggyCode.Core.RobotGameCore.Model;
 global using ZaggyCode.Core.Theming.Interfaces;
 global using ZaggyCode.Modules.Archiving.Options;
 global using ZaggyCode.Modules.BackgroundManagement.Extensions;
+global using ZaggyCode.Modules.BackgroundManagement.Options;
 global using ZaggyCode.Modules.Data;
 global using ZaggyCode.Modules.Data.Json;
 global using ZaggyCode.Modules.Data.Options;

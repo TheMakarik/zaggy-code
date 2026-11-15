@@ -124,21 +124,19 @@ public sealed class SettingsStorage<T> : ISettingsStorage<T>
         logger.LogInformation("{type} сброшены к значениям по умолчанию", typeof(T).Name);
     }
 
-    public Task FlashAtBackground(bool waitBeforeFlash = false)
+    public void FlashAtBackground(bool waitBeforeFlash = false)
     {
         logger.LogDebug(
             "Фоновое сохранение {type}: ожидание перед сохранением — {wait}",
             typeof(T).Name,
             waitBeforeFlash);
 
-        var backgroundTask = backgroundTaskHelper.StartBackground(new BackgroundTaskStartDto
+        backgroundTaskHelper.StartBackground(new BackgroundTaskStartDto
         {
             Kind = backgroundKind,
             HasNoProgress = true,
             DelegateToStart = _ => FlashCoreAsync(waitBeforeFlash)
         });
-
-        return backgroundTask.Task;
     }
 
     private async Task FlashCoreAsync(bool waitBeforeFlash)

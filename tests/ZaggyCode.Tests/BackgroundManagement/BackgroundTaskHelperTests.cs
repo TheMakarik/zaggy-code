@@ -3,6 +3,7 @@ using ZaggyCode.Core.BackgroundManagement.Dto;
 using ZaggyCode.Core.BackgroundManagement.Enums;
 using ZaggyCode.Core.BackgroundManagement.Model;
 using ZaggyCode.Modules.BackgroundManagement;
+using ZaggyCode.Modules.BackgroundManagement.Options;
 
 namespace ZaggyCode.Tests.BackgroundManagement;
 
@@ -12,6 +13,8 @@ public class BackgroundTaskHelperTests
 
     private readonly Fixture _fixture = new();
     private readonly ILogger<IBackgroundTaskHelper> _logger = A.Dummy<ILogger<IBackgroundTaskHelper>>();
+    private readonly IBackgroundTaskNameProvider _taskNames =
+        new BackgroundTaskNameProvider(Options.Create(new BackgroundTaskNameOptions()));
 
     [Fact]
     public async Task StartBackground_WhenCalled_AddsTaskToCollection()
@@ -29,7 +32,7 @@ public class BackgroundTaskHelperTests
                 await release.Task;
             }
         };
-        var systemUnderTests = new BackgroundTaskHelper(_logger);
+        var systemUnderTests = new BackgroundTaskHelper(_taskNames, _logger);
 
         try
         {
@@ -68,7 +71,7 @@ public class BackgroundTaskHelperTests
                 await release.Task;
             }
         };
-        var systemUnderTests = new BackgroundTaskHelper(_logger);
+        var systemUnderTests = new BackgroundTaskHelper(_taskNames, _logger);
 
         try
         {
@@ -97,7 +100,7 @@ public class BackgroundTaskHelperTests
             Kind = _fixture.Create<BackgroundTaskKind>(),
             DelegateToStart = _ => Task.CompletedTask
         };
-        var systemUnderTests = new BackgroundTaskHelper(_logger);
+        var systemUnderTests = new BackgroundTaskHelper(_taskNames, _logger);
 
         // Act
         systemUnderTests.StartBackground(dto);
@@ -131,7 +134,7 @@ public class BackgroundTaskHelperTests
                 await release.Task;
             }
         };
-        var systemUnderTests = new BackgroundTaskHelper(_logger);
+        var systemUnderTests = new BackgroundTaskHelper(_taskNames, _logger);
 
         try
         {

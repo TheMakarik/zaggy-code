@@ -102,6 +102,7 @@ global using ZaggyCode.Core.RobotGameCore.Enums;
 global using ZaggyCode.Core.RobotGameCore.Factories;
 global using ZaggyCode.Core.RobotGameCore.Interfaces;
 global using ZaggyCode.Core.Theming.Interfaces;
+global using ZaggyCode.Modules.BackgroundManagement.Options;
 global using ZaggyCode.Modules.Archiving;
 global using ZaggyCode.Modules.Archiving.Options;
 global using ZaggyCode.Modules.Data;

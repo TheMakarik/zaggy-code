@@ -38,7 +38,7 @@ public sealed class StorageFacade(
         logger.LogInformation("Все хранилища сохранены");
     }
 
-    private IReadOnlyList<ISettingsStorage> SettingsStorages =>
+    private IReadOnlyList<IStorage> SettingsStorages =>
     [
         stateSettingsStorage,
         viewSettingsStorage,

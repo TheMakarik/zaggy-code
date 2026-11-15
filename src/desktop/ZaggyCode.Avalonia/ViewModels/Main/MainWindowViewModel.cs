@@ -335,7 +335,7 @@ public partial class MainWindowViewModel : ViewModelBase
             .Subscribe(size =>
             {
                 _viewSettingsStorage.Value.CodeFontSize = size;
-                _ = _viewSettingsStorage.FlashAtBackground(true);
+                _viewSettingsStorage.FlashAtBackground(true);
             });
 
         this.WhenAnyValue(vm => vm.TerminalFontSize)
@@ -343,7 +343,7 @@ public partial class MainWindowViewModel : ViewModelBase
             .Subscribe(size =>
             {
                 _viewSettingsStorage.Value.TerminalFontSize = size;
-                _ = _viewSettingsStorage.FlashAtBackground(true);
+                _viewSettingsStorage.FlashAtBackground(true);
             });
 
         this.WhenAnyValue(vm => vm.UseOsDecoration)
