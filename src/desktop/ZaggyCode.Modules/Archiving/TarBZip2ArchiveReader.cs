@@ -3,6 +3,7 @@ namespace ZaggyCode.Modules.Archiving;
 public sealed class TarBZip2ArchiveReader(
     ILogger<TarBZip2ArchiveReader> logger,
     IMetadataParser metadataParser,
+    IMetadataCache metadataCache,
     IOptions<TempOptions> tempOptions) : IArchiveReader
 {
     public async IAsyncEnumerable<T> EnumerateMetadata<T>(
@@ -20,6 +21,14 @@ public sealed class TarBZip2ArchiveReader(
         var metadataFilesCount = 0;
         await foreach (var file in files.ToAsyncEnumerable())
         {
+            var lastWriteTimeUtc = File.GetLastWriteTimeUtc(file);
+            if (metadataCache.TryGetValue<T>(file, lastWriteTimeUtc, out var cached))
+            {
+                metadataFilesCount++;
+                yield return cached;
+                continue;
+            }
+
             await using var archive = await OpenArchive(file);
             if (archive is null)
                 continue;
@@ -33,6 +42,7 @@ public sealed class TarBZip2ArchiveReader(
             if (metadata is null)
                 continue;
 
+            metadataCache.Add(file, lastWriteTimeUtc, metadata);
             metadataFilesCount++;
             yield return metadata;
         }
@@ -42,6 +52,10 @@ public sealed class TarBZip2ArchiveReader(
 
     public async Task<T?> ReadMetadataAsync<T>(string archivePath) where T : ArchiveMetadata
     {
+        var lastWriteTimeUtc = File.GetLastWriteTimeUtc(archivePath);
+        if (metadataCache.TryGetValue<T>(archivePath, lastWriteTimeUtc, out var cached))
+            return cached;
+
         await using var archive = await OpenArchive(archivePath);
         if (archive is null)
             return null;
@@ -50,7 +64,11 @@ public sealed class TarBZip2ArchiveReader(
             .Where(entry => entry is { Key: not null, IsDirectory: false })
             .Select(entry => entry.Key!);
 
-        return await ParseMetadataAsync<T>(tarEntries, archive, archivePath);
+        var metadata = await ParseMetadataAsync<T>(tarEntries, archive, archivePath);
+        if (metadata is not null)
+            metadataCache.Add(archivePath, lastWriteTimeUtc, metadata);
+
+        return metadata;
     }
 
     private async Task<T?> ParseMetadataAsync<T>(IAsyncEnumerable<string> tarEntries,
@@ -60,8 +78,8 @@ public sealed class TarBZip2ArchiveReader(
         {
             var metadataFile = await metadataParser.SelectMetadataFileAsync(tarEntries);
             var metaDataEntry = await archive.EntriesAsync.FirstAsync(entry => entry.Key == metadataFile);
-            await using var stream = await metaDataEntry.OpenEntryStreamAsync();
-            return metadataParser.Parse<T>(stream);
+
+            return await metadataParser.ParseAsync<T>(() => metaDataEntry.OpenEntryStreamAsync(), file);
         }
         catch (Exception ex)
         {

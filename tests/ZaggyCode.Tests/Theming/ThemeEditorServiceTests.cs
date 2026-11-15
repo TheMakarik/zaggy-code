@@ -21,6 +21,7 @@ public class ThemeEditorServiceTests : IDisposable
         var reader = new TarBZip2ArchiveReader(
             A.Dummy<ILogger<TarBZip2ArchiveReader>>(),
             new MetadataParser(metadataOptions, A.Dummy<ILogger<MetadataParser>>()),
+            new MetadataCache(A.Dummy<ILogger<IMetadataCache>>()),
             tempOptions);
 
         _catalog = new ThemeCatalog(

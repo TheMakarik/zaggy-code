@@ -2,9 +2,10 @@ namespace ZaggyCode.Modules.Archiving;
 
 public sealed class MetadataParser(IOptions<MetadataOptions> options, ILogger<MetadataParser> logger) : IMetadataParser
 {
-    public T Parse<T>(Stream stream) where T : ArchiveMetadata
+    public async Task<T> ParseAsync<T>(Func<ValueTask<Stream>> getStreamLazyFunction, string filePath) where T : ArchiveMetadata
     {
-        var metadata = JsonSerializer.Deserialize<T>(stream)
+        await using var stream = await getStreamLazyFunction();
+        var metadata = await JsonSerializer.DeserializeAsync<T>(stream)
                        ?? throw new InvalidOperationException("Не удалось десериализовать метаданные темы");
 
         logger.LogDebug("Прочитан мета файл: {metadata}", JsonSerializer.Serialize(metadata));

@@ -2,6 +2,6 @@ namespace ZaggyCode.Core.Archiving.Interfaces;
 
 public interface IMetadataParser
 {
-    public T Parse<T>(Stream stream) where T : ArchiveMetadata;
+    public Task<T> ParseAsync<T>(Func<ValueTask<Stream>> getStreamLazyFunction, string filePath) where T : ArchiveMetadata;
     public Task<string> SelectMetadataFileAsync(IAsyncEnumerable<string> files);
 }

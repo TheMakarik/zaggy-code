@@ -19,6 +19,7 @@ public class TarBZip2ArchiveCompressorTests : IDisposable
         _reader = new TarBZip2ArchiveReader(
             A.Dummy<ILogger<TarBZip2ArchiveReader>>(),
             new MetadataParser(CreateMetadataOptions(), A.Dummy<ILogger<MetadataParser>>()),
+            new MetadataCache(A.Dummy<ILogger<IMetadataCache>>()),
             _tempOptions);
     }
 

@@ -1,3 +1,3 @@
 namespace ZaggyCode.Core.Archiving.Model;
 
-public sealed record MetadataCacheValue<T>(DateTime EditTime, T ArchiveMetadata) where T : ArchiveMetadata;
+public sealed record MetadataCacheValue(DateTime LastWriteTimeUtc, ArchiveMetadata ArchiveMetadata);
