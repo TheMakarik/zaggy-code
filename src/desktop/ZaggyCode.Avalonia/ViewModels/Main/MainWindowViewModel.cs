@@ -603,6 +603,10 @@ public partial class MainWindowViewModel : ViewModelBase
     [ReactiveCommand]
     private async Task OpenSettingsAsync()
     {
+        // Перед открытием настроек сбрасываем накопленные в памяти изменения в файлы,
+        // чтобы окно настроек и отмена работали от сохранённого состояния.
+        await _serviceProvider.GetRequiredService<ISettingStorageFacade>().FlushAllAsync();
+
         var settingsViewModel = _serviceProvider.GetRequiredService<SettingsViewModel>();
         await OpenSettings.Handle(settingsViewModel);
     }

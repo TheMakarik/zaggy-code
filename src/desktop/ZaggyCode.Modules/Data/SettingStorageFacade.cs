@@ -18,6 +18,15 @@ public sealed class SettingStorageFacade(
         await gameCodeStorage.LoadAsync();
     }
 
+    public async Task FlushAllAsync()
+    {
+        // Код игр пишет данные сам, поэтому сначала настройки, затем код.
+        foreach (var target in SettingsTargets)
+            await target.Storage.FlushAsync();
+
+        await gameCodeStorage.FlushAsync();
+    }
+
     public void FlashAllAtBackground()
         => StartBackground(
             BackgroundTaskKind.FlushingAllSettings,
