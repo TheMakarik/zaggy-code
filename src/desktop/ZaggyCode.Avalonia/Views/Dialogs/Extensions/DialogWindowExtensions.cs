@@ -7,11 +7,11 @@ internal static class DialogWindowExtensions
 {
     public static void ApplyThemeDecorations(this Window window)
     {
-        var viewSettings = App.Services.GetRequiredService<IObservableStorage<ViewSettings>>();
+        var viewSettings = App.Services.GetRequiredService<ISettingsStorage<ViewSettings>>();
 
         window.Bind(
             Window.WindowDecorationsProperty,
-            new Binding($"{nameof(IObservableStorage<ViewSettings>.Current)}.{nameof(ViewSettings.UseSystemTitleBar)}")
+            new Binding($"{nameof(ISettingsStorage<ViewSettings>.Value)}.{nameof(ViewSettings.UseSystemTitleBar)}")
             {
                 Source = viewSettings,
                 Converter = new BoolToWindowDecorationsConverter()
@@ -32,13 +32,20 @@ internal static class DialogWindowExtensions
                 return;
 
             // Клики по меню, кнопкам и выпадающим спискам не должны превращаться в перетаскивание окна.
-            if (e.Source is Visual source &&
-                (source.FindAncestorOfType<MenuItem>() is not null ||
-                 source.FindAncestorOfType<Button>() is not null ||
-                 source.FindAncestorOfType<ComboBox>() is not null))
+            if (IsInteractiveControl(e.Source))
                 return;
 
             window.BeginMoveDrag(e);
         };
+    }
+
+    private static bool IsInteractiveControl(object? source)
+    {
+        if (source is not Visual visual)
+            return false;
+
+        return visual.FindAncestorOfType<MenuItem>() is not null
+               || visual.FindAncestorOfType<Button>() is not null
+               || visual.FindAncestorOfType<ComboBox>() is not null;
     }
 }

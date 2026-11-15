@@ -14,20 +14,22 @@ public sealed partial class PythonSettingsViewModel : ViewModelBase
     #endregion
 
     private readonly PythonSettings _defaultPythonSettings;
+    private readonly ISettingsStorage<PythonSettings> _pythonSettingsStorage;
     private readonly IPythonFunctionNameValidator _pythonFunctionNameValidator;
     private bool _originalUseEntryFunction;
     private string _originalEntryFunctionName = string.Empty;
     private bool _originalSupressIo;
 
     public PythonSettingsViewModel(
-        IObservableStorage<PythonSettings> pythonSettingsStorage,
+        ISettingsStorage<PythonSettings> pythonSettingsStorage,
         IOptions<PythonDefaultSettingsOptions> pythonDefaultSettingsOptions,
         IPythonFunctionNameValidator pythonFunctionNameValidator)
     {
         _defaultPythonSettings = pythonDefaultSettingsOptions.Value.Settings;
+        _pythonSettingsStorage = pythonSettingsStorage;
         _pythonFunctionNameValidator = pythonFunctionNameValidator;
 
-        var current = pythonSettingsStorage.Current;
+        var current = pythonSettingsStorage.Value;
         _originalUseEntryFunction = current.UseEntryFunction;
         _originalEntryFunctionName = current.EntryFunctionName;
         _originalSupressIo = current.SupressIo;
@@ -47,6 +49,26 @@ public sealed partial class PythonSettingsViewModel : ViewModelBase
 
         this.WhenAnyValue(viewModel => viewModel.EntryFunctionName)
             .Subscribe(_ => UpdateEntryFunctionNameValidation());
+
+        pythonSettingsStorage.Value.PropertyChanged += (_, args) => ApplySettingsChange(args.PropertyName);
+    }
+
+    private void ApplySettingsChange(string? propertyName)
+    {
+        var current = _pythonSettingsStorage.Value;
+
+        switch (propertyName)
+        {
+            case nameof(PythonSettings.UseEntryFunction):
+                UseEntryFunction = current.UseEntryFunction;
+                break;
+            case nameof(PythonSettings.EntryFunctionName):
+                EntryFunctionName = current.EntryFunctionName;
+                break;
+            case nameof(PythonSettings.SupressIo):
+                SupressIo = current.SupressIo;
+                break;
+        }
     }
 
     public void ResetToDefaults()

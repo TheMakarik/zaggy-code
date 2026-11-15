@@ -20,7 +20,7 @@ public sealed partial class AboutViewModel : ViewModelBase
     public AboutViewModel(
         IOptions<AboutOptions> aboutOptions,
         IOptions<ZaggyAssetsOptions> zaggyAssets,
-        IObservableStorage<ViewSettings> viewSettings,
+        ISettingsStorage<ViewSettings> viewSettings,
         ILogger<AboutViewModel> logger)
     {
         var options = aboutOptions.Value;
@@ -33,7 +33,7 @@ public sealed partial class AboutViewModel : ViewModelBase
         Author = EntryAssembly.GetCustomAttribute<AssemblyCompanyAttribute>()?.Company ?? string.Empty;
         Description = options.ApplicationDescription;
         Acknowledgements = options.Acknowledgements;
-        UseOsDecoration = viewSettings.Current.UseSystemTitleBar;
+        UseOsDecoration = viewSettings.Value.UseSystemTitleBar;
 
         foreach (var component in options.Components)
         {

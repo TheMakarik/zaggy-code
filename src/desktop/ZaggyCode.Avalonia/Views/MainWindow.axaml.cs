@@ -12,8 +12,6 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
     private RobotGameTerminalProxy? _terminalProxy;
     private RobotGameMapProxy? _mapProxy;
     private TextMate.Installation? _textMateInstallation;
-    private DispatcherTimer? _fontSizeToastTimer;
-    private DispatcherTimer? _fontSizeToastFadeOutTimer;
 
     public MainWindow()
     {
@@ -26,10 +24,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
 
             // Нажатия на пункты меню приходят сюда из попапа по логическому дереву.
             // Без этой проверки BeginMoveDrag перехватывает клик и пункты меню не срабатывают.
-            if (e.Source is Visual source &&
-                (source.FindAncestorOfType<MenuItem>() is not null ||
-                 source.FindAncestorOfType<Button>() is not null ||
-                 source.FindAncestorOfType<ComboBox>() is not null))
+            if (IsInteractiveControl(e.Source))
                 return;
 
             BeginMoveDrag(e);
@@ -146,9 +141,11 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
 
         ViewModel.ShowToast.RegisterHandler(context =>
         {
-            ShowFontSizeToast(context.Input);
+            ShowToast(context.Input);
             context.SetOutput(Unit.Default);
         });
+
+        SettingsToast.Dismissed += (_, _) => ViewModel?.FlushViewSettings();
 
         ViewModel.ApplyCodeTheme.RegisterHandler(context =>
         {
@@ -307,73 +304,27 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         _textMateInstallation.SetTheme(registryOptions.LoadTheme(theme));
     }
 
-    private void ShowFontSizeToast(string message)
+    private static bool IsInteractiveControl(object? source)
     {
-        FontSizeToastText.Text = message;
-        FontSizeToast.IsVisible = true;
-        FontSizeToast.Opacity = 1;
+        if (source is not Visual visual)
+            return false;
 
-        _fontSizeToastTimer?.Stop();
-        _fontSizeToastFadeOutTimer?.Stop();
-
-        var popupOptions = ViewModel?.PopupOptions;
-        var displaySeconds = popupOptions?.PopupDisplaySeconds ?? 1.5;
-        var fadeOutSeconds = popupOptions?.PopupFadeOutSeconds ?? 0.5;
-
-        // Плашка подтверждает действие, а не требует прочтения: держим её
-        // на 30% меньше базового времени, чтобы она не мешала работе.
-        _fontSizeToastTimer = new DispatcherTimer
-        {
-            Interval = TimeSpan.FromSeconds(displaySeconds * 0.7)
-        };
-
-        _fontSizeToastTimer.Tick += (_, _) =>
-        {
-            _fontSizeToastTimer?.Stop();
-            StartFontSizeToastFadeOut(fadeOutSeconds);
-        };
-
-        _fontSizeToastTimer.Start();
+        return visual.FindAncestorOfType<MenuItem>() is not null
+               || visual.FindAncestorOfType<Button>() is not null
+               || visual.FindAncestorOfType<ComboBox>() is not null;
     }
 
-    private void StartFontSizeToastFadeOut(double fadeOutSeconds)
+    private void ShowToast(ToastRequest request)
     {
-        const double tickSeconds = 0.05;
-        var totalTicks = (int)(fadeOutSeconds / tickSeconds);
-        var currentTick = 0;
-
-        _fontSizeToastFadeOutTimer = new DispatcherTimer
+        if (request.ShowRevertAction)
         {
-            Interval = TimeSpan.FromSeconds(tickSeconds)
-        };
+            SettingsToast.Show(
+                request.Message,
+                new ToastAction("Отменить", ToastActionKind.Revert, ViewModel!.RevertViewSettings));
+            return;
+        }
 
-        _fontSizeToastFadeOutTimer.Tick += (_, _) =>
-        {
-            currentTick++;
-            var opacity = 1.0 - (double)currentTick / totalTicks;
-            FontSizeToast.Opacity = Math.Max(0, opacity);
-
-            if (currentTick < totalTicks)
-                return;
-
-            _fontSizeToastFadeOutTimer?.Stop();
-            HideFontSizeToast();
-        };
-
-        _fontSizeToastFadeOutTimer.Start();
-    }
-
-    private void HideFontSizeToast()
-    {
-        FontSizeToast.Opacity = 0;
-        FontSizeToast.IsVisible = false;
-    }
-
-    private void CloseFontSizeToastButton_Click(object? sender, RoutedEventArgs e)
-    {
-        _fontSizeToastTimer?.Stop();
-        _fontSizeToastFadeOutTimer?.Stop();
-        HideFontSizeToast();
+        SettingsToast.Show(request.Message);
     }
 
     private void ResizeHandle_PointerPressed(object? sender, PointerPressedEventArgs e)

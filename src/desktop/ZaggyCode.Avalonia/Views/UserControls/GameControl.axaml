@@ -4,6 +4,7 @@
     x:TypeArguments="vm:MainWindowViewModel"
     xmlns="https://github.com/avaloniaui"
     xmlns:controls="clr-namespace:ZaggyCode.Avalonia.Views.Controls"
+    xmlns:converters="clr-namespace:ZaggyCode.Avalonia.Views.Converters.Common"
     xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
     xmlns:records="clr-namespace:ZaggyCode.Avalonia.ViewModels.Common.Records"
     xmlns:rxui="http://reactiveui.net"
@@ -49,7 +50,7 @@
                     Width="28">
                     <materialIcons:MaterialIcon
                         Height="16"
-                        Kind="{Binding DescriptionToggleIcon}"
+                        Kind="{Binding IsDescriptionVisible, Converter={converters:DescriptionToggleIconConverter}}"
                         Width="16" />
                 </Button>
 
@@ -78,7 +79,7 @@
                                     Classes.selected="{Binding IsSelected}"
                                     Command="{Binding $parent[ItemsControl].((vm:MainWindowViewModel)DataContext).SelectMapCommand}"
                                     CommandParameter="{Binding}">
-                                    <materialIcons:MaterialIcon Kind="{Binding Icon}" />
+                                    <materialIcons:MaterialIcon Kind="{Binding Number, Converter={converters:MapNumberToIconConverter}}" />
                                 </Button>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>

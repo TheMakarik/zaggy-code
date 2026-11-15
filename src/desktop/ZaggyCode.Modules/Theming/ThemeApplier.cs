@@ -5,7 +5,7 @@ public sealed class ThemeApplier(
     IThemeCatalog themeCatalog,
     IThemeSetterProxy themeSetterProxy,
     IThemeDialogProxy themeDialogProxy,
-    IObservableStorage<ThemeSettings> themeSettingsStorage) : IThemeApplier
+    ISettingsStorage<ThemeSettings> themeSettingsStorage) : IThemeApplier
 {
     private const string FallbackThemeName = "Primus";
     private const string ColorSuffix = "Color";
@@ -17,7 +17,7 @@ public sealed class ThemeApplier(
             .ToArray();
 
     public async Task ApplySavedThemeAsync()
-        => await ApplyThemeAsync(themeSettingsStorage.Current.CurrentTheme);
+        => await ApplyThemeAsync(themeSettingsStorage.Value.CurrentTheme);
 
     public async Task ApplyThemeAsync(string name)
     {
@@ -48,7 +48,7 @@ public sealed class ThemeApplier(
 
         logger.LogWarning("Тема {name} не найдена, используется резервная тема {fallback}", name, FallbackThemeName);
 
-        themeSettingsStorage.Current.CurrentTheme = FallbackThemeName;
+        themeSettingsStorage.Value.CurrentTheme = FallbackThemeName;
         try
         {
             await themeDialogProxy.ShowThemeNotFoundDialogAsync(name);

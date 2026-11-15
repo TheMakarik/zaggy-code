@@ -34,6 +34,12 @@ public partial class SettingsWindow : ReactiveWindow<SettingsViewModel>
             }
         };
 
+        MessageBus.Current.Listen<SettingsSavedMessage>()
+            .Subscribe(_ => SettingsToast.Show("Настройки сохранены"));
+
+        MessageBus.Current.Listen<SettingsResetMessage>()
+            .Subscribe(_ => SettingsToast.Show("Настройки сброшены"));
+
         this.DataContextChanged += (_, _) =>
         {
             if (ViewModel is null)

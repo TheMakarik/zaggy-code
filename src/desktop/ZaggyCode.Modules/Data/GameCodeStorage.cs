@@ -19,10 +19,10 @@ public sealed class GameCodeStorage(
 
     public Task LoadAsync()
     {
-        if (string.IsNullOrWhiteSpace(stateSettingsStorage.Current.LastGamePath))
+        if (string.IsNullOrWhiteSpace(stateSettingsStorage.Value.LastGamePath))
             return Task.CompletedTask;
 
-        return LoadLastGameCodeAsync(stateSettingsStorage.Current.LastGamePath, stateSettingsStorage.Current.LastLanguage);
+        return LoadLastGameCodeAsync(stateSettingsStorage.Value.LastGamePath, stateSettingsStorage.Value.LastLanguage);
     }
 
 

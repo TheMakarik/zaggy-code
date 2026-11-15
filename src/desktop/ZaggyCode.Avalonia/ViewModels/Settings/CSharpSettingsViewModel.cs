@@ -12,17 +12,19 @@ public sealed partial class CSharpSettingsViewModel : ViewModelBase
     #endregion
 
     private readonly CSharpSettings _defaultCSharpSettings;
+    private readonly ISettingsStorage<CSharpSettings> _csharpSettingsStorage;
     private bool _originalUseTopLevelStatements;
     private bool _originalEnableImplicitUsings;
     private bool _originalBlockIo;
 
     public CSharpSettingsViewModel(
-        IObservableStorage<CSharpSettings> csharpSettingsStorage,
+        ISettingsStorage<CSharpSettings> csharpSettingsStorage,
         IOptions<CSharpDefaultSettingsOptions> csharpDefaultSettingsOptions)
     {
         _defaultCSharpSettings = csharpDefaultSettingsOptions.Value.Settings;
+        _csharpSettingsStorage = csharpSettingsStorage;
 
-        var current = csharpSettingsStorage.Current;
+        var current = csharpSettingsStorage.Value;
         _originalUseTopLevelStatements = current.UseTopLevelStatements;
         _originalEnableImplicitUsings = current.EnableImplicitUsings;
         _originalBlockIo = current.BlockIo;
@@ -35,6 +37,26 @@ public sealed partial class CSharpSettingsViewModel : ViewModelBase
                 nameof(EnableImplicitUsings),
                 nameof(BlockIo))
             .Subscribe(_ => UpdateHasChanges());
+
+        csharpSettingsStorage.Value.PropertyChanged += (_, args) => ApplySettingsChange(args.PropertyName);
+    }
+
+    private void ApplySettingsChange(string? propertyName)
+    {
+        var current = _csharpSettingsStorage.Value;
+
+        switch (propertyName)
+        {
+            case nameof(CSharpSettings.UseTopLevelStatements):
+                UseTopLevelStatements = current.UseTopLevelStatements;
+                break;
+            case nameof(CSharpSettings.EnableImplicitUsings):
+                EnableImplicitUsings = current.EnableImplicitUsings;
+                break;
+            case nameof(CSharpSettings.BlockIo):
+                BlockIo = current.BlockIo;
+                break;
+        }
     }
 
     public void ResetToDefaults()

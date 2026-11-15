@@ -106,9 +106,9 @@ public sealed class PythonLanguageRunner : LanguageRunnerBase
 
             _engine.CreateScriptSourceFromString(code, UserCodeFileName).Execute(_scope);
 
-            if (_pythonSettingsStorage.Current.UseEntryFunction)
+            if (_pythonSettingsStorage.Value.UseEntryFunction)
             {
-                var entryPoint = _scope.GetVariable(_pythonSettingsStorage.Current.EntryFunctionName);
+                var entryPoint = _scope.GetVariable(_pythonSettingsStorage.Value.EntryFunctionName);
                 entryPoint();
             }
         }
@@ -233,7 +233,7 @@ public sealed class PythonLanguageRunner : LanguageRunnerBase
     {
         return text =>
         {
-            if (_pythonSettingsStorage.Current.SupressIo)
+            if (_pythonSettingsStorage.Value.SupressIo)
             {
                 _logger.LogWarning("Попытка вывода через print() заблокирована настройкой подачи ввода-вывода.");
                 WriteError(CodeErrorType.IoBlocked, $"print() {NotSupportedText}");
@@ -248,7 +248,7 @@ public sealed class PythonLanguageRunner : LanguageRunnerBase
     {
         return () =>
         {
-            if (_pythonSettingsStorage.Current.SupressIo)
+            if (_pythonSettingsStorage.Value.SupressIo)
             {
                 _logger.LogWarning("Попытка ввода через input() заблокирована настройкой подачи ввода-вывода.");
                 WriteError(CodeErrorType.IoBlocked, $"input() {NotSupportedText}");

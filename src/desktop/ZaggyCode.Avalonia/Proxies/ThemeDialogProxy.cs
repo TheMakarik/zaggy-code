@@ -1,5 +1,6 @@
 namespace ZaggyCode.Avalonia.Proxies;
 
+//#:NO_AI
 public sealed class ThemeDialogProxy : IThemeDialogProxy
 {
     public async Task ShowThemeNotFoundDialogAsync(string missingThemeName)

@@ -35,8 +35,8 @@ public partial class MainWindowViewModel : ViewModelBase
     public int SidebarColumn => IsSidebarRight ? 2 : 0;
     public int SidebarRow => IsSidebarTop ? 2 : 4;
     public string CodeTheme { get; private set; }
-    public PythonSettings PythonSettings => _pythonSettingsStorage.Current;
-    public CSharpSettings CSharpSettings => _csharpSettingsStorage.Current;
+    public PythonSettings PythonSettings => _pythonSettingsStorage.Value;
+    public CSharpSettings CSharpSettings => _csharpSettingsStorage.Value;
     public PopupOptions PopupOptions { get; }
     public ObservableCollection<CodeThemeItem> AvailableCodeThemes { get; } = [];
     public ObservableCollection<LanguageItem> AvailableLanguages { get; } = [];
@@ -44,9 +44,6 @@ public partial class MainWindowViewModel : ViewModelBase
     public IOptions<ZaggyAssetsOptions> ZaggyAssets { get; init; }
 
     public bool IsCodeVisible => !IsDescriptionVisible;
-    public MaterialIconKind DescriptionToggleIcon => IsDescriptionVisible
-        ? MaterialIconKind.CodeTags
-        : MaterialIconKind.BookOpenVariant;
     public string DescriptionToggleToolTip => IsDescriptionVisible
         ? "Показать код"
         : "Показать описание уровня";
@@ -83,7 +80,7 @@ public partial class MainWindowViewModel : ViewModelBase
     public readonly Interaction<Unit, Unit> StopCodeExecution = new();
     public readonly Interaction<Unit, Unit> ResetMap = new();
     public readonly Interaction<Unit, Unit> ConcludeRun = new();
-    public readonly Interaction<string, Unit> ShowToast = new();
+    public readonly Interaction<ToastRequest, Unit> ShowToast = new();
     public readonly Interaction<string, Unit> ApplyCodeTheme = new();
     public readonly Interaction<SettingsViewModel, Unit> OpenSettings = new();
     public readonly Interaction<Unit, Unit> OpenAbout = new();
@@ -95,10 +92,10 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly IRobotGameEngineFactory _robotGameEngineFactory;
     private readonly IRobotGameTerminalProxy _robotGameTerminalProxy;
     private readonly IServiceProvider _serviceProvider;
-    private readonly IObservableStorage<StateSettings> _stateSettingsStorage;
-    private readonly IObservableStorage<ViewSettings> _viewSettingsStorage;
-    private readonly IObservableStorage<PythonSettings> _pythonSettingsStorage;
-    private readonly IObservableStorage<CSharpSettings> _csharpSettingsStorage;
+    private readonly ISettingsStorage<StateSettings> _stateSettingsStorage;
+    private readonly ISettingsStorage<ViewSettings> _viewSettingsStorage;
+    private readonly ISettingsStorage<PythonSettings> _pythonSettingsStorage;
+    private readonly ISettingsStorage<CSharpSettings> _csharpSettingsStorage;
     private readonly IOptions<FontSizeOptions> _fontSizeOptions;
     private readonly IOptions<CodeThemeDisplayNameOptions> _displayNameOptions;
     private readonly IOptions<CodeThemeIconOptions> _iconOptions;
@@ -120,10 +117,10 @@ public partial class MainWindowViewModel : ViewModelBase
         IRobotGameTerminalProxy robotGameTerminalProxy,
         IServiceProvider serviceProvider,
         IOptions<ZaggyAssetsOptions> zaggyAssets,
-        IObservableStorage<StateSettings> stateSettingsStorage,
-        IObservableStorage<ViewSettings> viewSettingsStorage,
-        IObservableStorage<PythonSettings> pythonSettingsStorage,
-        IObservableStorage<CSharpSettings> csharpSettingsStorage,
+        ISettingsStorage<StateSettings> stateSettingsStorage,
+        ISettingsStorage<ViewSettings> viewSettingsStorage,
+        ISettingsStorage<PythonSettings> pythonSettingsStorage,
+        ISettingsStorage<CSharpSettings> csharpSettingsStorage,
         IOptions<PopupOptions> popupOptions,
         IOptions<FontSizeOptions> textFontSize,
         IOptions<CodeThemeDisplayNameOptions> displayNameOptions,
@@ -149,13 +146,13 @@ public partial class MainWindowViewModel : ViewModelBase
         _animationOptions = animationOptions;
         _mapOptions = mapOptions;
         _speedOptions = speedOptions;
-        _executionSpeed = stateSettingsStorage.Current.LastSpeed;
-        _selectedLanguage = stateSettingsStorage.Current.LastLanguage;
-        _textEditorFontSize = viewSettingsStorage.Current.CodeFontSize;
-        _terminalFontSize = viewSettingsStorage.Current.TerminalFontSize;
-        _useOsDecoration = viewSettingsStorage.Current.UseSystemTitleBar;
-        _sidebarPosition = viewSettingsStorage.Current.SidebarPosition;
-        CodeTheme = viewSettingsStorage.Current.CodeTheme;
+        _executionSpeed = stateSettingsStorage.Value.LastSpeed;
+        _selectedLanguage = stateSettingsStorage.Value.LastLanguage;
+        _textEditorFontSize = viewSettingsStorage.Value.CodeFontSize;
+        _terminalFontSize = viewSettingsStorage.Value.TerminalFontSize;
+        _useOsDecoration = viewSettingsStorage.Value.UseSystemTitleBar;
+        _sidebarPosition = viewSettingsStorage.Value.SidebarPosition;
+        CodeTheme = viewSettingsStorage.Value.CodeTheme;
         PopupOptions = popupOptions.Value;
         MaxFontSize = _fontSizeOptions.Value.MaxFontSize;
         MinFontSize = _fontSizeOptions.Value.MinFontSize;
@@ -173,12 +170,12 @@ public partial class MainWindowViewModel : ViewModelBase
         InitializeAvailableLanguages();
         InitializeLanguageSelection();
         InitializeStorageSynchronization();
+        ObserveSettingsStorages();
 
         this.WhenAnyValue(vm => vm.IsDescriptionVisible)
             .Subscribe(_ =>
             {
                 this.RaisePropertyChanged(nameof(IsCodeVisible));
-                this.RaisePropertyChanged(nameof(DescriptionToggleIcon));
                 this.RaisePropertyChanged(nameof(DescriptionToggleToolTip));
             });
 
@@ -295,25 +292,17 @@ public partial class MainWindowViewModel : ViewModelBase
             var displayName = (string?)property.GetValue(_displayNameOptions.Value) ?? themeName;
 
             var iconProperty = typeof(CodeThemeIconOptions).GetProperty(themeName);
-            var iconName = (string?)iconProperty?.GetValue(_iconOptions.Value);
-            var iconKind = Enum.TryParse<MaterialIconKind>(iconName, out var kind) ? kind : MaterialIconKind.Palette;
+            var iconName = (string?)iconProperty?.GetValue(_iconOptions.Value) ?? string.Empty;
 
-            AvailableCodeThemes.Add(new CodeThemeItem(themeName, displayName, iconKind));
+            AvailableCodeThemes.Add(new CodeThemeItem(themeName, displayName, iconName));
         }
     }
 
     private void InitializeAvailableLanguages()
     {
         foreach (var language in Enum.GetValues<Language>())
-            AvailableLanguages.Add(new LanguageItem(language, language.GetPrettyName(), GetLanguageIcon(language)));
+            AvailableLanguages.Add(new LanguageItem(language, language.GetPrettyName()));
     }
-
-    private static MaterialIconKind GetLanguageIcon(Language language) => language switch
-    {
-        Language.CSharp => MaterialIconKind.LanguageCsharp,
-        Language.Python => MaterialIconKind.LanguagePython,
-        _ => MaterialIconKind.Code
-    };
 
     private void InitializeLanguageSelection()
     {
@@ -347,46 +336,102 @@ public partial class MainWindowViewModel : ViewModelBase
         MessageBus.Current.Listen<CodeThemeChangedMessage>()
             .Subscribe(async void (message) =>
             {
-                _viewSettingsStorage.Current.CodeTheme = message.ThemeName;
+                _viewSettingsStorage.Value.CodeTheme = message.ThemeName;
                 CodeTheme = message.ThemeName;
                 await ApplyCodeTheme.Handle(message.ThemeName);
             });
 
         MessageBus.Current.Listen<FontSizeToastMessage>()
-            .Subscribe(async void (message) => await ShowToast.Handle($"Размер шрифта {message.Source} изменён на {message.FontSize}"));
+            .Subscribe(async void (message) => await ShowToast.Handle(
+                new ToastRequest($"Размер шрифта {message.Source} изменён на {message.FontSize}", true)));
+
+        MessageBus.Current.Listen<SettingsSavedMessage>()
+            .Subscribe(async void (_) => await ShowToast.Handle(new ToastRequest("Настройки сохранены")));
+
+        MessageBus.Current.Listen<SettingsResetMessage>()
+            .Subscribe(async void (_) => await ShowToast.Handle(new ToastRequest("Настройки сброшены")));
 #pragma warning restore AsyncVoidMethod
     }
 
     private void InitializeStorageSynchronization()
     {
         this.WhenAnyValue(vm => vm.TextEditorFontSize)
-            .Where(size => size != _viewSettingsStorage.Current.CodeFontSize)
-            .Subscribe(_ => _viewSettingsStorage.Current.CodeFontSize = _textEditorFontSize);
+            .Where(size => size != _viewSettingsStorage.Value.CodeFontSize)
+            .Subscribe(_ =>
+            {
+                _viewSettingsStorage.Value.CodeFontSize = _textEditorFontSize;
+                _viewSettingsStorage.FlashAtBackground(true);
+            });
 
         this.WhenAnyValue(vm => vm.TerminalFontSize)
-            .Where(size => size != _viewSettingsStorage.Current.TerminalFontSize)
-            .Subscribe(_ => _viewSettingsStorage.Current.TerminalFontSize = _terminalFontSize);
+            .Where(size => size != _viewSettingsStorage.Value.TerminalFontSize)
+            .Subscribe(_ =>
+            {
+                _viewSettingsStorage.Value.TerminalFontSize = _terminalFontSize;
+                _viewSettingsStorage.FlashAtBackground(true);
+            });
 
         this.WhenAnyValue(vm => vm.UseOsDecoration)
-            .Where(useOsDecoration => useOsDecoration != _viewSettingsStorage.Current.UseSystemTitleBar)
-            .Subscribe(_ => _viewSettingsStorage.Current.UseSystemTitleBar = _useOsDecoration);
+            .Where(useOsDecoration => useOsDecoration != _viewSettingsStorage.Value.UseSystemTitleBar)
+            .Subscribe(_ => _viewSettingsStorage.Value.UseSystemTitleBar = _useOsDecoration);
 
         this.WhenAnyValue(vm => vm.SidebarPosition)
             .Subscribe(position =>
             {
-                if (position != _viewSettingsStorage.Current.SidebarPosition)
-                    _viewSettingsStorage.Current.SidebarPosition = position;
+                if (position != _viewSettingsStorage.Value.SidebarPosition)
+                    _viewSettingsStorage.Value.SidebarPosition = position;
 
                 RaiseSidebarLayoutChanged();
             });
 
         this.WhenAnyValue(vm => vm.ExecutionSpeed)
-            .Where(speed => speed != _stateSettingsStorage.Current.LastSpeed)
-            .Subscribe(_ => _stateSettingsStorage.Current.LastSpeed = _executionSpeed);
+            .Where(speed => speed != _stateSettingsStorage.Value.LastSpeed)
+            .Subscribe(_ => _stateSettingsStorage.Value.LastSpeed = _executionSpeed);
 
         this.WhenAnyValue(vm => vm.SelectedLanguage)
-            .Where(language => language != _stateSettingsStorage.Current.LastLanguage)
-            .Subscribe(_ => _stateSettingsStorage.Current.LastLanguage = _selectedLanguage);
+            .Where(language => language != _stateSettingsStorage.Value.LastLanguage)
+            .Subscribe(_ => _stateSettingsStorage.Value.LastLanguage = _selectedLanguage);
+    }
+
+    private void ObserveSettingsStorages()
+    {
+        _viewSettingsStorage.Value.PropertyChanged += (_, args) => ApplyViewSettingsChange(args.PropertyName);
+        _stateSettingsStorage.Value.PropertyChanged += (_, args) => ApplyStateSettingsChange(args.PropertyName);
+    }
+
+    private void ApplyViewSettingsChange(string? propertyName)
+    {
+        switch (propertyName)
+        {
+            case nameof(ViewSettings.CodeFontSize):
+                TextEditorFontSize = _viewSettingsStorage.Value.CodeFontSize;
+                break;
+            case nameof(ViewSettings.TerminalFontSize):
+                TerminalFontSize = _viewSettingsStorage.Value.TerminalFontSize;
+                break;
+            case nameof(ViewSettings.UseSystemTitleBar):
+                UseOsDecoration = _viewSettingsStorage.Value.UseSystemTitleBar;
+                break;
+            case nameof(ViewSettings.SidebarPosition):
+                SidebarPosition = _viewSettingsStorage.Value.SidebarPosition;
+                break;
+            case nameof(ViewSettings.CodeTheme):
+                CodeTheme = _viewSettingsStorage.Value.CodeTheme;
+                break;
+        }
+    }
+
+    private void ApplyStateSettingsChange(string? propertyName)
+    {
+        switch (propertyName)
+        {
+            case nameof(StateSettings.LastSpeed):
+                ExecutionSpeed = _stateSettingsStorage.Value.LastSpeed;
+                break;
+            case nameof(StateSettings.LastLanguage):
+                SelectedLanguage = _stateSettingsStorage.Value.LastLanguage;
+                break;
+        }
     }
 
     private void RaiseSidebarLayoutChanged()
@@ -547,7 +592,7 @@ public partial class MainWindowViewModel : ViewModelBase
     [ReactiveCommand]
     private void SelectCodeTheme(string themeName)
     {
-        _viewSettingsStorage.Current.CodeTheme = themeName;
+        _viewSettingsStorage.Value.CodeTheme = themeName;
         MessageBus.Current.SendMessage(new CodeThemeChangedMessage(themeName));
     }
 
@@ -566,11 +611,17 @@ public partial class MainWindowViewModel : ViewModelBase
 
     #region Private methods
 
+    public void RevertViewSettings()
+        => _viewSettingsStorage.Revert();
+
+    public void FlushViewSettings()
+        => _viewSettingsStorage.FlashAtBackground();
+
     private async Task ShowEditorFontSizeToast()
-        => await ShowToast.Handle($"Размер шрифта редактора и описания изменён на {TextEditorFontSize}");
+        => await ShowToast.Handle(new ToastRequest($"Размер шрифта редактора и описания изменён на {TextEditorFontSize}", true));
 
     private async Task ShowTerminalFontSizeToast()
-        => await ShowToast.Handle($"Размер шрифта терминала изменён на {TerminalFontSize}");
+        => await ShowToast.Handle(new ToastRequest($"Размер шрифта терминала изменён на {TerminalFontSize}", true));
 
     private async Task PrepareExecution()
     {

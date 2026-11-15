@@ -1,17 +1,8 @@
 namespace ZaggyCode.Avalonia.ViewModels.Common.Records;
 
-public sealed partial class MapNumberItem : ReactiveObject
+public sealed partial class MapNumberItem(int number) : ReactiveObject
 {
-    public int Number { get; }
-    public MaterialIconKind Icon { get; }
+    public int Number { get; } = number;
 
     [Reactive] private bool _isSelected;
-
-    public MapNumberItem(int number)
-    {
-        Number = number;
-        Icon = Enum.TryParse<MaterialIconKind>($"Numeric{number}", out var kind)
-            ? kind
-            : MaterialIconKind.Numeric;
-    }
 }

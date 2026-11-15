@@ -63,10 +63,6 @@ public sealed class Bootstrapper
             .AddViewSettingsStorage()
             .AddThemeSettingsStorage();
 
-        // UpdateStorageWaiter хранит версии изменений в полях экземпляра,
-        // поэтому каждому хранилищу нужен собственный наблюдатель.
-        builder.Services.AddTransient<IUpdateStorageWaiter, UpdateStorageWaiter>();
-
         builder.Logging
             .ClearProviders()
             .AddSerilog(Log.Logger, dispose: true);
@@ -113,24 +109,24 @@ public sealed class Bootstrapper
         Log.Information("Зарегистрированно {количество} сервисов", builder.Services.Count);
         var app = builder.Build();
 
+        await using (var scope = app.Services.CreateAsyncScope())
+        {
+#if DEBUG
+            try
+            {
+#endif
+                var storageFacade = scope.ServiceProvider.GetRequiredService<ISettingStorageFacade>();
+                await storageFacade.LoadAllAsync();
+#if DEBUG
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+#endif
+        }
+
         _ = app.RunAsync();
-
-        await using var scope = app.Services.CreateAsyncScope();
-#if DEBUG
-        try
-        {
-#endif
-            var storageFacade = scope.ServiceProvider.GetRequiredService<IStorageFacade>();
-            await storageFacade.LoadAllAsync();
-#if DEBUG
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-        }
-#endif
-
-
 
         return app;
     }

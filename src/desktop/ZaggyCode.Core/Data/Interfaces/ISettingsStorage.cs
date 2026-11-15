@@ -1,8 +1,14 @@
 namespace ZaggyCode.Core.Data.Interfaces;
 
-public interface ISettingsStorage<T> : IStorage
+public interface ISettingsStorage : IStorage
+{
+    public void FlashAtBackground(bool waitBeforeFlash = false);
+    public void Revert();
+    public ValueTask ToDefaultAsync();
+}
+
+public interface ISettingsStorage<out T> : ISettingsStorage
+    where T : class, INotifyPropertyChanged
 {
     public T Value { get; }
-    public void Revert();
-    public void ToDefault();
 }

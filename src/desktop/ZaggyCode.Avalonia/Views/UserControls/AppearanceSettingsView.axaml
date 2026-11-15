@@ -181,7 +181,7 @@
                             </Button.IsEnabled>
                             <StackPanel Orientation="Horizontal" Spacing="0">
                                 <materialIcons:MaterialIcon
-                                    Kind="{Binding IconKind}"
+                                    Kind="{Binding IconName, Converter={converters:IconNameToKindConverter}}"
                                     Margin="0,0,6,0"
                                     VerticalAlignment="Center"
                                     Width="24" />

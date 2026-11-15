@@ -275,7 +275,7 @@
                                                     <StackPanel Orientation="Horizontal" Spacing="12">
                                                         <materialIcons:MaterialIcon
                                                             Height="17"
-                                                            Kind="{Binding IconKind}"
+                                                            Kind="{Binding IconName, Converter={converters:IconNameToKindConverter}}"
                                                             VerticalAlignment="Center"
                                                             Width="17" />
                                                         <TextBlock Text="{Binding DisplayName}" VerticalAlignment="Center" />
@@ -495,7 +495,7 @@
                                                         <StackPanel Orientation="Horizontal" Spacing="12">
                                                             <materialIcons:MaterialIcon
                                                                 Height="17"
-                                                                Kind="{Binding IconKind}"
+                                                                Kind="{Binding IconName, Converter={converters:IconNameToKindConverter}}"
                                                                 VerticalAlignment="Center"
                                                                 Width="17" />
                                                             <TextBlock Text="{Binding DisplayName}" VerticalAlignment="Center" />
@@ -640,7 +640,7 @@
                                 <StackPanel Orientation="Horizontal" Spacing="9">
                                     <materialIcons:MaterialIcon
                                         Height="15"
-                                        Kind="{Binding IconKind}"
+                                        Kind="{Binding Value, Converter={converters:LanguageToIconConverter}}"
                                         Width="15" />
                                     <TextBlock Text="{Binding Name}" />
                                 </StackPanel>
@@ -976,31 +976,12 @@
                 VerticalAlignment="Center" />
         </Border>
 
-        <Border
-            Classes="settings-toast"
+        <controls:SettingsToast
             Grid.Column="0"
             Grid.ColumnSpan="3"
             Grid.Row="0"
             Grid.RowSpan="7"
-            HorizontalAlignment="Center"
-            IsVisible="False"
-            Margin="0,0,0,20"
-            Name="FontSizeToast"
-            Opacity="0"
-            VerticalAlignment="Bottom"
-            ZIndex="100">
-            <Grid ColumnDefinitions="*,Auto">
-                <TextBlock
-                    Grid.Column="0"
-                    Name="FontSizeToastText"
-                    VerticalAlignment="Center" />
-                <Button
-                    Classes="icon-button"
-                    Click="CloseFontSizeToastButton_Click"
-                    Content="{materialIcons:MaterialIconExt Kind=Close}"
-                    Grid.Column="1"
-                    Margin="5,0,0,0" />
-            </Grid>
-        </Border>
+            Name="SettingsToast"
+            ZIndex="100" />
     </Grid>
 </rxui:ReactiveWindow>

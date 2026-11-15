@@ -10,9 +10,10 @@ public sealed partial class SettingsViewModel : ViewModelBase
 
     #endregion
 
-    private readonly IObservableStorage<ViewSettings> _viewStorage;
-    private readonly IObservableStorage<PythonSettings> _pythonSettingsStorage;
-    private readonly IObservableStorage<CSharpSettings> _csharpSettingsStorage;
+    private readonly ISettingsStorage<ViewSettings> _viewStorage;
+    private readonly ISettingsStorage<PythonSettings> _pythonSettingsStorage;
+    private readonly ISettingsStorage<CSharpSettings> _csharpSettingsStorage;
+    private readonly ISettingStorageFacade _storageFacade;
     private readonly ILogger<SettingsViewModel> _logger;
 
     public AppearanceSettingsViewModel AppearanceSettings { get; }
@@ -22,10 +23,11 @@ public sealed partial class SettingsViewModel : ViewModelBase
     public Interaction<Unit, Unit> CloseSettingsInteraction { get; } = new();
 
     public SettingsViewModel(
-        IObservableStorage<ViewSettings> viewStorage,
-        IObservableStorage<ThemeSettings> themeSettingsStorage,
-        IObservableStorage<PythonSettings> pythonSettingsStorage,
-        IObservableStorage<CSharpSettings> csharpSettingsStorage,
+        ISettingsStorage<ViewSettings> viewStorage,
+        ISettingsStorage<ThemeSettings> themeSettingsStorage,
+        ISettingsStorage<PythonSettings> pythonSettingsStorage,
+        ISettingsStorage<CSharpSettings> csharpSettingsStorage,
+        ISettingStorageFacade storageFacade,
         IOptions<DefaultViewSettings> defaultViewSettingsOptions,
         IOptions<DefaultThemeSettings> defaultThemeSettingsOptions,
         IOptions<PythonDefaultSettingsOptions> pythonDefaultSettingsOptions,
@@ -47,6 +49,7 @@ public sealed partial class SettingsViewModel : ViewModelBase
         _viewStorage = viewStorage;
         _pythonSettingsStorage = pythonSettingsStorage;
         _csharpSettingsStorage = csharpSettingsStorage;
+        _storageFacade = storageFacade;
         _logger = loggerFactory.CreateLogger<SettingsViewModel>();
 
         AppearanceSettings = new AppearanceSettingsViewModel(
@@ -108,11 +111,14 @@ public sealed partial class SettingsViewModel : ViewModelBase
 
         if (CSharpSettings.HasChanges)
             SaveCSharpSettings();
+
+        _storageFacade.FlashAllAtBackground();
+        MessageBus.Current.SendMessage(new SettingsSavedMessage());
     }
 
     private void SaveAppearanceSettings()
     {
-        var current = _viewStorage.Current;
+        var current = _viewStorage.Value;
         var codeFontSizeChanged = current.CodeFontSize != AppearanceSettings.CodeFontSize;
         var terminalFontSizeChanged = current.TerminalFontSize != AppearanceSettings.TerminalFontSize;
         current.CodeFontSize = AppearanceSettings.CodeFontSize;
@@ -137,7 +143,7 @@ public sealed partial class SettingsViewModel : ViewModelBase
 
     private void SavePythonSettings()
     {
-        var current = _pythonSettingsStorage.Current;
+        var current = _pythonSettingsStorage.Value;
         current.UseEntryFunction = PythonSettings.UseEntryFunction;
         current.EntryFunctionName = PythonSettings.EntryFunctionName;
         current.SupressIo = PythonSettings.SupressIo;
@@ -147,7 +153,7 @@ public sealed partial class SettingsViewModel : ViewModelBase
 
     private void SaveCSharpSettings()
     {
-        var current = _csharpSettingsStorage.Current;
+        var current = _csharpSettingsStorage.Value;
         current.UseTopLevelStatements = CSharpSettings.UseTopLevelStatements;
         current.EnableImplicitUsings = CSharpSettings.EnableImplicitUsings;
         current.BlockIo = CSharpSettings.BlockIo;
@@ -170,7 +176,9 @@ public sealed partial class SettingsViewModel : ViewModelBase
     [ReactiveCommand]
     private void ResetToDefaults()
     {
+        _storageFacade.ToDefaultAllAtBackground();
         AppearanceSettings.ResetToDefaults();
         PythonSettings.ResetToDefaults();
+        MessageBus.Current.SendMessage(new SettingsResetMessage());
     }
 }

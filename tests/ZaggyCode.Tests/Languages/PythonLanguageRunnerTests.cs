@@ -6,7 +6,7 @@ namespace ZaggyCode.Tests.Languages;
 public class PythonLanguageRunnerTests : LanguageRunnerTests
 {
     private readonly IOptions<PythonScriptsOptions> _pythonOptions;
-    private readonly IObservableStorage<PythonSettings> _pythonSettingsStorage;
+    private readonly ISettingsStorage<PythonSettings> _pythonSettingsStorage;
     private PythonSettings _pythonSettings = new()
     {
         UseEntryFunction = false,
@@ -29,8 +29,8 @@ public class PythonLanguageRunnerTests : LanguageRunnerTests
             StandardLibraryPath = Path.Join(pythonDirectory, "Lib")
         });
 
-        _pythonSettingsStorage = A.Fake<IObservableStorage<PythonSettings>>();
-        A.CallTo(() => _pythonSettingsStorage.Current).ReturnsLazily(() => _pythonSettings);
+        _pythonSettingsStorage = A.Fake<ISettingsStorage<PythonSettings>>();
+        A.CallTo(() => _pythonSettingsStorage.Value).ReturnsLazily(() => _pythonSettings);
     }
 
     protected override string CodeDirectory => "Languages/PythonCode";
